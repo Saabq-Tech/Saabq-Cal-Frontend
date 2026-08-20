@@ -81,7 +81,7 @@ function MainLayout({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <IconSprite />
       <ScrollToTop />
       <LanguageProvider>
