@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 const SITE_NAME = 'Saabq Cal';
-const DEFAULT_OG_IMAGE = '/logo.png';
+const DEFAULT_OG_IMAGE = `${import.meta.env.BASE_URL}logo.png`.replace(/\/+/g, '/');
 const BASE_URL = 'https://cal.saabq.com';
 
 /**

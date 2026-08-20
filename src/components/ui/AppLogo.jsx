@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { fetchPublicSettings } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 
+const DEFAULT_LOGO = `${import.meta.env.BASE_URL}logo.png`.replace(/\/+/g, '/');
+
 export default function AppLogo({ height = 36, showText = true, className = '' }) {
   const { t } = useLanguage();
-  const [logoUrl, setLogoUrl] = useState('/logo.png');
+  const [logoUrl, setLogoUrl] = useState(DEFAULT_LOGO);
   const [imgError, setImgError] = useState(false);
   const [siteName, setSiteName] = useState(t('appName'));
 
@@ -17,7 +19,7 @@ export default function AppLogo({ height = 36, showText = true, className = '' }
         if (data?.logo) {
           setLogoUrl(data.logo);
         }
-        const faviconUrl = data?.favicon || data?.logo || '/logo.png';
+        const faviconUrl = data?.favicon || data?.logo || DEFAULT_LOGO;
         const faviconEl = document.getElementById('app-favicon');
         if (faviconEl) {
           faviconEl.setAttribute('href', faviconUrl);
@@ -36,8 +38,8 @@ export default function AppLogo({ height = 36, showText = true, className = '' }
           loading="eager"
           style={{ height: height, width: 'auto', objectFit: 'contain' }}
           onError={() => {
-            if (logoUrl !== '/logo.png') {
-              setLogoUrl('/logo.png');
+            if (logoUrl !== DEFAULT_LOGO) {
+              setLogoUrl(DEFAULT_LOGO);
             } else {
               setImgError(true);
             }
