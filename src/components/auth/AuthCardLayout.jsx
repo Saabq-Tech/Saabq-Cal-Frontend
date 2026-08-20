@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import AppLogo from '../ui/AppLogo';
+import { getPublicAssetUrl } from '../../utils/url';
 
 export default function AuthCardLayout({ children, illustration = '/images/login.svg', illustrationAlt = 'Saabq Cal Scheduling', quote, quoteAuthor }) {
   const { lang, toggleLanguage, t } = useLanguage();
@@ -32,7 +33,7 @@ export default function AuthCardLayout({ children, illustration = '/images/login
 
         <div className="auth-illustration">
           <img
-            src={illustration}
+            src={getPublicAssetUrl(illustration)}
             alt={illustrationAlt}
             width={320}
             height={320}

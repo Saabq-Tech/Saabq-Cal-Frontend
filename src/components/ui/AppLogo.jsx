@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchPublicSettings } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
+import { getPublicAssetUrl } from '../../utils/url';
 
-const DEFAULT_LOGO = `${import.meta.env.BASE_URL}logo.png`.replace(/\/+/g, '/');
+const DEFAULT_LOGO = getPublicAssetUrl('/logo.png');
 
 export default function AppLogo({ height = 36, showText = true, className = '' }) {
   const { t } = useLanguage();
