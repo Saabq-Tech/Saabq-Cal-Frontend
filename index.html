@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var lang = localStorage.getItem('saabq_lang') || 'ar';
+          var dir = lang === 'ar' ? 'rtl' : 'ltr';
+          document.documentElement.setAttribute('lang', lang);
+          document.documentElement.setAttribute('dir', dir);
+
+          var theme = localStorage.getItem('saabq_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (!theme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="icon" id="app-favicon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Saabq Cal — Smart scheduling and appointment management platform. Book, manage, and automate your workspace appointments." />
+    <meta name="theme-color" content="#11646a" />
+
+    <!-- Preconnect hints for faster resource loading -->
+    <link rel="preconnect" href="https://admin.cal.saabq.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Default Open Graph meta (overridden per-route by react-helmet-async) -->
+    <meta property="og:title" content="سابق كول — الجدولة وإدارة المواعيد الذكية" />
+    <meta property="og:description" content="Saabq Cal — Smart scheduling and appointment management platform." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Saabq Cal" />
+    <meta property="og:image" content="https://cal.saabq.com/logo.png" />
+    <meta property="og:url" content="https://cal.saabq.com/" />
+
+    <!-- Default Twitter Card meta -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="سابق كول — الجدولة وإدارة المواعيد الذكية" />
+    <meta name="twitter:description" content="Saabq Cal — Smart scheduling and appointment management platform." />
+    <meta name="twitter:image" content="https://cal.saabq.com/logo.png" />
+
+    <title>سابق كول — الجدولة وإدارة المواعيد الذكية</title>
+  </head>
+  <body>
+    <div id="root">
+      <!-- SSR/Crawler fallback: visible only before JS hydrates -->
+      <noscript>
+        <div style="text-align:center;padding:60px 20px;font-family:system-ui,sans-serif">
+          <h1>Saabq Cal — سابق كول</h1>
+          <p>Smart scheduling and appointment management platform.</p>
+          <p>منصة ذكية لجدولة وإدارة المواعيد.</p>
+          <p>Please enable JavaScript to use this application.</p>
+        </div>
+      </noscript>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
