@@ -25,8 +25,8 @@ export function TopProgressBar({ progress = 75 }) {
           height: '100%',
           width: `${progress}%`,
           transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-          background: 'linear-gradient(90deg, #11646a 0%, #0d4f4e 35%, #e88d22 70%, #ffaa33 100%)',
-          boxShadow: '0 0 14px rgba(232, 141, 34, 0.8), 0 0 4px #11646a',
+        background: 'linear-gradient(90deg, #0a9099 0%, #166992 40%, #44f2fe 100%)',
+        boxShadow: '0 0 14px rgba(68, 242, 254, 0.8), 0 0 4px #0a9099',
           borderRadius: '0 2px 2px 0',
         }}
       />

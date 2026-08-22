@@ -94,33 +94,6 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
             </div>
           </div>
         </div>
-
-        {/* Favicon Card */}
-        <div style={{ padding: 18, borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', background: 'var(--surface-alt)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 14 }}>
-          <span style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--heading)', display: 'block' }}>
-            {t('browserIcon') || 'أيقونة المتصفح'}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            {getFieldValue('favicon_url', 'favicon') ? (
-              <img src={getFieldValue('favicon_url', 'favicon')} alt="Favicon" style={{ height: 40, width: 40, objectFit: 'contain', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', padding: 4 }} />
-            ) : (
-              <div style={{ width: 42, height: 42, borderRadius: 8, border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.78rem', fontWeight: 600, background: 'var(--surface)' }}>
-                {t('noneBadge') || 'بدون'}
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <label style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--heading)', cursor: canEdit ? 'pointer' : 'default', transition: 'all 0.15s ease' }}>
-                {t('replaceBtn') || 'استبدال'}
-                <input type="file" accept="image/*" onChange={(e) => handleFileChange('favicon_url', e)} hidden disabled={!canEdit} />
-              </label>
-              {getFieldValue('favicon_url', 'favicon') && (
-                <button type="button" onClick={() => setBrandingForm({ ...brandingForm, favicon_url: '', favicon: '' })} style={{ padding: '6px 8px', borderRadius: 8, border: 'none', background: 'transparent', color: '#ef4444', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }} disabled={!canEdit}>
-                  {t('removeBtn') || 'إزالة'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Colors Section - 3 Columns Grid */}
@@ -136,10 +109,10 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               {t('primaryColor') || 'اللون الأساسي'}
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.primary_color || '#11646a', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.primary_color || '#0a9099', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
                 <input
                   type="color"
-                  value={brandingForm.primary_color || '#11646a'}
+                  value={brandingForm.primary_color || '#0a9099'}
                   onChange={(e) => setBrandingForm({ ...brandingForm, primary_color: e.target.value })}
                   disabled={!canEdit}
                   style={{ opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
@@ -148,7 +121,7 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               <input
                 type="text"
                 className="form-input"
-                value={brandingForm.primary_color || '#11646a'}
+                value={brandingForm.primary_color || '#0a9099'}
                 onChange={(e) => setBrandingForm({ ...brandingForm, primary_color: e.target.value })}
                 disabled={!canEdit}
                 style={{ fontFamily: 'monospace', direction: 'ltr', textAlign: 'center', height: 40 }}
@@ -162,10 +135,10 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               {t('secondaryColor') || 'اللون الثانوي'}
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.secondary_color || '#25bec1', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.secondary_color || '#166992', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
                 <input
                   type="color"
-                  value={brandingForm.secondary_color || '#25bec1'}
+                  value={brandingForm.secondary_color || '#166992'}
                   onChange={(e) => setBrandingForm({ ...brandingForm, secondary_color: e.target.value })}
                   disabled={!canEdit}
                   style={{ opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
@@ -174,7 +147,7 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               <input
                 type="text"
                 className="form-input"
-                value={brandingForm.secondary_color || '#25bec1'}
+                value={brandingForm.secondary_color || '#166992'}
                 onChange={(e) => setBrandingForm({ ...brandingForm, secondary_color: e.target.value })}
                 disabled={!canEdit}
                 style={{ fontFamily: 'monospace', direction: 'ltr', textAlign: 'center', height: 40 }}
@@ -188,10 +161,10 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               {t('hoverColor') || 'لون التحويم'}
             </label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.hover_color || '#0d4f54', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ position: 'relative', width: 40, height: 40, borderRadius: 10, border: '1px solid var(--border)', background: brandingForm.hover_color || '#44f2fe', flexShrink: 0, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
                 <input
                   type="color"
-                  value={brandingForm.hover_color || '#0d4f54'}
+                  value={brandingForm.hover_color || '#44f2fe'}
                   onChange={(e) => setBrandingForm({ ...brandingForm, hover_color: e.target.value })}
                   disabled={!canEdit}
                   style={{ opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
@@ -200,7 +173,7 @@ export default function BrandingTab({ brandingForm, setBrandingForm, onSave, sav
               <input
                 type="text"
                 className="form-input"
-                value={brandingForm.hover_color || '#0d4f54'}
+                value={brandingForm.hover_color || '#44f2fe'}
                 onChange={(e) => setBrandingForm({ ...brandingForm, hover_color: e.target.value })}
                 disabled={!canEdit}
                 style={{ fontFamily: 'monospace', direction: 'ltr', textAlign: 'center', height: 40 }}

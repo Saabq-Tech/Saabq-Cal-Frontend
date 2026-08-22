@@ -18,26 +18,25 @@
 /* ── Design Tokens (Light) ── */
 :root {
   /* Primary Palette */
-  --primary: #11646a;
-  --primary-hover: #0d4f54;
-  --primary-light: #169393;
-  --primary-subtle: #e6f3f4;
+  --primary: #21868d;
+  --primary-color: #21868d;
+  --primary-hover: #28767c;
+  --primary-light: #44f2fe;
+  --primary-subtle: #e6f7f8;
   --primary-foreground: #ffffff;
 
   /* Secondary Palette */
-  --secondary: #207b59;
-  --secondary-hover: #185e42;
-  --secondary-light: #27946c;
-  --secondary-subtle: #e6f3f4;
+  --secondary: #0d384e;
+  --secondary-color: #166992;
+  --secondary-hover: #3186b0;
+  --secondary-light: #44f2fe;
+  --secondary-subtle: #e8f4f9;
   --secondary-foreground: #ffffff;
+  --secondary-50: #0d384e6a;
 
-  /* Accent */
-  --accent: #e88d22;
-  --accent-hover: #d17d18;
-  --accent-strong: #ea5b21;
-  --accent-light: #ffb547;
-  --accent-subtle: #fff6eb;
-  --accent-foreground: #ffffff;
+  /* Hover Token */
+  --hover: #28767c;
+  --hover-color: #28767c;
 
   /* Layout */
   --background: #ffffff;
@@ -97,20 +96,22 @@ html[dir="ltr"] {
 
 /* ── Dark Mode Tokens ── */
 html.dark {
-  --primary: #11646a;
-  --primary-hover: #169393;
-  --primary-light: #1da4a4;
+  --primary: #0a9099;
+  --primary-color: #0a9099;
+  --primary-hover: #41a9b0;
+  --primary-light: #44f2fe;
   --primary-subtle: #0a2e30;
   --primary-foreground: #ffffff;
 
-  --secondary: #e88d22;
-  --secondary-hover: #ffb547;
-  --secondary-light: #ffc46b;
-  --secondary-subtle: #2d1e0c;
+  --secondary: #166992;
+  --secondary-color: #166992;
+  --secondary-hover: #3186b0;
+  --secondary-light: #44f2fe;
+  --secondary-subtle: #123040;
   --secondary-foreground: #ffffff;
 
-  --accent: #e88d22;
-  --accent-hover: #ffb547;
+  --hover: #41a9b0;
+  --hover-color: #41a9b0;
 
   --background: #0b1324;
   --surface: #141f36;
@@ -1004,12 +1005,12 @@ html.dark .navbar {
 }
 
 .btn-accent {
-  background-color: var(--accent);
-  color: var(--accent-foreground, #ffffff);
+  background-color: var(--secondary);
+  color: var(--secondary-foreground, #ffffff);
 }
 
 .btn-accent:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--secondary-hover);
   color: #ffffff !important;
 }
 
@@ -1398,13 +1399,13 @@ html.dark .auth-panel-right {
 }
 
 .auth-toggle button.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: var(--primary);
   color: var(--primary-foreground);
-  box-shadow: 0 3px 10px rgba(232, 141, 34, 0.25);
+  box-shadow: 0 3px 10px var(--secondary-subtle);
 }
 
 .auth-toggle button:hover:not(.active) {
-  color: var(--secondary);
+  color: var(--secondary-light);
   background: var(--secondary-subtle);
 }
 
@@ -2640,7 +2641,7 @@ html.dark .flagship-card {
 }
 
 .pricing-card.popular {
-  border: 2px solid var(--accent);
+  border: 2px solid var(--secondary);
   box-shadow: var(--shadow-lg);
 }
 
@@ -2651,7 +2652,7 @@ html.dark .flagship-card {
   transform: translateX(-50%);
   padding: 4px 14px;
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--secondary);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 800;

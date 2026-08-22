@@ -35,12 +35,12 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'https://admin.cal.saabq.com',
+        target: process.env.VITE_API_BASE_URL || 'https://admin.cal.saabq.com',
         changeOrigin: true,
         secure: false,
       },
       '/storage': {
-        target: 'https://admin.cal.saabq.com',
+        target: process.env.VITE_API_BASE_URL || 'https://admin.cal.saabq.com',
         changeOrigin: true,
         secure: false,
       },

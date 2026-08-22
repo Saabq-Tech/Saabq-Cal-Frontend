@@ -83,10 +83,10 @@ export default function WorkspaceSettingsPage() {
   const canEdit = isOwner || userPermissions.includes('settings_write');
 
   // Forms
-  const [basicForm, setBasicForm] = useState({ name: '', email: '', phone: '', bio: '', slug: '', status: 'active', workspace_type_id: '', country_id: '', state_id: '', city_id: '', website_url: '' });
-  const [brandingForm, setBrandingForm] = useState({ logo_url: '', cover_url: '', favicon_url: '', primary_color: '#11646a', secondary_color: '#25bec1', hover_color: '#0d4f54' });
+  const [basicForm, setBasicForm] = useState({ name: '', email: '', phone: '', description: '', slug: '', status: 'active', workspace_type_id: '', country_id: '', state_id: '', city_id: '', website: '' });
+  const [brandingForm, setBrandingForm] = useState({ logo_url: '', cover_url: '', primary_color: '#0a9099', secondary_color: '#166992', hover_color: '#44f2fe' });
   const [timezoneForm, setTimezoneForm] = useState({ timezone: 'Asia/Riyadh', date_format: 'Y-m-d', time_format: '12h', start_of_week: 'sunday' });
-  const [socialForm, setSocialForm] = useState({ website_url: '', facebook_url: '', twitter_url: '', instagram_url: '', linkedin_url: '', youtube_url: '' });
+  const [socialForm, setSocialForm] = useState({ website: '', facebook_url: '', twitter_url: '', instagram_url: '', linkedin_url: '', youtube_url: '' });
   const [bookingRulesForm, setBookingRulesForm] = useState({ min_advance_notice_hours: 2, max_advance_booking_days: 30, default_slot_duration: 30, buffer_before_minutes: 0, buffer_after_minutes: 0 });
   const [formFieldsForm, setFormFieldsForm] = useState({ collect_phone: true, collect_notes: true, require_phone: false });
   const [paymentReceiptsForm, setPaymentReceiptsForm] = useState({ receipt_mode: 'required', tax_number: '', company_address: '', receipt_footer_note: '' });
@@ -155,22 +155,21 @@ export default function WorkspaceSettingsPage() {
             name: data.name || '',
             email: data.email || '',
             phone: data.phone || '',
-            bio: data.description || data.bio || '',
+            description: data.description || data.description || '',
             slug: data.slug || '',
             status: data.status || 'active',
             workspace_type_id: data.workspace_type_id || data.workspace_type?.id || '',
             country_id: data.country_id || data.country?.id || '',
             state_id: data.state_id || data.state?.id || '',
             city_id: data.city_id || data.city?.id || '',
-            website_url: data.website || data.website_url || '',
+            website: data.website || data.website || '',
           });
           setBrandingForm({
             logo_url: data.logo_url || data.logo || '',
             cover_url: data.cover_url || data.cover || '',
-            favicon_url: data.favicon_url || data.favicon || '',
-            primary_color: data.primary_color || '#11646a',
-            secondary_color: data.secondary_color || '#25bec1',
-            hover_color: data.hover_color || '#0d4f54',
+            primary_color: data.primary_color || '#0a9099',
+            secondary_color: data.secondary_color || '#166992',
+            hover_color: data.hover_color || '#44f2fe',
           });
           const timeFmt = (data.time_format === '24h' || data.time_format === 'H:i') ? '24h' : '12h';
           const startWeek = data.start_of_week || (data.week_start === 1 ? 'monday' : (data.week_start === 6 ? 'saturday' : 'sunday'));
@@ -178,7 +177,7 @@ export default function WorkspaceSettingsPage() {
           setTimezoneForm({ timezone: tzStr, date_format: data.date_format || 'Y-m-d', time_format: timeFmt, start_of_week: startWeek });
           setSocialForm({
             social_links: Array.isArray(data.social_links) ? data.social_links : [],
-            website_url: data.website_url || '',
+            website: data.website || '',
             facebook_url: data.facebook_url || '',
             twitter_url: data.twitter_url || '',
             instagram_url: data.instagram_url || '',

@@ -139,8 +139,8 @@ export default function BasicInfoTab({ basicForm, setBasicForm, workspaceTypes =
         <label className="form-label">{t('workspaceBioLabel') || t('bio') || 'نبذة عن مساحة العمل'}</label>
         <textarea
           className="form-textarea"
-          value={basicForm.bio || ''}
-          onChange={(e) => setBasicForm({ ...basicForm, bio: e.target.value })}
+          value={basicForm.description || ''}
+          onChange={(e) => setBasicForm({ ...basicForm, description: e.target.value })}
           rows={3}
           placeholder={t('workspaceBioPlaceholder') || 'اكتب نبذة مختصرة عن نشاط مساحة العمل...'}
           disabled={!canEdit}
@@ -177,8 +177,8 @@ export default function BasicInfoTab({ basicForm, setBasicForm, workspaceTypes =
           <input
             type="url"
             className="form-input"
-            value={basicForm.website_url || ''}
-            onChange={(e) => setBasicForm({ ...basicForm, website_url: e.target.value })}
+            value={basicForm.website || ''}
+            onChange={(e) => setBasicForm({ ...basicForm, website: e.target.value })}
             placeholder="https://example.com"
             disabled={!canEdit}
           />

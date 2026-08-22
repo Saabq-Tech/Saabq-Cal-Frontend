@@ -38,7 +38,7 @@ export default function WorkspaceLayout() {
 
   const wsName = user?.workspace?.name || 'مساحة العمل';
   const wsEmail = user?.email || '';
-  const wsLogo = user?.workspace?.logo_url || user?.workspace?.favicon_url || null;
+  const wsLogo = user?.workspace?.logo_url || null;
 
   const mainWorkspaceTabs = [
     {
