@@ -941,7 +941,7 @@ export default function CustomerBookAppointmentPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px dashed var(--border)', paddingTop: 10 }}>
                     <span>{isRTL ? 'السعر:' : 'Price:'}</span>
                     <strong style={{ color: primaryColor }}>
-                      {parseFloat(selectedService.price) > 0 ? `${selectedService.price} ${selectedService.currency || t('priceCurrency')}` : t('freeService')}
+                      {parseFloat(selectedService.price) > 0 ? `${selectedService.price} ${selectedService.currency.symbol || t('priceCurrency')}` : t('freeService')}
                     </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', marginTop: 6 }}>
