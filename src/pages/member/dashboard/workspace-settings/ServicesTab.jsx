@@ -105,7 +105,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
       description_en: descEn,
       duration_minutes: service.duration_minutes ?? service.duration ?? 30,
       price: service.price ?? 0,
-      currency: service.currency || 'SAR',
+      currency_id: service.currency.id || 1,
       buffer_before_minutes: service.buffer_before_minutes ?? 0,
       buffer_after_minutes: service.buffer_after_minutes ?? 0,
       capacity: service.capacity ?? 1,
@@ -344,7 +344,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--border-light)', flexWrap: 'wrap', gap: 8 }}>
                   <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.1rem' }}>
-                    {price > 0 ? `${price} ${currency}` : (t('freeService') || 'مجاناً')}
+                    {price > 0 ? `${price} ${currency?.symbol}` : (t('freeService') || 'مجاناً')}
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>

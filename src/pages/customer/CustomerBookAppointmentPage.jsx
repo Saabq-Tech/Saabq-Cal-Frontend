@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import client, { endpoints } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,7 @@ export default function CustomerBookAppointmentPage() {
   const { idOrSlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
   const toast = useToast();
@@ -98,9 +99,21 @@ export default function CustomerBookAppointmentPage() {
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Require authentication before accessing booking page
+  useEffect(() => {
+    if (!user) {
+      toast.warning(
+        isRTL
+          ? 'يرجى تسجيل الدخول أولاً لمتابعة حجز الموعد'
+          : 'Please sign in first to book an appointment'
+      );
+      navigate('/customer/login', { replace: true, state: { from: location } });
+    }
+  }, [user, navigate, isRTL, location, toast]);
+
   // Fetch workspace details & services
   useEffect(() => {
-    if (!idOrSlug) return;
+    if (!user || !idOrSlug) return;
     setLoading(true);
     Promise.all([
       client.get(endpoints.publicWorkspaceDetail(idOrSlug)),
@@ -140,11 +153,11 @@ export default function CustomerBookAppointmentPage() {
         console.error(err);
         setLoading(false);
       });
-  }, [idOrSlug, preselectedServiceId]);
+  }, [user, idOrSlug, preselectedServiceId, isRTL]);
 
   // Fetch available slots when service or date changes
   useEffect(() => {
-    if (!selectedService || !selectedDate) return;
+    if (!user || !selectedService || !selectedDate) return;
     setSlotsLoading(true);
     setSelectedSlot('');
     client
@@ -159,7 +172,7 @@ export default function CustomerBookAppointmentPage() {
         setSlots([]);
         setSlotsLoading(false);
       });
-  }, [idOrSlug, selectedService, selectedDate]);
+  }, [user, idOrSlug, selectedService, selectedDate]);
 
   // Calendar generation helpers
   const calendarDays = useMemo(() => {
@@ -288,11 +301,18 @@ export default function CustomerBookAppointmentPage() {
         return;
       }
 
+      const serviceCurrency = selectedService?.currency_detail || selectedService?.currency || workspace?.currency_detail || workspace?.currency;
+      const currencyCode = typeof serviceCurrency === 'string' ? serviceCurrency : (serviceCurrency?.code || serviceCurrency?.symbol || 'SAR');
+      const currencyId = typeof serviceCurrency === 'object' ? serviceCurrency?.id : (selectedService?.currency_id || workspace?.currency_id || undefined);
+
       const payload = {
         workspace_id: workspace.id,
         service_id: selectedService.id,
         starts_at: startsAt,
         notes: formFields.notes || null,
+        currency: currencyCode,
+        currency_code: currencyCode,
+        currency_id: currencyId,
         payment_proof: paymentProof || undefined,
         answers: answersArray.length > 0 ? answersArray : undefined,
         metadata: {
@@ -304,6 +324,8 @@ export default function CustomerBookAppointmentPage() {
           transaction_number: formFields.transaction_number || undefined,
           bank_name: formFields.bank_name || undefined,
           card_last4: formFields.card_last4 || undefined,
+          currency: currencyCode,
+          currency_id: currencyId,
         },
       };
 
@@ -312,12 +334,28 @@ export default function CustomerBookAppointmentPage() {
       toast.success(isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!');
       navigate('/customer/profile');
     } catch (err) {
-      const msg = err.response?.data?.message || (isRTL ? 'فشل حجز الموعد، حاول مرة أخرى' : 'Failed to book appointment');
-      toast.error(msg);
+      console.error('Booking failed:', err);
+      const serverMsg = err.response?.data?.message;
+      let userMsg = isRTL ? 'فشل حجز الموعد، حاول مرة أخرى' : 'Failed to book appointment';
+
+      if (serverMsg) {
+        if (serverMsg.includes('Attempt to read property') || serverMsg.includes('symbol') || serverMsg.includes('null')) {
+          userMsg = isRTL
+            ? 'تعذر إكمال الحجز بسبب عدم ضبط عملة الخدمة في مساحة العمل'
+            : 'Unable to complete booking due to unconfigured service currency in workspace.';
+        } else {
+          userMsg = serverMsg;
+        }
+      }
+      toast.error(userMsg);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -941,7 +979,7 @@ export default function CustomerBookAppointmentPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', borderTop: '1px dashed var(--border)', paddingTop: 10 }}>
                     <span>{isRTL ? 'السعر:' : 'Price:'}</span>
                     <strong style={{ color: primaryColor }}>
-                      {parseFloat(selectedService.price) > 0 ? `${selectedService.price} ${selectedService.currency.symbol || t('priceCurrency')}` : t('freeService')}
+                      {formatCurrency(selectedService.price, selectedService.currency_detail || selectedService.currency || workspace?.currency_detail || workspace?.currency, isRTL, t('freeService'))}
                     </strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', marginTop: 6 }}>

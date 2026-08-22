@@ -26,7 +26,11 @@ export default function CustomerLoginPage() {
   const [show2FA, setShow2FA] = useState(false);
 
   const defaultRedirect = '/customer/profile';
-  const from = location.state?.from?.pathname || defaultRedirect;
+  const from = location.state?.from
+    ? (typeof location.state.from === 'string'
+        ? location.state.from
+        : (location.state.from.pathname + (location.state.from.search || '') + (location.state.from.hash || '')))
+    : defaultRedirect;
 
   useEffect(() => {
     document.title = t('pageTitleLogin');
