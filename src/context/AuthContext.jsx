@@ -174,6 +174,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Reset Password
+  const resetPassword = useCallback(async (type, data) => {
+    setLoading(true);
+    try {
+      const response = await client.post(endpoints.resetPassword(type), data);
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      const errorData = error.response?.data;
+      return {
+        success: false,
+        message: errorData?.message || 'Failed to reset password',
+        errors: errorData?.errors || {},
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch Profile
   const fetchProfile = useCallback(async () => {
     if (!token || !userType) return;
@@ -666,6 +684,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     forgotPassword,
+    resetPassword,
     fetchProfile,
     updateWorkspaceState,
     updateProfile,

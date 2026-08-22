@@ -100,6 +100,7 @@ export default function App() {
                 <Route path="/customer/login" element={<AuthLayout><CustomerLoginPage /></AuthLayout>} />
                 <Route path="/customer/register" element={<AuthLayout><CustomerRegisterPage /></AuthLayout>} />
                 <Route path="/customer/forgot-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
+                <Route path="/customer/reset-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
                 <Route path="/customer/verify-account" element={<AuthLayout><CustomerVerifyAccountPage /></AuthLayout>} />
 
                 <Route path="/customer" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
@@ -113,6 +114,7 @@ export default function App() {
                 <Route path="/member/login" element={<AuthLayout><MemberLoginPage /></AuthLayout>} />
                 <Route path="/member/register" element={<AuthLayout><MemberRegisterPage /></AuthLayout>} />
                 <Route path="/member/forgot-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
+                <Route path="/member/reset-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
                 <Route path="/member/verify-account" element={<AuthLayout><MemberVerifyAccountPage /></AuthLayout>} />
 
                 <Route path="/member" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
@@ -138,6 +140,7 @@ export default function App() {
                 <Route path="/login" element={<Navigate to="/customer/login" replace />} />
                 <Route path="/register" element={<Navigate to="/customer/register" replace />} />
                 <Route path="/forgot-password" element={<Navigate to="/customer/forgot-password" replace />} />
+                <Route path="/reset-password" element={<Navigate to="/customer/forgot-password" replace />} />
                 <Route path="/verify-account" element={<Navigate to="/customer/verify-account" replace />} />
                 <Route path="/profile" element={<Navigate to="/customer/profile" replace />} />
                 <Route path="/customer/appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />

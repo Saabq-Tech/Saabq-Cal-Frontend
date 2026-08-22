@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../context/ToastContext';
 import { useLanguage } from '../../../context/LanguageContext';
@@ -7,22 +7,31 @@ import AuthCardLayout from '../../../components/auth/AuthCardLayout';
 import SEO from '../../../components/ui/SEO';
 import Icon from '../../../components/common/Icon';
 
-
 export default function MemberForgotPasswordPage() {
-  const { forgotPassword, loading } = useAuth();
+  const { forgotPassword, resetPassword, loading } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const userType = 'member';
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const emailFromParams = searchParams.get('email') || location.state?.email || '';
+  const otpFromParams = searchParams.get('otp') || searchParams.get('code') || searchParams.get('token') || '';
+
+  const [email, setEmail] = useState(emailFromParams);
+  const [sent, setSent] = useState(Boolean(emailFromParams));
+  const [otp, setOtp] = useState(otpFromParams);
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [errors, setErrors] = useState({});
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    document.title = t('pageTitleForgotPassword');
-  }, []);
+    document.title = sent ? t('resetPasswordTitle') : t('pageTitleForgotPassword');
+  }, [sent, t]);
 
-  const handleSubmit = async (e) => {
+  const handleSendCode = async (e) => {
     e.preventDefault();
     setErrors({});
 
@@ -33,32 +42,166 @@ export default function MemberForgotPasswordPage() {
       toast.success(result.message || t('resetLinkSent'));
     } else {
       setErrors(result.errors || {});
-      toast.error(result.message || 'Failed to send reset link');
+      toast.error(result.message || t('failedToSendResetCode'));
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    if (!otp || otp.length < 4) {
+      toast.error(t('enterValidOtpCode'));
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      const msg = t('passwordsDoNotMatch');
+      setErrors({ password_confirmation: [msg] });
+      toast.error(msg);
+      return;
+    }
+
+    const result = await resetPassword(userType, {
+      email,
+      otp,
+      password,
+      password_confirmation: passwordConfirmation,
+    });
+
+    if (result.success) {
+      toast.success(result.message || t('passwordResetSuccess'));
+      navigate('/member/login', { replace: true, state: { email } });
+    } else {
+      setErrors(result.errors || {});
+      toast.error(result.message || 'Failed to reset password');
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    const result = await forgotPassword(userType, email);
+    setResending(false);
+
+    if (result.success) {
+      toast.success(result.message || t('codeResent'));
+    } else {
+      toast.error(result.message || t('failedToSendResetCode'));
     }
   };
 
   return (
     <AuthCardLayout illustration="/images/forgot-password.svg" illustrationAlt={t('pageTitleForgotPassword')}>
-      <SEO title={t('pageTitleForgotPassword') + ` (${t('teamMember')})`} noindex />
+      <SEO title={(sent ? t('resetPasswordTitle') : t('pageTitleForgotPassword')) + ` (${t('teamMember')})`} noindex />
       {sent ? (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-full)', background: 'var(--primary-subtle)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: '1.5rem' }}>
-            <Icon name="custom-184f8b5c" size={32} />
+        <>
+          <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-full)', background: 'var(--primary-subtle)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <Icon name="key" size={28} />
           </div>
-          <h1 style={{ fontSize: '1.5rem' }}>{t('checkYourEmail')}</h1>
-          <p style={{ marginTop: 8 }}>
-            {t('resetLinkSent')} <strong>{email}</strong>. {t('checkInbox')}
+
+          <h1 style={{ textAlign: 'center' }}>{t('resetPasswordTitle')}</h1>
+          <p style={{ textAlign: 'center', marginBottom: 24 }}>
+            {t('resetPasswordSubtitle')} <strong style={{ color: 'var(--primary)' }}>{email}</strong>
           </p>
-          <Link to="/member/login" className="btn btn-primary" style={{ marginTop: 28 }}>
-            {t('backToSignIn')}
-          </Link>
-        </div>
+
+          <form className="auth-form" onSubmit={handleResetPassword}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="reset-otp">{t('enterOtpCode')}</label>
+              <input
+                id="reset-otp"
+                type="text"
+                className={`form-input${errors.otp || errors.code ? ' is-invalid' : ''}`}
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required
+                autoFocus
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                maxLength={6}
+                style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: 4, fontWeight: 700 }}
+              />
+              {(errors.otp || errors.code) && <span className="form-error">{(errors.otp || errors.code)[0]}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="reset-password">{t('newPassword')}</label>
+              <input
+                id="reset-password"
+                type="password"
+                className={`form-input${errors.password ? ' is-invalid' : ''}`}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+              {errors.password && <span className="form-error">{errors.password[0]}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="reset-password-confirm">{t('confirmNewPassword')}</label>
+              <input
+                id="reset-password-confirm"
+                type="password"
+                className={`form-input${errors.password_confirmation ? ' is-invalid' : ''}`}
+                placeholder="••••••••"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                required
+                minLength={8}
+              />
+              {errors.password_confirmation && <span className="form-error">{errors.password_confirmation[0]}</span>}
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
+                  {t('loading')}
+                </>
+              ) : (
+                t('resetPasswordButton')
+              )}
+            </button>
+          </form>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, fontSize: '0.88rem' }}>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handleResend}
+              disabled={resending}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              {resending ? t('loading') : (
+                <>
+                  <Icon name="refresh-cw" size={14} />
+                  {t('resendCode')}
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setSent(false)}
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {t('changeEmail')}
+            </button>
+          </div>
+
+          <div className="auth-footer" style={{ marginTop: 20 }}>
+            <Link to="/member/login">{t('backToSignIn')}</Link>
+          </div>
+        </>
       ) : (
         <>
           <h1>{t('forgotPasswordTitle')}</h1>
           <p>{t('forgotPasswordSubtitle')} ({t('teamMember')})</p>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSendCode}>
             <div className="form-group">
               <label className="form-label" htmlFor="forgot-email">{t('emailAddress')}</label>
               <input
@@ -82,7 +225,7 @@ export default function MemberForgotPasswordPage() {
                   {t('loading')}
                 </>
               ) : (
-                t('sendResetLink')
+                t('sendResetCode')
               )}
             </button>
           </form>
@@ -96,3 +239,4 @@ export default function MemberForgotPasswordPage() {
     </AuthCardLayout>
   );
 }
+
