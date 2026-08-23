@@ -97,6 +97,14 @@ export default function WorkspaceLayout() {
       permissions: ['subscription_read', 'subscription_write'],
       capability: 'SUBSCRIPTION',
     },
+    {
+      id: 'payments',
+      path: '/member/workspace/payments',
+      label: t('paymentsAndFinance') || 'المدفوعات والمالية',
+      icon: 'credit-card',
+      permissions: ['payment_read', 'payment_write', 'booking_read', 'booking_write'],
+      capability: null,
+    },
   ];
 
   const canViewTab = (tab) => {

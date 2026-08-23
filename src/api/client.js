@@ -141,6 +141,18 @@ export const endpoints = {
   workspaceSubscriptionCancel: '/workspace-members/workspace/subscription/cancel',
   workspaceSubscriptionPause: '/workspace-members/workspace/subscription/pause',
   workspaceSubscriptionResume: '/workspace-members/workspace/subscription/resume',
+  workspaceSubscriptionProof: '/workspace-members/workspace/subscription/payment-proof',
+
+  // Workspace Payments (Member only)
+  workspacePayments: '/workspace-members/workspace/payments',
+  workspacePaymentDetail: (id) => `/workspace-members/workspace/payments/${id}`,
+  workspacePaymentVerify: (id) => `/workspace-members/workspace/payments/${id}/verify`,
+  workspacePaymentReject: (id) => `/workspace-members/workspace/payments/${id}/reject`,
+
+  // Customer Payments
+  customerPayments: '/customers/payments',
+  customerPaymentDetail: (id) => `/customers/payments/${id}`,
+  customerPaymentProof: (id) => `/customers/payments/${id}/proof`,
 
   // Notifications (shared — works for both customer & member tokens)
   notifications: '/notifications',

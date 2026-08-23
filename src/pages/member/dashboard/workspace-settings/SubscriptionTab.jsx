@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '../../../../context/LanguageContext';
 import { useToast } from '../../../../context/ToastContext';
 import Icon from '../../../../components/common/Icon';
-
+import client, { endpoints } from '../../../../api/client';
 
 export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoading = false, plansError = null, canEdit, onUpgrade, onRenew, onCancel, onPause, onResume }) {
   const { t } = useLanguage();
@@ -18,22 +18,54 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [renewDurationMonths, setRenewDurationMonths] = useState(12);
 
+  // Payment Methods state
+  const [paymentMethods, setPaymentMethods] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    client.get('/v1/workspace-members/workspace/payments/methods')
+      .then((res) => {
+        if (isMounted && res.data?.data) {
+          setPaymentMethods(Array.isArray(res.data.data) ? res.data.data : []);
+        }
+      })
+      .catch(() => {});
+    return () => { isMounted = false; };
+  }, []);
+
+  // Proof Modal state
+  const [isProofModalOpen, setIsProofModalOpen] = useState(false);
+  const [proofFile, setProofFile] = useState(null);
+  const [proofFilePreview, setProofFilePreview] = useState('');
+  const [proofNotes, setProofNotes] = useState('');
+  const [submittingProof, setSubmittingProof] = useState(false);
+
   const planName = subscriptionInfo?.plan?.name || subscriptionInfo?.name || null;
   const endsAt = subscriptionInfo?.ends_at || subscriptionInfo?.expires_at || null;
   const statusStr = subscriptionInfo?.status || (subscriptionInfo ? 'active' : null);
+
+  const latestPayment = subscriptionInfo?.latest_payment || subscriptionInfo?.payments?.[0];
+  const rejectionReason = latestPayment?.rejection_reason || subscriptionInfo?.rejection_reason;
+  const isPaymentRejected = latestPayment?.status === 'failed' || Boolean(rejectionReason);
 
   const handleConfirmUpgrade = () => {
     if (!selectedUpgradePlanId) {
       toast.error(t('selectPlanError') || 'يرجى اختيار باقة للمتابعة');
       return;
     }
-    if (onUpgrade) onUpgrade(selectedUpgradePlanId, billingCycle);
+    if (onUpgrade) onUpgrade(selectedUpgradePlanId, billingCycle, proofFile, proofNotes);
     setIsUpgradeModalOpen(false);
+    setProofFile(null);
+    setProofFilePreview('');
+    setProofNotes('');
   };
 
   const handleConfirmRenew = () => {
-    if (onRenew) onRenew(renewDurationMonths);
+    if (onRenew) onRenew(renewDurationMonths, proofFile, proofNotes);
     setIsRenewModalOpen(false);
+    setProofFile(null);
+    setProofFilePreview('');
+    setProofNotes('');
   };
 
   const handleConfirmCancel = async () => {
@@ -45,6 +77,46 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
       } finally {
         setCancelLoading(false);
       }
+    }
+  };
+
+  const handleUploadSubscriptionProof = async (e) => {
+    e.preventDefault();
+    setSubmittingProof(true);
+    try {
+      const formData = new FormData();
+      if (proofFile instanceof File) {
+        formData.append('proof_file', proofFile);
+      } else if (typeof proofFile === 'string' && proofFile.trim()) {
+        formData.append('proof_file', proofFile.trim());
+      } else if (proofFilePreview) {
+        formData.append('proof_file', proofFilePreview);
+      } else {
+        toast.error(t('selectReceiptError') || 'يرجى اختيار ملف أو إرفاق إيصال الدفع');
+        setSubmittingProof(false);
+        return;
+      }
+
+      if (proofNotes.trim()) {
+        formData.append('proof_notes', proofNotes.trim());
+      }
+
+      const res = await client.post(endpoints.workspaceSubscriptionProof, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      toast.success(res.data?.message || t('payment_proof_submitted') || 'تم إرفاق إيصال السداد بنجاح');
+      setIsProofModalOpen(false);
+      setProofFile(null);
+      setProofFilePreview('');
+      setProofNotes('');
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.reload();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || t('uploadProofFailed') || 'فشل إرفاق إيصال الدفع');
+    } finally {
+      setSubmittingProof(false);
     }
   };
 
@@ -167,6 +239,10 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                 </button>
               </>
             )}
+            <button className="btn btn-secondary btn-sm" onClick={() => setIsProofModalOpen(true)} style={{ gap: 6 }}>
+              <Icon name="upload-cloud" size={14} />
+              {t('uploadProofBtn') || 'إرفاق إيصال الدفع'}
+            </button>
           </div>
         )}
       </div>
@@ -190,7 +266,31 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
         </div>
       ) : (
         <div style={{ padding: 20, background: 'var(--surface-alt)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)', marginBottom: 20 }}>
-          {statusStr === 'pending' && (
+          {isPaymentRejected && (
+            <div style={{ padding: '14px 18px', background: '#fef2f2', borderRadius: 12, border: '1px solid #fca5a5', color: '#991b1b', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Icon name="x-circle" size={24} style={{ color: '#dc2626' }} />
+                  <div>
+                    <strong style={{ display: 'block', fontSize: '0.92rem', marginBottom: 2 }}>
+                      {t('paymentRejectedTitle') || 'تم رفض إيصال الدفع السابق'}
+                    </strong>
+                    <span style={{ fontSize: '0.84rem' }}>
+                      {rejectionReason ? `${t('rejectionReason') || 'سبب الرفض'}: ${rejectionReason}` : (t('paymentRejectedDesc') || 'يرجى إعادة رفع إيصال تحويل صحيح للتحقق منه وتفعيل الاشتراك.')}
+                    </span>
+                  </div>
+                </div>
+                {canEdit && (
+                  <button className="btn btn-primary btn-sm" onClick={() => setIsProofModalOpen(true)} style={{ gap: 6 }}>
+                    <Icon name="upload-cloud" size={14} />
+                    {t('resendProofBtn') || 'إعادة إرفاق إيصال الدفع'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {statusStr === 'pending' && !isPaymentRejected && (
             <div style={{ padding: '14px 18px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: 12, border: '1px solid rgba(245, 158, 11, 0.3)', color: '#b45309', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
               <Icon name="clock" size={24} />
               <div>
@@ -198,7 +298,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                   {t('pendingSubscriptionTitle') || 'طلب الاشتراك قيد المراجعة'}
                 </strong>
                 <span style={{ fontSize: '0.84rem' }}>
-                  {t('pendingSubscriptionDesc') || 'تم تقديم طلب الاشتراك الخاص بمساحة العمل وهو قيد المراجعة حالياً من قبل الإدارة. سيتم تفعيل المميزات فور الاعتماد.'}
+                  {t('pendingSubscriptionDesc') || 'تم تقديم طلب الاشتراك وهو قيد المراجعة حالياً. سيتم تفعيل المميزات فور الاعتماد.'}
                 </span>
               </div>
             </div>
@@ -262,7 +362,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
               </div>
             ) : plans.length === 0 ? (
               <div style={{ padding: 32, textAlign: 'center', color: 'var(--muted)', marginBottom: 20 }}>
-                {t('noPlansAvailable') || 'لا توجد بااقات متوفرة حالياً'}
+                {t('noPlansAvailable') || 'لا توجد باقات متوفرة حالياً'}
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16, marginBottom: 20 }}>
@@ -270,22 +370,6 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                   const selected = selectedUpgradePlanId === p.id;
                   const rawPrice = billingCycle === 'yearly' ? (p.yearly_price || p.price_yearly || p.price * 10) : (p.monthly_price || p.price_monthly || p.price);
                   const unitStr = billingCycle === 'yearly' ? (t('sarPerYear') || 'ر.س / سنوياً') : (t('sarPerMonth') || 'ر.س / شهرياً');
-
-                  const capsList = Array.isArray(p.capabilities)
-                    ? p.capabilities.map((c) => (typeof c.name === 'object' ? (c.name.ar || c.name.en || '') : (c.name || c.title || ''))).filter(Boolean)
-                    : [];
-
-                  const rawFeatures = Array.isArray(p.features)
-                    ? p.features.map((f) => (typeof f === 'string' ? f : (f.title || f.name || ''))).filter(Boolean)
-                    : (p.description ? [p.description] : []);
-
-                  const limits = [];
-                  if (p.max_members) limits.push(`${p.max_members} ${t('membersLimit') || 'أعضاء'}`);
-                  if (p.max_services) limits.push(`${p.max_services} ${t('servicesLimit') || 'خدمات'}`);
-                  if (p.max_appointments) limits.push(`${p.max_appointments} ${t('appointmentsLimit') || 'حجوزات'}`);
-                  if (p.max_customers) limits.push(`${p.max_customers} ${t('customersLimit') || 'عملاء'}`);
-
-                  const capabilities = [...new Set([...capsList, ...rawFeatures])];
 
                   return (
                     <div
@@ -316,7 +400,6 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                             fontWeight: 800,
                             padding: '2px 10px',
                             borderRadius: 10,
-                            boxShadow: '0 2px 8px rgba(17, 100, 106, 0.3)',
                           }}
                         >
                           {t('selected') || 'محدد'}
@@ -331,87 +414,64 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                       <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)', marginBottom: 14 }}>
                         {rawPrice} <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unitStr}</span>
                       </div>
-
-                      {limits.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
-                          {limits.map((lbl, i) => (
-                            <span
-                              key={i}
-                              style={{
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                color: 'var(--primary)',
-                                background: 'rgba(17, 100, 106, 0.08)',
-                                padding: '4px 10px',
-                                borderRadius: 20,
-                              }}
-                            >
-                              {lbl}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: 12, marginTop: 'auto' }}>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--heading)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <Icon name="sparkles" size={14} style={{ color: 'var(--primary)' }} />
-                          {t('planCapabilitiesLabel') || 'الإمكانيات والمميزات المتاحة:'}
-                        </div>
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.83rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          {capabilities.length > 0 ? (
-                            capabilities.map((item, idx) => (
-                              <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, lineHeight: 1.45 }}>
-                                <span
-                                  style={{
-                                    width: 18,
-                                    height: 18,
-                                    borderRadius: '50%',
-                                    background: 'rgba(17, 100, 106, 0.12)',
-                                    color: 'var(--primary)',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0,
-                                    marginTop: 2,
-                                  }}
-                                >
-                                  <Icon name="check" size={11} />
-                                </span>
-                                <span>{item}</span>
-                              </li>
-                            ))
-                          ) : (
-                            <li style={{ color: 'var(--muted)', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span
-                                style={{
-                                  width: 18,
-                                  height: 18,
-                                  borderRadius: '50%',
-                                  background: 'rgba(17, 100, 106, 0.12)',
-                                  color: 'var(--primary)',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                <Icon name="check" size={11} />
-                              </span>
-                              <span>{t('basicPlanCapabilities') || 'تتضمن المميزات والخدمات الأساسية'}</span>
-                            </li>
-                          )}
-                        </ul>
-                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
 
+            {/* Receipt File Upload for Upgrade */}
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: 16, marginTop: 10 }}>
+              {paymentMethods.length > 0 && (
+                <div style={{ background: 'var(--bg-secondary)', padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border-light)', marginBottom: 14 }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--heading)', marginBottom: 6, display: 'flex', itemsCenter: 'center', gap: 6 }}>
+                    <Icon name="credit-card" size={16} />
+                    <span>{t('paymentMethods') || 'وسائل السداد المتاحة'}</span>
+                  </div>
+                  {paymentMethods.map((pm) => (
+                    <div key={pm.id} style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: 6 }}>
+                      <strong style={{ color: 'var(--heading)' }}>{pm.name}:</strong> {pm.description}
+                      {pm.instructions && (
+                        <div style={{ margin: '4px 0 0 0', padding: '6px 8px', background: 'var(--bg-primary)', borderRadius: 6, fontSize: '0.74rem', fontFamily: 'monospace', whitespace: 'pre-line' }}>
+                          {pm.instructions}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--heading)', marginBottom: 10 }}>
+                {t('paymentProofUploadTitle') || 'إرفاق إيصال تحويل الاشتراك (إجباري للاعتماد)'}
+              </h4>
+              <div className="form-group" style={{ marginBottom: 10 }}>
+                <label className="form-label">{t('receiptFile') || 'ملف الإيصال (صورة / PDF)'}</label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="form-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setProofFile(file);
+                  }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('notes') || 'ملاحظات التحويل'}</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder={t('transferNotesPlaceholder') || 'رقم الحساب أو المرجع...'}
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsUpgradeModalOpen(false)}>{t('cancel')}</button>
               <button type="button" className="btn btn-primary btn-sm" onClick={handleConfirmUpgrade} disabled={plansLoading || plans.length === 0}>
-                {t('confirmUpgradeBtn') || 'تأكيد ترقية الباقة'}
+                {t('confirmUpgradeBtn') || 'تأكيد ترقية الباقة وإرسال الإيصال'}
               </button>
             </div>
           </div>
@@ -431,7 +491,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
             </div>
 
             <div className="modal-body">
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: 14 }}>
                 <label className="form-label">{t('renewDurationLabel') || 'مدة التجديد المطلوبة'}</label>
                 <select className="form-select" value={renewDurationMonths} onChange={(e) => setRenewDurationMonths(Number(e.target.value))}>
                   <option value={1}>{t('oneMonth') || 'شهر واحد (1 Month)'}</option>
@@ -440,14 +500,112 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                   <option value={12}>{t('twelveMonths') || 'سنة كاملة (12 Months - أفضل قيمة)'}</option>
                 </select>
               </div>
+
+              <div className="form-group" style={{ marginBottom: 12 }}>
+                <label className="form-label">{t('receiptFile') || 'ملف الإيصال (صورة / PDF)'}</label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="form-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setProofFile(file);
+                  }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('notes') || 'ملاحظات التحويل'}</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder={t('transferNotesPlaceholder') || 'رقم الحساب أو المرجع...'}
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                />
+              </div>
             </div>
 
             <div className="modal-actions">
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsRenewModalOpen(false)}>{t('cancel')}</button>
               <button type="button" className="btn btn-primary btn-sm" onClick={handleConfirmRenew}>
-                {t('confirmRenewBtn') || 'تأكيد التجديد الآن'}
+                {t('confirmRenewBtn') || 'تأكيد التجديد وإرسال الإيصال'}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Standalone Proof Resend Modal */}
+      {isProofModalOpen && createPortal(
+        <div className="modal-backdrop" onClick={() => setIsProofModalOpen(false)}>
+          <div className="modal-card modal-md animate-fade-in-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t('resendProofModalTitle') || 'إعادة تقديم / إرفاق إيصال الدفع'}</h3>
+              <button type="button" className="modal-close-btn" onClick={() => setIsProofModalOpen(false)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadSubscriptionProof} className="modal-body">
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label" style={{ fontWeight: 700 }}>{t('receiptFile') || 'ملف الإيصال (صورة / PDF)'}</label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="form-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setProofFile(file);
+                      if (file.type.startsWith('image/')) {
+                        setProofFilePreview(URL.createObjectURL(file));
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{t('orDirectUrl') || 'أو رابط الإيصال مباشرة'}</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  placeholder="https://example.com/receipt.pdf"
+                  value={typeof proofFile === 'string' ? proofFile : proofFilePreview}
+                  onChange={(e) => {
+                    setProofFile(e.target.value);
+                    setProofFilePreview(e.target.value);
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label className="form-label">{t('notes') || 'ملاحظات التحويل / البنك'}</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  placeholder={t('transferNotesPlaceholder') || 'تم التحويل من حساب البنك رقم المرجع #1234'}
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsProofModalOpen(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={submittingProof}>
+                  {submittingProof ? (
+                    <>
+                      <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
+                      {t('submitting') || 'جاري الإرسال...'}
+                    </>
+                  ) : (
+                    t('confirmSubmitProof') || 'تأكيد وإرسال الإيصال'
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

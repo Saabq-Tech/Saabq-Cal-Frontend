@@ -74,3 +74,9 @@ build/
 
 # OS
 .DS_Store
+
+# Local SSH / Security keys
+server_deploy_key*
+*.pem
+*.key
+

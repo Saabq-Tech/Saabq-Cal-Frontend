@@ -50,11 +50,22 @@ export default function WorkspaceSubscriptionsPage() {
     loadData();
   }, []);
 
-  const handleUpgrade = async (planId, billingCycle) => {
+  const handleUpgrade = async (planId, billingCycle, proofFile, proofNotes) => {
     try {
-      const res = await client.post(endpoints.workspaceSubscription, {
-        plan_id: planId,
-        billing_cycle: billingCycle,
+      const formData = new FormData();
+      formData.append('plan_id', planId);
+      if (billingCycle) formData.append('billing_cycle', billingCycle);
+      if (proofFile instanceof File) {
+        formData.append('proof_file', proofFile);
+      } else if (typeof proofFile === 'string' && proofFile.trim()) {
+        formData.append('proof_file', proofFile.trim());
+      }
+      if (proofNotes && proofNotes.trim()) {
+        formData.append('proof_notes', proofNotes.trim());
+      }
+
+      const res = await client.post(endpoints.workspaceSubscription, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success(res.data?.message || t('upgradeSuccess') || 'تم ترقية الاشتراك بنجاح');
       loadData();
@@ -63,10 +74,21 @@ export default function WorkspaceSubscriptionsPage() {
     }
   };
 
-  const handleRenew = async (durationMonths) => {
+  const handleRenew = async (durationMonths, proofFile, proofNotes) => {
     try {
-      const res = await client.post(endpoints.workspaceSubscriptionRenew, {
-        duration_months: durationMonths,
+      const formData = new FormData();
+      formData.append('duration_months', durationMonths);
+      if (proofFile instanceof File) {
+        formData.append('proof_file', proofFile);
+      } else if (typeof proofFile === 'string' && proofFile.trim()) {
+        formData.append('proof_file', proofFile.trim());
+      }
+      if (proofNotes && proofNotes.trim()) {
+        formData.append('proof_notes', proofNotes.trim());
+      }
+
+      const res = await client.post(endpoints.workspaceSubscriptionRenew, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success(res.data?.message || t('renewSuccess') || 'تم تجديد الاشتراك بنجاح');
       loadData();

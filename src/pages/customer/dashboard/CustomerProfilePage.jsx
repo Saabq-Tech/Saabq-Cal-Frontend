@@ -92,7 +92,7 @@ export default function CustomerProfilePage() {
 
   if (!user) return null;
 
-  if (currentTab === 'appointments' || currentTab === 'bookings') {
+  if (currentTab === 'appointments' || currentTab === 'bookings' || currentTab === 'payments') {
     return <CustomerAppointmentsTab />;
   }
 

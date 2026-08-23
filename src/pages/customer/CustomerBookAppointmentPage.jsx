@@ -102,14 +102,10 @@ export default function CustomerBookAppointmentPage() {
   // Require authentication before accessing booking page
   useEffect(() => {
     if (!user) {
-      toast.warning(
-        isRTL
-          ? 'يرجى تسجيل الدخول أولاً لمتابعة حجز الموعد'
-          : 'Please sign in first to book an appointment'
-      );
+      toast.warning(t('signin_required_booking'));
       navigate('/customer/login', { replace: true, state: { from: location } });
     }
-  }, [user, navigate, isRTL, location, toast]);
+  }, [user, navigate, isRTL, location, toast, t]);
 
   // Fetch workspace details & services
   useEffect(() => {
@@ -340,9 +336,7 @@ export default function CustomerBookAppointmentPage() {
 
       if (serverMsg) {
         if (serverMsg.includes('Attempt to read property') || serverMsg.includes('symbol') || serverMsg.includes('null')) {
-          userMsg = isRTL
-            ? 'تعذر إكمال الحجز بسبب عدم ضبط عملة الخدمة في مساحة العمل'
-            : 'Unable to complete booking due to unconfigured service currency in workspace.';
+          userMsg = t('currency_unconfigured_error');
         } else {
           userMsg = serverMsg;
         }

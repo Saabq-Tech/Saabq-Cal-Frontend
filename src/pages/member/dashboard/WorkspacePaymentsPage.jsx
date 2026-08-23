@@ -1,0 +1,380 @@
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useAuth } from '../../../context/AuthContext';
+import { useToast } from '../../../context/ToastContext';
+import { useLanguage } from '../../../context/LanguageContext';
+import client, { endpoints } from '../../../api/client';
+import SEO from '../../../components/ui/SEO';
+import Icon from '../../../components/common/Icon';
+import { SkeletonRect } from '../../../components/ui/Skeleton';
+
+export default function WorkspacePaymentsPage() {
+  const { user } = useAuth();
+  const { t, isRTL } = useLanguage();
+  const toast = useToast();
+
+  const [payments, setPayments] = useState([]);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('');
+  const [providerFilter, setProviderFilter] = useState('');
+  const [payableTypeFilter, setPayableTypeFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Selected Payment for Modal / Verification
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState(null);
+
+  const fetchPayments = useCallback(async (targetPage = 1) => {
+    setLoading(true);
+    try {
+      const params = {
+        page: targetPage,
+        per_page: 10,
+      };
+      if (statusFilter) params.status = statusFilter;
+      if (providerFilter) params.provider = providerFilter;
+      if (payableTypeFilter) params.payable_type = payableTypeFilter;
+      if (searchQuery.trim()) params.search = searchQuery.trim();
+
+      const res = await client.get(endpoints.workspacePayments, { params });
+      setPayments(res.data?.data || []);
+      setMeta(res.data?.meta || null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل تحميل سجل المدفوعات' : 'Failed to load payments'));
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, providerFilter, payableTypeFilter, searchQuery, isRTL, toast]);
+
+  useEffect(() => {
+    fetchPayments(page);
+  }, [fetchPayments, page]);
+
+  const handleVerify = async (payment) => {
+    setActionLoading(true);
+    try {
+      const res = await client.post(endpoints.workspacePaymentVerify(payment.id));
+      toast.success(res.data?.message || (isRTL ? 'تم الاعتماد بنجاح' : 'Payment verified successfully'));
+      setSelectedPayment(null);
+      fetchPayments(page);
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل اعتماد الدفع' : 'Failed to verify payment'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async (payment) => {
+    if (!rejectReason.trim()) {
+      toast.error(isRTL ? 'يرجى تقديم سبب الرفض' : 'Please provide a rejection reason');
+      return;
+    }
+    setActionLoading(true);
+    try {
+      const res = await client.post(endpoints.workspacePaymentReject(payment.id), {
+        reason: rejectReason.trim(),
+      });
+      toast.success(res.data?.message || (isRTL ? 'تم رفض الدفع' : 'Payment rejected'));
+      setSelectedPayment(null);
+      setRejectReason('');
+      fetchPayments(page);
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل رفض الدفع' : 'Failed to reject payment'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'paid':
+        return { label: isRTL ? 'مدفوع / معتمد' : 'Paid', color: '#166534', bg: '#dcfce7', border: '#bbf7d0' };
+      case 'verifying':
+        return { label: isRTL ? 'قيد التحقق' : 'Verifying', color: '#0369a1', bg: '#e0f2fe', border: '#bae6fd' };
+      case 'pending':
+        return { label: isRTL ? 'قيد الانتظار' : 'Pending', color: '#b45309', bg: '#fef3c7', border: '#fde68a' };
+      case 'failed':
+      case 'cancelled':
+        return { label: isRTL ? 'مرفوض / ملغى' : 'Failed', color: '#991b1b', bg: '#fee2e2', border: '#fecaca' };
+      case 'refunded':
+        return { label: isRTL ? 'مسترجع' : 'Refunded', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' };
+      default:
+        return { label: status, color: '#334155', bg: '#f1f5f9', border: '#cbd5e1' };
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <div className="card" style={{ padding: 24 }}>
+      <SEO title={isRTL ? 'سجل المدفوعات والمالية' : 'Payments & Finance Log'} noindex />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--heading)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icon name="credit-card" size={22} style={{ color: 'var(--primary)' }} />
+            {isRTL ? 'سجل المدفوعات والتحويلات المالية' : 'Payments & Finance Log'}
+          </h2>
+          <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+            {isRTL ? 'متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي' : 'Monitor all payment transactions, transfer receipts, and verification statuses'}
+          </p>
+        </div>
+      </div>
+
+      {/* Filters Bar */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20, background: 'var(--surface-alt)', padding: 14, borderRadius: 12, border: '1px solid var(--border-light)' }}>
+        <input
+          type="text"
+          className="form-input"
+          placeholder={isRTL ? 'البحث بالمرجع أو الملاحظات...' : 'Search by reference or notes...'}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ maxWidth: 260, fontSize: '0.85rem' }}
+        />
+
+        <select
+          className="form-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ maxWidth: 160, fontSize: '0.85rem' }}
+        >
+          <option value="">{isRTL ? 'جميع الحالات' : 'All Statuses'}</option>
+          <option value="verifying">{isRTL ? 'قيد التحقق' : 'Verifying'}</option>
+          <option value="pending">{isRTL ? 'قيد الانتظار' : 'Pending'}</option>
+          <option value="paid">{isRTL ? 'مدفوع ومعتمد' : 'Paid'}</option>
+          <option value="failed">{isRTL ? 'مرفوض' : 'Failed'}</option>
+        </select>
+
+        <select
+          className="form-select"
+          value={payableTypeFilter}
+          onChange={(e) => setPayableTypeFilter(e.target.value)}
+          style={{ maxWidth: 180, fontSize: '0.85rem' }}
+        >
+          <option value="">{isRTL ? 'جميع الأنواع' : 'All Types'}</option>
+          <option value="Appointment">{isRTL ? 'حجوزات المواعيد' : 'Appointments'}</option>
+          <option value="Subscription">{isRTL ? 'اشتراكات الباقات' : 'Subscriptions'}</option>
+        </select>
+      </div>
+
+      {/* Payments Table */}
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <SkeletonRect height={48} />
+          <SkeletonRect height={54} />
+          <SkeletonRect height={54} />
+        </div>
+      ) : payments.length === 0 ? (
+        <div style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--surface-alt)', borderRadius: 12, border: '1px dashed var(--border-light)' }}>
+          <Icon name="credit-card" size={32} style={{ color: 'var(--muted)', margin: '0 auto 12px' }} />
+          <h4 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700, color: 'var(--heading)' }}>
+            {isRTL ? 'لا توجد سجلات مدفوعات مطابقة' : 'No matching payment records found'}
+          </h4>
+        </div>
+      ) : (
+        <div className="table-responsive">
+          <table className="table" style={{ width: '100%', fontSize: '0.88rem' }}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{isRTL ? 'المستحق له' : 'Payable'}</th>
+                <th>{isRTL ? 'المبلغ' : 'Amount'}</th>
+                <th>{isRTL ? 'وسيلة الدفع' : 'Method / Provider'}</th>
+                <th>{isRTL ? 'الحالة' : 'Status'}</th>
+                <th>{isRTL ? 'التاريخ' : 'Date'}</th>
+                <th style={{ textAlign: 'center' }}>{isRTL ? 'الإجراءات' : 'Actions'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((p) => {
+                const badge = getStatusBadge(p.status);
+                const isSub = p.payable_type?.includes('Subscription');
+                return (
+                  <tr key={p.id}>
+                    <td style={{ fontWeight: 700 }}>#{p.id}</td>
+                    <td>
+                      <span style={{ fontWeight: 700, color: 'var(--heading)', display: 'block' }}>
+                        {isSub ? (isRTL ? 'اشتراك مساحة العمل' : 'Workspace Subscription') : (isRTL ? 'حجز موعد' : 'Appointment Booking')}
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ID: {p.payable_id}</span>
+                    </td>
+                    <td style={{ fontWeight: 800, color: 'var(--primary)' }}>
+                      {p.amount} {p.currency || 'SAR'}
+                    </td>
+                    <td>
+                      <span style={{ fontWeight: 600, display: 'block' }}>{p.method || 'bank_transfer'}</span>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{p.provider || 'manual'}</span>
+                    </td>
+                    <td>
+                      <span
+                        style={{
+                          padding: '4px 12px',
+                          borderRadius: 20,
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          color: badge.color,
+                          background: badge.bg,
+                          border: `1px solid ${badge.border}`,
+                          display: 'inline-block',
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{formatDate(p.created_at)}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setSelectedPayment(p)}
+                        style={{ gap: 6, fontSize: '0.8rem' }}
+                      >
+                        <Icon name="eye" size={14} />
+                        {isRTL ? 'التفاصيل / الإيصال' : 'View / Verify'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Details & Verification Modal */}
+      {selectedPayment && createPortal(
+        <div className="modal-backdrop">
+          <div className="modal-card modal-md animate-fade-in-up" style={{ maxWidth: 640 }}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {isRTL ? 'تفاصيل عملية الدفع وإيصال السداد' : 'Payment Details & Receipt Verification'}
+              </h3>
+              <button type="button" className="modal-close-btn" onClick={() => setSelectedPayment(null)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, background: 'var(--surface-alt)', padding: 14, borderRadius: 12 }}>
+                <div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'المبلغ' : 'Amount'}</span>
+                  <strong style={{ fontSize: '1.25rem', color: 'var(--primary)' }}>{selectedPayment.amount} {selectedPayment.currency || 'SAR'}</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'الحالة الحالية' : 'Current Status'}</span>
+                  <strong style={{ color: getStatusBadge(selectedPayment.status).color }}>{getStatusBadge(selectedPayment.status).label}</strong>
+                </div>
+              </div>
+
+              {selectedPayment.proof_notes && (
+                <div style={{ padding: 12, borderRadius: 8, background: 'rgba(234, 179, 8, 0.08)', border: '1px solid rgba(234, 179, 8, 0.25)' }}>
+                  <strong style={{ fontSize: '0.82rem', color: '#b45309', display: 'block', marginBottom: 2 }}>
+                    📝 {isRTL ? 'ملاحظات المحوّل / الإيصال:' : 'Transfer Notes:'}
+                  </strong>
+                  <span style={{ fontSize: '0.86rem', color: 'var(--heading)' }}>{selectedPayment.proof_notes}</span>
+                </div>
+              )}
+
+              {selectedPayment.proof_file ? (
+                <div style={{ border: '1px solid var(--border-light)', borderRadius: 10, overflow: 'hidden', background: '#0f172a' }}>
+                  <div style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.8rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>📷 {isRTL ? 'صورة إيصال التحويل' : 'Attached Receipt Proof'}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImage(selectedPayment.proof_file)}
+                      style={{ background: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem' }}
+                    >
+                      {isRTL ? 'تكبير' : 'Enlarge'}
+                    </button>
+                  </div>
+                  <div style={{ padding: 12, textAlign: 'center', maxHeight: 240, overflow: 'hidden', cursor: 'pointer' }} onClick={() => setLightboxImage(selectedPayment.proof_file)}>
+                    <img src={selectedPayment.proof_file} alt="Receipt Proof" style={{ maxWidth: '100%', maxHeight: 220, objectFit: 'contain', borderRadius: 6 }} />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: 14, background: 'var(--surface-alt)', borderRadius: 8, textAlign: 'center', border: '1px dashed var(--border-light)' }}>
+                  <span style={{ fontSize: '0.84rem', color: 'var(--muted)' }}>
+                    {isRTL ? 'لم يتم إرفاق ملف إيصال سداد' : 'No receipt file attached'}
+                  </span>
+                </div>
+              )}
+
+              {selectedPayment.status !== 'paid' && (
+                <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: 14, marginTop: 4 }}>
+                  <label className="form-label" style={{ fontSize: '0.84rem', fontWeight: 700, marginBottom: 6, display: 'block' }}>
+                    {isRTL ? 'سبب الرفض (في حالة عدم الاعتماد)' : 'Rejection Reason (if rejecting)'}
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder={isRTL ? 'مثال: رقم الحساب أو إيصال التحويل غير مطبق' : 'Reason for rejection...'}
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="modal-actions" style={{ justifyContent: 'space-between' }}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelectedPayment(null)} disabled={actionLoading}>
+                {t('close') || 'إغلاق'}
+              </button>
+
+              {selectedPayment.status !== 'paid' && (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleReject(selectedPayment)}
+                    disabled={actionLoading}
+                  >
+                    {isRTL ? 'رفض الإيصال' : 'Reject Payment'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleVerify(selectedPayment)}
+                    disabled={actionLoading}
+                  >
+                    {isRTL ? 'اعتماد والدفع' : 'Verify & Approve'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Lightbox Preview */}
+      {lightboxImage && createPortal(
+        <div className="modal-backdrop" onClick={() => setLightboxImage(null)} style={{ background: 'rgba(0,0,0,0.85)' }}>
+          <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }} onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxImage} alt="Full Receipt" style={{ maxWidth: '100%', maxHeight: '85vh', objectFit: 'contain', borderRadius: 8 }} />
+            <button
+              onClick={() => setLightboxImage(null)}
+              style={{ position: 'absolute', top: -36, right: 0, background: '#fff', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontWeight: 800 }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}

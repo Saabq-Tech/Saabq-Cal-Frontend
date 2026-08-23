@@ -1,0 +1,90 @@
+name: Deploy Workflow
+
+on:
+  workflow_run:
+    workflows: ["CI Workflow"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production-website
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          test -n "$SSH_PRIVATE_KEY" || {
+            echo "::error::SSH_PRIVATE_KEY secret is not set"
+            exit 1
+          }
+
+          test -n "$SSH_HOST" || {
+            echo "::error::SSH_HOST secret is not set"
+            exit 1
+          }
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan \
+            -p "${SSH_PORT:-22}" \
+            -H "$SSH_HOST" \
+            >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to VPS
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          VPS_PATH: ${{ secrets.VPS_PATH }}
+        run: |
+          test -n "$SSH_USER" || {
+            echo "::error::SSH_USER secret is not set"
+            exit 1
+          }
+
+          test -n "$VPS_PATH" || {
+            echo "::error::VPS_PATH secret is not set"
+            exit 1
+          }
+
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -p "${SSH_PORT:-22}" \
+            "$SSH_USER@$SSH_HOST" \
+            'bash -seuo pipefail' <<REMOTE
+
+          export VPS_PATH="$VPS_PATH"
+          cd "$VPS_PATH"
+
+          echo "→ Current commit:"
+          git rev-parse HEAD
+
+          echo "→ Fetching latest main..."
+          git fetch --prune origin main
+          git reset --hard origin/main
+          git clean -fd
+
+          echo "→ Installing Frontend dependencies..."
+          npm ci
+
+          echo "→ Building Frontend assets..."
+          npm run build
+
+          echo "✓ Deployment complete"
+
+          REMOTE

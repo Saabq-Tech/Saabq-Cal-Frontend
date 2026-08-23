@@ -35,6 +35,13 @@ export default function CustomerAppointmentsTab() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
 
+  // Payment proof reupload modal state
+  const [proofModalAppt, setProofModalAppt] = useState(null);
+  const [proofFile, setProofFile] = useState(null);
+  const [proofFilePreview, setProofFilePreview] = useState('');
+  const [proofNotes, setProofNotes] = useState('');
+  const [uploadingProof, setUploadingProof] = useState(false);
+
   const fetchAppointments = useCallback(async (targetPage = 1) => {
     setLoading(true);
     try {
@@ -139,6 +146,56 @@ export default function CustomerAppointmentsTab() {
       toast.error(err.response?.data?.message || (isRTL ? 'فشل إلغاء الموعد' : 'Failed to cancel appointment'));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleUploadPaymentProof = async (e) => {
+    e.preventDefault();
+    if (!proofModalAppt) return;
+
+    const paymentId = proofModalAppt.payments?.[0]?.id || proofModalAppt.payment?.id || proofModalAppt.latest_payment?.id;
+    if (!paymentId) {
+      toast.error(isRTL ? 'لم يتم العثور على سجل دفع لهذا الموعد' : 'No payment record found for this appointment');
+      return;
+    }
+
+    setUploadingProof(true);
+    try {
+      const formData = new FormData();
+      if (proofFile instanceof File) {
+        formData.append('proof_file', proofFile);
+      } else if (typeof proofFile === 'string' && proofFile.trim()) {
+        formData.append('proof_file', proofFile.trim());
+      } else if (proofFilePreview) {
+        formData.append('proof_file', proofFilePreview);
+      } else {
+        toast.error(isRTL ? 'يرجى اختيار صورة إيصال السداد' : 'Please select a receipt proof file');
+        setUploadingProof(false);
+        return;
+      }
+
+      if (proofNotes.trim()) {
+        formData.append('proof_notes', proofNotes.trim());
+      }
+
+      const res = await client.post(endpoints.customerPaymentProof(paymentId), formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      toast.success(res.data?.message || (isRTL ? 'تم إعادة إرفاق إيصال السداد بنجاح' : 'Payment proof uploaded successfully'));
+      setProofModalAppt(null);
+      setProofFile(null);
+      setProofFilePreview('');
+      setProofNotes('');
+
+      if (selectedAppointment) {
+        handleOpenDetails(selectedAppointment);
+      }
+      fetchAppointments(page);
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل إرفاق إيصال السداد' : 'Failed to upload payment proof'));
+    } finally {
+      setUploadingProof(false);
     }
   };
 
@@ -887,6 +944,21 @@ export default function CustomerAppointmentsTab() {
                       </span>
                     </div>
                   )}
+
+                  <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setProofModalAppt(selectedAppointment);
+                        setProofFilePreview(getPaymentReceiptUrl(selectedAppointment) || '');
+                      }}
+                      style={{ gap: 6, fontSize: '0.82rem' }}
+                    >
+                      <Icon name="upload-cloud" size={14} />
+                      {isRTL ? 'إعادة إرفاق / رفع إيصال الدفع' : 'Reupload Payment Proof'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Cancellation Reason if cancelled */}
@@ -1041,6 +1113,94 @@ export default function CustomerAppointmentsTab() {
                     <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
                   ) : (
                     isRTL ? 'تأكيد الإلغاء' : 'Confirm Cancel'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Payment Proof Reupload Modal */}
+      {proofModalAppt && createPortal(
+        <div className="modal-backdrop" onClick={() => setProofModalAppt(null)}>
+          <div className="modal-card modal-md animate-fade-in-up" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {isRTL ? 'إعادة إرفاق / رفع إيصال الدفع' : 'Reupload / Submit Payment Proof'}
+              </h3>
+              <button type="button" className="modal-close-btn" onClick={() => setProofModalAppt(null)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadPaymentProof} className="modal-body">
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label" style={{ fontWeight: 700 }}>
+                  {isRTL ? 'ملف إيصال السداد (صورة / PDF)' : 'Receipt File (Image / PDF)'}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  className="form-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setProofFile(file);
+                      if (file.type.startsWith('image/')) {
+                        setProofFilePreview(URL.createObjectURL(file));
+                      } else {
+                        setProofFilePreview('');
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{isRTL ? 'أو رابط الإيصال مباشرة' : 'Or Direct Receipt URL'}</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  placeholder="https://example.com/receipt.pdf"
+                  value={typeof proofFile === 'string' ? proofFile : proofFilePreview}
+                  onChange={(e) => {
+                    setProofFile(e.target.value);
+                    setProofFilePreview(e.target.value);
+                  }}
+                />
+              </div>
+
+              {proofFilePreview && proofFilePreview.startsWith('http') && (
+                <div style={{ padding: 10, borderRadius: 8, background: 'var(--surface-alt)', marginBottom: 14, textAlign: 'center' }}>
+                  <img src={proofFilePreview} alt="Receipt Preview" style={{ maxWidth: '100%', maxHeight: 150, borderRadius: 6, objectFit: 'contain' }} />
+                </div>
+              )}
+
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label className="form-label">{isRTL ? 'ملاحظات التحويل / البنك (اختياري)' : 'Notes / Reference (Optional)'}</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  placeholder={isRTL ? 'مثال: تم التحويل من حساب البنك الأهلي رقم المرجع #1234' : 'e.g. Sent from National Bank ref #1234'}
+                  value={proofNotes}
+                  onChange={(e) => setProofNotes(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setProofModalAppt(null)}>
+                  {isRTL ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={uploadingProof}>
+                  {uploadingProof ? (
+                    <>
+                      <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
+                      {isRTL ? 'جاري الرفع...' : 'Uploading...'}
+                    </>
+                  ) : (
+                    isRTL ? 'تأكيد وحفظ الإيصال' : 'Submit Receipt'
                   )}
                 </button>
               </div>

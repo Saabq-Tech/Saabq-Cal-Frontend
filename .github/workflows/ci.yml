@@ -1,0 +1,59 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  code-quality-and-build:
+    name: Code Quality & Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Validate Translation Keys (lang:check)
+        id: check-lang
+        continue-on-error: true
+        run: npm run lang:check
+
+      - name: Validate Code Formatting & Linting
+        id: check-lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build Application Artifacts
+        id: check-build
+        continue-on-error: true
+        run: npm run build
+
+      - name: Summarize & Notify on Failure
+        if: ${{ always() && (steps.check-lang.outcome == 'failure' || steps.check-lint.outcome == 'failure' || steps.check-build.outcome == 'failure') }}
+        run: |
+          echo "::error title=CI Verification Alert::One or more website CI checks failed for @${{ github.actor }}."
+          echo "### ⚠️ CI Verification Failure Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Attention **Committer** (@${{ github.actor }}) and **Repo Owner** (@${{ github.repository_owner }}):" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Verification Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Translation Keys** | ${{ steps.check-lang.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Linting & Code Style** | ${{ steps.check-lint.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Production Build** | ${{ steps.check-build.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          exit 1

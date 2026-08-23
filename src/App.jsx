@@ -46,6 +46,7 @@ const WorkspaceRolesPage = lazy(() => import('./pages/member/dashboard/Workspace
 const WorkspaceServicesPage = lazy(() => import('./pages/member/dashboard/WorkspaceServicesPage'));
 const WorkspaceBookingsPage = lazy(() => import('./pages/member/dashboard/WorkspaceBookingsPage'));
 const WorkspaceSchedulesPage = lazy(() => import('./pages/member/dashboard/WorkspaceSchedulesPage'));
+const WorkspacePaymentsPage = lazy(() => import('./pages/member/dashboard/WorkspacePaymentsPage'));
 
 // Auth pages layout
 function AuthLayout({ children }) {
@@ -134,6 +135,7 @@ export default function App() {
                   <Route path="services" element={<WorkspaceServicesPage />} />
                   <Route path="bookings" element={<WorkspaceBookingsPage />} />
                   <Route path="schedules" element={<WorkspaceSchedulesPage />} />
+                  <Route path="payments" element={<WorkspacePaymentsPage />} />
                 </Route>
 
                 {/* General Route Aliases */}
