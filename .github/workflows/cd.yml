@@ -102,12 +102,13 @@ jobs:
           TMP_BUILD_DIR=$(mktemp -d)
           cp -r dist/* "$TMP_BUILD_DIR/"
 
-          find . -maxdepth 1 ! -name '.' ! -name '.git' ! -name '..' -exec rm -rf {} +
+          rm -rf "$VPS_PATH"/*
 
-          cp -r "$TMP_BUILD_DIR"/* ./
+          cp -r "$TMP_BUILD_DIR"/* "$VPS_PATH"/
           rm -rf "$TMP_BUILD_DIR"
 
           echo "✓ Deployment complete"
+
 
 
 
