@@ -50,7 +50,6 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_USER: ${{ secrets.SSH_USER }}
           VPS_PATH: ${{ secrets.VPS_PATH }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           test -n "$SSH_USER" || {
             echo "::error::SSH_USER secret is not set"
@@ -73,7 +72,7 @@ jobs:
           mkdir -p "$VPS_PATH"
           cd "$VPS_PATH"
 
-          REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          REMOTE_URL="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
 
           if [ ! -d ".git" ]; then
             echo "→ Initializing git repository in $VPS_PATH..."
