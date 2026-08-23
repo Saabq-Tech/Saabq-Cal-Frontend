@@ -98,10 +98,17 @@ jobs:
           echo "→ Building Frontend assets..."
           npm run build
 
-          echo "→ Copying compiled build files to domain web root..."
-          cp -r dist/* ./
+          echo "→ Cleaning web root directory and publishing production build..."
+          TMP_BUILD_DIR=$(mktemp -d)
+          cp -r dist/* "$TMP_BUILD_DIR/"
+
+          find . -maxdepth 1 ! -name '.' ! -name '.git' ! -name '..' -exec rm -rf {} +
+
+          cp -r "$TMP_BUILD_DIR"/* ./
+          rm -rf "$TMP_BUILD_DIR"
 
           echo "✓ Deployment complete"
+
 
 
           REMOTE
