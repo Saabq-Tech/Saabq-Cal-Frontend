@@ -98,7 +98,11 @@ jobs:
           echo "→ Building Frontend assets..."
           npm run build
 
+          echo "→ Copying compiled build files to domain web root..."
+          cp -r dist/* ./
+
           echo "✓ Deployment complete"
+
 
           REMOTE
 
