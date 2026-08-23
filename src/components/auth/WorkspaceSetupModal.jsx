@@ -29,6 +29,12 @@ export default function WorkspaceSetupModal({
 
   if (!show) return null;
 
+  const getFieldError = (field) => {
+    if (!workspaceErrors || !workspaceErrors[field]) return null;
+    const err = workspaceErrors[field];
+    return Array.isArray(err) ? err[0] : err;
+  };
+
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
@@ -66,7 +72,7 @@ export default function WorkspaceSetupModal({
             <input
               id="ws-setup-name"
               type="text"
-              className={`form-input${workspaceErrors?.workspace_name ? ' is-invalid' : ''}`}
+              className={`form-input${getFieldError('workspace_name') ? ' is-invalid' : ''}`}
               placeholder={t('workspaceNamePlaceholder', 'مثال: شركة سابق التقنية')}
               value={workspaceData.workspace_name || ''}
               onChange={(e) => {
@@ -75,12 +81,12 @@ export default function WorkspaceSetupModal({
               }}
               required
               aria-required="true"
-              aria-describedby={workspaceErrors?.workspace_name ? 'ws-setup-name-error' : undefined}
+              aria-describedby={getFieldError('workspace_name') ? 'ws-setup-name-error' : undefined}
               autoFocus
             />
-            {workspaceErrors?.workspace_name && (
+            {getFieldError('workspace_name') && (
               <span id="ws-setup-name-error" className="form-error" role="alert">
-                {workspaceErrors.workspace_name[0]}
+                {getFieldError('workspace_name')}
               </span>
             )}
           </div>
@@ -92,11 +98,20 @@ export default function WorkspaceSetupModal({
             <input
               id="ws-setup-slug"
               type="text"
-              className={`form-input${workspaceErrors?.workspace_slug ? ' is-invalid' : ''}`}
+              className={`form-input${getFieldError('workspace_slug') ? ' is-invalid' : ''}`}
               placeholder={t('workspaceSlugPlaceholder', 'مثال: saabq-tech')}
               value={workspaceData.workspace_slug || ''}
-              onChange={(e) => setWorkspaceData({ ...workspaceData, workspace_slug: e.target.value })}
+              onChange={(e) => {
+                setWorkspaceData({ ...workspaceData, workspace_slug: e.target.value });
+                if (setWorkspaceErrors) setWorkspaceErrors({ ...workspaceErrors, workspace_slug: null });
+              }}
+              aria-describedby={getFieldError('workspace_slug') ? 'ws-setup-slug-error' : undefined}
             />
+            {getFieldError('workspace_slug') && (
+              <span id="ws-setup-slug-error" className="form-error" role="alert">
+                {getFieldError('workspace_slug')}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
@@ -105,9 +120,13 @@ export default function WorkspaceSetupModal({
             </label>
             <select
               id="ws-setup-type"
-              className="form-select"
+              className={`form-select${getFieldError('workspace_type_id') ? ' is-invalid' : ''}`}
               value={workspaceData.workspace_type_id || ''}
-              onChange={(e) => setWorkspaceData({ ...workspaceData, workspace_type_id: e.target.value })}
+              onChange={(e) => {
+                setWorkspaceData({ ...workspaceData, workspace_type_id: e.target.value });
+                if (setWorkspaceErrors) setWorkspaceErrors({ ...workspaceErrors, workspace_type_id: null });
+              }}
+              aria-describedby={getFieldError('workspace_type_id') ? 'ws-setup-type-error' : undefined}
             >
               <option value="">-- {t('selectWorkspaceType', 'اختر نوع مساحة العمل')} --</option>
               {workspaceTypes.map((type) => (
@@ -116,6 +135,11 @@ export default function WorkspaceSetupModal({
                 </option>
               ))}
             </select>
+            {getFieldError('workspace_type_id') && (
+              <span id="ws-setup-type-error" className="form-error" role="alert">
+                {getFieldError('workspace_type_id')}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
@@ -125,11 +149,20 @@ export default function WorkspaceSetupModal({
             <input
               id="ws-setup-phone"
               type="tel"
-              className="form-input"
+              className={`form-input${getFieldError('phone') ? ' is-invalid' : ''}`}
               placeholder="05XXXXXXXX"
               value={workspaceData.phone || ''}
-              onChange={(e) => setWorkspaceData({ ...workspaceData, phone: e.target.value })}
+              onChange={(e) => {
+                setWorkspaceData({ ...workspaceData, phone: e.target.value });
+                if (setWorkspaceErrors) setWorkspaceErrors({ ...workspaceErrors, phone: null });
+              }}
+              aria-describedby={getFieldError('phone') ? 'ws-setup-phone-error' : undefined}
             />
+            {getFieldError('phone') && (
+              <span id="ws-setup-phone-error" className="form-error" role="alert">
+                {getFieldError('phone')}
+              </span>
+            )}
           </div>
 
           <div className="modal-actions">

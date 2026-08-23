@@ -114,13 +114,28 @@ export default function MemberLoginPage() {
     if (res.success) {
       toast.success(res.message || t('googleAuthSuccess'));
       setShowWorkspaceModal(false);
+      setWorkspaceErrors({});
       navigate(from, { replace: true });
     } else {
-      if (res.errors?.workspace_name || res.message?.includes('مساحة العمل')) {
+      const errors = res.errors || {};
+      setWorkspaceErrors(errors);
+
+      if (res.message) {
+        toast.error(res.message);
+      } else {
+        toast.error('Google authentication failed.');
+      }
+
+      if (
+        errors.workspace_name ||
+        errors.workspace_slug ||
+        errors.workspace_type_id ||
+        errors.phone ||
+        res.message?.includes('مساحة العمل') ||
+        Object.keys(errors).length > 0
+      ) {
         setSavedGoogleToken(googleToken);
         setShowWorkspaceModal(true);
-      } else {
-        toast.error(res.message || 'Google authentication failed.');
       }
     }
   };
