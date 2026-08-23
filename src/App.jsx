@@ -48,6 +48,14 @@ const WorkspaceBookingsPage = lazy(() => import('./pages/member/dashboard/Worksp
 const WorkspaceSchedulesPage = lazy(() => import('./pages/member/dashboard/WorkspaceSchedulesPage'));
 const WorkspacePaymentsPage = lazy(() => import('./pages/member/dashboard/WorkspacePaymentsPage'));
 
+// Frontend Error Pages
+const NotFoundPage = lazy(() => import('./pages/error/NotFoundPage'));
+const ForbiddenPage = lazy(() => import('./pages/error/ForbiddenPage'));
+const ServerErrorPage = lazy(() => import('./pages/error/ServerErrorPage'));
+const ServiceUnavailablePage = lazy(() => import('./pages/error/ServiceUnavailablePage'));
+
+import ErrorBoundary from './components/common/ErrorBoundary';
+
 // Auth pages layout
 function AuthLayout({ children }) {
   return (
@@ -88,76 +96,87 @@ export default function App() {
       <LanguageProvider>
         <AuthProvider>
           <ToastProvider>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                {/* Public pages — with Navbar/Footer */}
-                <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-                <Route path="/about" element={<Navigate to="/#about" replace />} />
-                <Route path="/workspaces" element={<MainLayout><CustomerWorkspacesPage /></MainLayout>} />
-                <Route path="/workspaces/:idOrSlug" element={<MainLayout><CustomerWorkspaceProfilePage /></MainLayout>} />
-                <Route path="/workspaces/:idOrSlug/book" element={<MainLayout><CustomerBookAppointmentPage /></MainLayout>} />
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* Public pages — with Navbar/Footer */}
+                  <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+                  <Route path="/about" element={<Navigate to="/#about" replace />} />
+                  <Route path="/workspaces" element={<MainLayout><CustomerWorkspacesPage /></MainLayout>} />
+                  <Route path="/workspaces/:idOrSlug" element={<MainLayout><CustomerWorkspaceProfilePage /></MainLayout>} />
+                  <Route path="/workspaces/:idOrSlug/book" element={<MainLayout><CustomerBookAppointmentPage /></MainLayout>} />
 
-                {/* Customer Suite Routes */}
-                <Route path="/customer/login" element={<AuthLayout><CustomerLoginPage /></AuthLayout>} />
-                <Route path="/customer/register" element={<AuthLayout><CustomerRegisterPage /></AuthLayout>} />
-                <Route path="/customer/forgot-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
-                <Route path="/customer/reset-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
-                <Route path="/customer/verify-account" element={<AuthLayout><CustomerVerifyAccountPage /></AuthLayout>} />
+                  {/* Customer Suite Routes */}
+                  <Route path="/customer/login" element={<AuthLayout><CustomerLoginPage /></AuthLayout>} />
+                  <Route path="/customer/register" element={<AuthLayout><CustomerRegisterPage /></AuthLayout>} />
+                  <Route path="/customer/forgot-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
+                  <Route path="/customer/reset-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
+                  <Route path="/customer/verify-account" element={<AuthLayout><CustomerVerifyAccountPage /></AuthLayout>} />
 
-                <Route path="/customer" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
-                  <Route index element={<Navigate to="profile" replace />} />
-                  <Route path="profile" element={<CustomerProfilePage />} />
-                  <Route path="security" element={<CustomerSecurityPage />} />
-                  <Route path="change-password" element={<CustomerChangePasswordPage />} />
-                </Route>
+                  <Route path="/customer" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
+                    <Route index element={<Navigate to="profile" replace />} />
+                    <Route path="profile" element={<CustomerProfilePage />} />
+                    <Route path="security" element={<CustomerSecurityPage />} />
+                    <Route path="change-password" element={<CustomerChangePasswordPage />} />
+                  </Route>
 
-                {/* Workspace Member Suite Routes */}
-                <Route path="/member/login" element={<AuthLayout><MemberLoginPage /></AuthLayout>} />
-                <Route path="/member/register" element={<AuthLayout><MemberRegisterPage /></AuthLayout>} />
-                <Route path="/member/forgot-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
-                <Route path="/member/reset-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
-                <Route path="/member/verify-account" element={<AuthLayout><MemberVerifyAccountPage /></AuthLayout>} />
+                  {/* Workspace Member Suite Routes */}
+                  <Route path="/member/login" element={<AuthLayout><MemberLoginPage /></AuthLayout>} />
+                  <Route path="/member/register" element={<AuthLayout><MemberRegisterPage /></AuthLayout>} />
+                  <Route path="/member/forgot-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
+                  <Route path="/member/reset-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
+                  <Route path="/member/verify-account" element={<AuthLayout><MemberVerifyAccountPage /></AuthLayout>} />
 
-                <Route path="/member" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
-                  <Route index element={<Navigate to="profile" replace />} />
-                  <Route path="profile" element={<MemberProfilePage />} />
-                  <Route path="security" element={<MemberSecurityPage />} />
-                  <Route path="change-password" element={<MemberChangePasswordPage />} />
-                </Route>
+                  <Route path="/member" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
+                    <Route index element={<Navigate to="profile" replace />} />
+                    <Route path="profile" element={<MemberProfilePage />} />
+                    <Route path="security" element={<MemberSecurityPage />} />
+                    <Route path="change-password" element={<MemberChangePasswordPage />} />
+                  </Route>
 
-                {/* Workspace Suite Routes */}
-                <Route path="/member/workspace" element={<MainLayout><ProtectedRoute><WorkspaceLayout /></ProtectedRoute></MainLayout>}>
-                  <Route index element={<Navigate to="settings" replace />} />
-                  <Route path="settings" element={<WorkspaceSettingsPage />} />
-                  <Route path="subscriptions" element={<WorkspaceSubscriptionsPage />} />
-                  <Route path="members" element={<WorkspaceMembersPage />} />
-                  <Route path="roles" element={<WorkspaceRolesPage />} />
-                  <Route path="services" element={<WorkspaceServicesPage />} />
-                  <Route path="bookings" element={<WorkspaceBookingsPage />} />
-                  <Route path="schedules" element={<WorkspaceSchedulesPage />} />
-                  <Route path="payments" element={<WorkspacePaymentsPage />} />
-                </Route>
+                  {/* Workspace Suite Routes */}
+                  <Route path="/member/workspace" element={<MainLayout><ProtectedRoute><WorkspaceLayout /></ProtectedRoute></MainLayout>}>
+                    <Route index element={<Navigate to="settings" replace />} />
+                    <Route path="settings" element={<WorkspaceSettingsPage />} />
+                    <Route path="subscriptions" element={<WorkspaceSubscriptionsPage />} />
+                    <Route path="members" element={<WorkspaceMembersPage />} />
+                    <Route path="roles" element={<WorkspaceRolesPage />} />
+                    <Route path="services" element={<WorkspaceServicesPage />} />
+                    <Route path="bookings" element={<WorkspaceBookingsPage />} />
+                    <Route path="schedules" element={<WorkspaceSchedulesPage />} />
+                    <Route path="payments" element={<WorkspacePaymentsPage />} />
+                  </Route>
 
-                {/* General Route Aliases */}
-                <Route path="/login" element={<Navigate to="/customer/login" replace />} />
-                <Route path="/register" element={<Navigate to="/customer/register" replace />} />
-                <Route path="/forgot-password" element={<Navigate to="/customer/forgot-password" replace />} />
-                <Route path="/reset-password" element={<Navigate to="/customer/forgot-password" replace />} />
-                <Route path="/verify-account" element={<Navigate to="/customer/verify-account" replace />} />
-                <Route path="/profile" element={<Navigate to="/customer/profile" replace />} />
-                <Route path="/customer/appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />
-                <Route path="/my-appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />
-                <Route path="/security" element={<Navigate to="/customer/security" replace />} />
-                <Route path="/change-password" element={<Navigate to="/customer/change-password" replace />} />
-                <Route path="/workspace/settings" element={<Navigate to="/member/workspace/settings" replace />} />
-                <Route path="/workspace/subscriptions" element={<Navigate to="/member/workspace/subscriptions" replace />} />
-                <Route path="/workspace/members" element={<Navigate to="/member/workspace/members" replace />} />
-                <Route path="/workspace/roles" element={<Navigate to="/member/workspace/roles" replace />} />
-                <Route path="/workspace/services" element={<Navigate to="/member/workspace/services" replace />} />
-                <Route path="/workspace/bookings" element={<Navigate to="/member/workspace/bookings" replace />} />
-                <Route path="/workspace/schedules" element={<Navigate to="/member/workspace/schedules" replace />} />
-              </Routes>
-            </Suspense>
+                  {/* Explicit Error Pages */}
+                  <Route path="/404" element={<MainLayout><NotFoundPage /></MainLayout>} />
+                  <Route path="/403" element={<MainLayout><ForbiddenPage /></MainLayout>} />
+                  <Route path="/500" element={<MainLayout><ServerErrorPage /></MainLayout>} />
+                  <Route path="/503" element={<MainLayout><ServiceUnavailablePage /></MainLayout>} />
+
+                  {/* General Route Aliases */}
+                  <Route path="/login" element={<Navigate to="/customer/login" replace />} />
+                  <Route path="/register" element={<Navigate to="/customer/register" replace />} />
+                  <Route path="/forgot-password" element={<Navigate to="/customer/forgot-password" replace />} />
+                  <Route path="/reset-password" element={<Navigate to="/customer/forgot-password" replace />} />
+                  <Route path="/verify-account" element={<Navigate to="/customer/verify-account" replace />} />
+                  <Route path="/profile" element={<Navigate to="/customer/profile" replace />} />
+                  <Route path="/customer/appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />
+                  <Route path="/my-appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />
+                  <Route path="/security" element={<Navigate to="/customer/security" replace />} />
+                  <Route path="/change-password" element={<Navigate to="/customer/change-password" replace />} />
+                  <Route path="/workspace/settings" element={<Navigate to="/member/workspace/settings" replace />} />
+                  <Route path="/workspace/subscriptions" element={<Navigate to="/member/workspace/subscriptions" replace />} />
+                  <Route path="/workspace/members" element={<Navigate to="/member/workspace/members" replace />} />
+                  <Route path="/workspace/roles" element={<Navigate to="/member/workspace/roles" replace />} />
+                  <Route path="/workspace/services" element={<Navigate to="/member/workspace/services" replace />} />
+                  <Route path="/workspace/bookings" element={<Navigate to="/member/workspace/bookings" replace />} />
+                  <Route path="/workspace/schedules" element={<Navigate to="/member/workspace/schedules" replace />} />
+
+                  {/* Catch-all Route for 404 Not Found */}
+                  <Route path="*" element={<MainLayout><NotFoundPage /></MainLayout>} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </ToastProvider>
         </AuthProvider>
       </LanguageProvider>
