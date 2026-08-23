@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -90,7 +90,7 @@ function MainLayout({ children }) {
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <IconSprite />
       <ScrollToTop />
       <LanguageProvider>
@@ -180,6 +180,6 @@ export default function App() {
           </ToastProvider>
         </AuthProvider>
       </LanguageProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

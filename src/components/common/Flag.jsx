@@ -37,6 +37,24 @@ export default function Flag({ country = 'us', className = '', style = {} }) {
     );
   }
 
+  if (c === 'sa' || c === 'saudi') {
+    return (
+      <svg
+        viewBox="0 0 640 480"
+        className={className}
+        style={defaultStyle}
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Saudi Arabia Flag"
+      >
+        <path fill="#006c35" d="M0 0h640v480H0z" />
+        <g fill="#ffffff">
+          <path d="M180 325 h280 v8 h-280 z M460 320 l18 9 l-18 9 z M180 310 v38 h8 v-38 z" />
+          <path d="M210 240 Q250 210 320 225 Q390 210 430 240 Q390 270 320 255 Q250 270 210 240 Z" fill="#ffffff" opacity="0.95" />
+        </g>
+      </svg>
+    );
+  }
+
   // USA Flag default
   return (
     <svg
