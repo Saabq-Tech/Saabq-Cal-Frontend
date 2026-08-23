@@ -111,4 +111,42 @@ jobs:
 
           REMOTE
 
+      - name: Ensure nginx SPA routing (try_files)
+        continue-on-error: true
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -p "${SSH_PORT:-22}" \
+            "$SSH_USER@$SSH_HOST" \
+            'bash -seuo pipefail' <<'NGINX_FIX'
+
+          CONF=$(grep -rl "experts.saabq.com" /etc/nginx/ 2>/dev/null | head -1)
+
+          if [ -z "$CONF" ]; then
+            echo "⚠ Could not find nginx config for experts.saabq.com — skipping"
+            exit 0
+          fi
+
+          if grep -q "try_files.*index\.html" "$CONF"; then
+            echo "✓ SPA try_files already configured in $CONF"
+            exit 0
+          fi
+
+          echo "→ Adding try_files to $CONF..."
+          sed -i '/location \/ {/a\        try_files $uri $uri/ /index.html;' "$CONF"
+
+          echo "→ Testing nginx config..."
+          nginx -t
+
+          echo "→ Reloading nginx..."
+          systemctl reload nginx
+
+          echo "✓ nginx SPA routing configured"
+
+          NGINX_FIX
 
