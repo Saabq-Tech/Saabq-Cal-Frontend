@@ -69,27 +69,15 @@ jobs:
             'bash -seuo pipefail' <<REMOTE
 
           export VPS_PATH="$VPS_PATH"
-          mkdir -p "$VPS_PATH"
           cd "$VPS_PATH"
-
-          REMOTE_URL="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-
-          if [ ! -d ".git" ]; then
-            echo "→ Initializing git repository in $VPS_PATH..."
-            git init
-            git remote add origin "$REMOTE_URL"
-          else
-            git remote set-url origin "$REMOTE_URL"
-          fi
-
-          echo "→ Fetching latest main..."
-          git fetch --prune origin main
-          git checkout -B main origin/main 2>/dev/null || true
-          git reset --hard origin/main
-          git clean -fd
 
           echo "→ Current commit:"
           git rev-parse HEAD
+
+          echo "→ Fetching latest main..."
+          git fetch --prune origin main
+          git reset --hard origin/main
+          git clean -fd
 
           echo "→ Installing Frontend dependencies..."
           npm ci
