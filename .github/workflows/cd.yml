@@ -68,9 +68,9 @@ jobs:
             "$SSH_USER@$SSH_HOST" \
             'bash -seuo pipefail' <<REMOTE
 
-          export VPS_PATH="$VPS_PATH"
-          mkdir -p "\$VPS_PATH"
-          cd "\$VPS_PATH"
+          echo "→ Target deployment path: $VPS_PATH"
+          mkdir -p "$VPS_PATH"
+          cd "$VPS_PATH"
 
           if [ ! -d ".git" ]; then
             echo "→ Initializing git repository..."
@@ -99,18 +99,16 @@ jobs:
           npm run build
 
           echo "→ Cleaning web root directory and publishing production build..."
-          TMP_BUILD_DIR=$(mktemp -d)
-          cp -r dist/* "$TMP_BUILD_DIR/"
+          TMP_BUILD_DIR=\$(mktemp -d)
+          cp -r dist/* "\$TMP_BUILD_DIR/"
 
           rm -rf "$VPS_PATH"/*
 
-          cp -r "$TMP_BUILD_DIR"/* "$VPS_PATH"/
-          rm -rf "$TMP_BUILD_DIR"
+          cp -r "\$TMP_BUILD_DIR"/* "$VPS_PATH"/
+          rm -rf "\$TMP_BUILD_DIR"
 
           echo "✓ Deployment complete"
 
-
-
-
           REMOTE
+
 
