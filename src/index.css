@@ -38,16 +38,16 @@
   --hover: #28767c;
   --hover-color: #28767c;
 
-  /* Layout */
-  --background: #ffffff;
-  --surface: #f8f9fb;
-  --surface-alt: #f1f3f7;
-  --border: #c1d6d8;
-  --border-light: #f2f2f2;
-  --heading: #0a1821;
-  --text: #38454a;
-  --text-secondary: #69727d;
-  --muted: #8a929b;
+  /* Layout (Enhanced Light Mode) */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #b2bdc0;
+  --border-light: #f1f5f9;
+  --heading: #0f172a;
+  --text: #334155;
+  --text-secondary: #64748b;
+  --muted: #94a3b8;
 
   /* Status */
   --success: #16a34a;
@@ -55,11 +55,12 @@
   --error: #dc2626;
   --info: #0ea5e9;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  /* Shadows (Layered Light Mode Elevation) */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.07), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.09), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 
   /* Radius */
   --radius-sm: 6px;

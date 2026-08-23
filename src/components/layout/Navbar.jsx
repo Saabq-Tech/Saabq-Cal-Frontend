@@ -6,6 +6,7 @@ import AppLogo from '../ui/AppLogo';
 import UserAvatar from '../ui/UserAvatar';
 import client, { endpoints } from '../../api/client';
 import Icon from '../common/Icon';
+import Flag from '../common/Flag';
 
 
 export default function Navbar() {
@@ -421,7 +422,7 @@ export default function Navbar() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
+                gap: 8,
                 padding: '6px 14px',
                 borderRadius: 'var(--radius-full)',
                 border: '1px solid var(--border)',
@@ -433,9 +434,7 @@ export default function Navbar() {
                 transition: 'all 0.2s ease',
               }}
             >
-              <span style={{ fontSize: '1.1rem', lineHeight: 1 }} aria-hidden="true">
-                {lang === 'ar' ? '🇺🇸' : '🇪🇬'}
-              </span>
+              <Flag country={lang === 'ar' ? 'us' : 'eg'} style={{ width: 18, height: 13 }} />
               <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
             </button>
 
@@ -719,7 +718,7 @@ export default function Navbar() {
                   onClick={toggleLanguage}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
                 >
-                  <span style={{ fontSize: '1.15rem' }}>{lang === 'ar' ? '🇺🇸' : '🇪🇬'}</span>
+                  <Flag country={lang === 'ar' ? 'us' : 'eg'} style={{ width: 18, height: 13 }} />
                   <span>{lang === 'ar' ? 'English' : 'التحويل للعربية'}</span>
                 </button>
 

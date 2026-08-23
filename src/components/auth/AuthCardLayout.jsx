@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import AppLogo from '../ui/AppLogo';
 import { getPublicAssetUrl } from '../../utils/url';
+import Flag from '../common/Flag';
 
 export default function AuthCardLayout({ children, illustration = '/images/login.svg', illustrationAlt = 'Saabq Cal Scheduling', quote, quoteAuthor }) {
   const { lang, toggleLanguage, t } = useLanguage();
@@ -16,7 +17,7 @@ export default function AuthCardLayout({ children, illustration = '/images/login
             aria-label={lang === 'ar' ? 'Switch to English' : 'التحويل للعربية'}
             style={{ width: 'auto', padding: '6px 14px', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 'var(--radius-full, 9999px)', cursor: 'pointer' }}
           >
-            <span style={{ fontSize: '1.1rem', lineHeight: 1 }} aria-hidden="true">{lang === 'ar' ? '🇺🇸' : '🇪🇬'}</span>
+            <Flag country={lang === 'ar' ? 'us' : 'eg'} style={{ width: 18, height: 13 }} />
             <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
           </button>
         </div>
