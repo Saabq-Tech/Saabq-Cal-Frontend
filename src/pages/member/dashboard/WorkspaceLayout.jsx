@@ -141,32 +141,21 @@ export default function WorkspaceLayout() {
         <GoogleNotConnectedBanner />
 
         {!isWorkspaceActive && (
-          <div
-            style={{
-              padding: '16px 20px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '2px solid rgba(239, 68, 68, 0.35)',
-              borderRadius: 'var(--radius-lg, 16px)',
-              marginBottom: 20,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 14,
-              boxShadow: '0 4px 14px rgba(239, 68, 68, 0.12)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Icon name="alert-triangle" size={24} style={{ color: '#ef4444' }} />
-              <div>
-                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#ef4444' }}>
+          <div className="warning-banner warning-banner-inactive">
+            <div className="warning-banner-content">
+              <div className="warning-banner-icon icon-red">
+                <Icon name="alert-triangle" size={24} />
+              </div>
+              <div className="warning-banner-text">
+                <h4>
                   {t('workspaceInactiveTitle') || 'مساحة العمل غير مفعّلة!'}
                 </h4>
-                <p style={{ margin: '4px 0 0', fontSize: '0.86rem', color: 'var(--heading)', opacity: 0.9 }}>
+                <p>
                   {t('workspaceInactiveDesc') || 'مساحة العمل الخاصة بك بانتظار موافقة الإدارة أو غير مفعّلة حالياً. تم تقييد الوصول لصفحات وبيانات مساحة العمل.'}
                 </p>
               </div>
             </div>
-            <Link to="/member/profile" className="btn btn-secondary btn-sm" style={{ fontWeight: 700, gap: 6 }}>
+            <Link to="/member/profile" className="btn btn-secondary btn-sm warning-banner-action">
               <Icon name="user" size={14} />
               {t('profileInfo') || 'الملف الشخصي'}
             </Link>
@@ -174,27 +163,18 @@ export default function WorkspaceLayout() {
         )}
 
         {isWorkspaceActive && !hasActiveSub && (
-          <div
-            style={{
-              padding: '12px 18px',
-              background: 'rgba(239, 68, 68, 0.08)',
-              border: '1px solid rgba(239, 68, 68, 0.25)',
-              borderRadius: 'var(--radius-md, 12px)',
-              marginBottom: 20,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Icon name="alert-triangle" size={20} style={{ color: 'var(--error, #ef4444)' }} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--heading)' }}>
-                {t('noActiveSubscriptionBanner') || 'تنبيه: مساحة العمل لا تمتلك اشتراكاً نشطاً. تم تقييد الميزات المتقدمة لحين تفعيل اشتراكك.'}
-              </span>
+          <div className="warning-banner warning-banner-inactive">
+            <div className="warning-banner-content">
+              <div className="warning-banner-icon icon-red">
+                <Icon name="alert-triangle" size={20} />
+              </div>
+              <div className="warning-banner-text">
+                <p style={{ margin: 0, fontWeight: 600 }}>
+                  {t('noActiveSubscriptionBanner') || 'تنبيه: مساحة العمل لا تمتلك اشتراكاً نشطاً. تم تقييد الميزات المتقدمة لحين تفعيل اشتراكك.'}
+                </p>
+              </div>
             </div>
-            <Link to="/member/workspace/subscriptions" className="btn btn-danger btn-sm">
+            <Link to="/member/workspace/subscriptions" className="btn btn-danger btn-sm warning-banner-action">
               {t('subscribeNow') || 'اشترك الآن'}
             </Link>
           </div>

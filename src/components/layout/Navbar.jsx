@@ -491,7 +491,7 @@ export default function Navbar() {
                 <Icon name="message-square" className="bell-icon" />
 
                 {unreadChatCount > 0 && (
-                  <span className="navbar-notif-badge" style={{ background: '#ef4444' }}>
+                  <span className="navbar-notif-badge">
                     {unreadChatCount > 99 ? '99+' : unreadChatCount}
                   </span>
                 )}

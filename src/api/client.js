@@ -137,7 +137,6 @@ export const endpoints = {
   workspaceBookingCancel: (id) => `/workspace-members/workspace/bookings/${id}/cancel`,
   workspaceBookingReschedule: (id) => `/workspace-members/workspace/bookings/${id}/reschedule`,
   workspaceSubscription: '/workspace-members/workspace/subscription',
-  workspaceSubscriptionRenew: '/workspace-members/workspace/subscription/renew',
   workspaceSubscriptionCancel: '/workspace-members/workspace/subscription/cancel',
   workspaceSubscriptionPause: '/workspace-members/workspace/subscription/pause',
   workspaceSubscriptionResume: '/workspace-members/workspace/subscription/resume',

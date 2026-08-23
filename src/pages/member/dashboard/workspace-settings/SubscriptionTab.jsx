@@ -5,18 +5,16 @@ import { useToast } from '../../../../context/ToastContext';
 import Icon from '../../../../components/common/Icon';
 import client, { endpoints } from '../../../../api/client';
 
-export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoading = false, plansError = null, canEdit, onUpgrade, onRenew, onCancel, onPause, onResume }) {
+export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoading = false, plansError = null, canEdit, onUpgrade, onCancel, onPause, onResume }) {
   const { t } = useLanguage();
   const toast = useToast();
 
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [isRenewModalOpen, setIsRenewModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelLoading, setCancelLoading] = useState(false);
   const [selectedUpgradePlanId, setSelectedUpgradePlanId] = useState(null);
   const [billingCycle, setBillingCycle] = useState('monthly');
-  const [renewDurationMonths, setRenewDurationMonths] = useState(12);
 
   // Payment Methods state
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -60,13 +58,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
     setProofNotes('');
   };
 
-  const handleConfirmRenew = () => {
-    if (onRenew) onRenew(renewDurationMonths, proofFile, proofNotes);
-    setIsRenewModalOpen(false);
-    setProofFile(null);
-    setProofFilePreview('');
-    setProofNotes('');
-  };
+
 
   const handleConfirmCancel = async () => {
     if (onCancel) {
@@ -227,17 +219,10 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
         {canEdit && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {statusStr !== 'pending' && (
-              <>
-                {statusStr !== 'active' && statusStr !== 'trialing' && (
-                  <button className="btn btn-secondary btn-sm" onClick={() => setIsRenewModalOpen(true)}>
-                    {t('renewSubscription') || 'تجديد الاشتراك'}
-                  </button>
-                )}
-                <button className="btn btn-primary btn-sm" onClick={() => setIsUpgradeModalOpen(true)} style={{ gap: 6 }}>
-                  <Icon name="rocket" size={14} />
-                  {t('upgradePlan') || 'ترقية الباقة'}
-                </button>
-              </>
+              <button className="btn btn-primary btn-sm" onClick={() => setIsUpgradeModalOpen(true)} style={{ gap: 6 }}>
+                <Icon name="rocket" size={14} />
+                {t('upgradePlan') || 'ترقية الباقة'}
+              </button>
             )}
             <button className="btn btn-secondary btn-sm" onClick={() => setIsProofModalOpen(true)} style={{ gap: 6 }}>
               <Icon name="upload-cloud" size={14} />
@@ -365,54 +350,112 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                 {t('noPlansAvailable') || 'لا توجد باقات متوفرة حالياً'}
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16, marginBottom: 20 }}>
+              <div className="plan-cards-grid">
                 {plans.map((p) => {
                   const selected = selectedUpgradePlanId === p.id;
                   const rawPrice = billingCycle === 'yearly' ? (p.yearly_price || p.price_yearly || p.price * 10) : (p.monthly_price || p.price_monthly || p.price);
                   const unitStr = billingCycle === 'yearly' ? (t('sarPerYear') || 'ر.س / سنوياً') : (t('sarPerMonth') || 'ر.س / شهرياً');
 
+                  const formatCapStr = (cap) => {
+                    if (!cap) return '';
+                    if (typeof cap === 'string') return cap;
+                    if (typeof cap === 'object') {
+                      if (cap.name) return typeof cap.name === 'object' ? cap.name.ar || cap.name.en || '' : cap.name;
+                      if (cap.title) return typeof cap.title === 'object' ? cap.title.ar || cap.title.en || '' : cap.title;
+                      return cap.code || cap.key || '';
+                    }
+                    return String(cap);
+                  };
+
                   return (
                     <div
                       key={p.id}
                       onClick={() => setSelectedUpgradePlanId(p.id)}
-                      style={{
-                        padding: 20,
-                        borderRadius: 16,
-                        border: selected ? '2px solid var(--primary)' : '1px solid var(--border-light)',
-                        background: selected ? 'linear-gradient(180deg, rgba(17, 100, 106, 0.06) 0%, rgba(17, 100, 106, 0.02) 100%)' : 'var(--surface-alt)',
-                        boxShadow: selected ? '0 8px 24px rgba(17, 100, 106, 0.15)' : 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.25s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        position: 'relative',
-                      }}
+                      className={`plan-card-option ${selected ? 'selected' : ''}`}
                     >
                       {selected && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: -10,
-                            right: 16,
-                            background: 'var(--primary)',
-                            color: '#ffffff',
-                            fontSize: '0.72rem',
-                            fontWeight: 800,
-                            padding: '2px 10px',
-                            borderRadius: 10,
-                          }}
-                        >
+                        <div className="plan-card-selected-badge">
                           {t('selected') || 'محدد'}
                         </div>
                       )}
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                        <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--heading)' }}>{p.name || p.title}</span>
-                        <input type="radio" checked={selected} readOnly style={{ accentColor: 'var(--primary)', width: 18, height: 18 }} />
+                      <div className="plan-card-header">
+                        <span className="plan-card-title">{p.name || p.title}</span>
+                        <input type="radio" checked={selected} readOnly className="plan-card-radio" />
                       </div>
 
-                      <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)', marginBottom: 14 }}>
-                        {rawPrice} <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unitStr}</span>
+                      <div className="plan-card-price">
+                        {rawPrice} <span className="plan-card-price-unit">{unitStr}</span>
+                      </div>
+
+                      {p.description && (
+                        <p className="plan-card-desc">
+                          {formatCapStr(p.description)}
+                        </p>
+                      )}
+
+                      <div className="plan-card-features-wrapper">
+                        <div className="plan-card-features-title">
+                          {t('planCapabilitiesLabel') || 'المميزات والإمكانيات:'}
+                        </div>
+                        <ul className="plan-card-features-list">
+                          <li>
+                            <Icon name="check" size={14} className="feature-check-icon" />
+                            <span>
+                              {p.max_members || p.max_team_members
+                                ? `${t('members') || 'أعضاء الفريق'}: ${p.max_members || p.max_team_members}`
+                                : (t('unlimitedTeamMembers') || 'أعضاء فريق غير محدودين')}
+                            </span>
+                          </li>
+                          <li>
+                            <Icon name="check" size={14} className="feature-check-icon" />
+                            <span>
+                              {p.max_services || p.max_schedules
+                                ? `${t('services') || 'الخدمات والجداول'}: ${p.max_services || p.max_schedules}`
+                                : (t('unlimitedServices') || 'خدمات وجداول غير محدودة')}
+                            </span>
+                          </li>
+                          <li>
+                            <Icon name="check" size={14} className="feature-check-icon" />
+                            <span>
+                              {p.max_appointments || p.max_bookings
+                                ? `${t('appointments') || 'الحجوزات'}: ${p.max_appointments || p.max_bookings}`
+                                : (t('unlimitedAppointments') || 'حجوزات عملاء غير محدودة')}
+                            </span>
+                          </li>
+                          {p.max_customers && (
+                            <li>
+                              <Icon name="check" size={14} className="feature-check-icon" />
+                              <span>
+                                {`${t('customers') || 'العملاء'}: ${p.max_customers}`}
+                              </span>
+                            </li>
+                          )}
+
+                          {/* Capabilities Array */}
+                          {Array.isArray(p.capabilities) && p.capabilities.map((cap, idx) => {
+                            const nameStr = formatCapStr(cap);
+                            if (!nameStr) return null;
+                            return (
+                              <li key={cap.id || cap.code || idx}>
+                                <Icon name="check" size={14} className="feature-check-icon" />
+                                <span>{nameStr}</span>
+                              </li>
+                            );
+                          })}
+
+                          {/* Features Array */}
+                          {Array.isArray(p.features) && p.features.map((feat, idx) => {
+                            const featStr = formatCapStr(feat);
+                            if (!featStr) return null;
+                            return (
+                              <li key={idx}>
+                                <Icon name="check" size={14} className="feature-check-icon" />
+                                <span>{featStr}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
                     </div>
                   );
@@ -479,63 +522,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
         document.body
       )}
 
-      {/* Renew Modal */}
-      {isRenewModalOpen && createPortal(
-        <div className="modal-backdrop">
-          <div className="modal-card modal-sm animate-fade-in-up">
-            <div className="modal-header">
-              <h3 className="modal-title">{t('renewModalTitle') || 'تجديد اشتراك مساحة العمل'}</h3>
-              <button type="button" className="modal-close-btn" onClick={() => setIsRenewModalOpen(false)}>
-                <Icon name="x" size={16} />
-              </button>
-            </div>
 
-            <div className="modal-body">
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label className="form-label">{t('renewDurationLabel') || 'مدة التجديد المطلوبة'}</label>
-                <select className="form-select" value={renewDurationMonths} onChange={(e) => setRenewDurationMonths(Number(e.target.value))}>
-                  <option value={1}>{t('oneMonth') || 'شهر واحد (1 Month)'}</option>
-                  <option value={3}>{t('threeMonths') || '3 أشهر (3 Months)'}</option>
-                  <option value={6}>{t('sixMonths') || '6 أشهر (6 Months)'}</option>
-                  <option value={12}>{t('twelveMonths') || 'سنة كاملة (12 Months - أفضل قيمة)'}</option>
-                </select>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 12 }}>
-                <label className="form-label">{t('receiptFile') || 'ملف الإيصال (صورة / PDF)'}</label>
-                <input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  className="form-input"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setProofFile(file);
-                  }}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">{t('notes') || 'ملاحظات التحويل'}</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder={t('transferNotesPlaceholder') || 'رقم الحساب أو المرجع...'}
-                  value={proofNotes}
-                  onChange={(e) => setProofNotes(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setIsRenewModalOpen(false)}>{t('cancel')}</button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={handleConfirmRenew}>
-                {t('confirmRenewBtn') || 'تأكيد التجديد وإرسال الإيصال'}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
 
       {/* Standalone Proof Resend Modal */}
       {isProofModalOpen && createPortal(

@@ -138,59 +138,53 @@ function NotificationItem({ notif, index, onMarkRead, onDelete, t }) {
             </span>
           )}
         </div>
-      </div>
 
-      <div className="notification-item-actions" onClick={(e) => e.stopPropagation()}>
-        {notif.data?.action_url && (
-          <a
-            href={notif.data.action_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="notif-action-btn action-link-btn"
-            title={notif.data?.action_text || t('view')}
-            style={{
-              width: 'auto',
-              padding: '0 12px',
-              color: 'var(--primary)',
-              background: 'rgba(17,100,106,0.1)',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontSize: '0.75rem',
-              fontWeight: '600'
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isUnread) onMarkRead(notif.id);
-            }}
-          >
-            <Icon name="link" size={13} style={{ marginInlineEnd: 4 }} />
-            {notif.data?.action_text || t('view')}
-          </a>
-        )}
-        {isUnread && (
+        <div className="notification-item-actions" onClick={(e) => e.stopPropagation()}>
+          {notif.data?.action_url && (
+            <a
+              href={notif.data.action_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="notif-action-btn primary-action"
+              title={notif.data?.action_text || t('view')}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isUnread) onMarkRead(notif.id);
+              }}
+            >
+              <Icon name="link" size={13} />
+              <span>{notif.data?.action_text || t('view')}</span>
+            </a>
+          )}
+          {isUnread && (
+            <button
+              type="button"
+              className="notif-action-btn read-action"
+              title={t('markAsRead')}
+              aria-label={t('markAsRead')}
+              onClick={(e) => {
+                e.stopPropagation();
+                onMarkRead(notif.id);
+              }}
+            >
+              <Icon name="check" size={14} />
+              <span>{t('markAsRead') || 'تحديد كمقروء'}</span>
+            </button>
+          )}
           <button
-            className="notif-action-btn"
-            title={t('markAsRead')}
-            aria-label={t('markAsRead')}
+            type="button"
+            className="notif-action-btn delete-action"
+            title={t('delete')}
+            aria-label={t('delete')}
             onClick={(e) => {
               e.stopPropagation();
-              onMarkRead(notif.id);
+              onDelete(notif.id);
             }}
           >
-            <Icon name="check" size={14} />
+            <Icon name="trash" size={13} />
+            <span>{t('delete') || 'حذف'}</span>
           </button>
-        )}
-        <button
-          className="notif-action-btn delete"
-          title={t('delete')}
-          aria-label={t('delete')}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(notif.id);
-          }}
-        >
-          <Icon name="trash" size={13} />
-        </button>
+        </div>
       </div>
     </div>
   );

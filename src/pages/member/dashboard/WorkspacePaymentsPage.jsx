@@ -43,10 +43,16 @@ export default function WorkspacePaymentsPage() {
       if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const res = await client.get(endpoints.workspacePayments, { params });
-      setPayments(res.data?.data || []);
-      setMeta(res.data?.meta || null);
+      const rawData = res.data?.data;
+      const list = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.data) ? rawData.data : []);
+      const paginationMeta = Array.isArray(rawData) ? (res.data?.meta || null) : (rawData?.meta || res.data?.meta || null);
+
+      setPayments(list);
+      setMeta(paginationMeta);
     } catch (err) {
       toast.error(err.response?.data?.message || (isRTL ? 'فشل تحميل سجل المدفوعات' : 'Failed to load payments'));
+      setPayments([]);
+      setMeta(null);
     } finally {
       setLoading(false);
     }
@@ -179,7 +185,7 @@ export default function WorkspacePaymentsPage() {
           <SkeletonRect height={54} />
           <SkeletonRect height={54} />
         </div>
-      ) : payments.length === 0 ? (
+      ) : !Array.isArray(payments) || payments.length === 0 ? (
         <div style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--surface-alt)', borderRadius: 12, border: '1px dashed var(--border-light)' }}>
           <Icon name="credit-card" size={32} style={{ color: 'var(--muted)', margin: '0 auto 12px' }} />
           <h4 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700, color: 'var(--heading)' }}>
@@ -201,7 +207,7 @@ export default function WorkspacePaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {payments.map((p) => {
+              {Array.isArray(payments) && payments.map((p) => {
                 const badge = getStatusBadge(p.status);
                 const isSub = p.payable_type?.includes('Subscription');
                 return (

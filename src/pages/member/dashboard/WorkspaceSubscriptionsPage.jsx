@@ -74,29 +74,6 @@ export default function WorkspaceSubscriptionsPage() {
     }
   };
 
-  const handleRenew = async (durationMonths, proofFile, proofNotes) => {
-    try {
-      const formData = new FormData();
-      formData.append('duration_months', durationMonths);
-      if (proofFile instanceof File) {
-        formData.append('proof_file', proofFile);
-      } else if (typeof proofFile === 'string' && proofFile.trim()) {
-        formData.append('proof_file', proofFile.trim());
-      }
-      if (proofNotes && proofNotes.trim()) {
-        formData.append('proof_notes', proofNotes.trim());
-      }
-
-      const res = await client.post(endpoints.workspaceSubscriptionRenew, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      toast.success(res.data?.message || t('renewSuccess') || 'تم تجديد الاشتراك بنجاح');
-      loadData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || t('renewFailed') || 'فشلت عملية تجديد الاشتراك');
-    }
-  };
-
   const handleCancel = async (reason) => {
     try {
       const res = await client.put(endpoints.workspaceSubscriptionCancel, { reason });
@@ -144,7 +121,6 @@ export default function WorkspaceSubscriptionsPage() {
           plansError={plansError}
           canEdit={canEdit}
           onUpgrade={handleUpgrade}
-          onRenew={handleRenew}
           onCancel={handleCancel}
           onPause={handlePause}
           onResume={handleResume}

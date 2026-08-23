@@ -1636,6 +1636,325 @@ html.dark .auth-panel-right {
   padding: 40px 0 80px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE WARNING & NOTIFICATION BANNERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.warning-banner {
+  margin-top: 28px;
+  margin-bottom: 24px;
+  padding: 18px 22px;
+  border-radius: var(--radius-lg, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.warning-banner-inactive {
+  background: rgba(239, 68, 68, 0.08);
+  border: 2px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.12);
+}
+
+html.dark .warning-banner-inactive {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.warning-banner-amber {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+html.dark .warning-banner-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.12) 100%);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.warning-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.warning-banner-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.warning-banner-icon.icon-red {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.warning-banner-icon.icon-amber {
+  background: rgba(245, 158, 11, 0.18);
+  color: #D97706;
+}
+
+.warning-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.warning-banner-text h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #ef4444;
+}
+
+.warning-banner-amber .warning-banner-text h4 {
+  color: var(--heading, #1f2937);
+}
+
+.warning-banner-text p {
+  margin: 4px 0 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--heading);
+  opacity: 0.9;
+}
+
+.warning-banner-amber .warning-banner-text p {
+  color: var(--text-muted, #4b5563);
+}
+
+.warning-banner-action {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .warning-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    padding: 18px 16px !important;
+    margin-top: 24px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .warning-banner-content {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .warning-banner-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    margin-top: 2px !important;
+  }
+
+  .warning-banner-text h4 {
+    font-size: 0.95rem !important;
+  }
+
+  .warning-banner-text p {
+    font-size: 0.85rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .warning-banner-action {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    margin-top: 4px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE PLAN SELECTION CARDS & FEATURES LIST
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.plan-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.plan-card-option {
+  padding: 20px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border-light);
+  background: var(--surface-alt);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.plan-card-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.plan-card-option.selected {
+  border: 2px solid var(--primary);
+  background: linear-gradient(180deg, rgba(33, 134, 141, 0.08) 0%, rgba(33, 134, 141, 0.02) 100%);
+  box-shadow: 0 8px 24px rgba(33, 134, 141, 0.15);
+}
+
+html.dark .plan-card-option.selected {
+  background: linear-gradient(180deg, rgba(33, 134, 141, 0.2) 0%, rgba(33, 134, 141, 0.05) 100%);
+  border-color: var(--primary);
+}
+
+.plan-card-selected-badge {
+  position: absolute;
+  top: -11px;
+  inset-inline-end: 18px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(33, 134, 141, 0.3);
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.plan-card-title {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--heading);
+}
+
+.plan-card-radio {
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.plan-card-price {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.plan-card-price-unit {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.plan-card-desc {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0 0 14px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.plan-card-features-wrapper {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.plan-card-features-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.plan-card-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-card-features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--heading);
+  line-height: 1.4;
+}
+
+.feature-check-icon {
+  color: var(--primary);
+  background: var(--primary-subtle);
+  border-radius: 50%;
+  padding: 2px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+html.dark .feature-check-icon {
+  background: rgba(33, 134, 141, 0.25);
+  color: var(--primary-light, #44f2fe);
+}
+
+@media (max-width: 768px) {
+  .plan-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .plan-card-option {
+    padding: 18px 16px !important;
+  }
+
+  .plan-card-title {
+    font-size: 1.02rem !important;
+  }
+
+  .plan-card-price {
+    font-size: 1.3rem !important;
+  }
+
+  .plan-card-features-list li {
+    font-size: 0.82rem !important;
+  }
+}
+
 .profile-header {
   display: flex;
   align-items: center;
@@ -3162,14 +3481,16 @@ html.dark .footer {
   width: 42px;
   height: 42px;
   border-radius: var(--radius-full);
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.04);
   background: var(--primary-subtle);
   color: var(--primary);
   cursor: pointer;
   flex-shrink: 0;
+  overflow: visible;
   transition:
     background 0.22s ease,
     color 0.22s ease,
+    border-color 0.22s ease,
     box-shadow 0.22s ease,
     transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   outline: none;
@@ -3177,9 +3498,10 @@ html.dark .footer {
 
 .navbar-bell:hover {
   background: var(--primary);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(17, 100, 106, 0.35);
-  transform: translateY(-1px) scale(1.06);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px rgba(17, 100, 106, 0.32);
+  transform: translateY(-1px) scale(1.05);
 }
 
 .navbar-bell:active {
@@ -3216,7 +3538,7 @@ html.dark .footer {
 /* Pulse ring — expands outward when unread */
 .bell-ring-pulse {
   position: absolute;
-  inset: 0;
+  inset: -2px;
   border-radius: var(--radius-full);
   border: 2px solid var(--primary);
   opacity: 0;
@@ -3225,33 +3547,36 @@ html.dark .footer {
 }
 
 @keyframes bell-pulse {
-  0%   { transform: scale(0.95); opacity: 0.5; }
-  70%  { transform: scale(1.22); opacity: 0; }
-  100% { transform: scale(1.22); opacity: 0; }
+  0%   { transform: scale(0.92); opacity: 0.6; }
+  70%  { transform: scale(1.25); opacity: 0; }
+  100% { transform: scale(1.25); opacity: 0; }
 }
 
-/* Badge */
+/* Badge — Modern sleek pill floating on top-end corner */
 .navbar-notif-badge {
   position: absolute;
-  top: 2px;
-  inset-inline-end: 2px;
-  min-width: 18px;
-  height: 18px;
+  top: -3px;
+  inset-inline-end: -3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
   padding: 0 5px;
-  border-radius: 99px;
-  background: linear-gradient(135deg, #ff4444 0%, #cc1111 100%);
-  color: #fff;
-  font-size: 0.64rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  font-size: 0.68rem;
   font-weight: 800;
-  line-height: 18px;
+  line-height: 1;
   text-align: center;
-  border: 2px solid var(--surface);
+  border: 2px solid var(--bg-card, #ffffff);
   box-sizing: border-box;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
   animation: badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  letter-spacing: -0.02em;
-  z-index: 5;
+  letter-spacing: -0.01em;
+  z-index: 10;
 }
 
 
@@ -3422,7 +3747,7 @@ html.dark .footer {
   }
 
   .main-content {
-    padding-top: 16px;
+    padding-top: calc(var(--navbar-height) + 32px) !important;
     padding-bottom: 40px;
   }
 
@@ -3710,42 +4035,84 @@ html.dark .footer {
 
 .notification-item-actions {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  flex-shrink: 0;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .notif-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: var(--radius-md, 8px);
-  border: 1px solid var(--border-light);
-  background: var(--surface);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  padding: 0;
+  border: 1px solid transparent;
   font-family: var(--font-sans);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  line-height: 1.2;
 }
 
-.notif-action-btn:hover {
+/* Primary Action Button (Teal filled pill) */
+.notif-action-btn.primary-action {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(33, 134, 141, 0.25);
+}
+
+.notif-action-btn.primary-action:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 134, 141, 0.35);
+}
+
+/* Mark as Read Button (Soft Teal background pill with border) */
+.notif-action-btn.read-action {
+  background: rgba(33, 134, 141, 0.1);
+  color: var(--primary);
+  border-color: rgba(33, 134, 141, 0.25);
+}
+
+html.dark .notif-action-btn.read-action {
+  background: rgba(33, 134, 141, 0.2);
+  color: var(--primary-light, #44f2fe);
+  border-color: rgba(33, 134, 141, 0.4);
+}
+
+.notif-action-btn.read-action:hover {
+  background: rgba(33, 134, 141, 0.2);
   border-color: var(--primary);
   color: var(--primary);
-  background: var(--primary-subtle);
-  transform: scale(1.1);
-  box-shadow: 0 3px 10px rgba(17, 100, 106, 0.18);
+  transform: translateY(-1px);
 }
 
-.notif-action-btn.delete:hover {
-  border-color: var(--error, #ef4444);
-  color: var(--error, #ef4444);
+/* Delete Button (Soft Red background pill with border) */
+.notif-action-btn.delete-action {
   background: rgba(239, 68, 68, 0.08);
-  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+html.dark .notif-action-btn.delete-action {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.notif-action-btn.delete-action:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #dc2626;
+  color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.15);
 }
 
 /* Empty state */
