@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useToast } from '../../../context/ToastContext';
 import client, { endpoints } from '../../../api/client';
@@ -149,6 +149,19 @@ export default function CustomerAppointmentsTab() {
     }
   };
 
+  const getMeetingUrl = (appt) => {
+    if (!appt) return null;
+    return (
+      appt.google_meet_link ||
+      appt.metadata?.google_meet_link ||
+      appt.metadata?.meet_link ||
+      appt.metadata?.meeting_url ||
+      appt.meeting_link ||
+      appt.google_meet_url ||
+      (typeof appt.location === 'string' && appt.location.includes('http') ? appt.location : null)
+    );
+  };
+
   const handleUploadPaymentProof = async (e) => {
     e.preventDefault();
     if (!proofModalAppt) return;
@@ -208,7 +221,7 @@ export default function CustomerAppointmentsTab() {
       case 'completed':
         return { label: isRTL ? 'مكتمل' : 'Completed', className: 'member' };
       case 'cancelled':
-        return { label: isRTL ? 'ملغى' : 'Cancelled', className: 'unverified', style: { background: '#fef2f2', color: '#ef4444', borderColor: '#fca5a5' } };
+        return { label: isRTL ? 'ملغى' : 'Cancelled', className: 'unverified', style: { background: '#ef4444', color: '#ffffff', borderColor: '#dc2626', fontWeight: 700 } };
       default:
         return { label: status, className: 'member' };
     }
@@ -297,19 +310,6 @@ export default function CustomerAppointmentsTab() {
     return null;
   };
 
-  const getMeetingUrl = (b) => {
-    if (!b) return null;
-    if (b.google_meet_url) return b.google_meet_url;
-    if (b.meeting_link) return b.meeting_link;
-    if (b.location && (b.location.startsWith('http://') || b.location.startsWith('https://'))) return b.location;
-    if (b.metadata) {
-      if (b.metadata.google_meet_url) return b.metadata.google_meet_url;
-      if (b.metadata.meeting_link) return b.metadata.meeting_link;
-      if (b.metadata.location && (b.metadata.location.startsWith('http://') || b.metadata.location.startsWith('https://'))) return b.metadata.location;
-      if (b.metadata.join_url) return b.metadata.join_url;
-    }
-    return null;
-  };
 
   const handleCopySummary = (b) => {
     if (!b) return;
@@ -439,6 +439,7 @@ export default function CustomerAppointmentsTab() {
             {appointments.map((appt) => {
               const badge = getStatusBadge(appt.status);
               const isStarting = startingChatId === appt.id;
+              const wsSlugOrId = appt.workspace?.slug || appt.workspace?.id || appt.workspace_id;
 
               return (
                 <div
@@ -458,18 +459,42 @@ export default function CustomerAppointmentsTab() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                     {/* Workspace & Service Title */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <UserAvatar
-                        name={appt.workspace?.name || appt.snapshot?.service_name || 'WS'}
-                        avatarUrl={appt.workspace?.logo_url}
-                        size={46}
-                      />
+                      {wsSlugOrId ? (
+                        <Link
+                          to={`/workspaces/${wsSlugOrId}`}
+                          title={appt.workspace?.name || (isRTL ? 'عرض مساحة العمل' : 'View Workspace')}
+                          style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                        >
+                          <UserAvatar
+                            name={appt.workspace?.name || appt.snapshot?.service_name || 'WS'}
+                            avatarUrl={appt.workspace?.logo_url}
+                            size={46}
+                          />
+                        </Link>
+                      ) : (
+                        <UserAvatar
+                          name={appt.workspace?.name || appt.snapshot?.service_name || 'WS'}
+                          avatarUrl={appt.workspace?.logo_url}
+                          size={46}
+                        />
+                      )}
                       <div>
                         <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: 'var(--heading)' }}>
                           {appt.snapshot?.service_name || appt.service?.name || (isRTL ? 'خدمة حجز' : 'Booking Service')}
                         </h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                           <Icon name="briefcase" size={12} />
-                          <span style={{ fontWeight: 600 }}>{appt.workspace?.name || (isRTL ? 'مساحة العمل' : 'Workspace')}</span>
+                          {wsSlugOrId ? (
+                            <Link
+                              to={`/workspaces/${wsSlugOrId}`}
+                              style={{ fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}
+                              className="hover-underline"
+                            >
+                              {appt.workspace?.name || (isRTL ? 'مساحة العمل' : 'Workspace')}
+                            </Link>
+                          ) : (
+                            <span style={{ fontWeight: 600 }}>{appt.workspace?.name || (isRTL ? 'مساحة العمل' : 'Workspace')}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -535,9 +560,8 @@ export default function CustomerAppointmentsTab() {
                     {(appt.status === 'pending' || appt.status === 'confirmed') && (
                       <button
                         type="button"
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-danger-subtle btn-sm"
                         onClick={() => { setCancelModalAppt(appt); setCancelReason(''); }}
-                        style={{ color: '#ef4444', padding: '7px 12px', borderRadius: 8 }}
                       >
                         {isRTL ? 'إلغاء الموعد' : 'Cancel'}
                       </button>
@@ -726,42 +750,71 @@ export default function CustomerAppointmentsTab() {
                 )}
 
                 {/* Workspace Details Card */}
-                <div style={{ padding: 16, borderRadius: 14, border: '1px solid var(--border-light)', background: 'var(--surface-alt)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <Icon name="briefcase" size={16} style={{ color: 'var(--primary)' }} />
-                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--heading)' }}>
-                      {isRTL ? 'معلومات مساحة العمل' : 'Workspace Info'}
-                    </h4>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <UserAvatar
-                      name={selectedAppointment.workspace?.name || 'WS'}
-                      avatarUrl={selectedAppointment.workspace?.logo_url}
-                      size={52}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <h5 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--heading)' }}>
-                        {selectedAppointment.workspace?.name || '—'}
-                      </h5>
-                      {selectedAppointment.workspace?.description && (
-                        <p style={{ margin: '3px 0 6px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                          {selectedAppointment.workspace.description}
-                        </p>
-                      )}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                        {selectedAppointment.workspace?.phone && (
-                          <span>📞 {selectedAppointment.workspace.phone}</span>
+                {(() => {
+                  const modalWsSlugOrId = selectedAppointment.workspace?.slug || selectedAppointment.workspace?.id || selectedAppointment.workspace_id;
+                  return (
+                    <div style={{ padding: 16, borderRadius: 14, border: '1px solid var(--border-light)', background: 'var(--surface-alt)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <Icon name="briefcase" size={16} style={{ color: 'var(--primary)' }} />
+                        <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--heading)' }}>
+                          {isRTL ? 'معلومات مساحة العمل' : 'Workspace Info'}
+                        </h4>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                        {modalWsSlugOrId ? (
+                          <Link
+                            to={`/workspaces/${modalWsSlugOrId}`}
+                            title={selectedAppointment.workspace?.name}
+                            style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center' }}
+                          >
+                            <UserAvatar
+                              name={selectedAppointment.workspace?.name || 'WS'}
+                              avatarUrl={selectedAppointment.workspace?.logo_url}
+                              size={52}
+                            />
+                          </Link>
+                        ) : (
+                          <UserAvatar
+                            name={selectedAppointment.workspace?.name || 'WS'}
+                            avatarUrl={selectedAppointment.workspace?.logo_url}
+                            size={52}
+                          />
                         )}
-                        {selectedAppointment.workspace?.email && (
-                          <span>✉️ {selectedAppointment.workspace.email}</span>
-                        )}
-                        {selectedAppointment.workspace?.address && (
-                          <span>📍 {selectedAppointment.workspace.address}</span>
-                        )}
+                        <div style={{ flex: 1 }}>
+                          <h5 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--heading)' }}>
+                            {modalWsSlugOrId ? (
+                              <Link
+                                to={`/workspaces/${modalWsSlugOrId}`}
+                                style={{ color: 'var(--primary)', textDecoration: 'none' }}
+                                className="hover-underline"
+                              >
+                                {selectedAppointment.workspace?.name || '—'}
+                              </Link>
+                            ) : (
+                              selectedAppointment.workspace?.name || '—'
+                            )}
+                          </h5>
+                          {selectedAppointment.workspace?.description && (
+                            <p style={{ margin: '3px 0 6px', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                              {selectedAppointment.workspace.description}
+                            </p>
+                          )}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                            {selectedAppointment.workspace?.phone && (
+                              <span>📞 {selectedAppointment.workspace.phone}</span>
+                            )}
+                            {selectedAppointment.workspace?.email && (
+                              <span>✉️ {selectedAppointment.workspace.email}</span>
+                            )}
+                            {selectedAppointment.workspace?.address && (
+                              <span>📍 {selectedAppointment.workspace.address}</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* Grid: Service Details & Date / Time */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
@@ -963,11 +1016,12 @@ export default function CustomerAppointmentsTab() {
 
                 {/* Cancellation Reason if cancelled */}
                 {selectedAppointment.cancellation_reason && (
-                  <div style={{ padding: 14, borderRadius: 12, background: '#fef2f2', border: '1px solid #fca5a5' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#dc2626', display: 'block', marginBottom: 3 }}>
-                      🚫 {isRTL ? 'سبب إلغاء الموعد:' : 'Cancellation Reason:'}
+                  <div className="cancellation-reason-box">
+                    <span className="cancellation-reason-title">
+                      <Icon name="x-circle" size={15} style={{ marginInlineEnd: 6 }} />
+                      {isRTL ? 'سبب إلغاء الموعد:' : 'Cancellation Reason:'}
                     </span>
-                    <span style={{ fontSize: '0.88rem', color: '#991b1b' }}>{selectedAppointment.cancellation_reason}</span>
+                    <span className="cancellation-reason-text">{selectedAppointment.cancellation_reason}</span>
                   </div>
                 )}
 
@@ -1028,9 +1082,8 @@ export default function CustomerAppointmentsTab() {
                     {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
                       <button
                         type="button"
-                        className="btn btn-ghost"
+                        className="btn btn-danger-subtle"
                         onClick={() => { setCancelModalAppt(selectedAppointment); setCancelReason(''); }}
-                        style={{ color: '#ef4444' }}
                       >
                         {isRTL ? 'إلغاء الموعد' : 'Cancel Appointment'}
                       </button>

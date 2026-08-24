@@ -96,12 +96,26 @@ export default function BookingsCalendar({ onSelectBooking }) {
     return String(val);
   };
 
+  const getStatusColor = (status, isMine = true) => {
+    switch (status) {
+      case 'cancelled':
+        return '#ef4444'; // Red
+      case 'pending':
+        return '#f59e0b'; // Warning Yellow/Orange
+      case 'completed':
+        return 'var(--primary)'; // Main Color
+      case 'confirmed':
+      default:
+        return isMine ? 'var(--primary)' : '#8b5cf6';
+    }
+  };
+
   const renderStatusBadge = (status) => {
     switch (status) {
-      case 'confirmed': return <span style={{ color: '#059669', fontSize: '0.75rem', fontWeight: 600 }}>{t('statusConfirmed') || 'Confirmed'}</span>;
-      case 'pending': return <span style={{ color: '#b45309', fontSize: '0.75rem', fontWeight: 600 }}>{t('statusPending') || 'Pending'}</span>;
-      case 'cancelled': return <span style={{ color: '#dc2626', fontSize: '0.75rem', fontWeight: 600 }}>{t('statusCancelled') || 'Cancelled'}</span>;
-      case 'completed': return <span style={{ color: '#059669', fontSize: '0.75rem', fontWeight: 600 }}>{t('statusCompleted') || 'Completed'}</span>;
+      case 'confirmed': return <span style={{ background: 'var(--primary)', color: '#ffffff', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>{t('statusConfirmed') || 'Confirmed'}</span>;
+      case 'pending': return <span style={{ background: '#f59e0b', color: '#ffffff', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>{t('statusPending') || 'Pending'}</span>;
+      case 'cancelled': return <span style={{ background: '#ef4444', color: '#ffffff', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>{t('statusCancelled') || 'Cancelled'}</span>;
+      case 'completed': return <span style={{ background: 'var(--primary)', color: '#ffffff', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>{t('statusCompleted') || 'Completed'}</span>;
       default: return <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600 }}>{status}</span>;
     }
   };
@@ -154,8 +168,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {dayBookings.slice(0, 3).map(b => {
               const isMine = b.workspace_member_id === user.id;
-              // Own bookings show in primary color. Others show in a distinct color.
-              const bgColor = isMine ? 'var(--primary)' : '#8b5cf6';
+              const bgColor = getStatusColor(b.status, isMine);
               const time = new Date(b.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               
               return (
@@ -163,9 +176,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
                   key={b.id} 
                   className="calendar-event"
                   style={{ background: bgColor }}
-                  title={b.customer_name_snapshot || b.customer?.name}
+                  title={`${time} - ${b.customer_name_snapshot || b.customer?.name}`}
                 >
-                  {time} - {b.customer_name_snapshot || b.customer?.name}
+                  <span>{time}</span>
+                  <span className="calendar-event-name"> - {b.customer_name_snapshot || b.customer?.name}</span>
                 </div>
               );
             })}
@@ -233,21 +247,21 @@ export default function BookingsCalendar({ onSelectBooking }) {
                     <div 
                       key={b.id} 
                       className="booking-list-item"
-                      style={{ borderRight: isMine ? '4px solid var(--primary)' : '4px solid #8b5cf6' }}
+                      style={{ borderInlineStart: `4px solid ${getStatusColor(b.status, isMine)}` }}
                       onClick={() => onSelectBooking && onSelectBooking(b.id)}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                        <UserAvatar name={customerName} avatarUrl={b.customer?.avatar_url} size={44} />
-                        <div>
-                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--heading)' }}>{customerName}</div>
-                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 2 }}>{serviceTitle}</div>
+                      <div className="booking-list-item-main">
+                        <UserAvatar name={customerName} avatarUrl={b.customer?.avatar_url} size={40} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="booking-list-customer-name">{customerName}</div>
+                          <div className="booking-list-service-title">{serviceTitle}</div>
                         </div>
                       </div>
-                      <div style={{ textAlign: 'end' }}>
-                        <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--heading)' }}>
+                      <div className="booking-list-item-meta">
+                        <div className="booking-list-time">
                           {new Date(b.starts_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        <div style={{ marginTop: 4 }}>
+                        <div style={{ marginTop: 2 }}>
                           {renderStatusBadge(b.status)}
                         </div>
                       </div>
@@ -261,15 +275,23 @@ export default function BookingsCalendar({ onSelectBooking }) {
       )}
       
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 20, marginTop: 24, fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+      <div style={{ display: 'flex', gap: 20, marginTop: 24, fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 14, height: 14, borderRadius: 3, background: 'var(--primary)' }}></span>
-          {isRTL ? 'مواعيدي' : 'My Appointments'}
+          {isRTL ? 'مكتمل / رئيسي' : 'Completed / Main'}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: '#f59e0b' }}></span>
+          {isRTL ? 'قيد الانتظار' : 'Pending'}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 14, height: 14, borderRadius: 3, background: '#ef4444' }}></span>
+          {isRTL ? 'ملغى' : 'Cancelled'}
         </div>
         {canSeeOthers && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 14, height: 14, borderRadius: 3, background: '#8b5cf6' }}></span>
-            {isRTL ? 'مواعيد أخرى' : 'Other Appointments'}
+            {isRTL ? 'عضو آخر' : 'Other Member'}
           </div>
         )}
       </div>
@@ -292,14 +314,14 @@ export default function BookingsCalendar({ onSelectBooking }) {
         }
         .calendar-grid {
           display: grid;
-          grid-template-columns: repeat(7, minmax(130px, 1fr));
-          min-width: 900px; /* Forces scrolling on smaller screens */
+          grid-template-columns: repeat(7, 1fr);
+          width: 100%;
         }
         .calendar-header-cell {
           text-align: center;
-          padding: 12px 0;
+          padding: 10px 4px;
           font-weight: 700;
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           color: var(--text-secondary);
           border-right: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
@@ -309,10 +331,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
           border-right: none;
         }
         .calendar-day-cell {
-          min-height: 120px;
+          min-height: 85px;
           border-right: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
-          padding: 8px 10px;
+          padding: 6px 6px;
           cursor: pointer;
           transition: all 0.2s ease;
           background: var(--surface);
@@ -338,7 +360,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
           box-shadow: inset 0 0 0 2px var(--primary);
         }
         .calendar-day-blank {
-          min-height: 120px;
+          min-height: 85px;
           border-right: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
           background: rgba(0,0,0,0.02);
@@ -347,9 +369,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
           border-right: none;
         }
         .calendar-event {
-          font-size: 0.75rem;
+          font-size: 0.72rem;
           color: #fff;
-          padding: 5px 8px;
+          padding: 4px 6px;
           border-radius: 6px;
           white-space: nowrap;
           overflow: hidden;
@@ -363,17 +385,92 @@ export default function BookingsCalendar({ onSelectBooking }) {
           transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        @media (max-width: 768px) {
+          .calendar-header-cell {
+            padding: 6px 2px !important;
+            font-size: 0.72rem !important;
+          }
+          .calendar-day-cell,
+          .calendar-day-blank {
+            min-height: 44px !important;
+            padding: 3px 2px !important;
+          }
+          .calendar-event {
+            font-size: 0.62rem !important;
+            padding: 2px 3px !important;
+            margin-bottom: 2px !important;
+            line-height: 1.1 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+          .calendar-event-name {
+            display: none !important;
+          }
+          .booking-list-item {
+            flex-wrap: wrap !important;
+            gap: 10px !important;
+            padding: 12px !important;
+          }
+          .booking-list-item-main {
+            flex: 1 1 100% !important;
+            margin-bottom: 2px !important;
+          }
+          .booking-list-item-meta {
+            flex: 1 1 100% !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            border-top: 1px dashed var(--border-light) !important;
+            padding-top: 8px !important;
+          }
+        }
         .booking-list-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
           background: var(--surface);
-          padding: 16px;
+          padding: 14px 16px;
           border-radius: var(--radius-sm);
           border: 1px solid var(--border-light);
           cursor: pointer;
           transition: all 0.2s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .booking-list-item-main {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
+        }
+        .booking-list-customer-name {
+          font-weight: 800;
+          font-size: 0.95rem;
+          color: var(--heading);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .booking-list-service-title {
+          font-size: 0.84rem;
+          color: var(--text-secondary);
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .booking-list-item-meta {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 4px;
+        }
+        .booking-list-time {
+          font-weight: 800;
+          font-size: 0.9rem;
+          color: var(--heading);
+          white-space: nowrap;
         }
         .booking-list-item:hover {
           transform: translateY(-2px);

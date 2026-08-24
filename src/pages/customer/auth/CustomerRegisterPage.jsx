@@ -21,6 +21,7 @@ export default function CustomerRegisterPage() {
     phone: '',
   });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     document.title = t('pageTitleRegister');
@@ -115,20 +116,47 @@ export default function CustomerRegisterPage() {
 
         <div className="form-group">
           <label className="form-label" htmlFor="reg-password">{t('password')}</label>
-          <input
-            id="reg-password"
-            type="password"
-            name="password"
-            className={`form-input${errors.password ? ' is-invalid' : ''}`}
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            aria-required="true"
-            minLength={8}
-            aria-describedby={errors.password ? 'reg-password-error' : undefined}
-            autoComplete="new-password"
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              id="reg-password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              className={`form-input${errors.password ? ' is-invalid' : ''}`}
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              aria-required="true"
+              minLength={8}
+              aria-describedby={errors.password ? 'reg-password-error' : undefined}
+              autoComplete="new-password"
+              style={{ paddingInlineEnd: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? t('hidePassword') || 'إخفاء كلمة المرور' : t('showPassword') || 'إظهار كلمة المرور'}
+              title={showPassword ? t('hidePassword') || 'إخفاء كلمة المرور' : t('showPassword') || 'إظهار كلمة المرور'}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                insetInlineEnd: 10,
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary, #64748b)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 6,
+                borderRadius: 6,
+                transition: 'color 0.2s',
+              }}
+            >
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
+            </button>
+          </div>
           {errors.password && <span id="reg-password-error" className="form-error" role="alert">{errors.password[0]}</span>}
         </div>
 

@@ -45,6 +45,8 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
   const latestPayment = subscriptionInfo?.latest_payment || subscriptionInfo?.payments?.[0];
   const rejectionReason = latestPayment?.rejection_reason || subscriptionInfo?.rejection_reason;
   const isPaymentRejected = latestPayment?.status === 'failed' || Boolean(rejectionReason);
+  const isCancelledOrPending = statusStr === 'cancelled' || statusStr === 'canceled' || statusStr === 'pending';
+  const canUploadProof = Boolean(subscriptionInfo) && (isCancelledOrPending || isPaymentRejected);
 
   const handleConfirmUpgrade = () => {
     if (!selectedUpgradePlanId) {
@@ -224,10 +226,12 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
                 {t('upgradePlan') || 'ترقية الباقة'}
               </button>
             )}
-            <button className="btn btn-secondary btn-sm" onClick={() => setIsProofModalOpen(true)} style={{ gap: 6 }}>
-              <Icon name="upload-cloud" size={14} />
-              {t('uploadProofBtn') || 'إرفاق إيصال الدفع'}
-            </button>
+            {canUploadProof && (
+              <button className="btn btn-secondary btn-sm" onClick={() => setIsProofModalOpen(true)} style={{ gap: 6 }}>
+                <Icon name="upload-cloud" size={14} />
+                {t('uploadProofBtn') || 'إرفاق إيصال الدفع'}
+              </button>
+            )}
           </div>
         )}
       </div>

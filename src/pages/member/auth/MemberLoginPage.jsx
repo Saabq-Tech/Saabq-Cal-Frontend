@@ -26,6 +26,7 @@ export default function MemberLoginPage() {
   });
   const [errors, setErrors] = useState({});
   const [show2FA, setShow2FA] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Workspace Setup Modal State (Step 2 for Google Member Auth)
   const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
@@ -261,19 +262,46 @@ export default function MemberLoginPage() {
               {t('forgotPassword')}
             </Link>
           </div>
-          <input
-            id="login-password"
-            type="password"
-            name="password"
-            className={`form-input${errors.password ? ' is-invalid' : ''}`}
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            aria-required="true"
-            aria-describedby={errors.password ? 'login-password-error' : undefined}
-            autoComplete="current-password"
-          />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              className={`form-input${errors.password ? ' is-invalid' : ''}`}
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              aria-required="true"
+              aria-describedby={errors.password ? 'login-password-error' : undefined}
+              autoComplete="current-password"
+              style={{ paddingInlineEnd: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? t('hidePassword') || 'إخفاء كلمة المرور' : t('showPassword') || 'إظهار كلمة المرور'}
+              title={showPassword ? t('hidePassword') || 'إخفاء كلمة المرور' : t('showPassword') || 'إظهار كلمة المرور'}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                insetInlineEnd: 10,
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary, #64748b)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 6,
+                borderRadius: 6,
+                transition: 'color 0.2s',
+              }}
+            >
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
+            </button>
+          </div>
           {errors.password && <span id="login-password-error" className="form-error" role="alert">{errors.password[0]}</span>}
         </div>
 

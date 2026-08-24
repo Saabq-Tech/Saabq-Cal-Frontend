@@ -27,7 +27,7 @@ export default function BookingsTab({ bookings, meta, page = 1, onPageChange, on
       case 'pending':
         return <span className="profile-badge unverified" style={{ padding: '4px 12px', fontSize: '0.8rem', background: 'rgba(234, 179, 8, 0.12)', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="custom-56f3550d" size={12} />{t('statusPending') || 'قيد الانتظار'}</span>;
       case 'cancelled':
-        return <span className="profile-badge unverified" style={{ padding: '4px 12px', fontSize: '0.8rem', background: 'rgba(239, 68, 68, 0.12)', color: '#dc2626', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="x" size={12} />{t('statusCancelled') || 'ملغى'}</span>;
+        return <span className="profile-badge unverified" style={{ padding: '4px 12px', fontSize: '0.8rem', background: '#ef4444', color: '#ffffff', border: '1px solid #dc2626', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="x" size={12} />{t('statusCancelled') || 'ملغى'}</span>;
       case 'completed':
         return <span className="profile-badge verified" style={{ padding: '4px 12px', fontSize: '0.8rem', background: 'rgba(16, 185, 129, 0.12)', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="check" size={12} />{t('statusCompleted') || 'مكتمل'}</span>;
       case 'rescheduled':

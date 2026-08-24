@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useMemo } from 'react';
 import Icon from '../components/common/Icon';
 
 
@@ -21,20 +21,30 @@ export function ToastProvider({ children }) {
 
   const addToast = useCallback(
     (message, type = 'info', duration = 4000) => {
-      const id = ++idCounter;
-      setToasts((prev) => [...prev, { id, message, type, exiting: false }]);
-      timersRef.current[id] = setTimeout(() => removeToast(id), duration);
-      return id;
+      if (!message) return null;
+      let newId = null;
+      setToasts((prev) => {
+        if (prev.some((t) => t.message === message && !t.exiting)) {
+          return prev;
+        }
+        newId = ++idCounter;
+        timersRef.current[newId] = setTimeout(() => removeToast(newId), duration);
+        return [...prev, { id: newId, message, type, exiting: false }];
+      });
+      return newId;
     },
     [removeToast]
   );
 
-  const toast = {
-    success: (msg) => addToast(msg, 'success'),
-    error: (msg) => addToast(msg, 'error'),
-    warning: (msg) => addToast(msg, 'warning'),
-    info: (msg) => addToast(msg, 'info'),
-  };
+  const toast = useMemo(
+    () => ({
+      success: (msg) => addToast(msg, 'success'),
+      error: (msg) => addToast(msg, 'error'),
+      warning: (msg) => addToast(msg, 'warning'),
+      info: (msg) => addToast(msg, 'info'),
+    }),
+    [addToast]
+  );
 
   return (
     <ToastContext.Provider value={toast}>

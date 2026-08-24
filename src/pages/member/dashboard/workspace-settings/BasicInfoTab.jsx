@@ -88,7 +88,7 @@ export default function BasicInfoTab({ basicForm, setBasicForm, workspaceTypes =
       </div>
       
       {/* Row 1: Name, Slug (with Badge), Status */}
-      <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 16, marginBottom: 16 }}>
         <div className="form-group">
           <label className="form-label">{t('workspaceName') || 'اسم مساحة العمل'} *</label>
           <input
@@ -148,7 +148,7 @@ export default function BasicInfoTab({ basicForm, setBasicForm, workspaceTypes =
       </div>
 
       {/* Row 3: Email, Phone, Website */}
-      <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 16, marginBottom: 16 }}>
         <div className="form-group">
           <label className="form-label">{t('emailAddressLabel') || t('emailAddress') || 'البريد الإلكتروني'}</label>
           <input
@@ -186,7 +186,7 @@ export default function BasicInfoTab({ basicForm, setBasicForm, workspaceTypes =
       </div>
 
       {/* Row 4: Type, Country, State, City */}
-      <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
+      <div className="form-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 16, marginBottom: 24 }}>
         <div className="form-group">
           <label className="form-label">{t('industryCategoryLabel') || 'النوع / المجال'}</label>
           <SearchableSelect

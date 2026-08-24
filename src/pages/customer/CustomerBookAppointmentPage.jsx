@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useParams, useSearchParams, useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import client, { endpoints } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -99,13 +99,19 @@ export default function CustomerBookAppointmentPage() {
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  const hasToastedRef = useRef(false);
+
   // Require authentication before accessing booking page
   useEffect(() => {
-    if (!user) {
+    if (!user && !hasToastedRef.current) {
+      hasToastedRef.current = true;
       toast.warning(t('signin_required_booking'));
-      navigate('/customer/login', { replace: true, state: { from: location } });
     }
-  }, [user, navigate, isRTL, location, toast, t]);
+  }, [user, toast, t]);
+
+  if (!user) {
+    return <Navigate to="/customer/login" state={{ from: location }} replace />;
+  }
 
   // Fetch workspace details & services
   useEffect(() => {
@@ -402,7 +408,7 @@ export default function CustomerBookAppointmentPage() {
     <main
       className="main-content"
       style={{
-        background: 'var(--background-alt, #f8fafc)',
+        background: 'var(--background)',
         minHeight: 'calc(100vh - 70px)',
         paddingBottom: 60,
         '--primary': primaryColor,
@@ -454,15 +460,15 @@ export default function CustomerBookAppointmentPage() {
       </div>
 
       <div className="container" style={{ marginTop: -30 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 28 }}>
+        <div className="booking-page-grid">
           
           {/* Main Booking Form Panel */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <div className="card" style={{ padding: 28, borderRadius: 'var(--radius-lg)' }}>
+          <div className="booking-card-wrapper">
+            <div className="card booking-card-main">
               <form onSubmit={handleSubmitBooking}>
                 
                 {/* Visual Step Progress Bar Header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, borderBottom: '1px solid var(--border)', paddingBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginBottom: 24, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
                   {[
                     { step: 1, title: isRTL ? 'الخدمة' : 'Service' },
                     { step: 2, title: isRTL ? 'اليوم والوقت' : 'Date & Time' },
@@ -479,15 +485,15 @@ export default function CustomerBookAppointmentPage() {
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 10,
+                          gap: 6,
                           cursor: isPassed ? 'pointer' : 'default',
                           opacity: isActive || isPassed ? 1 : 0.45,
                         }}
                       >
                         <div
                           style={{
-                            width: 32,
-                            height: 32,
+                            width: 28,
+                            height: 28,
                             borderRadius: '50%',
                             background: isActive || isPassed ? primaryColor : 'var(--muted)',
                             color: '#ffffff',
@@ -495,16 +501,17 @@ export default function CustomerBookAppointmentPage() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontWeight: 700,
-                            fontSize: '0.9rem',
-                            boxShadow: isActive ? `0 0 0 4px ${primaryColor}22` : 'none',
+                            fontSize: '0.82rem',
+                            flexShrink: 0,
+                            boxShadow: isActive ? `0 0 0 3px ${primaryColor}22` : 'none',
                           }}
                         >
                           {isPassed ? '✓' : s.step}
                         </div>
-                        <span style={{ fontSize: '0.92rem', fontWeight: isActive ? 700 : 600, color: isActive ? primaryColor : 'var(--text)' }}>
+                        <span style={{ fontSize: '0.84rem', fontWeight: isActive ? 700 : 600, color: isActive ? primaryColor : 'var(--text)' }}>
                           {s.title}
                         </span>
-                        {i < 2 && <div style={{ width: 30, height: 2, background: isPassed ? primaryColor : 'var(--border)', marginInlineStart: 6 }} />}
+                        {i < 2 && <div style={{ width: 20, height: 2, background: isPassed ? primaryColor : 'var(--border)', marginInlineStart: 4 }} />}
                       </div>
                     );
                   })}
@@ -527,7 +534,7 @@ export default function CustomerBookAppointmentPage() {
                     {services.length === 0 ? (
                       <p style={{ color: 'var(--muted)' }}>{t('noServicesFound')}</p>
                     ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 14 }}>
                         {services.map((srv) => {
                           const active = selectedService?.id === srv.id;
                           return (
@@ -535,7 +542,7 @@ export default function CustomerBookAppointmentPage() {
                               key={srv.id}
                               onClick={() => setSelectedService(srv)}
                               style={{
-                                padding: 18,
+                                padding: 14,
                                 borderRadius: 'var(--radius-md)',
                                 border: active ? `2px solid ${primaryColor}` : '1px solid var(--border)',
                                 background: active ? 'var(--primary-subtle, rgba(232, 141, 34, 0.06))' : 'var(--surface)',
@@ -544,9 +551,9 @@ export default function CustomerBookAppointmentPage() {
                                 boxShadow: active ? '0 4px 14px rgba(0,0,0,0.06)' : 'none',
                               }}
                             >
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                                <strong style={{ fontSize: '1rem', color: 'var(--text)' }}>{getTranslatableText(srv.name)}</strong>
-                                <span style={{ fontSize: '0.95rem', fontWeight: 800, color: primaryColor }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap', marginBottom: 8 }}>
+                                <strong style={{ fontSize: '0.96rem', color: 'var(--text)', flex: 1, minWidth: 120 }}>{getTranslatableText(srv.name)}</strong>
+                                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: primaryColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
                                   {formatCurrency(srv.price, srv.currency_detail || srv.currency, isRTL, t('freeService'))}
                                 </span>
                               </div>
@@ -577,29 +584,29 @@ export default function CustomerBookAppointmentPage() {
                       2. {isRTL ? 'اختر اليوم والوقت المتاح' : 'Select Date & Available Time Slot'}
                     </h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: 20 }}>
                       
                       {/* Interactive Calendar Widget */}
-                      <div style={{ background: 'var(--surface-alt)', padding: 20, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <div style={{ background: 'var(--surface-alt)', padding: '12px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, padding: '0 4px' }}>
                           <button type="button" onClick={handlePrevMonth} className="btn btn-ghost btn-sm" style={{ padding: '4px 8px' }}>
                             {isRTL ? '▶' : '◀'}
                           </button>
-                          <strong style={{ fontSize: '1rem', color: 'var(--text)' }}>{currentMonthLabel}</strong>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text)' }}>{currentMonthLabel}</strong>
                           <button type="button" onClick={handleNextMonth} className="btn btn-ghost btn-sm" style={{ padding: '4px 8px' }}>
                             {isRTL ? '◀' : '▶'}
                           </button>
                         </div>
 
                         {/* Calendar Header Weekdays */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, textAlign: 'center', marginBottom: 8, fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                          {(isRTL ? weekDaysAr : weekDaysEn).map((wd, i) => (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, textAlign: 'center', marginBottom: 8, fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                          {(isRTL ? WEEK_DAYS_AR : WEEK_DAYS_EN).map((wd, i) => (
                             <div key={i}>{wd}</div>
                           ))}
                         </div>
 
                         {/* Calendar Days Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
                           {calendarDays.map((item, idx) => {
                             if (!item) return <div key={idx} />;
                             const isSelected = selectedDate === item.dateStr;
@@ -610,7 +617,11 @@ export default function CustomerBookAppointmentPage() {
                                 disabled={!item.isAvailable}
                                 onClick={() => setSelectedDate(item.dateStr)}
                                 style={{
-                                  height: 38,
+                                  height: 34,
+                                  padding: 0,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
                                   border: isSelected ? `2px solid ${primaryColor}` : '1px solid var(--border)',
                                   borderRadius: 'var(--radius-sm)',
                                   background: isSelected
@@ -624,7 +635,7 @@ export default function CustomerBookAppointmentPage() {
                                     ? 'var(--text)'
                                     : 'var(--muted)',
                                   fontWeight: isSelected ? 700 : 500,
-                                  fontSize: '0.85rem',
+                                  fontSize: '0.82rem',
                                   cursor: item.isAvailable ? 'pointer' : 'not-allowed',
                                   opacity: item.isAvailable ? 1 : 0.45,
                                   transition: 'all 0.15s ease',
@@ -896,16 +907,16 @@ export default function CustomerBookAppointmentPage() {
                 )}
 
                 {/* Step Action Controls (Previous, Next & Submit) */}
-                <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                <div className="booking-action-controls">
                   <div>
                     {currentStep > 1 && (
                       <button type="button" onClick={handlePrevStep} className="btn btn-secondary btn-md">
-                        {isRTL ? '← الخطوة السابقة' : '← Previous Step'}
+                        {isRTL ? '← السابقة' : '← Previous'}
                       </button>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: 10 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                     <Link to={`/workspaces/${workspace.slug}`} className="btn btn-ghost btn-md">
                       {t('cancel')}
                     </Link>
@@ -919,16 +930,16 @@ export default function CustomerBookAppointmentPage() {
                           (currentStep === 1 && !selectedService) ||
                           (currentStep === 2 && (!selectedDate || !selectedSlot))
                         }
-                        style={{ minWidth: 140, justifyContent: 'center' }}
+                        style={{ minWidth: 110, justifyContent: 'center' }}
                       >
-                        <span>{isRTL ? 'التالي →' : 'Next Step →'}</span>
+                        <span>{isRTL ? 'التالي →' : 'Next →'}</span>
                       </button>
                     ) : (
                       <button
                         type="submit"
                         className="btn btn-primary btn-md"
                         disabled={submitting || !selectedSlot}
-                        style={{ minWidth: 170, justifyContent: 'center' }}
+                        style={{ minWidth: 140, justifyContent: 'center' }}
                       >
                         {submitting ? (
                           <>
@@ -936,7 +947,7 @@ export default function CustomerBookAppointmentPage() {
                             <span>{isRTL ? 'جاري الحجز...' : 'Booking...'}</span>
                           </>
                         ) : (
-                          <span>{t('bookAppointment') || (isRTL ? 'تأكيد وحجز الموعد' : 'Confirm Booking')}</span>
+                          <span>{t('bookAppointment') || (isRTL ? 'تأكيد الحجز' : 'Confirm Booking')}</span>
                         )}
                       </button>
                     )}

@@ -152,6 +152,43 @@ body {
               color var(--duration-normal) ease;
 }
 
+/* Accessibility Skip Link (Completely hidden unless focused) */
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  height: auto;
+  padding: 8px 18px;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background: var(--primary);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.84rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 999999;
+  text-decoration: none;
+}
+
+
 h1, h2, h3, h4, h5, h6 {
   color: var(--heading);
   font-weight: 700;
@@ -623,9 +660,136 @@ html.dark .navbar {
     height: 36px;
   }
 
-  .main-content {
-    padding-top: calc(var(--navbar-height) + 48px);
+  @media (max-width: 480px) {
+    .navbar-actions {
+      gap: 4px;
+    }
+
+    .language-toggle-btn {
+      padding: 5px 8px !important;
+      font-size: 0.78rem !important;
+    }
+
+    .theme-toggle,
+    .navbar-bell {
+      width: 32px !important;
+      height: 32px !important;
+    }
   }
+
+  .main-content {
+    padding-top: calc(var(--navbar-height) + 12px);
+  }
+}
+
+/* Auth Header Navigation — Mobile & Small Screens Only */
+.auth-home-link {
+  display: none !important;
+}
+
+.auth-lang-toggle {
+  margin-inline-start: auto;
+}
+
+@media (max-width: 992px) {
+  .auth-home-link {
+    display: inline-flex !important;
+  }
+
+  .auth-lang-toggle {
+    margin-inline-start: 0;
+  }
+}
+
+/* Responsive Booking Page Grid Shell */
+.booking-page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.booking-card-wrapper {
+  min-width: 0;
+}
+
+.booking-card-main {
+  padding: 28px;
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 992px) {
+  .booking-page-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
+  .booking-card-main {
+    padding: 16px 14px !important;
+  }
+}
+
+.booking-action-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .booking-action-controls {
+    gap: 8px;
+  }
+}
+
+/* ── Clean Number Inputs (Hide WebKit/Firefox Native Spin Buttons) ── */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ── Dark Mode Form Inputs Focus & Browser Autofill Fix ── */
+html.dark .form-input,
+html.dark .form-control,
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: var(--surface, #141f36) !important;
+  color: var(--heading, #f8fafc) !important;
+  border-color: var(--border, #24334f);
+}
+
+html.dark .form-input:focus,
+html.dark .form-control:focus,
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  background-color: var(--surface, #141f36) !important;
+  color: var(--heading, #ffffff) !important;
+  border-color: var(--primary, #0a9099) !important;
+  box-shadow: 0 0 0 3px rgba(10, 144, 153, 0.25) !important;
+  outline: none;
+}
+
+/* Override Chrome / Edge / Safari Autofill White Background in Dark Mode */
+html.dark input:-webkit-autofill,
+html.dark input:-webkit-autofill:hover,
+html.dark input:-webkit-autofill:focus,
+html.dark input:-webkit-autofill:active,
+html.dark select:-webkit-autofill,
+html.dark textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #141f36 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  transition: background-color 50000s ease-in-out 0s !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1021,25 +1185,56 @@ html.dark .navbar {
 }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--text-secondary);
-  border: none;
+  background: var(--surface-alt, rgba(255, 255, 255, 0.08));
+  color: var(--text-secondary, #94a3b8);
+  border: 1px solid var(--border, #24334f);
   padding: 8px 16px;
+  border-radius: var(--radius-md, 8px);
+  transition: all 0.2s ease;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: var(--surface);
-  color: var(--primary);
+  background: var(--surface, #141f36);
+  color: var(--primary, #0a9099);
+  border-color: var(--primary, #0a9099);
   box-shadow: none;
 }
 
 .btn-danger {
-  background-color: var(--error);
-  color: #fff;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc2626 !important;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
+.btn-danger-subtle {
+  background-color: rgba(239, 68, 68, 0.14) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-radius: var(--radius-md, 8px);
+  transition: all 0.2s ease;
+}
+
+.btn-danger-subtle:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #dc2626 !important;
+}
+
+html.dark .btn-danger-subtle {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+html.dark .btn-danger-subtle:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.32) !important;
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  color: #ffffff !important;
 }
 
 .btn-sm {
@@ -1553,6 +1748,9 @@ html.dark .auth-panel-right {
 .modal-card {
   width: 100%;
   max-width: 500px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  margin: auto;
   background: var(--background, #ffffff);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg, 16px);
@@ -1560,6 +1758,16 @@ html.dark .auth-panel-right {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   color: var(--heading);
   position: relative;
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+  .modal-card {
+    padding: 18px 16px;
+    max-height: calc(100vh - 24px);
+  }
 }
 
 .modal-header {
@@ -2267,15 +2475,15 @@ html.dark .feature-check-icon {
   }
 
   .profile-page {
-    padding-top: 48px;
+    padding-top: 8px;
   }
 
   .profile-header {
     flex-direction: column;
     text-align: center;
     gap: 16px;
-    margin-top: 32px;
-    margin-bottom: 24px;
+    margin-top: 8px;
+    margin-bottom: 20px;
   }
 }
 
@@ -3555,28 +3763,110 @@ html.dark .footer {
 /* Badge — Modern sleek pill floating on top-end corner */
 .navbar-notif-badge {
   position: absolute;
-  top: -3px;
-  inset-inline-end: -3px;
+  top: -2px;
+  inset-inline-end: -2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 5px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4d4d 0%, #ef4444 100%);
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
   line-height: 1;
   text-align: center;
-  border: 2px solid var(--bg-card, #ffffff);
+  border: none !important;
   box-sizing: border-box;
   pointer-events: none;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 18px rgba(239, 68, 68, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
   animation: badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   letter-spacing: -0.01em;
   z-index: 10;
+}
+
+/* Sidebar Notification & Chat Badges */
+.notif-sidebar-badge {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* Cancellation Reason Box — Dark Mode Compatible */
+.cancellation-reason-box {
+  padding: 14px 16px;
+  border-radius: var(--radius-lg, 12px);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  transition: all 0.2s ease;
+}
+
+.cancellation-reason-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.cancellation-reason-text {
+  font-size: 0.9rem;
+  color: #991b1b;
+  margin: 0;
+  display: block;
+  word-break: break-word;
+}
+
+[data-theme='dark'] .cancellation-reason-box,
+.dark .cancellation-reason-box {
+  background: rgba(239, 68, 68, 0.16) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme='dark'] .cancellation-reason-title,
+.dark .cancellation-reason-title {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] .cancellation-reason-text,
+.dark .cancellation-reason-text {
+  color: #fecaca !important;
+}
+
+/* Integration & Application Cards Hover Effects */
+.hover-card,
+.hover-card-elevate {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease !important;
+}
+
+.hover-card:hover,
+.hover-card-elevate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -6px rgba(17, 100, 106, 0.14), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border-color: var(--primary) !important;
+}
+
+[data-theme='dark'] .hover-card:hover,
+[data-theme='dark'] .hover-card-elevate:hover,
+.dark .hover-card:hover,
+.dark .hover-card-elevate:hover {
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 18px rgba(17, 100, 106, 0.25) !important;
+  border-color: var(--primary) !important;
 }
 
 
@@ -5516,3 +5806,126 @@ html.dark .error-details-disclosure {
     justify-content: center;
   }
 }
+
+/* ── Responsive Payments & Data Table Styling ── */
+.responsive-card-container {
+  padding: 24px;
+}
+
+.responsive-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  background: var(--surface-alt);
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  align-items: center;
+}
+
+.responsive-filter-input {
+  flex: 2 1 220px;
+  min-width: 180px;
+  width: 100%;
+}
+
+.responsive-filter-select {
+  flex: 1 1 160px;
+  min-width: 130px;
+  width: 100%;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+}
+
+.payments-desktop-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payments-mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-mobile-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.payment-mobile-card:hover {
+  border-color: var(--border);
+}
+
+.payment-mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-light);
+  padding-bottom: 8px;
+}
+
+.payment-mobile-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.payment-mobile-card-footer {
+  padding-top: 6px;
+}
+
+.responsive-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+@media (max-width: 768px) {
+  .responsive-card-container {
+    padding: 14px !important;
+  }
+
+  .payments-desktop-table {
+    display: none;
+  }
+
+  .payments-mobile-cards {
+    display: flex;
+  }
+
+  .responsive-filters-bar {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .responsive-filter-input,
+  .responsive-filter-select {
+    flex: 1 1 100%;
+  }
+
+  .responsive-pagination {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+}

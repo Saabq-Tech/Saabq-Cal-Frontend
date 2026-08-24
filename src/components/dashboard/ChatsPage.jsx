@@ -177,7 +177,7 @@ function VoicePlayer({ src }) {
 --------------------------------------------------------------- */
 export default function ChatsPage() {
   const { t } = useLanguage();
-  const { user, userType } = useAuth();
+  const { user, userType, refreshUnreadCounts } = useAuth();
   const toast = useToast();
 
   const [conversations, setConversations] = useState([]);
@@ -347,6 +347,9 @@ export default function ChatsPage() {
     setImageFile(null);
     setImagePreview(null);
     fetchConversationDetails(conv.id);
+    if (typeof refreshUnreadCounts === 'function') {
+      setTimeout(refreshUnreadCounts, 1000);
+    }
   };
 
   // Start New Chat (with Technical Support Admin)
@@ -626,21 +629,42 @@ export default function ChatsPage() {
     );
   });
 
-  // Get recipient display name for conversation header
+  // Get recipient display name & role label for conversation header
   const getRecipientInfo = (conv) => {
-    if (!conv) return { name: t('technicalSupport'), role: 'admin' };
-    const other = conv.participants?.find(
-      (p) => p.participant && p.participant.id !== user?.id
-    )?.participant;
+    if (!conv) return { name: t('technicalSupport'), role: 'admin', roleLabel: t('technicalSupport') || 'الدعم الفني' };
 
-    if (other) {
-      return {
-        name: other.name || t('technicalSupport'),
-        avatarUrl: other.avatar_url,
-        role: other.role || 'admin',
-      };
+    const otherPart = conv.participants?.find((p) => {
+      if (!p) return false;
+      const pModel = p.participant;
+      const pId = p.participant_id || pModel?.id;
+      const pRole = pModel?.role || (p.participant_type?.includes('Customer') ? 'customer' : p.participant_type?.includes('WorkspaceMember') ? 'member' : 'admin');
+
+      const isMe = String(pId) === String(user?.id) && (
+        (userType === 'customer' && (pRole === 'customer' || p.participant_type?.includes('Customer'))) ||
+        (userType === 'member' && (pRole === 'member' || p.participant_type?.includes('WorkspaceMember'))) ||
+        (userType === 'admin' && (pRole === 'admin' || p.participant_type?.includes('Admin')))
+      );
+      return !isMe;
+    });
+
+    const otherModel = otherPart?.participant;
+    const pRole = otherModel?.role || (otherPart?.participant_type?.includes('Customer') ? 'customer' : otherPart?.participant_type?.includes('WorkspaceMember') ? 'member' : 'admin');
+
+    let roleLabel = t('technicalSupport') || 'الدعم الفني';
+    if (pRole === 'customer') {
+      roleLabel = t('customer') || 'عميل';
+    } else if (pRole === 'member') {
+      roleLabel = t('workspaceMember') || 'عضو مساحة عمل';
+    } else if (pRole === 'admin') {
+      roleLabel = t('technicalSupport') || 'الدعم الفني';
     }
-    return { name: t('technicalSupport'), role: 'admin' };
+
+    return {
+      name: otherModel?.name || t('technicalSupport'),
+      avatarUrl: otherModel?.avatar_url,
+      role: pRole,
+      roleLabel,
+    };
   };
 
   const recipient = getRecipientInfo(activeConversation);
@@ -781,7 +805,7 @@ export default function ChatsPage() {
                   </h3>
                   <span className="chat-status-badge">
                     <span className="chat-status-dot" />
-                    {t('technicalSupport')}
+                    {recipient.roleLabel}
                   </span>
                 </div>
               </div>

@@ -142,7 +142,7 @@ export default function NotificationTemplatesTab({
       )}
 
       {/* Grid Layout: Sidebar + Editor */}
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 24, alignItems: 'start' }}>
         {/* Sidebar */}
         <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', padding: 16 }}>
           {/* Search Box */}

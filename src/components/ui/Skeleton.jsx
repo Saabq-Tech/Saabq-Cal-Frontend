@@ -75,7 +75,7 @@ export function WorkspaceCardSkeleton({ count = 6 }) {
 
 export function ServiceCardSkeleton({ count = 3 }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="card" style={{ padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>

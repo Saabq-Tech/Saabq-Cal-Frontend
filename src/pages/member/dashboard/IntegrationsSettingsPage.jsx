@@ -536,7 +536,7 @@ export default function IntegrationsSettingsPage() {
     {
       id: 'google_calendar',
       title: 'Google Calendar',
-      category: 'calendar',
+      category: 'google',
       icon: (
         <Icon name="google-calendar" size={28} />
       ),
@@ -547,7 +547,7 @@ export default function IntegrationsSettingsPage() {
     {
       id: 'google_meet',
       title: 'Google Meet',
-      category: 'calendar',
+      category: 'google',
       icon: (
         <Icon name="google-meet" size={28} />
       ),
@@ -558,7 +558,7 @@ export default function IntegrationsSettingsPage() {
     {
       id: 'google_sheets',
       title: 'Google Sheets',
-      category: 'automation',
+      category: 'google',
       icon: (
         <Icon name="google-sheets" size={28} />
       ),
@@ -569,7 +569,7 @@ export default function IntegrationsSettingsPage() {
     {
       id: 'telegram',
       title: t('telegramTitle') || 'إعدادات Telegram',
-      category: 'notifications',
+      category: 'automation',
       icon: (
         <Icon name="telegram" size={28} />
       ),
@@ -598,8 +598,8 @@ export default function IntegrationsSettingsPage() {
         <Icon name="notifications-colored" size={26} />
       ),
       description: t('notificationsDesc') || 'تلقي إشعارات البريد الإلكتروني والتنبيهات المباشرة فور حجز أي موعد جديد.',
-      isConnected: emailNotify || pushNotify,
-      subtitle: (emailNotify && pushNotify) ? (t('emailAndPushActive') || 'البريد والتنبيهات مفعّلة') : (emailNotify ? (t('emailActive') || 'البريد مفعّل') : (t('pushActive') || 'التنبيهات مفعّلة')),
+      isConnected: true,
+      subtitle: t('activeBySystem') || 'مفعّلة افتراضياً بالنظام',
     },
   ];
 
@@ -637,7 +637,6 @@ export default function IntegrationsSettingsPage() {
           {[
             { id: 'all', label: t('allApplications') || 'كافة التطبيقات' },
             { id: 'google', label: t('googleServicesTab') || 'خدمات Google' },
-            { id: 'calendar', label: t('calendarAndMeetingsTab') || 'التقويم والاجتماعات' },
             { id: 'automation', label: t('automationAndWebhooksTab') || 'الأتمتة والـ Webhooks' },
             { id: 'notifications', label: t('notificationsTab') || 'الإشعارات' },
           ].map((tab) => (
@@ -650,6 +649,7 @@ export default function IntegrationsSettingsPage() {
                 borderRadius: 20,
                 fontSize: '0.82rem',
                 padding: '6px 16px',
+                marginTop: 10,
                 fontWeight: activeTab === tab.id ? 700 : 500,
               }}
             >
@@ -660,7 +660,7 @@ export default function IntegrationsSettingsPage() {
       </div>
 
       {/* Grid of Applications */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 20 }}>
         {filteredIntegrations.map((item) => (
           <div
             key={item.id}
@@ -671,26 +671,37 @@ export default function IntegrationsSettingsPage() {
               justifyContent: 'space-between',
               padding: 20,
               borderRadius: 'var(--radius-lg)',
-              border: item.isConnected ? '1px solid var(--border-light)' : '1px solid var(--border)',
+              border: '1px solid var(--border)',
               background: 'var(--bg-card)',
               boxShadow: '0 4px 14px rgba(0,0,0,0.03)',
             }}
           >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 12, background: 'var(--surface-alt)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+                  <div style={{ width: 46, height: 46, minWidth: 46, borderRadius: 12, background: 'var(--surface-alt)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {item.icon}
                   </div>
-                  <div>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0, color: 'var(--heading)' }}>{item.title}</h3>
-                    <span style={{ fontSize: '0.78rem', color: item.isConnected ? 'var(--primary)' : 'var(--muted)', fontWeight: 600 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <h3 style={{ fontSize: '1.02rem', fontWeight: 800, margin: 0, color: 'var(--heading)', wordBreak: 'break-word' }}>{item.title}</h3>
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        color: item.isConnected ? 'var(--primary)' : 'var(--muted)',
+                        fontWeight: 600,
+                        display: 'block',
+                        wordBreak: 'break-all',
+                        lineHeight: 1.3,
+                        marginTop: 2,
+                      }}
+                      title={typeof item.subtitle === 'string' ? item.subtitle : ''}
+                    >
                       {item.subtitle}
                     </span>
                   </div>
                 </div>
 
-                <span className={`profile-badge ${item.isConnected ? 'verified' : 'unverified'}`} style={{ fontSize: '0.75rem', padding: '3px 10px' }}>
+                <span className={`profile-badge ${item.isConnected ? 'verified' : 'unverified'}`} style={{ fontSize: '0.75rem', padding: '3px 10px', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {item.isConnected ? (t('statusConnected') || 'متصل') : (t('statusNotConnected') || 'غير متصل')}
                 </span>
               </div>

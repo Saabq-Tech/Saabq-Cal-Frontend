@@ -418,7 +418,7 @@ export default function WorkspaceProfilePage() {
               <p>{t('noServicesFound')}</p>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
               {services.map((srv) => (
                 <article
                   key={srv.id}
@@ -433,8 +433,8 @@ export default function WorkspaceProfilePage() {
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                      <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+                      <div style={{ flex: 1, minWidth: 140 }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: 'var(--text)' }}>
                           {getTranslatableText(srv.name)}
                         </h3>
@@ -444,7 +444,7 @@ export default function WorkspaceProfilePage() {
                           </span>
                         )}
                       </div>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: primaryColor }}>
+                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: primaryColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
                         {formatCurrency(srv.price, srv.currency_detail || srv.currency, isRTL, t('freeService'))}
                       </span>
                     </div>

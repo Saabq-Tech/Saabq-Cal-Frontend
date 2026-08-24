@@ -217,9 +217,19 @@ export function AuthProvider({ children }) {
 
   // Centralized unread counts polling
   const isFetchingUnreadRef = useRef(false);
-  const refreshUnreadCounts = useCallback(() => {
+  const lastFetchTimeRef = useRef(0);
+
+  const refreshUnreadCounts = useCallback((force = false) => {
     if (!token || isFetchingUnreadRef.current) return;
+    if (document.hidden && !force) return;
+
+    const now = Date.now();
+    if (!force && now - lastFetchTimeRef.current < 4_000) {
+      return;
+    }
+
     isFetchingUnreadRef.current = true;
+    lastFetchTimeRef.current = now;
 
     Promise.allSettled([
       client.get(endpoints.notificationsUnreadCount),
@@ -240,9 +250,14 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (token) {
-      refreshUnreadCounts();
-      const interval = setInterval(refreshUnreadCounts, 60_000);
-      return () => clearInterval(interval);
+      refreshUnreadCounts(true);
+      const interval = setInterval(() => refreshUnreadCounts(false), 60_000);
+      const handleFocus = () => refreshUnreadCounts(true);
+      window.addEventListener('focus', handleFocus);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleFocus);
+      };
     } else {
       setUnreadCount(0);
       setUnreadChatCount(0);

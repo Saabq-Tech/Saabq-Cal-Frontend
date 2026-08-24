@@ -28,7 +28,16 @@ export class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      const errorDetails = this.state.error
+      const isDevOrTest =
+        import.meta.env.DEV ||
+        import.meta.env.MODE === 'development' ||
+        import.meta.env.MODE === 'test' ||
+        process.env.NODE_ENV === 'development' ||
+        process.env.NODE_ENV === 'test' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+
+      const errorDetails = (isDevOrTest && this.state.error)
         ? `${this.state.error.toString()}\n${this.state.errorInfo?.componentStack || ''}`
         : null;
 

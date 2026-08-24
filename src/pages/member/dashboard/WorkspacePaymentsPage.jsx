@@ -127,7 +127,7 @@ export default function WorkspacePaymentsPage() {
   };
 
   return (
-    <div className="card" style={{ padding: 24 }}>
+    <div className="card responsive-card-container">
       <SEO title={isRTL ? 'سجل المدفوعات والمالية' : 'Payments & Finance Log'} noindex />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
@@ -142,43 +142,75 @@ export default function WorkspacePaymentsPage() {
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20, background: 'var(--surface-alt)', padding: 14, borderRadius: 12, border: '1px solid var(--border-light)' }}>
-        <input
-          type="text"
-          className="form-input"
-          placeholder={isRTL ? 'البحث بالمرجع أو الملاحظات...' : 'Search by reference or notes...'}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ maxWidth: 260, fontSize: '0.85rem' }}
-        />
+      {/* Responsive Filters Bar */}
+      <div className="responsive-filters-bar">
+        <div className="responsive-filter-input">
+          <input
+            type="text"
+            className="form-input"
+            placeholder={isRTL ? 'البحث بالمرجع أو الملاحظات...' : 'Search by reference or notes...'}
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: '100%', fontSize: '0.85rem' }}
+          />
+        </div>
 
-        <select
-          className="form-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ maxWidth: 160, fontSize: '0.85rem' }}
-        >
-          <option value="">{isRTL ? 'جميع الحالات' : 'All Statuses'}</option>
-          <option value="verifying">{isRTL ? 'قيد التحقق' : 'Verifying'}</option>
-          <option value="pending">{isRTL ? 'قيد الانتظار' : 'Pending'}</option>
-          <option value="paid">{isRTL ? 'مدفوع ومعتمد' : 'Paid'}</option>
-          <option value="failed">{isRTL ? 'مرفوض' : 'Failed'}</option>
-        </select>
+        <div className="responsive-filter-select">
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: '100%', fontSize: '0.85rem' }}
+          >
+            <option value="">{isRTL ? 'جميع الحالات' : 'All Statuses'}</option>
+            <option value="verifying">{isRTL ? 'قيد التحقق' : 'Verifying'}</option>
+            <option value="pending">{isRTL ? 'قيد الانتظار' : 'Pending'}</option>
+            <option value="paid">{isRTL ? 'مدفوع ومعتمد' : 'Paid'}</option>
+            <option value="failed">{isRTL ? 'مرفوض' : 'Failed'}</option>
+          </select>
+        </div>
 
-        <select
-          className="form-select"
-          value={payableTypeFilter}
-          onChange={(e) => setPayableTypeFilter(e.target.value)}
-          style={{ maxWidth: 180, fontSize: '0.85rem' }}
-        >
-          <option value="">{isRTL ? 'جميع الأنواع' : 'All Types'}</option>
-          <option value="Appointment">{isRTL ? 'حجوزات المواعيد' : 'Appointments'}</option>
-          <option value="Subscription">{isRTL ? 'اشتراكات الباقات' : 'Subscriptions'}</option>
-        </select>
+        <div className="responsive-filter-select">
+          <select
+            className="form-select"
+            value={payableTypeFilter}
+            onChange={(e) => {
+              setPayableTypeFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: '100%', fontSize: '0.85rem' }}
+          >
+            <option value="">{isRTL ? 'جميع الأنواع' : 'All Types'}</option>
+            <option value="Appointment">{isRTL ? 'حجوزات المواعيد' : 'Appointments'}</option>
+            <option value="Subscription">{isRTL ? 'اشتراكات الباقات' : 'Subscriptions'}</option>
+          </select>
+        </div>
+
+        {(searchQuery || statusFilter || payableTypeFilter) && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              setSearchQuery('');
+              setStatusFilter('');
+              setPayableTypeFilter('');
+              setPage(1);
+            }}
+            style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Icon name="x" size={14} />
+            {isRTL ? 'إلغاء التصفية' : 'Clear Filters'}
+          </button>
+        )}
       </div>
 
-      {/* Payments Table */}
+      {/* Payments View */}
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <SkeletonRect height={48} />
@@ -193,78 +225,176 @@ export default function WorkspacePaymentsPage() {
           </h4>
         </div>
       ) : (
-        <div className="table-responsive">
-          <table className="table" style={{ width: '100%', fontSize: '0.88rem' }}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>{isRTL ? 'المستحق له' : 'Payable'}</th>
-                <th>{isRTL ? 'المبلغ' : 'Amount'}</th>
-                <th>{isRTL ? 'وسيلة الدفع' : 'Method / Provider'}</th>
-                <th>{isRTL ? 'الحالة' : 'Status'}</th>
-                <th>{isRTL ? 'التاريخ' : 'Date'}</th>
-                <th style={{ textAlign: 'center' }}>{isRTL ? 'الإجراءات' : 'Actions'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(payments) && payments.map((p) => {
-                const badge = getStatusBadge(p.status);
-                const isSub = p.payable_type?.includes('Subscription');
-                return (
-                  <tr key={p.id}>
-                    <td style={{ fontWeight: 700 }}>#{p.id}</td>
-                    <td>
-                      <span style={{ fontWeight: 700, color: 'var(--heading)', display: 'block' }}>
-                        {isSub ? (isRTL ? 'اشتراك مساحة العمل' : 'Workspace Subscription') : (isRTL ? 'حجز موعد' : 'Appointment Booking')}
+        <>
+          {/* Desktop Table View */}
+          <div className="table-responsive payments-desktop-table">
+            <table className="table" style={{ width: '100%', fontSize: '0.88rem' }}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{isRTL ? 'المستحق له' : 'Payable'}</th>
+                  <th>{isRTL ? 'المبلغ' : 'Amount'}</th>
+                  <th>{isRTL ? 'وسيلة الدفع' : 'Method / Provider'}</th>
+                  <th>{isRTL ? 'الحالة' : 'Status'}</th>
+                  <th>{isRTL ? 'التاريخ' : 'Date'}</th>
+                  <th style={{ textAlign: 'center' }}>{isRTL ? 'الإجراءات' : 'Actions'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p) => {
+                  const badge = getStatusBadge(p.status);
+                  const isSub = p.payable_type?.includes('Subscription');
+                  return (
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 700 }}>#{p.id}</td>
+                      <td>
+                        <span style={{ fontWeight: 700, color: 'var(--heading)', display: 'block' }}>
+                          {isSub ? (isRTL ? 'اشتراك مساحة العمل' : 'Workspace Subscription') : (isRTL ? 'حجز موعد' : 'Appointment Booking')}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ID: {p.payable_id}</span>
+                      </td>
+                      <td style={{ fontWeight: 800, color: 'var(--primary)' }}>
+                        {p.amount} {p.currency || 'SAR'}
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 600, display: 'block' }}>{p.method || 'bank_transfer'}</span>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{p.provider || 'manual'}</span>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: 20,
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            color: badge.color,
+                            background: badge.bg,
+                            border: `1px solid ${badge.border}`,
+                            display: 'inline-block',
+                          }}
+                        >
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{formatDate(p.created_at)}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => setSelectedPayment(p)}
+                          style={{ gap: 6, fontSize: '0.8rem' }}
+                        >
+                          <Icon name="eye" size={14} />
+                          {isRTL ? 'التفاصيل / الإيصال' : 'View / Verify'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards View */}
+          <div className="payments-mobile-cards">
+            {payments.map((p) => {
+              const badge = getStatusBadge(p.status);
+              const isSub = p.payable_type?.includes('Subscription');
+              return (
+                <div key={p.id} className="payment-mobile-card">
+                  <div className="payment-mobile-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontWeight: 800, color: 'var(--heading)', fontSize: '0.9rem' }}>#{p.id}</span>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                        {isSub ? (isRTL ? 'اشتراك' : 'Subscription') : (isRTL ? 'حجز موعد' : 'Appointment')} (ID: {p.payable_id})
                       </span>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ID: {p.payable_id}</span>
-                    </td>
-                    <td style={{ fontWeight: 800, color: 'var(--primary)' }}>
-                      {p.amount} {p.currency || 'SAR'}
-                    </td>
-                    <td>
-                      <span style={{ fontWeight: 600, display: 'block' }}>{p.method || 'bank_transfer'}</span>
-                      <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{p.provider || 'manual'}</span>
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          padding: '4px 12px',
-                          borderRadius: 20,
-                          fontSize: '0.78rem',
-                          fontWeight: 700,
-                          color: badge.color,
-                          background: badge.bg,
-                          border: `1px solid ${badge.border}`,
-                          display: 'inline-block',
-                        }}
-                      >
-                        {badge.label}
+                    </div>
+                    <span
+                      style={{
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: badge.color,
+                        background: badge.bg,
+                        border: `1px solid ${badge.border}`,
+                      }}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
+
+                  <div className="payment-mobile-card-body">
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'المبلغ' : 'Amount'}</span>
+                      <strong style={{ fontSize: '0.95rem', color: 'var(--primary)', fontWeight: 800 }}>
+                        {p.amount} {p.currency || 'SAR'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'وسيلة الدفع' : 'Method'}</span>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--heading)' }}>
+                        {p.method || 'bank_transfer'}
                       </span>
-                    </td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{formatDate(p.created_at)}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => setSelectedPayment(p)}
-                        style={{ gap: 6, fontSize: '0.8rem' }}
-                      >
-                        <Icon name="eye" size={14} />
-                        {isRTL ? 'التفاصيل / الإيصال' : 'View / Verify'}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'التاريخ' : 'Date'}</span>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{formatDate(p.created_at)}</span>
+                    </div>
+                  </div>
+
+                  <div className="payment-mobile-card-footer">
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setSelectedPayment(p)}
+                      style={{ width: '100%', justifyContent: 'center', gap: 6, fontSize: '0.82rem', padding: '8px' }}
+                    >
+                      <Icon name="eye" size={14} />
+                      {isRTL ? 'التفاصيل / الإيصال' : 'View / Verify'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Responsive Pagination */}
+          {meta && meta.last_page > 1 && (
+            <div className="responsive-pagination">
+              <span style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+                {(t('paginationInfo') || (isRTL ? 'صفحة {current} من {last} ({total} سجل)' : 'Page {current} of {last} ({total} records)'))
+                  .replace('{current}', String(meta.current_page || page))
+                  .replace('{last}', String(meta.last_page))
+                  .replace('{total}', String(meta.total || payments.length))}
+              </span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  disabled={(meta.current_page || page) <= 1 || loading}
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                >
+                  {t('previous') || (isRTL ? 'السابق' : 'Previous')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  disabled={(meta.current_page || page) >= meta.last_page || loading}
+                  onClick={() => setPage((prev) => prev + 1)}
+                  style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                >
+                  {t('next') || (isRTL ? 'التالي' : 'Next')}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Details & Verification Modal */}
       {selectedPayment && createPortal(
         <div className="modal-backdrop">
-          <div className="modal-card modal-md animate-fade-in-up" style={{ maxWidth: 640 }}>
+          <div className="modal-card modal-md animate-fade-in-up" style={{ maxWidth: 640, width: '95%' }}>
             <div className="modal-header">
               <h3 className="modal-title">
                 {isRTL ? 'تفاصيل عملية الدفع وإيصال السداد' : 'Payment Details & Receipt Verification'}
@@ -275,7 +405,7 @@ export default function WorkspacePaymentsPage() {
             </div>
 
             <div className="modal-body" style={{ gap: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, background: 'var(--surface-alt)', padding: 14, borderRadius: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, background: 'var(--surface-alt)', padding: 14, borderRadius: 12 }}>
                 <div>
                   <span style={{ fontSize: '0.78rem', color: 'var(--muted)', display: 'block' }}>{isRTL ? 'المبلغ' : 'Amount'}</span>
                   <strong style={{ fontSize: '1.25rem', color: 'var(--primary)' }}>{selectedPayment.amount} {selectedPayment.currency || 'SAR'}</strong>
@@ -335,13 +465,13 @@ export default function WorkspacePaymentsPage() {
               )}
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'space-between' }}>
+            <div className="modal-actions" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelectedPayment(null)} disabled={actionLoading}>
-                {t('close') || 'إغلاق'}
+                {t('close') || (isRTL ? 'إغلاق' : 'Close')}
               </button>
 
               {selectedPayment.status !== 'paid' && (
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button
                     type="button"
                     className="btn btn-danger btn-sm"
@@ -384,3 +514,4 @@ export default function WorkspacePaymentsPage() {
     </div>
   );
 }
+

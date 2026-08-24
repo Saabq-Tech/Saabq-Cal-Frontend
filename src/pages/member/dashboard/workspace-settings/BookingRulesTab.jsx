@@ -40,7 +40,7 @@ export default function BookingRulesTab({ bookingRulesForm, setBookingRulesForm,
       </div>
 
       {/* Toggles Row (Online Booking & Auto Confirm) - 2 Columns Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: 16 }}>
         {/* Enable Online Booking Card */}
         <div
           onClick={() => {
@@ -125,7 +125,7 @@ export default function BookingRulesTab({ bookingRulesForm, setBookingRulesForm,
       </div>
 
       {/* 4 Numerical Rules Grid - 2 Rows of 2 Columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 14 }}>
         <div>
           <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 700, marginBottom: 6, display: 'block' }}>
             {t('bufferBeforeMinutes') || 'فارق زمني قبل الحجز (دقائق)'}

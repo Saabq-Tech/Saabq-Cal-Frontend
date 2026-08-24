@@ -224,7 +224,7 @@ export default function RolesTab({ rolesList, availablePermissions, canEdit, onS
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: 16 }}>
         {roles.map((r) => {
           const roleNameStr = typeof r.name === 'object' ? (r.name.ar || r.name.en) : r.name;
           const roleDescStr = typeof r.description === 'object' ? (r.description.ar || r.description.en) : r.description;
@@ -234,7 +234,7 @@ export default function RolesTab({ rolesList, availablePermissions, canEdit, onS
             <div
               key={r.id}
               style={{
-                padding: 20,
+                padding: '16px 14px',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border-light)',
                 background: 'var(--surface)',

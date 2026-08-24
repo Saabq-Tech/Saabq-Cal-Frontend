@@ -95,6 +95,15 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
     const descAr = getFieldVal('description', 'ar');
     const descEn = getFieldVal('description', 'en');
 
+    const currencyCode =
+      (typeof service.currency === 'object' && service.currency?.code) ||
+      (typeof service.currency_detail === 'object' && service.currency_detail?.code) ||
+      (typeof service.currency === 'string' && service.currency) ||
+      service.currency_code ||
+      (availableCurrencies && availableCurrencies.length > 0 ? availableCurrencies[0].code : 'SAR');
+
+    const matchedCurr = availableCurrencies?.find((c) => c.code === currencyCode || c.id === service.currency_id || c.id === service.currency?.id);
+
     setForm({
       id: service.id,
       name_ar: nameAr,
@@ -105,7 +114,8 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
       description_en: descEn,
       duration_minutes: service.duration_minutes ?? service.duration ?? 30,
       price: service.price ?? 0,
-      currency_id: service.currency.id || 1,
+      currency: matchedCurr?.code || currencyCode,
+      currency_id: matchedCurr?.id || service.currency_id || service.currency?.id || 1,
       buffer_before_minutes: service.buffer_before_minutes ?? 0,
       buffer_after_minutes: service.buffer_after_minutes ?? 0,
       capacity: service.capacity ?? 1,
@@ -140,8 +150,15 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
 
       const payload = {
         ...rest,
-        currency_id: selectedCurr?.id || null,
-        workspace_member_id: form.workspace_member_id ? parseInt(form.workspace_member_id) : null,
+        capacity: form.capacity !== '' && form.capacity !== null && form.capacity !== undefined ? parseInt(form.capacity, 10) : 1,
+        duration_minutes: form.duration_minutes !== '' && form.duration_minutes !== null ? parseInt(form.duration_minutes, 10) : 30,
+        price: form.price !== '' && form.price !== null ? parseFloat(form.price) : 0,
+        buffer_before_minutes: form.buffer_before_minutes ? parseInt(form.buffer_before_minutes, 10) : 0,
+        buffer_after_minutes: form.buffer_after_minutes ? parseInt(form.buffer_after_minutes, 10) : 0,
+        minimum_booking_notice_minutes: form.minimum_booking_notice_minutes ? parseInt(form.minimum_booking_notice_minutes, 10) : 0,
+        maximum_booking_days: form.maximum_booking_days ? parseInt(form.maximum_booking_days, 10) : 30,
+        currency_id: selectedCurr?.id || form.currency_id || null,
+        workspace_member_id: form.workspace_member_id ? parseInt(form.workspace_member_id, 10) : null,
         name: {
           ar: name_ar || name_en || '',
           en: name_en || name_ar || '',
@@ -173,20 +190,20 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, color: 'var(--heading)' }}>
-            {t('workspaceServices') || 'إدارة خدمات المساحة'}
+            {t('workspaceServices') || (isRTL ? 'إدارة خدمات المساحة' : 'Workspace Services Management')}
           </h2>
           <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
-            {t('workspaceServicesDesc') || 'إضافة وتحديث جميع بيانات وقواعد وإعدادات الخدمات المتاحة للحجز.'}
+            {t('workspaceServicesDesc') || (isRTL ? 'إضافة وتحديث جميع بيانات وقواعد وإعدادات الخدمات المتاحة للحجز.' : 'Manage customer services, pricing, and durations')}
           </p>
         </div>
         {canEdit ? (
           <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-            + {t('addService') || 'إضافة خدمة جديدة'}
+            + {t('addService') || (isRTL ? 'إضافة خدمة جديدة' : 'Add New Service')}
           </button>
         ) : (
           <span className="profile-badge unverified" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <Icon name="lock" size={12} />
-            {t('readOnlyNotice') || 'العرض فقط (بدون تعديل)'}
+            {t('readOnlyNotice') || (isRTL ? 'العرض فقط (بدون تعديل)' : 'Read-only mode')}
           </span>
         )}
       </div>
@@ -198,19 +215,19 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
             <Icon name="custom-bc148024" size={24} />
           </div>
           <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 6px', color: 'var(--heading)' }}>
-            {t('noServicesFound') || 'لا توجد خدمات مضافة حالياً في مساحة العمل'}
+            {t('noServicesFound') || (isRTL ? 'لا توجد خدمات مضافة حالياً في مساحة العمل' : 'No services found in this workspace')}
           </h4>
           <p style={{ fontSize: '0.85rem', color: 'var(--muted)', margin: '0 0 16px' }}>
-            {t('noServicesDesc') || 'قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد.'}
+            {t('noServicesDesc') || (isRTL ? 'قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد.' : 'Add your first service to allow customers to select and book appointments.')}
           </p>
           {canEdit && (
             <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-              + {t('addFirstService') || 'إضافة أول خدمة'}
+              + {t('addFirstService') || (isRTL ? 'إضافة أول خدمة' : 'Add First Service')}
             </button>
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 18 }}>
           {servicesList.map((s) => {
             const isEnabled = s.booking_enabled ?? true;
             const isFeatured = s.is_featured ?? false;
@@ -226,7 +243,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
               <div
                 key={s.id}
                 style={{
-                  padding: 20,
+                  padding: '16px 14px',
                   borderRadius: 'var(--radius-lg)',
                   border: isFeatured ? '1.5px solid var(--primary)' : '1px solid var(--border-light)',
                   background: 'var(--surface)',
@@ -247,7 +264,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                         {isFeatured && (
                           <span style={{ fontSize: '0.7rem', background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <Icon name="custom-5768860f" size={12} />
-                            {t('featured') || 'مميزة'}
+                            {t('featured') || (isRTL ? 'مميزة' : 'Featured')}
                           </span>
                         )}
 
@@ -262,7 +279,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                             color: s.status === 'active' ? '#15803d' : (s.status === 'draft' ? '#b45309' : '#4b5563'),
                           }}
                         >
-                          {s.status === 'active' ? (t('statusActive') || 'نشطة') : (s.status === 'draft' ? (t('statusDraft') || 'مسودة') : (t('statusArchived') || 'مؤرشفة'))}
+                          {s.status === 'active' ? (t('statusActive') || (isRTL ? 'نشطة' : 'Active')) : (s.status === 'draft' ? (t('statusDraft') || (isRTL ? 'مسودة' : 'Draft')) : (t('statusArchived') || (isRTL ? 'مؤرشفة' : 'Archived')))}
                         </span>
 
                         {/* 2. Online Booking Status Badge (enabled / disabled) */}
@@ -276,7 +293,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                             color: s.booking_enabled ? '#0f766e' : '#991b1b',
                           }}
                         >
-                          {s.booking_enabled ? (t('bookingActive') || 'الحجز أونلاين مفعّل') : (t('bookingDisabled') || 'الحجز أونلاين معطّل')}
+                          {s.booking_enabled ? (t('bookingActive') || (isRTL ? 'الحجز أونلاين مفعّل' : 'Online Booking Active')) : (t('bookingDisabled') || (isRTL ? 'الحجز أونلاين معطّل' : 'Online Booking Disabled'))}
                         </span>
                       </div>
                       {shortDescDisplay && (
@@ -288,12 +305,12 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
 
                     <span className="profile-badge verified" style={{ fontSize: '0.78rem', padding: '3px 10px', display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                       <Icon name="custom-56f3550d" size={12} />
-                      {duration} {t('minUnit') || 'دقيقة'}
+                      {duration} {t('minUnit') || (isRTL ? 'دقيقة' : 'min')}
                     </span>
                   </div>
 
                   <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 10px' }}>
-                    {descDisplay || 'لا يوجد وصف تفصيلي مضاف لهذه الخدمة.'}
+                    {descDisplay || t('noServiceDescription') || (isRTL ? 'لا يوجد وصف تفصيلي مضاف لهذه الخدمة.' : 'No detailed description provided for this service.')}
                   </p>
 
                   {/* Metadata Chips */}
@@ -307,13 +324,13 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                     {s.capacity > 1 && (
                       <span style={{ fontSize: '0.76rem', background: 'var(--surface-alt)', padding: '3px 9px', borderRadius: 6, color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         <Icon name="custom-0c2e06fd" size={12} />
-                        {s.capacity} {t('persons') || 'أشخاص'}
+                        {s.capacity} {t('persons') || (isRTL ? 'أشخاص' : 'persons')}
                       </span>
                     )}
                     {s.booking_mode === 'confirmation' && (
                       <span style={{ fontSize: '0.76rem', background: '#eff6ff', color: '#1d4ed8', padding: '3px 9px', borderRadius: 6, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         <Icon name="copy" size={12} />
-                        {t('requiresApproval') || 'تأكيد يدوي'}
+                        {t('requiresApproval') || (isRTL ? 'تأكيد يدوي' : 'Manual Approval')}
                       </span>
                     )}
                   </div>
@@ -321,7 +338,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                   {/* Service Provider Info Badge */}
                   {(() => {
                     const provider = s.workspace_member;
-                    const providerName = provider?.name || (user?.name ? `${user.name}` : (t('workspaceOwner') || 'مالك مساحة العمل'));
+                    const providerName = provider?.name || (user?.name ? `${user.name}` : (t('workspaceOwner') || (isRTL ? 'مالك مساحة العمل' : 'Workspace Owner')));
                     const providerTitle = provider?.title || user?.title || '';
                     const providerAvatar = provider?.avatar_url || user?.avatar_url;
                     const providerInitial = providerName ? providerName.charAt(0).toUpperCase() : 'P';
@@ -331,7 +348,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                         <UserAvatar name={providerName} avatarUrl={providerAvatar} size={24} />
                         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                           <span style={{ fontSize: '0.68rem', color: 'var(--muted)', fontWeight: 600, lineHeight: 1.1 }}>
-                            {t('serviceProvider') || 'مقدم الخدمة:'}
+                            {t('serviceProvider') || (isRTL ? 'مقدم الخدمة:' : 'Service Provider:')}
                           </span>
                           <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--heading)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {providerName} {providerTitle && <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.76rem' }}>({providerTitle})</span>}
@@ -344,7 +361,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--border-light)', flexWrap: 'wrap', gap: 8 }}>
                   <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.1rem' }}>
-                    {price > 0 ? `${price} ${currency?.symbol}` : (t('freeService') || 'مجاناً')}
+                    {price > 0 ? `${price} ${currency?.symbol || currency}` : (t('freeService') || (isRTL ? 'مجاناً' : 'Free'))}
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -576,8 +593,8 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                       type="number"
                       min="1"
                       className="form-input"
-                      value={form.duration_minutes}
-                      onChange={(e) => setForm({ ...form, duration_minutes: parseInt(e.target.value, 10) || 1 })}
+                      value={form.duration_minutes ?? ''}
+                      onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
                       required
                     />
                   </div>
@@ -592,8 +609,8 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                       min="0"
                       step="0.01"
                       className="form-input"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                      value={form.price ?? ''}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
                       required
                     />
                   </div>
@@ -604,8 +621,16 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                     </label>
                     <select
                       className="form-input"
-                      value={form.currency}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                      value={form.currency || 'SAR'}
+                      onChange={(e) => {
+                        const selectedCode = e.target.value;
+                        const selectedCurr = availableCurrencies.find((c) => c.code === selectedCode);
+                        setForm({
+                          ...form,
+                          currency: selectedCode,
+                          currency_id: selectedCurr?.id || form.currency_id,
+                        });
+                      }}
                     >
                       {availableCurrencies.map((c) => {
                         const nameStr = typeof c.name === 'object' ? (c.name[isRTL ? 'ar' : 'en'] || c.name.ar || c.name.en || c.code) : (c.name || c.code);
@@ -627,8 +652,8 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                       type="number"
                       min="1"
                       className="form-input"
-                      value={form.capacity}
-                      onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value, 10) || 1 })}
+                      value={form.capacity ?? ''}
+                      onChange={(e) => setForm({ ...form, capacity: e.target.value })}
                     />
                   </div>
                 </div>
@@ -691,55 +716,67 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: 2 }}>
                       {t('bufferBeforeLabel') || 'فاصل قبل الحجز (دقائق)'}
                     </label>
+                    <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--text-secondary)', marginBottom: 6, lineHeight: 1.35 }}>
+                      {t('bufferBeforeDesc')}
+                    </span>
                     <input
                       type="number"
                       min="0"
                       className="form-input"
-                      value={form.buffer_before_minutes}
-                      onChange={(e) => setForm({ ...form, buffer_before_minutes: parseInt(e.target.value, 10) || 0 })}
+                      value={form.buffer_before_minutes ?? ''}
+                      onChange={(e) => setForm({ ...form, buffer_before_minutes: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: 2 }}>
                       {t('bufferAfterLabel') || 'فاصل بعد الحجز (دقائق)'}
                     </label>
+                    <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--text-secondary)', marginBottom: 6, lineHeight: 1.35 }}>
+                      {t('bufferAfterDesc')}
+                    </span>
                     <input
                       type="number"
                       min="0"
                       className="form-input"
-                      value={form.buffer_after_minutes}
-                      onChange={(e) => setForm({ ...form, buffer_after_minutes: parseInt(e.target.value, 10) || 0 })}
+                      value={form.buffer_after_minutes ?? ''}
+                      onChange={(e) => setForm({ ...form, buffer_after_minutes: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: 2 }}>
                       {t('minNoticeLabel') || 'أقل مهلة للإشعار (دقائق)'}
                     </label>
+                    <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--text-secondary)', marginBottom: 6, lineHeight: 1.35 }}>
+                      {t('minNoticeDesc')}
+                    </span>
                     <input
                       type="number"
                       min="0"
                       className="form-input"
-                      value={form.minimum_booking_notice_minutes}
-                      onChange={(e) => setForm({ ...form, minimum_booking_notice_minutes: parseInt(e.target.value, 10) || 0 })}
+                      value={form.minimum_booking_notice_minutes ?? ''}
+                      onChange={(e) => setForm({ ...form, minimum_booking_notice_minutes: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                    <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: 2 }}>
                       {t('maxDaysLabel') || 'أقصى مدى للحجز (أيام)'}
                     </label>
+                    <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--text-secondary)', marginBottom: 6, lineHeight: 1.35 }}>
+                      {t('maxDaysDesc')}
+                    </span>
                     <input
                       type="number"
                       min="1"
                       max="365"
                       className="form-input"
-                      value={form.maximum_booking_days}
-                      onChange={(e) => setForm({ ...form, maximum_booking_days: parseInt(e.target.value, 10) || 30 })}
+                      value={form.maximum_booking_days ?? ''}
+                      onChange={(e) => setForm({ ...form, maximum_booking_days: e.target.value })}
                     />
                   </div>
                 </div>

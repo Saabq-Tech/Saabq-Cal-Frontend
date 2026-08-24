@@ -126,7 +126,7 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
       case 'pending':
         return <span className="profile-badge unverified" style={{ padding: '6px 16px', fontSize: '0.86rem', background: 'rgba(234, 179, 8, 0.12)', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="custom-56f3550d" size={14} />{t('statusPending') || 'قيد الانتظار'}</span>;
       case 'cancelled':
-        return <span className="profile-badge unverified" style={{ padding: '6px 16px', fontSize: '0.86rem', background: 'rgba(239, 68, 68, 0.12)', color: '#dc2626', display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="x" size={14} />{t('statusCancelled') || 'ملغى'}</span>;
+        return <span className="profile-badge unverified" style={{ padding: '6px 16px', fontSize: '0.86rem', background: '#ef4444', color: '#ffffff', border: '1px solid #dc2626', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="x" size={14} />{t('statusCancelled') || 'ملغى'}</span>;
       case 'completed':
         return <span className="profile-badge verified" style={{ padding: '6px 16px', fontSize: '0.86rem', background: 'rgba(16, 185, 129, 0.12)', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="check" size={14} />{t('statusCompleted') || 'مكتمل'}</span>;
       case 'rescheduled':
@@ -220,7 +220,10 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
   const customerPhone = b.customer_phone || b.customer?.phone || b.snapshot?.customer_phone || '';
   const serviceTitle = formatTranslatable(b.service?.name) || b.service_name || b.service?.title || b.snapshot?.service_name || 'خدمة';
   const servicePrice = b.service?.price || b.snapshot?.price || 0;
-  const serviceCurrency = b.service?.currency || b.snapshot?.currency || 'SAR';
+  const rawCurrency = b.service?.currency || b.snapshot?.currency || b.currency || 'SAR';
+  const serviceCurrency = typeof rawCurrency === 'object' && rawCurrency !== null 
+    ? (rawCurrency.symbol_native || rawCurrency.symbol || rawCurrency.code || 'SAR') 
+    : (rawCurrency || 'SAR');
   const serviceDuration = b.service?.duration_minutes || b.snapshot?.duration_minutes || 30;
   const providerName = b.workspace_member?.name || b.createdByMember?.name || (t('allWorkspaceMembers') || 'جميع أعضاء المساحة (عامة)');
 
@@ -232,18 +235,18 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
       <SEO title={`${t('appointmentDetails') || 'تفاصيل الموعد'} #${b.id}`} noindex />
 
       {/* TOP HEADER & ACTION NAVIGATION BAR */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, background: 'var(--surface-alt)', padding: '16px 20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, background: 'var(--surface-alt)', padding: '14px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn btn-secondary btn-sm"
             onClick={onBack}
-            style={{ fontSize: '0.86rem', fontWeight: 700, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            style={{ fontSize: '0.84rem', fontWeight: 700, padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
             <Icon name="custom-7d909fa7" size={16} />
             {isRTL ? 'العودة للمواعيد' : 'Back to Bookings'}
           </button>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: 0, color: 'var(--heading)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--heading)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <span>{t('appointmentDetails') || 'تفاصيل الموعد'}</span>
             <span style={{ color: 'var(--primary)', fontFamily: 'monospace' }}>#{b.id}</span>
           </h2>
@@ -254,7 +257,7 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
           type="button"
           className="btn btn-secondary btn-sm"
           onClick={handleCopySummary}
-          style={{ fontSize: '0.82rem', fontWeight: 700, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          style={{ fontSize: '0.82rem', fontWeight: 700, padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
           <Icon name="copy" size={14} />
           {t('copySummary') || 'نسخ ملخص الموعد'}
@@ -262,11 +265,11 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
       </div>
 
       {/* TWO-COLUMN REORGANIZED GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 20 }}>
         {/* COLUMN 1: CUSTOMER & SERVICE INFORMATION */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {/* CUSTOMER CARD */}
-          <div className="card-body" style={{ background: 'var(--surface)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)', padding: 22 }}>
+          <div className="card-body" style={{ background: 'var(--surface)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)', padding: '16px 14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <Icon name="user" size={18} />
               <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--heading)' }}>
@@ -274,10 +277,10 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
               </h4>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-              <UserAvatar name={customerName} avatarUrl={b.customer?.avatar_url} size={56} />
-              <div>
-                <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.15rem', color: 'var(--heading)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16, flexWrap: 'wrap' }}>
+              <UserAvatar name={customerName} avatarUrl={b.customer?.avatar_url} size={50} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h3 style={{ margin: 0, fontWeight: 800, fontSize: '1.08rem', color: 'var(--heading)', wordBreak: 'break-word' }}>
                   {customerName}
                 </h3>
                 <span className="profile-badge verified" style={{ marginTop: 6, padding: '3px 10px', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -287,11 +290,11 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, borderTop: '1px solid var(--border-light)', paddingTop: 16, fontSize: '0.92rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid var(--border-light)', paddingTop: 14, fontSize: '0.9rem' }}>
               {customerEmail && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--muted)' }}>البريد الإلكتروني:</span>
-                  <a href={`mailto:${customerEmail}`} style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+                  <span style={{ color: 'var(--muted)', flexShrink: 0 }}>البريد الإلكتروني:</span>
+                  <a href={`mailto:${customerEmail}`} style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', wordBreak: 'break-all' }}>
                     {customerEmail}
                   </a>
                 </div>
@@ -387,7 +390,7 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
 
             <div style={{ background: 'var(--surface-alt)', padding: 16, borderRadius: 'var(--radius-md)', marginBottom: 16 }}>
               <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--heading)' }}>
-                {servicePrice} {serviceCurrency}
+                {formatCurrency(servicePrice, b.service?.currency_detail || rawCurrency, isRTL)}
               </div>
               <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginTop: 4 }}>
                 طريقة السداد: {b.payments?.[0]?.method || 'تحويل بنكي / إيصال سداد'}
@@ -445,30 +448,38 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
           </div>
 
           {/* MEETING LINK OR LOCATION */}
-          {(b.meeting_link || b.location || b.google_meet_url) && (
-            <div className="card-body" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 'var(--radius-lg)', padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <strong style={{ fontSize: '0.88rem', color: '#2563eb', display: 'block', marginBottom: 4 }}>
-                  رابط الاجتماع / المكان:
-                </strong>
-                <span style={{ fontSize: '0.92rem', color: 'var(--heading)', fontWeight: 600 }}>
-                  {b.location || b.meeting_link || b.google_meet_url}
-                </span>
+          {(() => {
+            const meetUrl = b.google_meet_link || b.metadata?.google_meet_link || b.metadata?.meet_link || b.metadata?.meeting_url || b.meeting_link || b.google_meet_url || (typeof b.location === 'string' && b.location.includes('http') ? b.location : null);
+            const displayLoc = meetUrl || b.location;
+
+            if (!displayLoc) return null;
+
+            return (
+              <div className="card-body" style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.25)', borderRadius: 'var(--radius-lg)', padding: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <strong style={{ fontSize: '0.88rem', color: '#2563eb', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Icon name="google-meet" size={18} />
+                    {meetUrl ? (t('googleMeetLink') || 'رابط اجتماع Google Meet / الموعد:') : (t('locationLabel') || 'المكان:')}
+                  </strong>
+                  <span style={{ fontSize: '0.92rem', color: 'var(--heading)', fontWeight: 600, wordBreak: 'break-all' }}>
+                    {displayLoc}
+                  </span>
+                </div>
+                {meetUrl && (
+                  <a
+                    href={meetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{ fontSize: '0.84rem', padding: '8px 18px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 10 }}
+                  >
+                    <Icon name="link" size={14} />
+                    {t('joinMeeting') || 'الانضمام للاجتماع'}
+                  </a>
+                )}
               </div>
-              {(b.meeting_link || b.google_meet_url) && (
-                <a
-                  href={b.meeting_link || b.google_meet_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary btn-sm"
-                  style={{ fontSize: '0.84rem', padding: '8px 16px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                >
-                  <Icon name="link" size={14} />
-                  {t('joinMeeting') || 'الانضمام للاجتماع'}
-                </a>
-              )}
-            </div>
-          )}
+            );
+          })()}
 
           {/* NOTES & REASON */}
           {b.notes && (
@@ -481,11 +492,12 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
           )}
 
           {b.cancellation_reason && (
-            <div className="card-body" style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius-lg)', padding: 18 }}>
-              <strong style={{ fontSize: '0.88rem', color: '#dc2626', display: 'block', marginBottom: 4 }}>
-                سبب إلغاء الموعد:
+            <div className="cancellation-reason-box">
+              <strong className="cancellation-reason-title">
+                <Icon name="x-circle" size={15} style={{ marginInlineEnd: 6 }} />
+                {t('cancellationReason') || 'سبب إلغاء الموعد:'}
               </strong>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text)' }}>{b.cancellation_reason}</p>
+              <p className="cancellation-reason-text">{b.cancellation_reason}</p>
             </div>
           )}
 
