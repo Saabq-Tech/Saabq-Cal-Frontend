@@ -7,6 +7,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import GuestRoute from './components/layout/GuestRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ScrollToTop from './components/layout/ScrollToTop';
 import PageLoader from './components/ui/PageLoader';
@@ -107,11 +108,11 @@ export default function App() {
                   <Route path="/workspaces/:idOrSlug/book" element={<MainLayout><CustomerBookAppointmentPage /></MainLayout>} />
 
                   {/* Customer Suite Routes */}
-                  <Route path="/customer/login" element={<AuthLayout><CustomerLoginPage /></AuthLayout>} />
-                  <Route path="/customer/register" element={<AuthLayout><CustomerRegisterPage /></AuthLayout>} />
-                  <Route path="/customer/forgot-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
-                  <Route path="/customer/reset-password" element={<AuthLayout><CustomerForgotPasswordPage /></AuthLayout>} />
-                  <Route path="/customer/verify-account" element={<AuthLayout><CustomerVerifyAccountPage /></AuthLayout>} />
+                  <Route path="/customer/login" element={<GuestRoute><AuthLayout><CustomerLoginPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/customer/register" element={<GuestRoute><AuthLayout><CustomerRegisterPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/customer/forgot-password" element={<GuestRoute><AuthLayout><CustomerForgotPasswordPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/customer/reset-password" element={<GuestRoute><AuthLayout><CustomerForgotPasswordPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/customer/verify-account" element={<GuestRoute><AuthLayout><CustomerVerifyAccountPage /></AuthLayout></GuestRoute>} />
 
                   <Route path="/customer" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
                     <Route index element={<Navigate to="profile" replace />} />
@@ -121,11 +122,11 @@ export default function App() {
                   </Route>
 
                   {/* Workspace Member Suite Routes */}
-                  <Route path="/member/login" element={<AuthLayout><MemberLoginPage /></AuthLayout>} />
-                  <Route path="/member/register" element={<AuthLayout><MemberRegisterPage /></AuthLayout>} />
-                  <Route path="/member/forgot-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
-                  <Route path="/member/reset-password" element={<AuthLayout><MemberForgotPasswordPage /></AuthLayout>} />
-                  <Route path="/member/verify-account" element={<AuthLayout><MemberVerifyAccountPage /></AuthLayout>} />
+                  <Route path="/member/login" element={<GuestRoute><AuthLayout><MemberLoginPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/member/register" element={<GuestRoute><AuthLayout><MemberRegisterPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/member/forgot-password" element={<GuestRoute><AuthLayout><MemberForgotPasswordPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/member/reset-password" element={<GuestRoute><AuthLayout><MemberForgotPasswordPage /></AuthLayout></GuestRoute>} />
+                  <Route path="/member/verify-account" element={<GuestRoute><AuthLayout><MemberVerifyAccountPage /></AuthLayout></GuestRoute>} />
 
                   <Route path="/member" element={<MainLayout><ProtectedRoute><DashboardLayout /></ProtectedRoute></MainLayout>}>
                     <Route index element={<Navigate to="profile" replace />} />
@@ -154,11 +155,11 @@ export default function App() {
                   <Route path="/503" element={<MainLayout><ServiceUnavailablePage /></MainLayout>} />
 
                   {/* General Route Aliases */}
-                  <Route path="/login" element={<Navigate to="/customer/login" replace />} />
-                  <Route path="/register" element={<Navigate to="/customer/register" replace />} />
-                  <Route path="/forgot-password" element={<Navigate to="/customer/forgot-password" replace />} />
-                  <Route path="/reset-password" element={<Navigate to="/customer/forgot-password" replace />} />
-                  <Route path="/verify-account" element={<Navigate to="/customer/verify-account" replace />} />
+                  <Route path="/login" element={<GuestRoute><Navigate to="/customer/login" replace /></GuestRoute>} />
+                  <Route path="/register" element={<GuestRoute><Navigate to="/customer/register" replace /></GuestRoute>} />
+                  <Route path="/forgot-password" element={<GuestRoute><Navigate to="/customer/forgot-password" replace /></GuestRoute>} />
+                  <Route path="/reset-password" element={<GuestRoute><Navigate to="/customer/forgot-password" replace /></GuestRoute>} />
+                  <Route path="/verify-account" element={<GuestRoute><Navigate to="/customer/verify-account" replace /></GuestRoute>} />
                   <Route path="/profile" element={<Navigate to="/customer/profile" replace />} />
                   <Route path="/customer/appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />
                   <Route path="/my-appointments" element={<Navigate to="/customer/profile?tab=appointments" replace />} />

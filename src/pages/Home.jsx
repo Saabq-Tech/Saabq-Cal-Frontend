@@ -20,7 +20,7 @@ const FEATURE_ICONS = [
 
 export default function Home() {
   const { t, lang } = useLanguage();
-  useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [banners, setBanners] = useState([]);
   const [features, setFeatures] = useState([]);
@@ -124,10 +124,12 @@ export default function Home() {
             <p>{t('heroDescription')}</p>
 
             <div className="hero-actions" style={{ marginBottom: 40 }}>
-              <Link to="/register" className="btn btn-primary btn-lg">
-                {t('getStartedFree')}
-                <Icon name="arrow-right" size={16} style={{ transform: lang === 'ar' ? 'rotate(180deg)' : 'none' }} />
-              </Link>
+              {!isAuthenticated && (
+                <Link to="/register" className="btn btn-primary btn-lg">
+                  {t('getStartedFree')}
+                  <Icon name="arrow-right" size={16} style={{ transform: lang === 'ar' ? 'rotate(180deg)' : 'none' }} />
+                </Link>
+              )}
               <Link to="/workspaces" className="btn btn-accent btn-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="monitor" size={18} />
                 {t('exploreWorkspaces')}
@@ -536,9 +538,11 @@ export default function Home() {
             {t('readyToStartDesc')}
           </p>
           <div className="hero-actions">
-            <Link to="/register" className="btn btn-primary btn-lg">
-              {t('createFreeAccount')}
-            </Link>
+            {!isAuthenticated && (
+              <Link to="/register" className="btn btn-primary btn-lg">
+                {t('createFreeAccount')}
+              </Link>
+            )}
             <Link to="/workspaces" className="btn btn-accent btn-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <Icon name="monitor" size={18} />
               {t('exploreWorkspaces')}

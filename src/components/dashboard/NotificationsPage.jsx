@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import client, { endpoints } from '../../api/client';
 import Icon from '../common/Icon';
 
@@ -9,6 +11,35 @@ import Icon from '../common/Icon';
 /* ---------------------------------------------------------------
    Helpers
 --------------------------------------------------------------- */
+function resolveActionUrl(url, userType) {
+  if (!url) return null;
+
+  // If URL contains /b/ or points to legacy /b/:id
+  if (url.includes('/b/')) {
+    return userType === 'member' ? '/member/workspace/bookings' : '/customer/profile?tab=appointments';
+  }
+
+  try {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const parsed = new URL(url);
+      if (parsed.pathname.startsWith('/member') || parsed.pathname.startsWith('/workspace')) {
+        return parsed.pathname + parsed.search;
+      }
+      if (parsed.pathname.startsWith('/customer') || parsed.pathname.startsWith('/profile') || parsed.pathname.startsWith('/my-appointments')) {
+        return parsed.pathname + parsed.search;
+      }
+      if (parsed.pathname.startsWith('/b/')) {
+        return userType === 'member' ? '/member/workspace/bookings' : '/customer/profile?tab=appointments';
+      }
+      return url;
+    }
+  } catch {
+    // fallback to original url
+  }
+
+  return url;
+}
+
 function relativeTime(isoString, t) {
   if (!isoString) return '';
   const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
@@ -89,8 +120,11 @@ function ClearConfirmModal({ onConfirm, onCancel, t }) {
 /* ---------------------------------------------------------------
    Single notification item
 --------------------------------------------------------------- */
-function NotificationItem({ notif, index, onMarkRead, onDelete, t }) {
+function NotificationItem({ notif, index, onMarkRead, onDelete, t, userType, navigate }) {
   const isUnread = !notif.read_at;
+  const rawUrl = notif.data?.action_url;
+  const resolvedUrl = resolveActionUrl(rawUrl, userType);
+  const isInternal = resolvedUrl && (resolvedUrl.startsWith('/') || !resolvedUrl.startsWith('http'));
 
   const handleCardClick = () => {
     if (isUnread) {
@@ -102,6 +136,18 @@ function NotificationItem({ notif, index, onMarkRead, onDelete, t }) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleCardClick();
+    }
+  };
+
+  const handleActionClick = (e) => {
+    e.stopPropagation();
+    if (isUnread) onMarkRead(notif.id);
+    if (!resolvedUrl) return;
+
+    if (isInternal) {
+      navigate(resolvedUrl);
+    } else {
+      window.open(resolvedUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -140,21 +186,16 @@ function NotificationItem({ notif, index, onMarkRead, onDelete, t }) {
         </div>
 
         <div className="notification-item-actions" onClick={(e) => e.stopPropagation()}>
-          {notif.data?.action_url && (
-            <a
-              href={notif.data.action_url}
-              target="_blank"
-              rel="noopener noreferrer"
+          {resolvedUrl && (
+            <button
+              type="button"
               className="notif-action-btn primary-action"
               title={notif.data?.action_text || t('view')}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isUnread) onMarkRead(notif.id);
-              }}
+              onClick={handleActionClick}
             >
               <Icon name="link" size={13} />
               <span>{notif.data?.action_text || t('view')}</span>
-            </a>
+            </button>
           )}
           {isUnread && (
             <button
@@ -196,6 +237,8 @@ function NotificationItem({ notif, index, onMarkRead, onDelete, t }) {
 export default function NotificationsPage() {
   const { t } = useLanguage();
   const toast = useToast();
+  const { userType } = useAuth();
+  const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -411,6 +454,8 @@ export default function NotificationsPage() {
                   onMarkRead={busyIds.has(notif.id) ? () => {} : handleMarkRead}
                   onDelete={busyIds.has(notif.id) ? () => {} : handleDelete}
                   t={t}
+                  userType={userType}
+                  navigate={navigate}
                 />
               ))}
               {filter === 'all' && hasMore && (
