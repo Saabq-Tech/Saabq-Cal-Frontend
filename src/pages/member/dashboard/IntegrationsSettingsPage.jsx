@@ -1604,6 +1604,7 @@ export default function IntegrationsSettingsPage() {
             style={{
               maxWidth: 640,
               width: '95%',
+              maxHeight: '90vh',
               display: 'flex',
               flexDirection: 'column',
               padding: 0,
@@ -1614,10 +1615,12 @@ export default function IntegrationsSettingsPage() {
             {/* Header with Driver Radio Toggle matching Image 1 & 2 */}
             <div
               style={{
-                padding: '24px 28px 16px',
+                padding: '20px 28px 16px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                flexShrink: 0,
+                borderBottom: '1px solid var(--border-light)',
               }}
             >
               <h3 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1651,7 +1654,17 @@ export default function IntegrationsSettingsPage() {
               </div>
             </div>
 
-            <div style={{ padding: '0 28px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div
+              className="modal-scroll-area"
+              style={{
+                padding: '20px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 18,
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
 
               {/* RESEND DRIVER FIELDS */}
               {mailDriver === 'resend' && (
@@ -1839,12 +1852,14 @@ export default function IntegrationsSettingsPage() {
             <div
               className="modal-actions"
               style={{
-                padding: '16px 28px 24px',
+                padding: '16px 28px 20px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 background: 'var(--bg-card)',
                 marginTop: 0,
+                flexShrink: 0,
+                borderTop: '1px solid var(--border-light)',
               }}
             >
               <div style={{ display: 'flex', gap: 8 }}>
