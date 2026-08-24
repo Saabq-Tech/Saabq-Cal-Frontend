@@ -73,6 +73,10 @@ export default function IntegrationsSettingsPage() {
     saveTelegramIntegration,
     activateTelegramWebhook,
     deleteTelegramIntegration,
+    fetchEmailIntegration,
+    saveEmailIntegration,
+    deleteEmailIntegration,
+    testEmailIntegration,
   } = useAuth();
 
 
@@ -148,6 +152,20 @@ export default function IntegrationsSettingsPage() {
   const [telegramIsActive, setTelegramIsActive] = useState(true);
   const [services, setServices] = useState([]);
   const [showChatId, setShowChatId] = useState(false);
+
+  // Email Integration State
+  const [emailIntegration, setEmailIntegration] = useState(null);
+  const [mailDriver, setMailDriver] = useState('resend'); // 'smtp' or 'resend'
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState(587);
+  const [smtpUsername, setSmtpUsername] = useState('');
+  const [smtpPassword, setSmtpPassword] = useState('');
+  const [resendApiKey, setResendApiKey] = useState('');
+  const [fromAddress, setFromAddress] = useState('');
+  const [fromName, setFromName] = useState('');
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+  const [showResendKey, setShowResendKey] = useState(false);
+  const [emailIsActive, setEmailIsActive] = useState(true);
 
   const [emailNotify, setEmailNotify] = useState(true);
   const [pushNotify, setPushNotify] = useState(true);
@@ -233,6 +251,29 @@ export default function IntegrationsSettingsPage() {
       setTelegramEnableActionButtons(true);
       setTelegramActionButtonsConfig(JSON.stringify(defaultTelegramActionConfig, null, 2));
       setTelegramIsActive(true);
+    }
+
+    const eRes = await fetchEmailIntegration();
+    if (eRes?.success && eRes.data) {
+      setEmailIntegration(eRes.data);
+      setMailDriver(eRes.data.mail_driver || 'resend');
+      setSmtpHost(eRes.data.smtp_host || '');
+      setSmtpPort(eRes.data.smtp_port || 587);
+      setSmtpUsername(eRes.data.smtp_username || '');
+      setFromAddress(eRes.data.from_address || '');
+      setFromName(eRes.data.from_name || '');
+      setEmailIsActive(!!eRes.data.is_active);
+    } else {
+      setEmailIntegration(null);
+      setMailDriver('resend');
+      setSmtpHost('');
+      setSmtpPort(587);
+      setSmtpUsername('');
+      setSmtpPassword('');
+      setResendApiKey('');
+      setFromAddress('');
+      setFromName('');
+      setEmailIsActive(true);
     }
 
     try {
@@ -521,6 +562,69 @@ export default function IntegrationsSettingsPage() {
     );
   };
 
+  const handleSaveEmailSettings = async () => {
+    if (mailDriver === 'smtp' && !smtpHost) {
+      toast.error(t('enterSmtpHost'));
+      return;
+    }
+    if (mailDriver === 'resend' && !resendApiKey && !emailIntegration?.has_resend_api_key) {
+      toast.error(t('enterResendKey'));
+      return;
+    }
+    if (!fromAddress) {
+      toast.error(t('enterFromAddress'));
+      return;
+    }
+
+    const payload = {
+      mail_driver: mailDriver,
+      smtp_host: smtpHost || undefined,
+      smtp_port: smtpPort ? parseInt(smtpPort, 10) : 587,
+      smtp_username: smtpUsername || undefined,
+      smtp_password: smtpPassword || undefined,
+      resend_api_key: resendApiKey || undefined,
+      from_address: fromAddress,
+      from_name: fromName || undefined,
+      is_active: emailIsActive,
+    };
+
+    const res = await saveEmailIntegration(payload);
+    if (res?.success) {
+      toast.success(res.message || t('emailSettingsSaved') || 'تم حفظ إعدادات البريد الإلكتروني بنجاح');
+      await loadSecurityData();
+      setActiveModalId(null);
+    } else {
+      toast.error(res?.message || 'Failed to save Email settings.');
+    }
+  };
+
+  const handleTestEmail = async () => {
+    const res = await testEmailIntegration();
+    if (res?.success) {
+      toast.success(res.message || t('testEmailSuccess') || 'تم إرسال البريد الإلكتروني التجريبي بنجاح!');
+    } else {
+      toast.error(res?.message || 'Failed to send test email.');
+    }
+  };
+
+  const handleDeleteEmailSettings = () => {
+    openConfirm(
+      t('emailSettingsTitle') || 'إعدادات البريد الإلكتروني',
+      t('emailDisconnectConfirm') || 'هل أنت تأكد من رغبتك في إلغاء ربط البريد الإلكتروني؟',
+      t('disconnect') || 'إلغاء الربط',
+      async () => {
+        const res = await deleteEmailIntegration();
+        if (res?.success) {
+          toast.success(res.message || t('emailDisconnectedSuccess') || 'تم إلغاء ربط البريد الإلكتروني بنجاح');
+          await loadSecurityData();
+          setActiveModalId(null);
+        } else {
+          toast.error(res?.message || 'Failed to disconnect Email integration.');
+        }
+      }
+    );
+  };
+
   const integrationsList = [
     {
       id: 'google_workspace',
@@ -592,14 +696,16 @@ export default function IntegrationsSettingsPage() {
     },
     {
       id: 'notifications',
-      title: t('systemNotificationsTitle') || 'إشعارات النظام',
+      title: t('emailSettingsTitle') || 'إعدادات البريد الإلكتروني',
       category: 'notifications',
       icon: (
-        <Icon name="notifications-colored" size={26} />
+        <Icon name="mail" size={26} />
       ),
-      description: t('notificationsDesc') || 'تلقي إشعارات البريد الإلكتروني والتنبيهات المباشرة فور حجز أي موعد جديد.',
-      isConnected: true,
-      subtitle: t('activeBySystem') || 'مفعّلة افتراضياً بالنظام',
+      description: t('notificationsDesc') || 'إعدادات البريد الإلكتروني (SMTP / Resend) لإرسال إشعارات الحجوزات والتنبيهات المباشرة فور حجز أي موعد جديد.',
+      isConnected: !!(emailIntegration && emailIntegration.is_connected),
+      subtitle: emailIntegration && emailIntegration.is_connected
+        ? `${emailIntegration.mail_driver === 'resend' ? 'Resend' : 'SMTP'}: ${emailIntegration.from_address || ''}`
+        : (t('defaultSystemMail') || 'مفعّلة افتراضياً بالنظام'),
     },
   ];
 
@@ -1469,47 +1575,271 @@ export default function IntegrationsSettingsPage() {
         document.body
       )}
 
-      {/* --- MODAL 6: System Notifications --- */}
+      {/* --- MODAL 6: Email Integration Settings --- */}
       {activeModalId === 'notifications' && createPortal(
         <div className="modal-backdrop">
-          <div className="modal-card animate-scale-up">
-            <div className="modal-header">
-              <h3 className="modal-title">{t('systemNotificationsTitle') || 'تنبيهات وإشعارات النظام'}</h3>
-              <button type="button" className="modal-close-btn" onClick={() => setActiveModalId(null)}>
-                <Icon name="x" size={16} />
-              </button>
+          <div
+            className="modal-card animate-scale-up"
+            style={{
+              maxWidth: 640,
+              width: '95%',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: 0,
+              borderRadius: 'var(--radius-lg, 16px)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header with Driver Radio Toggle matching Image 1 & 2 */}
+            <div
+              style={{
+                padding: '24px 28px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <h3 className="modal-title" style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                ✉️ {t('emailSettingsTitle') || 'إعدادات البريد الإلكتروني'}
+              </h3>
+
+              {/* Radio Driver Selector */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
+                  <input
+                    type="radio"
+                    name="mail_driver"
+                    value="smtp"
+                    checked={mailDriver === 'smtp'}
+                    onChange={() => setMailDriver('smtp')}
+                    style={{ accentColor: '#0d685c', width: 16, height: 16 }}
+                  />
+                  SMTP
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
+                  <input
+                    type="radio"
+                    name="mail_driver"
+                    value="resend"
+                    checked={mailDriver === 'resend'}
+                    onChange={() => setMailDriver('resend')}
+                    style={{ accentColor: '#0d685c', width: 16, height: 16 }}
+                  />
+                  Resend
+                </label>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>{t('emailNotificationsLabel') || 'إشعارات البريد الإلكتروني'}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{t('emailNotificationsSub') || 'استلام تأكيد بكل حجز على بريدك'}</div>
+            <div style={{ padding: '0 28px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+              {/* RESEND DRIVER FIELDS (Matching Image 1) */}
+              {mailDriver === 'resend' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', textAlign: 'right', display: 'block', marginBottom: 6 }}>
+                      Resend API Key
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showResendKey ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="re_123456789_..."
+                        value={resendApiKey}
+                        onChange={(e) => setResendApiKey(e.target.value)}
+                        style={{ paddingLeft: t('lang') === 'en' ? 70 : 12, paddingRight: t('lang') === 'en' ? 12 : 70 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowResendKey(!showResendKey)}
+                        style={{
+                          position: 'absolute',
+                          left: t('lang') === 'en' ? 'auto' : 12,
+                          right: t('lang') === 'en' ? 12 : 'auto',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          border: 0,
+                          background: 'transparent',
+                          color: '#0d685c',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {showResendKey ? (t('hide') || 'إخفاء') : (t('change') || 'تغيير')}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <ToggleSwitch checked={emailNotify} onChange={(e) => setEmailNotify(e.target.checked)} />
+              )}
+
+              {/* SMTP DRIVER FIELDS (Matching Image 2) */}
+              {mailDriver === 'smtp' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Grid 2 Columns */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                        SMTP Host
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="smtp.gmail.com"
+                        value={smtpHost}
+                        onChange={(e) => setSmtpHost(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                        Port
+                      </label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="587"
+                        value={smtpPort}
+                        onChange={(e) => setSmtpPort(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="your-email@gmail.com"
+                        value={smtpUsername}
+                        onChange={(e) => setSmtpUsername(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                        Password
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showSmtpPassword ? 'text' : 'password'}
+                          className="form-input"
+                          placeholder={emailIntegration?.has_smtp_password ? '••••••••' : '••••••••'}
+                          value={smtpPassword}
+                          onChange={(e) => setSmtpPassword(e.target.value)}
+                          style={{ paddingLeft: t('lang') === 'en' ? 65 : 12, paddingRight: t('lang') === 'en' ? 12 : 65 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowSmtpPassword(!showSmtpPassword)}
+                          style={{
+                            position: 'absolute',
+                            left: t('lang') === 'en' ? 'auto' : 12,
+                            right: t('lang') === 'en' ? 12 : 'auto',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            border: 0,
+                            background: 'transparent',
+                            color: '#0d685c',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {showSmtpPassword ? (t('hide') || 'إخفاء') : (t('show') || 'إظهار')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* COMMON FROM ADDRESS FIELD (Image 1 & Image 2) */}
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                  {t('fromAddressLabel')}
+                </label>
+                <input
+                  type="email"
+                  className="form-input"
+                  placeholder="you@yourdomain.com"
+                  value={fromAddress}
+                  onChange={(e) => setFromAddress(e.target.value)}
+                />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.92rem' }}>{t('pushNotificationsLabel') || 'التنبيهات المباشرة (In-App Push)'}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{t('pushNotificationsSub') || 'إشعارات فورية بلوحة تحكم المتصفح'}</div>
-                </div>
-                <ToggleSwitch checked={pushNotify} onChange={(e) => setPushNotify(e.target.checked)} />
+              {/* OPTIONAL FROM SENDER NAME FIELD */}
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
+                  {t('fromSenderNameLabel') || 'اسم المرسل (Sender Name)'}
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="My Business Name"
+                  value={fromName}
+                  onChange={(e) => setFromName(e.target.value)}
+                />
               </div>
+
             </div>
 
-            <div className="modal-actions">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setActiveModalId(null)}>{t('cancel')}</button>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  toast.success(t('notificationSettingsSaved') || 'تم حفظ خيارات التنبيهات بنجاح');
-                  setActiveModalId(null);
-                }}
-              >
-                {t('saveNotificationsBtn') || 'حفظ التنبيهات'}
-              </button>
+            {/* Modal Actions Footer matching design */}
+            <div
+              className="modal-actions"
+              style={{
+                padding: '16px 28px 24px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'var(--bg-card)',
+                marginTop: 0,
+              }}
+            >
+              <div style={{ display: 'flex', gap: 8 }}>
+                {emailIntegration && emailIntegration.is_connected && (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleTestEmail}
+                      disabled={loading}
+                    >
+                      {t('testEmailBtn') || 'تجربة الإرسال'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={handleDeleteEmailSettings}
+                      disabled={loading}
+                    >
+                      {t('disconnect') || 'إلغاء الربط'}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setActiveModalId(null)}>
+                  {t('cancel')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={handleSaveEmailSettings}
+                  disabled={loading}
+                  style={{
+                    backgroundColor: '#0d685c',
+                    borderColor: '#0d685c',
+                    color: '#ffffff',
+                    padding: '8px 24px',
+                    borderRadius: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  {t('save') || 'حفظ'}
+                </button>
+              </div>
             </div>
           </div>
         </div>,

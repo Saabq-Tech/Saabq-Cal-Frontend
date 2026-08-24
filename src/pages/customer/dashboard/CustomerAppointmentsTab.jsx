@@ -35,6 +35,13 @@ export default function CustomerAppointmentsTab() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
 
+  // Reschedule modal state
+  const [rescheduleModalAppt, setRescheduleModalAppt] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduleReason, setRescheduleReason] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
+
   // Payment proof reupload modal state
   const [proofModalAppt, setProofModalAppt] = useState(null);
   const [proofFile, setProofFile] = useState(null);
@@ -146,6 +153,35 @@ export default function CustomerAppointmentsTab() {
       toast.error(err.response?.data?.message || (isRTL ? 'فشل إلغاء الموعد' : 'Failed to cancel appointment'));
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRescheduleAppointment = async (e) => {
+    e.preventDefault();
+    if (!rescheduleModalAppt || !rescheduleDate || !rescheduleTime) {
+      toast.error(isRTL ? 'يرجى اختيار التاريخ والوقت الجديد' : 'Please select a new date and time');
+      return;
+    }
+    setRescheduling(true);
+    try {
+      const startsAt = `${rescheduleDate}T${rescheduleTime}:00`;
+      await client.post(`/customers/appointments/${rescheduleModalAppt.id}/reschedule`, {
+        starts_at: startsAt,
+        reason: rescheduleReason || undefined,
+      });
+      toast.success(isRTL ? 'تم إعادة جدولة الموعد بنجاح' : 'Appointment rescheduled successfully');
+      setRescheduleModalAppt(null);
+      setRescheduleDate('');
+      setRescheduleTime('');
+      setRescheduleReason('');
+      if (selectedAppointment?.id === rescheduleModalAppt.id) {
+        setSelectedAppointment(null);
+      }
+      fetchAppointments(page);
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل إعادة جدولة الموعد' : 'Failed to reschedule appointment'));
+    } finally {
+      setRescheduling(false);
     }
   };
 
@@ -555,6 +591,25 @@ export default function CustomerAppointmentsTab() {
                       <Icon name="eye" size={14} />
                       <span>{isRTL ? 'التفاصيل الكاملة' : 'Full Details'}</span>
                     </button>
+
+                    {/* Reschedule Button if active */}
+                    {(appt.status === 'pending' || appt.status === 'confirmed') && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => {
+                          setRescheduleModalAppt(appt);
+                          const d = appt.starts_at ? new Date(appt.starts_at) : new Date();
+                          setRescheduleDate(d.toISOString().split('T')[0]);
+                          setRescheduleTime(d.toTimeString().slice(0, 5));
+                          setRescheduleReason('');
+                        }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8 }}
+                      >
+                        <Icon name="calendar" size={14} />
+                        <span>{isRTL ? 'إعادة جدولة' : 'Reschedule'}</span>
+                      </button>
+                    )}
 
                     {/* Cancel Button if active */}
                     {(appt.status === 'pending' || appt.status === 'confirmed') && (
@@ -1082,6 +1137,24 @@ export default function CustomerAppointmentsTab() {
                     {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
                       <button
                         type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          const appt = selectedAppointment;
+                          setRescheduleModalAppt(appt);
+                          const d = appt.starts_at ? new Date(appt.starts_at) : new Date();
+                          setRescheduleDate(d.toISOString().split('T')[0]);
+                          setRescheduleTime(d.toTimeString().slice(0, 5));
+                          setRescheduleReason('');
+                        }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                      >
+                        <Icon name="calendar" size={16} />
+                        <span>{isRTL ? 'إعادة جدولة' : 'Reschedule'}</span>
+                      </button>
+                    )}
+                    {(selectedAppointment.status === 'pending' || selectedAppointment.status === 'confirmed') && (
+                      <button
+                        type="button"
                         className="btn btn-danger-subtle"
                         onClick={() => { setCancelModalAppt(selectedAppointment); setCancelReason(''); }}
                       >
@@ -1254,6 +1327,109 @@ export default function CustomerAppointmentsTab() {
                     </>
                   ) : (
                     isRTL ? 'تأكيد وحفظ الإيصال' : 'Submit Receipt'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Reschedule Modal */}
+      {rescheduleModalAppt && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 999999,
+            background: 'rgba(0, 0, 0, 0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            backdropFilter: 'blur(6px)',
+          }}
+          onClick={() => setRescheduleModalAppt(null)}
+        >
+          <div
+            style={{
+              background: 'var(--surface)',
+              borderRadius: 16,
+              width: '100%',
+              maxWidth: 480,
+              padding: 24,
+              border: '1px solid var(--border-light)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="animate-fade-in-up"
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--heading)' }}>
+                {isRTL ? 'إعادة جدولة الموعد' : 'Reschedule Appointment'}
+              </h3>
+              <button type="button" className="btn btn-icon btn-sm" onClick={() => setRescheduleModalAppt(null)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+              {isRTL ? 'حدد اليوم والوقت الجديدين للموعد:' : 'Choose a new date and time for the appointment:'}
+            </p>
+
+            <form onSubmit={handleRescheduleAppointment}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{isRTL ? 'التاريخ الجديد' : 'New Date'}</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={rescheduleDate}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{isRTL ? 'الوقت الجديد' : 'New Time'}</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={rescheduleTime}
+                  onChange={(e) => setRescheduleTime(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 18 }}>
+                <label className="form-label">{isRTL ? 'سبب إعادة الجدولة (اختياري)' : 'Reason (Optional)'}</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  placeholder={isRTL ? 'اكتب سبب التعديل...' : 'Reason for rescheduling...'}
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setRescheduleModalAppt(null)}>
+                  {isRTL ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={rescheduling}>
+                  {rescheduling ? (
+                    <>
+                      <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
+                      {isRTL ? 'جاري الجدولة...' : 'Rescheduling...'}
+                    </>
+                  ) : (
+                    isRTL ? 'تأكيد إعادة الجدولة' : 'Confirm Reschedule'
                   )}
                 </button>
               </div>

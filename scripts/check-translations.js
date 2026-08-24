@@ -42,7 +42,9 @@ function getAllFiles(dir, fileList = []) {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {
-      getAllFiles(filePath, fileList);
+      if (file !== '__tests__') {
+        getAllFiles(filePath, fileList);
+      }
     } else if (filePath.endsWith('.js') || filePath.endsWith('.jsx')) {
       fileList.push(filePath);
     }

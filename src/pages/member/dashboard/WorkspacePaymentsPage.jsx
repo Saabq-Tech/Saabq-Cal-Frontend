@@ -14,14 +14,17 @@ export default function WorkspacePaymentsPage() {
   const toast = useToast();
 
   const [payments, setPayments] = useState([]);
+  const [walletData, setWalletData] = useState(null);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [walletLoading, setWalletLoading] = useState(true);
   const [page, setPage] = useState(1);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('');
   const [providerFilter, setProviderFilter] = useState('');
   const [payableTypeFilter, setPayableTypeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Selected Payment for Modal / Verification
@@ -29,6 +32,18 @@ export default function WorkspacePaymentsPage() {
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
+
+  const fetchWallet = useCallback(async () => {
+    setWalletLoading(true);
+    try {
+      const res = await client.get(endpoints.workspacePaymentsWallet);
+      setWalletData(res.data?.data || null);
+    } catch (err) {
+      setWalletData(null);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, []);
 
   const fetchPayments = useCallback(async (targetPage = 1) => {
     setLoading(true);
@@ -40,6 +55,7 @@ export default function WorkspacePaymentsPage() {
       if (statusFilter) params.status = statusFilter;
       if (providerFilter) params.provider = providerFilter;
       if (payableTypeFilter) params.payable_type = payableTypeFilter;
+      if (typeFilter) params.type = typeFilter;
       if (searchQuery.trim()) params.search = searchQuery.trim();
 
       const res = await client.get(endpoints.workspacePayments, { params });
@@ -56,11 +72,12 @@ export default function WorkspacePaymentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, providerFilter, payableTypeFilter, searchQuery, isRTL, toast]);
+  }, [statusFilter, providerFilter, payableTypeFilter, typeFilter, searchQuery, isRTL, toast]);
 
   useEffect(() => {
+    fetchWallet();
     fetchPayments(page);
-  }, [fetchPayments, page]);
+  }, [fetchWallet, fetchPayments, page]);
 
   const handleVerify = async (payment) => {
     setActionLoading(true);
@@ -68,6 +85,7 @@ export default function WorkspacePaymentsPage() {
       const res = await client.post(endpoints.workspacePaymentVerify(payment.id));
       toast.success(res.data?.message || (isRTL ? 'تم الاعتماد بنجاح' : 'Payment verified successfully'));
       setSelectedPayment(null);
+      fetchWallet();
       fetchPayments(page);
     } catch (err) {
       toast.error(err.response?.data?.message || (isRTL ? 'فشل اعتماد الدفع' : 'Failed to verify payment'));
@@ -89,6 +107,7 @@ export default function WorkspacePaymentsPage() {
       toast.success(res.data?.message || (isRTL ? 'تم رفض الدفع' : 'Payment rejected'));
       setSelectedPayment(null);
       setRejectReason('');
+      fetchWallet();
       fetchPayments(page);
     } catch (err) {
       toast.error(err.response?.data?.message || (isRTL ? 'فشل رفض الدفع' : 'Failed to reject payment'));
@@ -142,6 +161,107 @@ export default function WorkspacePaymentsPage() {
         </div>
       </div>
 
+      {/* Workspace Safe / Wallet Summary Cards */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 16,
+          marginBottom: 24,
+        }}
+      >
+        {/* Net Safe Balance */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(13, 104, 92, 0.12) 0%, rgba(13, 104, 92, 0.04) 100%)',
+            border: '1px solid rgba(13, 104, 92, 0.25)',
+            borderRadius: 16,
+            padding: '18px 20px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0d685c' }}>
+              {t('netBalanceLabel')}
+            </span>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(13, 104, 92, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0d685c' }}>
+              <Icon name="credit-card" size={18} />
+            </div>
+          </div>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--heading)' }}>
+            {walletLoading ? <SkeletonRect height={28} width={120} /> : `${walletData?.net_balance ?? 0} ${walletData?.currency || 'SAR'}`}
+          </div>
+        </div>
+
+        {/* Total Income (Credit) */}
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 16,
+            padding: '18px 20px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#166534' }}>
+              {t('totalCreditLabel')}
+            </span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#166534', background: '#dcfce7', padding: '3px 8px', borderRadius: 12 }}>
+              {t('creditBadge')}
+            </span>
+          </div>
+          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#166534' }}>
+            {walletLoading ? <SkeletonRect height={28} width={100} /> : `${walletData?.total_credit ?? 0} ${walletData?.currency || 'SAR'}`}
+          </div>
+        </div>
+
+        {/* Total Expenses & Refunds (Debit) */}
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 16,
+            padding: '18px 20px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#991b1b' }}>
+              {t('totalDebitLabel')}
+            </span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#991b1b', background: '#fee2e2', padding: '3px 8px', borderRadius: 12 }}>
+              {t('debitBadge')}
+            </span>
+          </div>
+          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#991b1b' }}>
+            {walletLoading ? <SkeletonRect height={28} width={100} /> : `${walletData?.total_debit ?? 0} ${walletData?.currency || 'SAR'}`}
+          </div>
+        </div>
+
+        {/* Pending Verification */}
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 16,
+            padding: '18px 20px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#b45309' }}>
+              {t('pendingVerificationLabel')}
+            </span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '3px 8px', borderRadius: 12 }}>
+              {walletData?.pending_count ?? 0}
+            </span>
+          </div>
+          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#b45309' }}>
+            {walletLoading ? <SkeletonRect height={28} width={100} /> : `${walletData?.pending_balance ?? 0} ${walletData?.currency || 'SAR'}`}
+          </div>
+        </div>
+      </div>
+
       {/* Responsive Filters Bar */}
       <div className="responsive-filters-bar">
         <div className="responsive-filter-input">
@@ -161,6 +281,22 @@ export default function WorkspacePaymentsPage() {
         <div className="responsive-filter-select">
           <select
             className="form-select"
+            value={typeFilter}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setPage(1);
+            }}
+            style={{ width: '100%', fontSize: '0.85rem' }}
+          >
+            <option value="">{t('allTypesLabel')}</option>
+            <option value="credit">{t('creditOnlyLabel')}</option>
+            <option value="debit">{t('debitOnlyLabel')}</option>
+          </select>
+        </div>
+
+        <div className="responsive-filter-select">
+          <select
+            className="form-select"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
@@ -173,6 +309,7 @@ export default function WorkspacePaymentsPage() {
             <option value="pending">{isRTL ? 'قيد الانتظار' : 'Pending'}</option>
             <option value="paid">{isRTL ? 'مدفوع ومعتمد' : 'Paid'}</option>
             <option value="failed">{isRTL ? 'مرفوض' : 'Failed'}</option>
+            <option value="refunded">{isRTL ? 'مسترجع' : 'Refunded'}</option>
           </select>
         </div>
 
@@ -186,13 +323,13 @@ export default function WorkspacePaymentsPage() {
             }}
             style={{ width: '100%', fontSize: '0.85rem' }}
           >
-            <option value="">{isRTL ? 'جميع الأنواع' : 'All Types'}</option>
+            <option value="">{isRTL ? 'جميع الجهات' : 'All Payables'}</option>
             <option value="Appointment">{isRTL ? 'حجوزات المواعيد' : 'Appointments'}</option>
             <option value="Subscription">{isRTL ? 'اشتراكات الباقات' : 'Subscriptions'}</option>
           </select>
         </div>
 
-        {(searchQuery || statusFilter || payableTypeFilter) && (
+        {(searchQuery || statusFilter || payableTypeFilter || typeFilter) && (
           <button
             type="button"
             className="btn btn-secondary btn-sm"
@@ -200,6 +337,7 @@ export default function WorkspacePaymentsPage() {
               setSearchQuery('');
               setStatusFilter('');
               setPayableTypeFilter('');
+              setTypeFilter('');
               setPage(1);
             }}
             style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
@@ -233,6 +371,7 @@ export default function WorkspacePaymentsPage() {
                 <tr>
                   <th>#</th>
                   <th>{isRTL ? 'المستحق له' : 'Payable'}</th>
+                  <th>{t('typeFilterLabel')}</th>
                   <th>{isRTL ? 'المبلغ' : 'Amount'}</th>
                   <th>{isRTL ? 'وسيلة الدفع' : 'Method / Provider'}</th>
                   <th>{isRTL ? 'الحالة' : 'Status'}</th>
@@ -244,6 +383,7 @@ export default function WorkspacePaymentsPage() {
                 {payments.map((p) => {
                   const badge = getStatusBadge(p.status);
                   const isSub = p.payable_type?.includes('Subscription');
+                  const isCredit = p.type === 'credit' || (!p.type && !isSub && p.status !== 'refunded');
                   return (
                     <tr key={p.id}>
                       <td style={{ fontWeight: 700 }}>#{p.id}</td>
@@ -253,8 +393,24 @@ export default function WorkspacePaymentsPage() {
                         </span>
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ID: {p.payable_id}</span>
                       </td>
-                      <td style={{ fontWeight: 800, color: 'var(--primary)' }}>
-                        {p.amount} {p.currency || 'SAR'}
+                      <td>
+                        <span
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: 14,
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            color: isCredit ? '#15803d' : '#b91c1c',
+                            background: isCredit ? '#dcfce7' : '#fee2e2',
+                            border: `1px solid ${isCredit ? '#bbf7d0' : '#fecaca'}`,
+                            display: 'inline-block',
+                          }}
+                        >
+                          {isCredit ? t('creditBadge') : t('debitBadge')}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 800, color: isCredit ? 'var(--primary)' : '#b91c1c' }}>
+                        {isCredit ? '+' : '-'}{p.amount} {p.currency || 'SAR'}
                       </td>
                       <td>
                         <span style={{ fontWeight: 600, display: 'block' }}>{p.method || 'bank_transfer'}</span>
@@ -299,6 +455,7 @@ export default function WorkspacePaymentsPage() {
             {payments.map((p) => {
               const badge = getStatusBadge(p.status);
               const isSub = p.payable_type?.includes('Subscription');
+              const isCredit = p.type === 'credit' || (!p.type && !isSub && p.status !== 'refunded');
               return (
                 <div key={p.id} className="payment-mobile-card">
                   <div className="payment-mobile-card-header">
@@ -308,19 +465,33 @@ export default function WorkspacePaymentsPage() {
                         {isSub ? (isRTL ? 'اشتراك' : 'Subscription') : (isRTL ? 'حجز موعد' : 'Appointment')} (ID: {p.payable_id})
                       </span>
                     </div>
-                    <span
-                      style={{
-                        padding: '3px 10px',
-                        borderRadius: 20,
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        color: badge.color,
-                        background: badge.bg,
-                        border: `1px solid ${badge.border}`,
-                      }}
-                    >
-                      {badge.label}
-                    </span>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <span
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: 12,
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          color: isCredit ? '#15803d' : '#b91c1c',
+                          background: isCredit ? '#dcfce7' : '#fee2e2',
+                        }}
+                      >
+                        {isCredit ? t('creditBadge') : t('debitBadge')}
+                      </span>
+                      <span
+                        style={{
+                          padding: '3px 10px',
+                          borderRadius: 20,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          color: badge.color,
+                          background: badge.bg,
+                          border: `1px solid ${badge.border}`,
+                        }}
+                      >
+                        {badge.label}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="payment-mobile-card-body">

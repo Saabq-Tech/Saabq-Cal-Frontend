@@ -682,6 +682,68 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
+  // --- Email Integration Methods (Workspace Members) ---
+  const fetchEmailIntegration = useCallback(async () => {
+    if (userType !== 'member') return;
+    setLoading(true);
+    try {
+      const response = await client.get(endpoints.emailIntegration('member'));
+      return { success: true, data: response.data.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
+  const saveEmailIntegration = useCallback(async (payload) => {
+    if (userType !== 'member') return;
+    setLoading(true);
+    try {
+      const response = await client.post(endpoints.emailIntegration('member'), payload);
+      return { success: true, data: response.data.data, message: response.data.message };
+    } catch (error) {
+      const errorData = error.response?.data;
+      return {
+        success: false,
+        message: errorData?.message || 'Failed to save Email settings',
+        errors: errorData?.errors || {},
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
+  const deleteEmailIntegration = useCallback(async () => {
+    if (userType !== 'member') return;
+    setLoading(true);
+    try {
+      const response = await client.delete(endpoints.emailIntegration('member'));
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Failed to delete Email integration' };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
+  const testEmailIntegration = useCallback(async () => {
+    if (userType !== 'member') return;
+    setLoading(true);
+    try {
+      const response = await client.post(endpoints.emailIntegrationTest('member'));
+      return { success: true, data: response.data.data, message: response.data.message };
+    } catch (error) {
+      const errorData = error.response?.data;
+      return {
+        success: false,
+        message: errorData?.message || 'Failed to send test email',
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
 
   const value = {
     user,
@@ -726,6 +788,10 @@ export function AuthProvider({ children }) {
     saveTelegramIntegration,
     activateTelegramWebhook,
     deleteTelegramIntegration,
+    fetchEmailIntegration,
+    saveEmailIntegration,
+    deleteEmailIntegration,
+    testEmailIntegration,
   };
 
 

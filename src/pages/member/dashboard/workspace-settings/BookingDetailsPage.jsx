@@ -24,6 +24,13 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
   // Action Confirmation Modal State
   const [confirmAction, setConfirmAction] = useState(null);
 
+  // Reschedule Modal State
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('');
+  const [rescheduleReason, setRescheduleReason] = useState('');
+  const [rescheduling, setRescheduling] = useState(false);
+
   const fetchDetails = async () => {
     try {
       setLoading(true);
@@ -188,6 +195,39 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
       toast.error(err.response?.data?.message || 'فشل إلغاء الموعد');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleRescheduleBooking = async (e) => {
+    e.preventDefault();
+    if (!rescheduleDate || !rescheduleTime) {
+      toast.error(isRTL ? 'يرجى اختيار التاريخ والوقت الجديد' : 'Please select a new date and time');
+      return;
+    }
+    setRescheduling(true);
+    try {
+      const startsAt = `${rescheduleDate}T${rescheduleTime}:00`;
+      const res = await client.post(endpoints.workspaceBookingReschedule(bookingId), {
+        starts_at: startsAt,
+        reason: rescheduleReason || undefined,
+      });
+      toast.success(isRTL ? 'تم إعادة جدولة الموعد بنجاح' : 'Booking rescheduled successfully');
+      setShowRescheduleModal(false);
+      setRescheduleDate('');
+      setRescheduleTime('');
+      setRescheduleReason('');
+      if (res.data?.data) {
+        setBooking(res.data.data);
+      } else {
+        fetchDetails();
+      }
+      if (typeof onReloadBookings === 'function') {
+        onReloadBookings();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || (isRTL ? 'فشل إعادة جدولة الموعد' : 'Failed to reschedule booking'));
+    } finally {
+      setRescheduling(false);
     }
   };
 
@@ -583,6 +623,23 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
 
               <button
                 type="button"
+                className="btn btn-sm btn-secondary"
+                onClick={() => {
+                  setShowRescheduleModal(true);
+                  const d = b.starts_at ? new Date(b.starts_at) : new Date();
+                  setRescheduleDate(d.toISOString().split('T')[0]);
+                  setRescheduleTime(d.toTimeString().slice(0, 5));
+                  setRescheduleReason('');
+                }}
+                disabled={updatingStatus}
+                style={{ fontSize: '0.92rem', fontWeight: 800, padding: '12px 18px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, width: '100%' }}
+              >
+                <Icon name="calendar" size={16} />
+                {isRTL ? 'إعادة جدولة الموعد' : 'Reschedule Booking'}
+              </button>
+
+              <button
+                type="button"
                 className="btn btn-sm"
                 onClick={() => setConfirmAction({ targetStatus: 'cancelled', label: t('cancelAppointment') || 'إلغاء الموعد', color: '#ef4444', requiresReason: true })}
                 disabled={updatingStatus}
@@ -704,6 +761,79 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
                 إغلاق
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* MEMBER RESCHEDULE MODAL */}
+      {showRescheduleModal && createPortal(
+        <div className="modal-backdrop" onClick={() => setShowRescheduleModal(false)} style={{ zIndex: 999999 }}>
+          <div className="modal-card animate-scale-up" style={{ maxWidth: 480, width: '100%', padding: 24 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h4 style={{ margin: 0, fontWeight: 800, fontSize: '1.15rem', color: 'var(--heading)' }}>
+                {isRTL ? 'إعادة جدولة الموعد' : 'Reschedule Booking'}
+              </h4>
+              <button type="button" className="modal-close-btn" onClick={() => setShowRescheduleModal(false)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 16 }}>
+              {isRTL ? 'اختر تاريخاً ووقتاً جديدين للموعد:' : 'Select a new date and time for the booking:'}
+            </p>
+
+            <form onSubmit={handleRescheduleBooking}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{isRTL ? 'التاريخ الجديد' : 'New Date'}</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={rescheduleDate}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label className="form-label">{isRTL ? 'الوقت الجديد' : 'New Time'}</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={rescheduleTime}
+                  onChange={(e) => setRescheduleTime(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 18 }}>
+                <label className="form-label">{isRTL ? 'سبب التعديل / ملاحظات (اختياري)' : 'Reason / Notes (Optional)'}</label>
+                <textarea
+                  className="form-input"
+                  rows={2}
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                  placeholder={isRTL ? 'أدخل السبب إن وجد...' : 'Enter reason if applicable...'}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowRescheduleModal(false)}>
+                  {isRTL ? 'إلغاء' : 'Cancel'}
+                </button>
+                <button type="submit" className="btn btn-primary btn-sm" disabled={rescheduling}>
+                  {rescheduling ? (
+                    <>
+                      <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
+                      {isRTL ? 'جاري التعديل...' : 'Updating...'}
+                    </>
+                  ) : (
+                    isRTL ? 'تأكيد الجدولة' : 'Confirm Reschedule'
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

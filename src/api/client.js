@@ -92,6 +92,8 @@ export const endpoints = {
   webhookIntegration: (type) => `${getAuthPrefix(type)}/integrations/webhook`,
   telegramIntegration: (type) => `${getAuthPrefix(type)}/integrations/telegram`,
   telegramActivateWebhook: (type) => `${getAuthPrefix(type)}/integrations/telegram/activate-webhook`,
+  emailIntegration: (type) => `${getAuthPrefix(type)}/integrations/email`,
+  emailIntegrationTest: (type) => `${getAuthPrefix(type)}/integrations/email/test`,
 
 
   // 2FA
@@ -144,6 +146,7 @@ export const endpoints = {
 
   // Workspace Payments (Member only)
   workspacePayments: '/workspace-members/workspace/payments',
+  workspacePaymentsWallet: '/workspace-members/workspace/payments/wallet',
   workspacePaymentDetail: (id) => `/workspace-members/workspace/payments/${id}`,
   workspacePaymentVerify: (id) => `/workspace-members/workspace/payments/${id}/verify`,
   workspacePaymentReject: (id) => `/workspace-members/workspace/payments/${id}/reject`,
