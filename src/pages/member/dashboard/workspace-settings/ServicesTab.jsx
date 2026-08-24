@@ -6,7 +6,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import UserAvatar from '../../../../components/ui/UserAvatar';
 import Icon from '../../../../components/common/Icon';
 import client, { endpoints } from '../../../../api/client';
-import { formatCurrency } from '../../../../utils/currency';
+
 
 const defaultFormState = {
   id: null,
@@ -229,7 +229,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))', gap: 18 }}>
           {servicesList.map((s) => {
-            const isEnabled = s.booking_enabled ?? true;
+            const _isEnabled = s.booking_enabled ?? true;
             const isFeatured = s.is_featured ?? false;
             const duration = s.duration_minutes || s.duration || 30;
             const price = s.price ?? 0;
@@ -341,7 +341,7 @@ export default function ServicesTab({ services, members = [], canEdit, onSaveSer
                     const providerName = provider?.name || (user?.name ? `${user.name}` : (t('workspaceOwner') || (isRTL ? 'مالك مساحة العمل' : 'Workspace Owner')));
                     const providerTitle = provider?.title || user?.title || '';
                     const providerAvatar = provider?.avatar_url || user?.avatar_url;
-                    const providerInitial = providerName ? providerName.charAt(0).toUpperCase() : 'P';
+                    const _providerInitial = providerName ? providerName.charAt(0).toUpperCase() : 'P';
 
                     return (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '6px 10px', background: 'var(--surface-alt)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>

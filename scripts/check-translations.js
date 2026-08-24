@@ -31,7 +31,7 @@ function logError(text) {
   console.log(`${colors.red}❌ ${text}${colors.reset}`);
 }
 
-function logWarning(text) {
+function _logWarning(text) {
   console.log(`${colors.yellow}⚠️  ${text}${colors.reset}`);
 }
 
@@ -154,9 +154,9 @@ async function runCheck() {
   const untranslatedFound = [];
 
   // Patterns for hardcoded text (matches both Arabic & English static text)
-  const jsxTextRegex = />\s*([\u0600-\u06FFA-Za-z][\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{1,})\s*</g;
-  const toastConfirmRegex = /(?:toast\.(?:success|error|info|warning)|confirm|alert)\(\s*['"]([\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{2,})['"]\s*\)/g;
-  const placeholderRegex = /placeholder=\s*['"]([\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{2,})['"]\s*/g;
+  const _jsxTextRegex = />\s*([\u0600-\u06FFA-Za-z][\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{1,})\s*</g;
+  const _toastConfirmRegex = /(?:toast\.(?:success|error|info|warning)|confirm|alert)\(\s*['"]([\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{2,})['"]\s*\)/g;
+  const _placeholderRegex = /placeholder=\s*['"]([\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{2,})['"]\s*/g;
 
   for (const filePath of allFiles) {
     const relativePath = path.relative(projectRoot, filePath);

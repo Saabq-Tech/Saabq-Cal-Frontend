@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../../../context/LanguageContext';
 import { useToast } from '../../../../context/ToastContext';
 import client, { endpoints } from '../../../../api/client';
@@ -31,7 +31,7 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
   const [rescheduleReason, setRescheduleReason] = useState('');
   const [rescheduling, setRescheduling] = useState(false);
 
-  const fetchDetails = async () => {
+  const fetchDetails = useCallback(async () => {
     try {
       setLoading(true);
       const res = await client.get(endpoints.workspaceBookingItem(bookingId));
@@ -43,13 +43,13 @@ export default function BookingDetailsPage({ bookingId, initialBooking, onBack, 
     } finally {
       setLoading(false);
     }
-  };
+  }, [bookingId]);
 
   useEffect(() => {
     if (bookingId) {
       fetchDetails();
     }
-  }, [bookingId]);
+  }, [bookingId, fetchDetails]);
 
   const formatTranslatable = (val) => {
     if (!val) return '';

@@ -3,7 +3,7 @@ import { useLanguage } from '../../../../context/LanguageContext';
 import Icon from '../../../../components/common/Icon';
 
 
-export default function SocialLinksTab({ socialForm, setSocialForm, onSave, saving, canEdit }) {
+export default function SocialLinksTab({ socialForm, setSocialForm: _setSocialForm, onSave, saving, canEdit }) {
   const { t } = useLanguage();
 
   // Initialize links state

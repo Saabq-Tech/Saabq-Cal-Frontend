@@ -36,6 +36,7 @@ export default function SecuritySettings() {
       script.defer = true;
       document.head.appendChild(script);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Email verification state
@@ -103,6 +104,7 @@ export default function SecuritySettings() {
 
   useEffect(() => {
     loadSecurityData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- Verification Handlers ---

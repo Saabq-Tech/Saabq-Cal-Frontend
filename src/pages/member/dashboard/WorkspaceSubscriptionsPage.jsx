@@ -48,6 +48,7 @@ export default function WorkspaceSubscriptionsPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleUpgrade = async (planId, billingCycle, proofFile, proofNotes) => {

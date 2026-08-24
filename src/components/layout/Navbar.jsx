@@ -10,7 +10,7 @@ import Flag from '../common/Flag';
 
 
 export default function Navbar() {
-  const { isAuthenticated, user, userType, logout, token, unreadCount = 0, unreadChatCount = 0 } = useAuth();
+  const { isAuthenticated, user, userType, logout, unreadCount = 0, unreadChatCount = 0 } = useAuth();
   const { lang, toggleLanguage, t } = useLanguage();
   const location = useLocation();
 

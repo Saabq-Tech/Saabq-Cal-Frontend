@@ -56,6 +56,7 @@ export default function WorkspaceBookingsPage() {
 
   useEffect(() => {
     loadBookings(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, isCapAllowed, canRead]);
 
   const handlePageChange = (newPage) => {

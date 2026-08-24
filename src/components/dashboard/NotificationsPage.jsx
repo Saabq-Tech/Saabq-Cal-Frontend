@@ -208,6 +208,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     document.title = t('pageTitleNotifications');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchNotifications = useCallback(async (page = 1, append = false) => {
@@ -230,6 +231,7 @@ export default function NotificationsPage() {
       setLoading(false);
       setLoadingMore(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
   useEffect(() => {

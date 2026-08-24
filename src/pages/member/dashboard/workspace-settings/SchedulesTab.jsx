@@ -101,6 +101,7 @@ export default function SchedulesTab({ schedules, startOfWeek = 'sunday', canEdi
     if (Array.isArray(schedules)) {
       setSchedulesList(schedules.map(normalizeSchedule));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedules]);
 
   // Selected Active Schedule ID
@@ -114,6 +115,7 @@ export default function SchedulesTab({ schedules, startOfWeek = 'sunday', canEdi
       const active = schedulesList.find(s => s.is_default) || schedulesList[0];
       setSelectedScheduleId(active?.id || null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schedulesList]);
 
   const activeSchedule = schedulesList.find(s => s.id === selectedScheduleId) || schedulesList[0];

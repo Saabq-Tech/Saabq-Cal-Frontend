@@ -9,7 +9,7 @@ import Icon from '../../../components/common/Icon';
 import { SkeletonRect } from '../../../components/ui/Skeleton';
 
 export default function WorkspacePaymentsPage() {
-  const { user } = useAuth();
+  useAuth();
   const { t, isRTL } = useLanguage();
   const toast = useToast();
 
@@ -22,7 +22,7 @@ export default function WorkspacePaymentsPage() {
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('');
-  const [providerFilter, setProviderFilter] = useState('');
+  const [providerFilter, _setProviderFilter] = useState('');
   const [payableTypeFilter, setPayableTypeFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,7 +38,7 @@ export default function WorkspacePaymentsPage() {
     try {
       const res = await client.get(endpoints.workspacePaymentsWallet);
       setWalletData(res.data?.data || null);
-    } catch (err) {
+    } catch {
       setWalletData(null);
     } finally {
       setWalletLoading(false);

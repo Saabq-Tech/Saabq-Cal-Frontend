@@ -10,6 +10,7 @@ export default function ChangePassword() {
 
   useEffect(() => {
     document.title = t('pageTitleChangePassword');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [formData, setFormData] = useState({

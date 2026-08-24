@@ -5,6 +5,7 @@ import { useToast } from '../../../context/ToastContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import AuthCardLayout from '../../../components/auth/AuthCardLayout';
 import SEO from '../../../components/ui/SEO';
+import Icon from '../../../components/common/Icon';
 
 export default function CustomerRegisterPage() {
   const { register, loading } = useAuth();
@@ -25,6 +26,7 @@ export default function CustomerRegisterPage() {
 
   useEffect(() => {
     document.title = t('pageTitleRegister');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {

@@ -14,14 +14,14 @@ import Icon from '../../../components/common/Icon';
 
 
 export default function CustomerProfilePage() {
-  const { user, fetchProfile, updateProfile, uploadAvatar, loading } = useAuth();
+  const { user, updateProfile, uploadAvatar, loading } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
   const fileInputRef = useRef(null);
   const [searchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'info';
 
-  const userType = 'customer';
+
 
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -29,6 +29,7 @@ export default function CustomerProfilePage() {
 
   useEffect(() => {
     document.title = t('pageTitleProfile');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

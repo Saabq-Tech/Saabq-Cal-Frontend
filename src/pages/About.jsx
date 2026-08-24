@@ -10,6 +10,7 @@ export default function About() {
 
   useEffect(() => {
     document.title = t('pageTitleAbout');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

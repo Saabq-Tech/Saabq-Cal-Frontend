@@ -1,5 +1,4 @@
 import { useLanguage } from '../../../../context/LanguageContext';
-import Icon from '../../../../components/common/Icon';
 
 
 export default function BookingRulesTab({ bookingRulesForm, setBookingRulesForm, onSave, saving, canEdit }) {

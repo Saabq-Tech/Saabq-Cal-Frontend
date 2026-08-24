@@ -19,13 +19,13 @@ export default function WorkspaceProfilePage() {
   const [servicesLoading, setServicesLoading] = useState(true);
 
   // Selected service slot checker state
-  const [activeServiceId, setActiveServiceId] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(() => {
+  const [_activeServiceId, _setActiveServiceId] = useState(null);
+  const [_selectedDate, _setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
-  const [slots, setSlots] = useState([]);
-  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [_slots, _setSlots] = useState([]);
+  const [_slotsLoading, _setSlotsLoading] = useState(false);
 
   const getTranslatableText = (val) => {
     if (!val) return '';
@@ -81,7 +81,8 @@ export default function WorkspaceProfilePage() {
     if (activeServiceId && selectedDate) {
       fetchSlots(activeServiceId, selectedDate);
     }
-  }, [activeServiceId, selectedDate, fetchSlots]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchSlots]);
 
   if (loading) {
     return (

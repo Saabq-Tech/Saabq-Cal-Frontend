@@ -44,6 +44,7 @@ export default function CustomerLoginPage() {
       script.defer = true;
       document.head.appendChild(script);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {

@@ -14,7 +14,7 @@ export default function NotificationTemplatesTab({
   onSave,
   saving,
   canEdit,
-  getInterpolatedText,
+  getInterpolatedText: _getInterpolatedText,
 }) {
   const { t } = useLanguage();
 
@@ -197,7 +197,7 @@ export default function NotificationTemplatesTab({
               filteredTemplates.map((tmpl) => {
                 const key = tmpl.key || tmpl.id;
                 const isSelected = key === selectedTemplateKey;
-                const catBadge = getCategoryBadgeColor(tmpl.category);
+                const _catBadge = getCategoryBadgeColor(tmpl.category);
 
                 return (
                   <button

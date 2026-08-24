@@ -155,14 +155,14 @@ export default function WorkspaceSettingsPage() {
             name: data.name || '',
             email: data.email || '',
             phone: data.phone || '',
-            description: data.description || data.description || '',
+            description: data.description || '',
             slug: data.slug || '',
             status: data.status || 'active',
             workspace_type_id: data.workspace_type_id || data.workspace_type?.id || '',
             country_id: data.country_id || data.country?.id || '',
             state_id: data.state_id || data.state?.id || '',
             city_id: data.city_id || data.city?.id || '',
-            website: data.website || data.website || '',
+            website: data.website || '',
           });
           setBrandingForm({
             logo_url: data.logo_url || data.logo || '',
@@ -230,6 +230,7 @@ export default function WorkspaceSettingsPage() {
       }
     };
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSaveSection = async (data, targetEndpoint = endpoints.workspaceSettings) => {

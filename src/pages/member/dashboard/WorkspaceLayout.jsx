@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import UserAvatar from '../../../components/ui/UserAvatar';
@@ -30,11 +30,11 @@ export default function WorkspaceLayout() {
 
   const isOwner = user?.is_owner === true;
   const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canViewPermission = (module) => isOwner || userPermissions.includes(`${module}_read`) || userPermissions.includes(`${module}_write`);
+  const _canViewPermission = (module) => isOwner || userPermissions.includes(`${module}_read`) || userPermissions.includes(`${module}_write`);
   const hasActiveSub = user?.workspace?.has_active_subscription ?? true;
   const subStatus = user?.workspace?.subscription?.status || (hasActiveSub ? 'active' : 'inactive');
   const isWorkspaceActive = user?.workspace?.status === 'active';
-  const workspaceStatus = user?.workspace?.status || 'pending';
+  const _workspaceStatus = user?.workspace?.status || 'pending';
 
   const wsName = user?.workspace?.name || 'مساحة العمل';
   const wsEmail = user?.email || '';

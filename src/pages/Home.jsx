@@ -10,17 +10,17 @@ import Icon from '../components/common/Icon';
 
 
 const FEATURE_ICONS = [
-  <Icon name="calendar" size={24} />,
-  <Icon name="zap" size={24} />,
-  <Icon name="bell" size={24} />,
-  <Icon name="bar-chart" size={24} />,
-  <Icon name="shield" size={24} />,
-  <Icon name="globe" size={24} />,
+  <Icon key="calendar" name="calendar" size={24} />,
+  <Icon key="zap" name="zap" size={24} />,
+  <Icon key="bell" name="bell" size={24} />,
+  <Icon key="bar-chart" name="bar-chart" size={24} />,
+  <Icon key="shield" name="shield" size={24} />,
+  <Icon key="globe" name="globe" size={24} />,
 ];
 
 export default function Home() {
   const { t, lang } = useLanguage();
-  const { user, userType } = useAuth();
+  useAuth();
 
   const [banners, setBanners] = useState([]);
   const [features, setFeatures] = useState([]);

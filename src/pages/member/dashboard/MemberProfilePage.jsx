@@ -14,13 +14,13 @@ import Icon from '../../../components/common/Icon';
 
 
 export default function MemberProfilePage() {
-  const { user, fetchProfile, updateProfile, loading } = useAuth();
+  const { user, updateProfile, loading } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'info';
 
-  const userType = 'member';
+
 
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -28,6 +28,7 @@ export default function MemberProfilePage() {
 
   useEffect(() => {
     document.title = t('pageTitleProfile');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

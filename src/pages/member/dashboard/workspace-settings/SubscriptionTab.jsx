@@ -5,14 +5,14 @@ import { useToast } from '../../../../context/ToastContext';
 import Icon from '../../../../components/common/Icon';
 import client, { endpoints } from '../../../../api/client';
 
-export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoading = false, plansError = null, canEdit, onUpgrade, onCancel, onPause, onResume }) {
+export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoading = false, plansError = null, canEdit, onUpgrade, onCancel, onPause: _onPause, onResume: _onResume }) {
   const { t } = useLanguage();
   const toast = useToast();
 
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [cancelReason, setCancelReason] = useState('');
-  const [cancelLoading, setCancelLoading] = useState(false);
+  const [_isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelReason, _setCancelReason] = useState('');
+  const [_cancelLoading, setCancelLoading] = useState(false);
   const [selectedUpgradePlanId, setSelectedUpgradePlanId] = useState(null);
   const [billingCycle, setBillingCycle] = useState('monthly');
 
@@ -62,7 +62,7 @@ export default function SubscriptionTab({ subscriptionInfo, plans = [], plansLoa
 
 
 
-  const handleConfirmCancel = async () => {
+  const _handleConfirmCancel = async () => {
     if (onCancel) {
       try {
         setCancelLoading(true);

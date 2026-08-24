@@ -24,6 +24,7 @@ export default function CustomerVerifyAccountPage() {
 
   useEffect(() => {
     document.title = t('pageTitleVerifyAccount');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e) => {

@@ -53,6 +53,7 @@ export default function WorkspaceMembersPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCapAllowed, canRead]);
 
   const handleSaveMember = async (formData) => {

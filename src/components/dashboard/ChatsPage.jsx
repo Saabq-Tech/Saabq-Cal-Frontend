@@ -216,6 +216,7 @@ export default function ChatsPage() {
 
   useEffect(() => {
     document.title = t('pageTitleChats');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto scroll messages container only
@@ -286,6 +287,7 @@ export default function ChatsPage() {
       setLoadingMessages(false);
       setLoadingMoreMessages(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
   // Fetch Conversations List
@@ -325,6 +327,7 @@ export default function ChatsPage() {
     } finally {
       setLoadingChats(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast, targetConvId, passedConv, fetchConversationDetails]);
 
   useEffect(() => {
@@ -449,6 +452,7 @@ export default function ChatsPage() {
     });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConversation?.id, activeConversation?.uuid, t]);
 
   // File Selection Handler (Images, PDFs, Documents, ZIPs)

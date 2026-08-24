@@ -3,7 +3,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import Icon from '../common/Icon';
 
 export default function TelegramActionBuilder({ configString, onChange }) {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   
   const [configObj, setConfigObj] = useState(() => {
     try {
@@ -21,6 +21,7 @@ export default function TelegramActionBuilder({ configString, onChange }) {
     } else {
       onChange(JSON.stringify(configObj, null, 2));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configObj]);
 
   const availableStates = [

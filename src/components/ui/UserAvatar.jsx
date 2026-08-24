@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function getInitials(name) {
   if (!name || typeof name !== 'string') return '?';
   const parts = name.trim().split(/\s+/).filter(Boolean);

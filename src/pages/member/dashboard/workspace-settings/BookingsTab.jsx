@@ -4,7 +4,7 @@ import UserAvatar from '../../../../components/ui/UserAvatar';
 import Icon from '../../../../components/common/Icon';
 import CreateBookingModal from './CreateBookingModal';
 
-export default function BookingsTab({ bookings, meta, page = 1, onPageChange, onSelectBooking, canEdit, onReloadBookings }) {
+export default function BookingsTab({ bookings, meta, page: _page = 1, onPageChange, onSelectBooking, canEdit, onReloadBookings }) {
   const { t, isRTL } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');

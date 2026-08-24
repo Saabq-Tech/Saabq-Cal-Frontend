@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import client, { endpoints } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
@@ -109,10 +109,6 @@ export default function CustomerBookAppointmentPage() {
     }
   }, [user, toast, t]);
 
-  if (!user) {
-    return <Navigate to="/customer/login" state={{ from: location }} replace />;
-  }
-
   // Fetch workspace details & services
   useEffect(() => {
     if (!user || !idOrSlug) return;
@@ -222,6 +218,10 @@ export default function CustomerBookAppointmentPage() {
 
     return days;
   }, [currentMonth, workspace]);
+
+  if (!user) {
+    return <Navigate to="/customer/login" state={{ from: location }} replace />;
+  }
 
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -397,8 +397,7 @@ export default function CustomerBookAppointmentPage() {
 
   const monthNamesAr = MONTH_NAMES_AR;
   const monthNamesEn = MONTH_NAMES_EN;
-  const weekDaysAr = WEEK_DAYS_AR;
-  const weekDaysEn = WEEK_DAYS_EN;
+
 
   const currentMonthLabel = isRTL
     ? `${monthNamesAr[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`

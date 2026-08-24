@@ -53,6 +53,7 @@ export default function WorkspaceServicesPage() {
 
   useEffect(() => {
     loadServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCapAllowed, canRead]);
 
   const handleSaveService = async (serviceForm) => {

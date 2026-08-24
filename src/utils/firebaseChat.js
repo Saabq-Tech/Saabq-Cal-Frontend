@@ -91,7 +91,7 @@ export function subscribeToChatMessages(conversation, onNewMessage) {
               onNewMessage(payload.data);
             }
           }
-        } catch (err) {
+        } catch {
           // ignore parse errors
         }
       });

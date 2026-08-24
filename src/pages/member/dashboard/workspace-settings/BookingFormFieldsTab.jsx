@@ -3,7 +3,7 @@ import { useLanguage } from '../../../../context/LanguageContext';
 import Icon from '../../../../components/common/Icon';
 
 
-export default function BookingFormFieldsTab({ formFieldsForm, setFormFieldsForm, onSave, saving, canEdit }) {
+export default function BookingFormFieldsTab({ formFieldsForm, setFormFieldsForm: _setFormFieldsForm, onSave, saving, canEdit }) {
   const { t } = useLanguage();
 
   // Standard system field statuses (required | optional | disabled)

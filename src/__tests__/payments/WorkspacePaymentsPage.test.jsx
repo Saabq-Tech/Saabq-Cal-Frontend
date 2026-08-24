@@ -136,7 +136,7 @@ describe('WorkspacePaymentsPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText(/\(\+\) دائن/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/\(\-\) مدين/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/\(-\) مدين/i).length).toBeGreaterThan(0);
     });
   });
 

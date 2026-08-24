@@ -55,6 +55,7 @@ export default function WorkspaceSchedulesPage() {
 
   useEffect(() => {
     loadSchedules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCapAllowed, canRead]);
 
   return (

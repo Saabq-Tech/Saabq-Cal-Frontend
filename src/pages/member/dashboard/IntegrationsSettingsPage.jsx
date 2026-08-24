@@ -61,7 +61,6 @@ function ToggleSwitch({ checked, onChange, disabled = false }) {
 
 export default function IntegrationsSettingsPage() {
   const {
-    user,
     loading,
     fetchGoogleIntegration,
     connectGoogleIntegration,
@@ -71,7 +70,6 @@ export default function IntegrationsSettingsPage() {
     deleteWebhookIntegration,
     fetchTelegramIntegration,
     saveTelegramIntegration,
-    activateTelegramWebhook,
     deleteTelegramIntegration,
     fetchEmailIntegration,
     saveEmailIntegration,
@@ -92,15 +90,7 @@ export default function IntegrationsSettingsPage() {
     }
   };
 
-  const handleActivateTelegramWebhook = async () => {
-    const res = await activateTelegramWebhook();
-    if (res?.success) {
-      toast.success(res.message || t('telegramWebhookActivated') || 'تم تفعيل الويب هوك للبوت بنجاح!');
-      await loadSecurityData();
-    } else {
-      toast.error(res?.message || 'Failed to activate Telegram webhook.');
-    }
-  };
+
 
   useEffect(() => {
     document.title = t('applicationsTitle') || 'Applications & Integrations';
@@ -113,6 +103,7 @@ export default function IntegrationsSettingsPage() {
       script.defer = true;
       document.head.appendChild(script);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Active Category Filter Tab
@@ -167,8 +158,7 @@ export default function IntegrationsSettingsPage() {
   const [showResendKey, setShowResendKey] = useState(false);
   const [emailIsActive, setEmailIsActive] = useState(true);
 
-  const [emailNotify, setEmailNotify] = useState(true);
-  const [pushNotify, setPushNotify] = useState(true);
+
 
   // Confirmation Modal state
   const [confirmModal, setConfirmModal] = useState({
@@ -281,7 +271,7 @@ export default function IntegrationsSettingsPage() {
       if (sRes?.data?.data) {
         setServices(sRes.data.data);
       }
-    } catch (err) {
+    } catch {
       // ignore
     }
   };
@@ -289,6 +279,7 @@ export default function IntegrationsSettingsPage() {
 
   useEffect(() => {
     loadSecurityData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- Google Integration Handlers ---
@@ -518,7 +509,7 @@ export default function IntegrationsSettingsPage() {
     if (telegramActionButtonsConfig.trim()) {
       try {
         parsedConfig = JSON.parse(telegramActionButtonsConfig);
-      } catch (err) {
+      } catch {
         toast.error(t('invalidJsonConfig') || 'تنسيق JSON غير صالح لإعدادات الأزرار');
         return;
       }

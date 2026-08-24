@@ -6,6 +6,7 @@ import { useLanguage } from '../../../context/LanguageContext';
 import AuthCardLayout from '../../../components/auth/AuthCardLayout';
 import SEO from '../../../components/ui/SEO';
 import client, { endpoints } from '../../../api/client';
+import Icon from '../../../components/common/Icon';
 
 export default function MemberRegisterPage() {
   const { register, loading } = useAuth();
@@ -37,6 +38,7 @@ export default function MemberRegisterPage() {
 
   useEffect(() => {
     document.title = t('pageTitleRegister');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (e) => {

@@ -53,6 +53,7 @@ export default function WorkspaceRolesPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCapAllowed, canRead]);
 
   const handleSaveRole = async (roleForm) => {

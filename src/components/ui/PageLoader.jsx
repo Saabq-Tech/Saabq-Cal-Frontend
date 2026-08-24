@@ -44,7 +44,7 @@ export function TopProgressBar({ progress = 75 }) {
  * @param {number} [props.minDurationMs] - Minimum duration to stay smoothly visible (default 600ms)
  */
 export default function PageLoader({ message, fullScreen = false, minDurationMs = 1400 }) {
-  const { t, isRTL } = useLanguage();
+  const { isRTL } = useLanguage();
   const [progress, setProgress] = useState(15);
 
   // Smooth progress bar simulation for graceful page transition
