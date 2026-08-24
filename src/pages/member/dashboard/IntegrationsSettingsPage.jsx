@@ -585,7 +585,8 @@ export default function IntegrationsSettingsPage() {
       await loadSecurityData();
       setActiveModalId(null);
     } else {
-      toast.error(res?.message || 'Failed to save Email settings.');
+      const firstError = res?.errors ? Object.values(res.errors).flat()[0] : null;
+      toast.error(firstError || res?.message || 'Failed to save Email settings.');
     }
   };
 
