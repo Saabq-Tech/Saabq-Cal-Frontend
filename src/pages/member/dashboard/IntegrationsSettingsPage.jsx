@@ -883,7 +883,7 @@ export default function IntegrationsSettingsPage() {
         <div className="modal-backdrop">
           <div className="modal-card animate-scale-up">
             <div className="modal-header">
-              <h3 className="modal-title">{t('googleCalendarSettingsTitle') || (t('lang') === 'en' ? 'Google Calendar Settings' : 'إعدادات Google Calendar')}</h3>
+              <h3 className="modal-title">{t('googleCalendarSettingsTitle')}</h3>
               <button type="button" className="modal-close-btn" onClick={() => setActiveModalId(null)}>
                 <Icon name="x" size={16} />
               </button>
@@ -954,7 +954,7 @@ export default function IntegrationsSettingsPage() {
         <div className="modal-backdrop">
           <div className="modal-card animate-scale-up">
             <div className="modal-header">
-              <h3 className="modal-title">{t('googleMeetSettingsTitle') || (t('lang') === 'en' ? 'Google Meet Settings' : 'إعدادات Google Meet')}</h3>
+              <h3 className="modal-title">{t('googleMeetSettingsTitle')}</h3>
               <button type="button" className="modal-close-btn" onClick={() => setActiveModalId(null)}>
                 <Icon name="x" size={16} />
               </button>
@@ -1013,7 +1013,7 @@ export default function IntegrationsSettingsPage() {
         <div className="modal-backdrop">
           <div className="modal-card animate-scale-up">
             <div className="modal-header">
-              <h3 className="modal-title">{t('googleSheetsSettingsTitle') || (t('lang') === 'en' ? 'Google Sheets Export Settings' : 'إعدادات تصدير Google Sheets')}</h3>
+              <h3 className="modal-title">{t('googleSheetsSettingsTitle')}</h3>
               <button type="button" className="modal-close-btn" onClick={() => setActiveModalId(null)}>
                 <Icon name="x" size={16} />
               </button>
@@ -1233,6 +1233,24 @@ export default function IntegrationsSettingsPage() {
               {/* Bot Token Input (Custom Bot) */}
               {telegramBotType === 'custom' && (
                 <div className="form-group">
+                  <div style={{ background: 'var(--surface-alt)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', marginBottom: 12 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Icon name="info" size={16} />
+                      {t('telegramCustomBotInstructionsTitle')}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)', whiteSpace: 'pre-line', lineHeight: 1.5, marginBottom: 8 }}>
+                      {t('telegramCustomBotInstructionsText')}
+                    </div>
+                    <a
+                      href="https://t.me/BotFather"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                    >
+                      {t('openBotFatherBtn')}
+                    </a>
+                  </div>
+
                   <label className="form-label" style={{ fontWeight: 700 }}>
                     {t('botTokenLabel') || 'Bot Token *'}
                   </label>
@@ -1332,8 +1350,8 @@ export default function IntegrationsSettingsPage() {
                         {showChatId ? (t('hide') || 'إخفاء') : (t('showId') || 'إظهار')}
                       </button>
                     </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: 6, lineHeight: 1.5 }}>
-                      {t('chatIdHelpText') || 'افتح بوت Saabq Cal وأرسل له أي رسالة — سيرد عليك البوت مباشرة برقم الـ Chat ID الخاص بك لتنسخه هنا.'}
+                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: 6, lineHeight: 1.5, whiteSpace: 'pre-line' }}>
+                      {t('telegramChatIdInstructionsText')}
                     </div>
                   </div>
 
@@ -1510,6 +1528,17 @@ export default function IntegrationsSettingsPage() {
               </button>
             </div>
 
+            {/* Webhook Instruction Box */}
+            <div style={{ background: 'var(--surface-alt)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', marginBottom: 16 }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Icon name="info" size={16} />
+                {t('webhookInstructionsTitle')}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+                {t('webhookInstructionsText')}
+              </div>
+            </div>
+
             <div className="form-group" style={{ marginBottom: 16 }}>
               <label className="form-label" style={{ fontWeight: 700 }}>{t('webhookUrlLabel') || 'رابط الـ Webhook *'}</label>
               <input
@@ -1623,12 +1652,31 @@ export default function IntegrationsSettingsPage() {
 
             <div style={{ padding: '0 28px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-              {/* RESEND DRIVER FIELDS (Matching Image 1) */}
+              {/* RESEND DRIVER FIELDS */}
               {mailDriver === 'resend' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Resend Instruction Help Box */}
+                  <div style={{ background: 'var(--surface-alt)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Icon name="info" size={16} />
+                      {t('resendInstructionsTitle')}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)', whiteSpace: 'pre-line', lineHeight: 1.5, marginBottom: 8 }}>
+                      {t('resendInstructionsText')}
+                    </div>
+                    <a
+                      href="https://resend.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                    >
+                      {t('visitResendBtn')}
+                    </a>
+                  </div>
+
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', textAlign: 'right', display: 'block', marginBottom: 6 }}>
-                      Resend API Key
+                      {t('resendApiKeyLabel')}
                     </label>
                     <div style={{ position: 'relative' }}>
                       <input
@@ -1663,14 +1711,25 @@ export default function IntegrationsSettingsPage() {
                 </div>
               )}
 
-              {/* SMTP DRIVER FIELDS (Matching Image 2) */}
+              {/* SMTP DRIVER FIELDS */}
               {mailDriver === 'smtp' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* SMTP Instruction Help Box */}
+                  <div style={{ background: 'var(--surface-alt)', padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Icon name="info" size={16} />
+                      {t('smtpInstructionsTitle')}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--muted)', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                      {t('smtpInstructionsText')}
+                    </div>
+                  </div>
+
                   {/* Grid 2 Columns */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-                        SMTP Host
+                        {t('smtpHostLabel')}
                       </label>
                       <input
                         type="text"
@@ -1683,7 +1742,7 @@ export default function IntegrationsSettingsPage() {
 
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-                        Port
+                        {t('smtpPortLabel')}
                       </label>
                       <input
                         type="number"
@@ -1696,7 +1755,7 @@ export default function IntegrationsSettingsPage() {
 
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-                        Username
+                        {t('smtpUsernameLabel')}
                       </label>
                       <input
                         type="text"
@@ -1709,7 +1768,7 @@ export default function IntegrationsSettingsPage() {
 
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-                        Password
+                        {t('smtpPasswordLabel')}
                       </label>
                       <div style={{ position: 'relative' }}>
                         <input
@@ -1762,12 +1821,12 @@ export default function IntegrationsSettingsPage() {
               {/* OPTIONAL FROM SENDER NAME FIELD */}
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text)', display: 'block', marginBottom: 6 }}>
-                  {t('fromSenderNameLabel') || 'اسم المرسل (Sender Name)'}
+                  {t('fromSenderNameLabel')}
                 </label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="My Business Name"
+                  placeholder={t('senderNamePlaceholder')}
                   value={fromName}
                   onChange={(e) => setFromName(e.target.value)}
                 />

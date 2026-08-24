@@ -19,13 +19,13 @@ export default function WorkspaceProfilePage() {
   const [servicesLoading, setServicesLoading] = useState(true);
 
   // Selected service slot checker state
-  const [_activeServiceId, _setActiveServiceId] = useState(null);
-  const [_selectedDate, _setSelectedDate] = useState(() => {
+  const [activeServiceId, _setActiveServiceId] = useState(null);
+  const [selectedDate, _setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
-  const [_slots, _setSlots] = useState([]);
-  const [_slotsLoading, _setSlotsLoading] = useState(false);
+  const [_slots, setSlots] = useState([]);
+  const [_slotsLoading, setSlotsLoading] = useState(false);
 
   const getTranslatableText = (val) => {
     if (!val) return '';

@@ -97,14 +97,13 @@ async function runCheck() {
 
   const allFiles = getAllFiles(srcDir).filter((f) => f !== translationsFile);
   const usedKeys = new Map(); // key -> [{ file, line }]
-  const tKeyRegex = /(?:^|[^a-zA-Z0-9_])t\(\s*['"]([a-zA-Z0-9_.-]+)['"]\s*\)/g;
-
   for (const filePath of allFiles) {
     const relativePath = path.relative(projectRoot, filePath);
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
 
     lines.forEach((lineText, idx) => {
+      const tKeyRegex = /(?:^|[^a-zA-Z0-9_])t\(\s*['"]([a-zA-Z0-9_.-]+)['"]\s*\)/g;
       let match;
       while ((match = tKeyRegex.exec(lineText)) !== null) {
         const key = match[1];
@@ -170,7 +169,6 @@ async function runCheck() {
         lineText.trim().startsWith('*') ||
         lineText.trim().startsWith('import') ||
         lineText.includes('console.log') ||
-        lineText.includes('className=') ||
         lineText.includes('style={{') ||
         lineText.includes('label_ar:') ||
         lineText.includes('description_ar:') ||
