@@ -18,11 +18,30 @@ export class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     this.setState({ errorInfo });
     console.error('Unhandled React Rendering Error:', error, errorInfo);
+
+    const isChunkLoadError =
+      error &&
+      (error.name === 'TypeError' || error.message) &&
+      (
+        /failed to fetch dynamically imported module/i.test(error.message || '') ||
+        /importing a module script failed/i.test(error.message || '') ||
+        /loading chunk/i.test(error.message || '')
+      );
+
+    if (isChunkLoadError) {
+      const lastReload = sessionStorage.getItem('chunk_error_auto_reload');
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem('chunk_error_auto_reload', now.toString());
+        window.location.reload();
+      }
+    }
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.href = '#/';
+    sessionStorage.removeItem('chunk_reload_attempted');
+    sessionStorage.removeItem('chunk_error_auto_reload');
     window.location.reload();
   };
 

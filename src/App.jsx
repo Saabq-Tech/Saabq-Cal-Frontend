@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -11,6 +11,7 @@ import GuestRoute from './components/layout/GuestRoute';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ScrollToTop from './components/layout/ScrollToTop';
 import PageLoader from './components/ui/PageLoader';
+import { lazyWithRetry as lazy } from './utils/lazyWithRetry';
 
 // Lazy-loaded Pages
 const Home = lazy(() => import('./pages/Home'));
