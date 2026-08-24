@@ -14,3 +14,8 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 });
+
+// Mock element scrolling methods in jsdom
+Element.prototype.scrollBy = function () {};
+Element.prototype.scrollTo = function () {};
+Element.prototype.scrollIntoView = function () {};
