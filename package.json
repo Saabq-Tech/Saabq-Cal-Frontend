@@ -9,8 +9,6 @@
     "lint": "oxlint",
     "lang:check": "node scripts/check-translations.js",
     "test": "vitest run",
-    "test:stress": "vitest run src/__tests__/stress",
-    "stress:benchmark": "node scripts/stress-benchmark.js",
     "preview": "vite preview"
   },
   "dependencies": {

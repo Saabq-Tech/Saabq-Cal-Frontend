@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useSearchParams, useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import client, { endpoints } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -20,7 +20,6 @@ export default function CustomerBookAppointmentPage() {
   const { idOrSlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
   const toast = useToast();
@@ -81,13 +80,13 @@ export default function CustomerBookAppointmentPage() {
 
   // Dynamic form field answers (field_statuses & booking_questions)
   const [formFields, setFormFields] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    notes: '',
+    full_name: user?.name || user?.full_name || '',
+    email: user?.email || '',
+    phone: user?.phone || user?.phone_number || '',
+    notes: user?.notes || '',
     consultation_subject: '',
     attendee_count: 1,
-    preferred_contact_method: 'phone',
+    preferred_contact_method: user?.preferred_contact_method || 'phone',
     payment_proof: null,
     upload_receipt: null,
     payment_notes: '',
@@ -98,20 +97,28 @@ export default function CustomerBookAppointmentPage() {
 
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [guestBookingResult, setGuestBookingResult] = useState(null);
 
-  const hasToastedRef = useRef(false);
-
-  // Require authentication before accessing booking page
+  // Sync logged in user details if available
   useEffect(() => {
-    if (!user && !hasToastedRef.current) {
-      hasToastedRef.current = true;
-      toast.warning(t('signin_required_booking'));
+    if (user) {
+      setFormFields((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.name || user.full_name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || user.phone_number || '',
+        notes: prev.notes || user.notes || '',
+        preferred_contact_method:
+          prev.preferred_contact_method && prev.preferred_contact_method !== 'phone'
+            ? prev.preferred_contact_method
+            : (user.preferred_contact_method || 'phone'),
+      }));
     }
-  }, [user, toast, t]);
+  }, [user]);
 
   // Fetch workspace details & services
   useEffect(() => {
-    if (!user || !idOrSlug) return;
+    if (!idOrSlug) return;
     setLoading(true);
     Promise.all([
       client.get(endpoints.publicWorkspaceDetail(idOrSlug)),
@@ -151,11 +158,11 @@ export default function CustomerBookAppointmentPage() {
         console.error(err);
         setLoading(false);
       });
-  }, [user, idOrSlug, preselectedServiceId, isRTL]);
+  }, [idOrSlug, preselectedServiceId, isRTL]);
 
   // Fetch available slots when service or date changes
   useEffect(() => {
-    if (!user || !selectedService || !selectedDate) return;
+    if (!selectedService || !selectedDate) return;
     setSlotsLoading(true);
     setSelectedSlot('');
     client
@@ -170,7 +177,7 @@ export default function CustomerBookAppointmentPage() {
         setSlots([]);
         setSlotsLoading(false);
       });
-  }, [user, idOrSlug, selectedService, selectedDate]);
+  }, [idOrSlug, selectedService, selectedDate]);
 
   // Calendar generation helpers
   const calendarDays = useMemo(() => {
@@ -219,10 +226,6 @@ export default function CustomerBookAppointmentPage() {
     return days;
   }, [currentMonth, workspace]);
 
-  if (!user) {
-    return <Navigate to="/customer/login" state={{ from: location }} replace />;
-  }
-
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
   };
@@ -245,17 +248,19 @@ export default function CustomerBookAppointmentPage() {
   // Submit appointment handler
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
-    if (!user) {
-      toast.warning(
-        isRTL ? 'يرجى تسجيل الدخول كعميل لتأكيد حجز الموعد' : 'Please sign in as customer to complete booking'
-      );
-      navigate('/customer/login');
-      return;
-    }
 
     if (!selectedService || !selectedDate || !selectedSlot) {
       toast.error(
         isRTL ? 'يرجى تحديد الخدمة والتاريخ والوقت' : 'Please select service, date, and slot'
+      );
+      return;
+    }
+
+    // Email validation (Mandatory for both guest and authenticated users)
+    const emailVal = (formFields.email || user?.email || '').trim();
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      toast.error(
+        t('guestBookingEmailRequired') || (isRTL ? 'البريد الإلكتروني مطلوب لإتمام الحجز' : 'Email is required to complete booking')
       );
       return;
     }
@@ -311,6 +316,10 @@ export default function CustomerBookAppointmentPage() {
         workspace_id: workspace.id,
         service_id: selectedService.id,
         starts_at: startsAt,
+        email: emailVal,
+        name: formFields.full_name || user?.name || undefined,
+        full_name: formFields.full_name || user?.name || undefined,
+        phone: formFields.phone || user?.phone || undefined,
         notes: formFields.notes || null,
         currency: currencyCode,
         currency_code: currencyCode,
@@ -318,6 +327,9 @@ export default function CustomerBookAppointmentPage() {
         payment_proof: paymentProof || undefined,
         answers: answersArray.length > 0 ? answersArray : undefined,
         metadata: {
+          full_name: formFields.full_name || user?.name || undefined,
+          email: emailVal,
+          phone: formFields.phone || user?.phone || undefined,
           consultation_subject: formFields.consultation_subject || undefined,
           attendee_count: formFields.attendee_count || undefined,
           preferred_contact_method: formFields.preferred_contact_method || undefined,
@@ -333,8 +345,19 @@ export default function CustomerBookAppointmentPage() {
 
       await client.post('/customers/appointments', payload);
 
-      toast.success(isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!');
-      navigate('/customer/profile');
+      if (user) {
+        toast.success(isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!');
+        navigate('/customer/profile?tab=appointments');
+      } else {
+        setGuestBookingResult({
+          email: emailVal,
+          startsAt,
+          date: selectedDate,
+          time: slotTime,
+          serviceName: getTranslatableText(selectedService.name),
+        });
+        toast.success(t('guestBookingSuccessTitle') || (isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment booked successfully!'));
+      }
     } catch (err) {
       console.error('Booking failed:', err);
       const serverMsg = err.response?.data?.message;
@@ -352,10 +375,6 @@ export default function CustomerBookAppointmentPage() {
       setSubmitting(false);
     }
   };
-
-  if (!user) {
-    return null;
-  }
 
   if (loading) {
     return (
@@ -459,6 +478,81 @@ export default function CustomerBookAppointmentPage() {
       </div>
 
       <div className="container" style={{ marginTop: -30 }}>
+        {guestBookingResult ? (
+          <div className="card" style={{ maxWidth: 640, margin: '0 auto', padding: '48px 32px', textAlign: 'center', borderRadius: 'var(--radius-xl, 16px)', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}>
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '50%',
+                background: 'rgba(34, 197, 94, 0.12)',
+                color: '#16a34a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+              }}
+            >
+              <Icon name="check" size={38} />
+            </div>
+
+            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--heading)', marginBottom: 12 }}>
+              {t('guestBookingSuccessTitle') || (isRTL ? 'تم حجز الموعد بنجاح!' : 'Appointment Booked Successfully!')}
+            </h2>
+
+            <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 520, margin: '0 auto 28px' }}>
+              {t('guestBookingSuccessDesc') || (isRTL ? 'تم تأكيد موعدك وإنشاء حساب جديد لك على منصة سابق كال. تم إرسال تفاصيل الحجز وبيانات تسجيل الدخول إلى بريدك الإلكتروني.' : 'Your appointment has been confirmed and a new account has been created for you on Saabq Cal. Your booking details and login credentials have been sent to your email.')}
+            </p>
+
+            <div
+              style={{
+                background: 'var(--surface-muted, #f8fafc)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg, 12px)',
+                padding: '20px',
+                marginBottom: 32,
+                textAlign: isRTL ? 'right' : 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'الخدمة:' : 'Service:'}</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--heading)' }}>{guestBookingResult.serviceName}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'الموعد:' : 'Date & Time:'}</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--heading)' }} dir="ltr">
+                  {guestBookingResult.date} | {guestBookingResult.time}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'البريد الإلكتروني:' : 'Email:'}</span>
+                <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--primary)' }} dir="ltr">{guestBookingResult.email}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link
+                to="/customer/login"
+                className="btn btn-primary"
+                style={{ padding: '12px 28px', fontSize: '0.95rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                <Icon name="log-in" size={18} />
+                <span>{t('loginToAccount') || (isRTL ? 'تسجيل الدخول إلى حسابك' : 'Log In to Your Account')}</span>
+              </Link>
+
+              <Link
+                to={`/workspaces/${workspace.slug}`}
+                className="btn btn-secondary"
+                style={{ padding: '12px 24px', fontSize: '0.95rem', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                <span>{isRTL ? 'العودة لمساحة العمل' : 'Back to Workspace'}</span>
+              </Link>
+            </div>
+          </div>
+        ) : (
         <div className="booking-page-grid">
           
           {/* Main Booking Form Panel */}
@@ -729,9 +823,9 @@ export default function CustomerBookAppointmentPage() {
                       {/* Fully Dynamic Form Fields from Workspace API field_statuses */}
                       {(() => {
                         const FIELD_LABELS = {
-                          full_name: { ar: 'الاسم الكامل', en: 'Full Name', placeholderAr: 'أدخل اسمك الكامل', placeholderEn: 'Enter full name', type: 'text', defaultValue: user?.name || '' },
-                          email: { ar: 'البريد الإلكتروني', en: 'Email Address', placeholderAr: 'name@example.com', placeholderEn: 'name@example.com', type: 'email', defaultValue: user?.email || '' },
-                          phone: { ar: 'رقم الهاتف', en: 'Phone Number', placeholderAr: '+9665...', placeholderEn: '+9665...', type: 'text', defaultValue: user?.phone || '' },
+                          full_name: { ar: 'الاسم الكامل', en: 'Full Name', placeholderAr: 'أدخل اسمك الكامل', placeholderEn: 'Enter full name', type: 'text' },
+                          email: { ar: 'البريد الإلكتروني', en: 'Email Address', placeholderAr: 'name@example.com', placeholderEn: 'name@example.com', type: 'email' },
+                          phone: { ar: 'رقم الهاتف', en: 'Phone Number', placeholderAr: '+9665...', placeholderEn: '+9665...', type: 'text' },
                           consultation_subject: { ar: 'موضوع الجلسة / الاستشارة', en: 'Consultation Subject', placeholderAr: 'مثال: استشارة تقنية / استفسار أولي', placeholderEn: 'e.g., General Consultation', type: 'text' },
                           attendee_count: { ar: 'عدد الحضور / الأشخاص', en: 'Attendee Count', placeholderAr: '1', placeholderEn: '1', type: 'number' },
                           preferred_contact_method: { ar: 'وسيلة التواصل المفضلة', en: 'Preferred Contact Method', type: 'select' },
@@ -744,7 +838,14 @@ export default function CustomerBookAppointmentPage() {
                           notes: { ar: 'ملاحظات أو طلبات خاصة', en: 'Notes / Special Requests', placeholderAr: 'أدخل أي تفاصيل تود مشاركتها قبل الموعد...', placeholderEn: 'Enter any notes...', type: 'textarea' },
                         };
 
-                        return Object.entries(fieldStatuses).map(([fieldKey, status]) => {
+                        const effectiveFieldStatuses = {
+                          full_name: fieldStatuses.full_name || 'required',
+                          phone: fieldStatuses.phone || 'optional',
+                          ...fieldStatuses,
+                          email: 'required',
+                        };
+
+                        return Object.entries(effectiveFieldStatuses).map(([fieldKey, status]) => {
                           if (status === 'disabled' || !FIELD_LABELS[fieldKey]) return null;
 
                           const receiptMode = workspace?.payment_receipt_mode || 'required';
@@ -754,11 +855,11 @@ export default function CustomerBookAppointmentPage() {
 
                           const meta = FIELD_LABELS[fieldKey];
                           const labelText = isRTL ? meta.ar : meta.en;
-                          let isRequired = status === 'required';
+                          let isRequired = fieldKey === 'email' ? true : status === 'required';
                           if (fieldKey === 'upload_receipt' || fieldKey === 'payment_proof') {
                             isRequired = receiptMode === 'required';
                           }
-                          const val = formFields[fieldKey] !== undefined ? formFields[fieldKey] : (meta.defaultValue || '');
+                          const val = formFields[fieldKey] !== undefined && formFields[fieldKey] !== null ? formFields[fieldKey] : '';
 
                           if (meta.type === 'file') {
                             return (
@@ -1028,6 +1129,7 @@ export default function CustomerBookAppointmentPage() {
           </div>
 
         </div>
+        )}
       </div>
     </main>
   );

@@ -1284,7 +1284,11 @@ export const translations = {
     "typeFilterLabel": "نوع المعاملة",
     "allTypesLabel": "جميع المعاملات",
     "creditOnlyLabel": "دائن (مقبوضات / إيداع)",
-    "debitOnlyLabel": "مدين (مصروفات / مستردات)"
+    "debitOnlyLabel": "مدين (مصروفات / مستردات)",
+    "guestBookingSuccessTitle": "تم حجز الموعد بنجاح!",
+    "guestBookingSuccessDesc": "تم تأكيد موعدك وإنشاء حساب جديد لك على منصة سابق كال. تم إرسال تفاصيل الحجز وبيانات تسجيل الدخول إلى بريدك الإلكتروني.",
+    "loginToAccount": "تسجيل الدخول إلى حسابك",
+    "guestBookingEmailRequired": "البريد الإلكتروني مطلوب لإتمام الحجز"
   },
   "en": {
     "pageTitleHome": "Saabq Cal — Smart Scheduling & Appointment Platform",
@@ -2571,6 +2575,10 @@ export const translations = {
     "typeFilterLabel": "Transaction Type",
     "allTypesLabel": "All Transactions",
     "creditOnlyLabel": "Credit (Income)",
-    "debitOnlyLabel": "Debit (Expenses & Refunds)"
+    "debitOnlyLabel": "Debit (Expenses & Refunds)",
+    "guestBookingSuccessTitle": "Appointment Booked Successfully!",
+    "guestBookingSuccessDesc": "Your appointment has been confirmed and a new account has been created for you on Saabq Cal. Your booking details and login credentials have been sent to your email.",
+    "loginToAccount": "Log In to Your Account",
+    "guestBookingEmailRequired": "Email is required to complete booking"
   }
 };
