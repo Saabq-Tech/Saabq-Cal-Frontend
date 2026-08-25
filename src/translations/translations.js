@@ -1,5 +1,8 @@
 export const translations = {
   "ar": {
+    "installApp": "تثبيت التطبيق",
+    "installAppTitle": "تثبيت تطبيق سابق كول",
+    "installAppDesc": "قم بتثبيت التطبيق على جهازك للحصول على تجربة أسرع وشاشة كاملة ووصول سريع من شاشتك الرئيسية.",
     "pageTitleHome": "سابق كول — الجدولة وإدارة المواعيد الذكية",
     "pageTitleAbout": "عن المنصة — سابق كول",
     "pageTitleLogin": "تسجيل الدخول — سابق كول",
@@ -1291,6 +1294,9 @@ export const translations = {
     "guestBookingEmailRequired": "البريد الإلكتروني مطلوب لإتمام الحجز"
   },
   "en": {
+    "installApp": "Install App",
+    "installAppTitle": "Install Saabq Cal App",
+    "installAppDesc": "Install our application on your device for a faster, full-screen experience and quick access from your home screen.",
     "pageTitleHome": "Saabq Cal — Smart Scheduling & Appointment Platform",
     "pageTitleAbout": "About Us — Saabq Cal",
     "pageTitleLogin": "Sign In — Saabq Cal",

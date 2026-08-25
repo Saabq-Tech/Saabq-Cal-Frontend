@@ -7,7 +7,7 @@ import UserAvatar from '../ui/UserAvatar';
 import client, { endpoints } from '../../api/client';
 import Icon from '../common/Icon';
 import Flag from '../common/Flag';
-
+import InstallAppButton from '../common/InstallAppButton';
 
 export default function Navbar() {
   const { isAuthenticated, user, userType, logout, unreadCount = 0, unreadChatCount = 0 } = useAuth();
@@ -414,6 +414,7 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
+            <InstallAppButton className="mobile-only" />
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}
@@ -712,6 +713,8 @@ export default function Navbar() {
 
             {/* Drawer Footer: Controls & Actions */}
             <div className="mobile-drawer-footer">
+              <InstallAppButton style={{ width: '100%', marginBottom: 12, justifyContent: 'center' }} />
+              
               <div className="drawer-controls">
                 <button
                   className="drawer-control-btn"

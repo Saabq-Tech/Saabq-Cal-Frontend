@@ -5928,4 +5928,13 @@ html.dark .error-details-disclosure {
     justify-content: center;
     text-align: center;
   }
+}
+
+.mobile-only {
+  display: none !important;
+}
+@media (max-width: 991px) {
+  .mobile-only {
+    display: inline-flex !important;
+  }
 }

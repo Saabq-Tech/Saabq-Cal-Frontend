@@ -1,9 +1,44 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: process.env.VITE_BASE_PATH,
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true
+      },
+      includeAssets: ['favicon.ico', 'favicon.svg', 'icons.svg', 'logo.png'],
+      manifest: {
+        name: 'Saabq Calendar',
+        short_name: 'Saabq',
+        description: 'The Saabq Calendar progressive web application.',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        icons: [
+          {
+            src: 'icon-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          }
+        ],
+      },
+      workbox: {
+        globPatterns: [],
+      },
+    })
+  ],
   define: {
     'import.meta.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(
       '333771442482-0ip5t2oeentnfm6rjac75fj40891iuam.apps.googleusercontent.com'
