@@ -32,7 +32,7 @@ export default function SubscriptionTab({
   useEffect(() => {
     let isMounted = true;
     client
-      .get("/v1/workspace-members/workspace/payments/methods")
+      .get("/workspace-members/workspace/payments/methods")
       .then((res) => {
         if (isMounted && res.data?.data) {
           setPaymentMethods(Array.isArray(res.data.data) ? res.data.data : []);
