@@ -18,6 +18,7 @@ export default function RolesTab({
     name: { ar: "", en: "" },
     description: { ar: "", en: "" },
     permissions: [],
+    is_visible_to_customers: false,
   });
 
   const PERMISSION_KEYS = {
@@ -250,6 +251,7 @@ export default function RolesTab({
       name: { ar: "", en: "" },
       description: { ar: "", en: "" },
       permissions: [],
+      is_visible_to_customers: false,
     });
     setIsModalOpen(true);
   };
@@ -273,6 +275,7 @@ export default function RolesTab({
           (typeof role.description === "string" ? role.description : ""),
       },
       permissions: Array.isArray(role.permissions) ? role.permissions : [],
+      is_visible_to_customers: !!role.is_visible_to_customers,
     });
     setIsModalOpen(true);
   };
@@ -637,6 +640,33 @@ export default function RolesTab({
                     </div>
                   </>
                 )}
+
+                <div style={{ marginTop: 12, marginBottom: 16 }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontSize: "0.88rem",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                      color: "var(--heading)",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={roleForm.is_visible_to_customers}
+                      onChange={(e) =>
+                        setRoleForm({
+                          ...roleForm,
+                          is_visible_to_customers: e.target.checked,
+                        })
+                      }
+                      style={{ width: 16, height: 16, accentColor: "var(--primary)" }}
+                    />
+                    {t("isVisibleToCustomers") || "إظهار هذا الدور للعملاء (عند الحجز)"}
+                  </label>
+                </div>
 
                 {/* Permissions Checklist */}
                 <div style={{ marginTop: 8 }}>

@@ -74,6 +74,7 @@ export default function WorkspaceRolesPage() {
         name: roleForm.name,
         description: roleForm.description,
         permissions: roleForm.permissions,
+        is_visible_to_customers: roleForm.is_visible_to_customers,
       };
       if (roleForm.editing_id) {
         await client.put(

@@ -45,7 +45,7 @@ export default function MembersTab({
       email: member.email || "",
       phone: member.phone || "",
       password: "",
-      role_id: member.role_id || member.role?.id || "",
+      role_id: member.roles?.[0]?.id || "",
       status: member.status || "active",
     });
     setShowPassword(false);
@@ -59,6 +59,12 @@ export default function MembersTab({
       if (!payload.password) {
         delete payload.password;
       }
+      if (payload.role_id) {
+        payload.role_ids = [parseInt(payload.role_id, 10)];
+      } else {
+        payload.role_ids = [];
+      }
+      delete payload.role_id;
       await onSaveMember(payload);
     }
     setIsModalOpen(false);
@@ -215,12 +221,12 @@ export default function MembersTab({
                     fontSize: "0.88rem",
                   }}
                 >
-                  {m.role
-                    ? typeof m.role.name === "object"
-                      ? m.role.name[t("lang")] ||
-                        m.role.name.ar ||
-                        m.role.name.en
-                      : m.role.name
+                  {m.roles && m.roles.length > 0
+                    ? typeof m.roles[0].name === "object"
+                      ? m.roles[0].name[t("lang")] ||
+                        m.roles[0].name.ar ||
+                        m.roles[0].name.en
+                      : m.roles[0].name
                     : t("memberRole") || "عضو"}
                   {m.is_owner && (
                     <span
