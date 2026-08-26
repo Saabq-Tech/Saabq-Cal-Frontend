@@ -1436,7 +1436,8 @@ export const translations = {
     active: "نشط",
     inactive: "غير نشط",
     confirmDelete: "تأكيد الحذف",
-    deleteResourceWarning: "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.",
+    deleteResourceWarning:
+      "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.",
     logsLoadFailed: "فشل تحميل سجل النشاطات",
     resourcesLoadFailed: "فشل تحميل الموارد والقاعات",
     resourceUpdatedSuccess: "تم تحديث المورد بنجاح",
@@ -2902,7 +2903,8 @@ export const translations = {
     active: "Active",
     inactive: "Inactive",
     confirmDelete: "Confirm Delete",
-    deleteResourceWarning: "Are you sure you want to delete this resource? This action cannot be undone.",
+    deleteResourceWarning:
+      "Are you sure you want to delete this resource? This action cannot be undone.",
     logsLoadFailed: "Failed to load audit logs",
     resourcesLoadFailed: "Failed to load resources",
     resourceUpdatedSuccess: "Resource updated successfully",

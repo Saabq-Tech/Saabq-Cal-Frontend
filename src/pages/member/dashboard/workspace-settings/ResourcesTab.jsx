@@ -87,7 +87,8 @@ export default function ResourcesTab({
               color: "var(--heading)",
             }}
           >
-            {t("workspaceResources") || (isRTL ? "إدارة الموارد والقاعات" : "Workspace Resources")}
+            {t("workspaceResources") ||
+              (isRTL ? "إدارة الموارد والقاعات" : "Workspace Resources")}
           </h2>
           <p
             style={{
@@ -143,14 +144,16 @@ export default function ResourcesTab({
               color: "var(--heading)",
             }}
           >
-            {t("noResourcesFound") || (isRTL ? "لا توجد موارد مضافة حالياً" : "No resources found")}
+            {t("noResourcesFound") ||
+              (isRTL ? "لا توجد موارد مضافة حالياً" : "No resources found")}
           </h4>
         </div>
       ) : (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 250px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 250px), 1fr))",
             gap: 18,
           }}
         >
@@ -170,7 +173,14 @@ export default function ResourcesTab({
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 800, margin: 0, color: "var(--heading)" }}>
+                <h3
+                  style={{
+                    fontSize: "1.05rem",
+                    fontWeight: 800,
+                    margin: 0,
+                    color: "var(--heading)",
+                  }}
+                >
                   {r.name}
                 </h3>
                 <span
@@ -183,39 +193,95 @@ export default function ResourcesTab({
                     color: r.status === "active" ? "#15803d" : "#4b5563",
                   }}
                 >
-                  {r.status === "active" ? (t("statusActive") || (isRTL ? "نشط" : "Active")) : (t("statusInactive") || (isRTL ? "غير نشط" : "Inactive"))}
+                  {r.status === "active"
+                    ? t("statusActive") || (isRTL ? "نشط" : "Active")
+                    : t("statusInactive") || (isRTL ? "غير نشط" : "Inactive")}
                 </span>
               </div>
-              <p style={{ fontSize: "0.86rem", color: "var(--text-secondary)", margin: 0 }}>
+              <p
+                style={{
+                  fontSize: "0.86rem",
+                  color: "var(--text-secondary)",
+                  margin: 0,
+                }}
+              >
                 {r.description || (isRTL ? "لا يوجد وصف" : "No description")}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {r.type && (
-                  <span style={{ fontSize: "0.76rem", background: "var(--surface-alt)", padding: "3px 9px", borderRadius: 6, color: "var(--text-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span
+                    style={{
+                      fontSize: "0.76rem",
+                      background: "var(--surface-alt)",
+                      padding: "3px 9px",
+                      borderRadius: 6,
+                      color: "var(--text-secondary)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
                     <Icon name="tag" size={12} />
                     {r.type}
                   </span>
                 )}
                 {r.location && (
-                  <span style={{ fontSize: "0.76rem", background: "var(--surface-alt)", padding: "3px 9px", borderRadius: 6, color: "var(--text-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span
+                    style={{
+                      fontSize: "0.76rem",
+                      background: "var(--surface-alt)",
+                      padding: "3px 9px",
+                      borderRadius: 6,
+                      color: "var(--text-secondary)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
                     <Icon name="map-pin" size={12} />
                     {r.location}
                   </span>
                 )}
                 {r.capacity > 1 && (
-                  <span style={{ fontSize: "0.76rem", background: "var(--surface-alt)", padding: "3px 9px", borderRadius: 6, color: "var(--text-secondary)", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span
+                    style={{
+                      fontSize: "0.76rem",
+                      background: "var(--surface-alt)",
+                      padding: "3px 9px",
+                      borderRadius: 6,
+                      color: "var(--text-secondary)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
                     <Icon name="custom-0c2e06fd" size={12} />
                     {r.capacity} {t("persons") || (isRTL ? "أشخاص" : "persons")}
                   </span>
                 )}
               </div>
               {canEdit && (
-                <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 12, borderTop: "1px solid var(--border-light)" }}>
-                  <button className="btn btn-secondary btn-sm" onClick={() => handleOpenEdit(r)} style={{ flex: 1 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    marginTop: "auto",
+                    paddingTop: 12,
+                    borderTop: "1px solid var(--border-light)",
+                  }}
+                >
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleOpenEdit(r)}
+                    style={{ flex: 1 }}
+                  >
                     <Icon name="edit-2" size={14} />
                     {t("edit") || (isRTL ? "تعديل" : "Edit")}
                   </button>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleOpenDelete(r.id)}>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleOpenDelete(r.id)}
+                  >
                     <Icon name="trash-2" size={14} />
                   </button>
                 </div>
@@ -230,13 +296,27 @@ export default function ResourcesTab({
         <div className="modal-backdrop">
           <div className="modal-content" style={{ maxWidth: 500 }}>
             <div className="modal-header">
-              <h3>{form.id ? (t("editResource") || (isRTL ? "تعديل المورد" : "Edit Resource")) : (t("addResource") || (isRTL ? "إضافة مورد" : "Add Resource"))}</h3>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>×</button>
+              <h3>
+                {form.id
+                  ? t("editResource") ||
+                    (isRTL ? "تعديل المورد" : "Edit Resource")
+                  : t("addResource") || (isRTL ? "إضافة مورد" : "Add Resource")}
+              </h3>
+              <button
+                className="close-btn"
+                onClick={() => setIsModalOpen(false)}
+              >
+                ×
+              </button>
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label>{t("resourceName") || (isRTL ? "اسم المورد/القاعة" : "Resource Name")} <span className="required">*</span></label>
+                  <label>
+                    {t("resourceName") ||
+                      (isRTL ? "اسم المورد/القاعة" : "Resource Name")}{" "}
+                    <span className="required">*</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
@@ -246,12 +326,16 @@ export default function ResourcesTab({
                   />
                 </div>
                 <div className="form-group">
-                  <label>{t("description") || (isRTL ? "الوصف" : "Description")}</label>
+                  <label>
+                    {t("description") || (isRTL ? "الوصف" : "Description")}
+                  </label>
                   <textarea
                     className="form-control"
                     rows="3"
                     value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
                   />
                 </div>
                 <div style={{ display: "flex", gap: 16 }}>
@@ -261,28 +345,41 @@ export default function ResourcesTab({
                       type="text"
                       className="form-control"
                       value={form.type}
-                      onChange={(e) => setForm({ ...form, type: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, type: e.target.value })
+                      }
                       placeholder="e.g. room, equipment"
                     />
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
-                    <label>{t("capacity") || (isRTL ? "السعة" : "Capacity")}</label>
+                    <label>
+                      {t("capacity") || (isRTL ? "السعة" : "Capacity")}
+                    </label>
                     <input
                       type="number"
                       className="form-control"
                       min="1"
                       value={form.capacity}
-                      onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value, 10) || 1 })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          capacity: parseInt(e.target.value, 10) || 1,
+                        })
+                      }
                     />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>{t("location") || (isRTL ? "الموقع" : "Location")}</label>
+                  <label>
+                    {t("location") || (isRTL ? "الموقع" : "Location")}
+                  </label>
                   <input
                     type="text"
                     className="form-control"
                     value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, location: e.target.value })
+                    }
                   />
                 </div>
                 <div className="form-group">
@@ -290,14 +387,32 @@ export default function ResourcesTab({
                   <select
                     className="form-control"
                     value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, status: e.target.value })
+                    }
                   >
-                    <option value="active">{t("active") || (isRTL ? "نشط" : "Active")}</option>
-                    <option value="inactive">{t("inactive") || (isRTL ? "غير نشط" : "Inactive")}</option>
+                    <option value="active">
+                      {t("active") || (isRTL ? "نشط" : "Active")}
+                    </option>
+                    <option value="inactive">
+                      {t("inactive") || (isRTL ? "غير نشط" : "Inactive")}
+                    </option>
                   </select>
                 </div>
-                <div className="modal-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 24 }}>
-                  <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+                <div
+                  className="modal-actions"
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 12,
+                    marginTop: 24,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setIsModalOpen(false)}
+                  >
                     {t("cancel") || (isRTL ? "إلغاء" : "Cancel")}
                   </button>
                   <button type="submit" className="btn btn-primary">
@@ -315,13 +430,37 @@ export default function ResourcesTab({
         <div className="modal-backdrop">
           <div className="modal-content" style={{ maxWidth: 400 }}>
             <div className="modal-header">
-              <h3>{t("confirmDelete") || (isRTL ? "تأكيد الحذف" : "Confirm Delete")}</h3>
-              <button className="close-btn" onClick={() => setIsConfirmOpen(false)}>×</button>
+              <h3>
+                {t("confirmDelete") ||
+                  (isRTL ? "تأكيد الحذف" : "Confirm Delete")}
+              </h3>
+              <button
+                className="close-btn"
+                onClick={() => setIsConfirmOpen(false)}
+              >
+                ×
+              </button>
             </div>
             <div className="modal-body text-center">
-              <p>{t("deleteResourceWarning") || (isRTL ? "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء." : "Are you sure you want to delete this resource? This action cannot be undone.")}</p>
-              <div className="modal-actions" style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 24 }}>
-                <button className="btn btn-secondary" onClick={() => setIsConfirmOpen(false)}>
+              <p>
+                {t("deleteResourceWarning") ||
+                  (isRTL
+                    ? "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء."
+                    : "Are you sure you want to delete this resource? This action cannot be undone.")}
+              </p>
+              <div
+                className="modal-actions"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 12,
+                  marginTop: 24,
+                }}
+              >
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setIsConfirmOpen(false)}
+                >
                   {t("cancel") || (isRTL ? "إلغاء" : "Cancel")}
                 </button>
                 <button className="btn btn-danger" onClick={confirmDelete}>

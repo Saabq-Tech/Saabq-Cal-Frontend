@@ -383,10 +383,7 @@ export default function App() {
                       path="resources"
                       element={<WorkspaceResourcesPage />}
                     />
-                    <Route
-                      path="logs"
-                      element={<WorkspaceLogsPage />}
-                    />
+                    <Route path="logs" element={<WorkspaceLogsPage />} />
                   </Route>
 
                   {/* Explicit Error Pages */}

@@ -24,12 +24,10 @@ export default function WorkspaceLogsPage() {
   const userPermissions = Array.isArray(user?.permissions)
     ? user.permissions
     : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("settings_read");
+  const canRead = isOwner || userPermissions.includes("settings_read");
 
   const loadingRef = useRef(false);
-  
+
   const loadLogs = async (currentFilters) => {
     if (!canRead) {
       setLoading(false);

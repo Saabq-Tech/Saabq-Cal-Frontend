@@ -18,12 +18,8 @@ export default function WorkspaceResourcesPage() {
   const userPermissions = Array.isArray(user?.permissions)
     ? user.permissions
     : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("resource_read");
-  const canEdit =
-    isOwner ||
-    userPermissions.includes("resource_write");
+  const canRead = isOwner || userPermissions.includes("resource_read");
+  const canEdit = isOwner || userPermissions.includes("resource_write");
 
   const loadingRef = useRef(false);
   const loadResources = async () => {
