@@ -316,7 +316,7 @@ export default function ChatsPage() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [toast],
+    [toast, t],
   );
 
   // Fetch Conversations List

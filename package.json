@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "lang:check": "node scripts/check-translations.js",
     "test": "vitest run",
