@@ -662,9 +662,14 @@ export default function RolesTab({
                           is_visible_to_customers: e.target.checked,
                         })
                       }
-                      style={{ width: 16, height: 16, accentColor: "var(--primary)" }}
+                      style={{
+                        width: 16,
+                        height: 16,
+                        accentColor: "var(--primary)",
+                      }}
                     />
-                    {t("isVisibleToCustomers") || "إظهار هذا الدور للعملاء (عند الحجز)"}
+                    {t("isVisibleToCustomers") ||
+                      "إظهار هذا الدور للعملاء (عند الحجز)"}
                   </label>
                 </div>
 

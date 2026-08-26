@@ -89,6 +89,9 @@ export default function WorkspaceSettingsPage() {
     email: "",
     phone: "",
     description: "",
+    customer_label_singular: "",
+    customer_label_plural: "",
+    is_visible_in_explorer: true,
     slug: "",
     status: "active",
     workspace_type_id: "",
@@ -208,7 +211,16 @@ export default function WorkspaceSettingsPage() {
             name: data.name || "",
             email: data.email || "",
             phone: data.phone || "",
-            description: data.description || "",
+            description:
+              typeof data.description === "object"
+                ? {
+                    ar: data.description?.ar || "",
+                    en: data.description?.en || "",
+                  }
+                : { ar: data.description || "", en: "" },
+            customer_label_singular: data.customer_label_singular || "",
+            customer_label_plural: data.customer_label_plural || "",
+            is_visible_in_explorer: data.is_visible_in_explorer !== false,
             slug: data.slug || "",
             status: data.status || "active",
             workspace_type_id:

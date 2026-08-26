@@ -504,11 +504,20 @@ export default function CustomerBookAppointmentPage() {
   useEffect(() => {
     if (workspace) {
       if (workspace.primary_color) {
-        document.documentElement.style.setProperty("--primary", workspace.primary_color);
-        document.documentElement.style.setProperty("--primary-hover", workspace.hover_color || workspace.primary_color);
+        document.documentElement.style.setProperty(
+          "--primary",
+          workspace.primary_color,
+        );
+        document.documentElement.style.setProperty(
+          "--primary-hover",
+          workspace.hover_color || workspace.primary_color,
+        );
       }
       if (workspace.secondary_color) {
-        document.documentElement.style.setProperty("--secondary", workspace.secondary_color);
+        document.documentElement.style.setProperty(
+          "--secondary",
+          workspace.secondary_color,
+        );
       }
       return () => {
         document.documentElement.style.removeProperty("--primary");

@@ -3,6 +3,7 @@ import { useLanguage } from "../../../../context/LanguageContext";
 import client, { endpoints } from "../../../../api/client";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
 import Icon from "../../../../components/common/Icon";
+import RichTextEditor from "../../../../components/common/RichTextEditor";
 
 export default function BasicInfoTab({
   basicForm,
@@ -14,6 +15,7 @@ export default function BasicInfoTab({
   canEdit,
 }) {
   const { t } = useLanguage();
+  const [descLang, setDescLang] = useState("ar");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [loadingStates, setLoadingStates] = useState(false);
@@ -241,24 +243,266 @@ export default function BasicInfoTab({
         </div>
       </div>
 
-      {/* Row 2: Bio / Description */}
-      <div className="form-group" style={{ marginBottom: 16 }}>
-        <label className="form-label">
-          {t("workspaceBioLabel") || t("bio") || "نبذة عن مساحة العمل"}
-        </label>
-        <textarea
-          className="form-textarea"
-          value={basicForm.description || ""}
-          onChange={(e) =>
-            setBasicForm({ ...basicForm, description: e.target.value })
-          }
-          rows={3}
-          placeholder={
-            t("workspaceBioPlaceholder") ||
-            "اكتب نبذة مختصرة عن نشاط مساحة العمل..."
-          }
-          disabled={!canEdit}
-        />
+      {/* Row 2: Bio / Description (Rich Text HTML Translatable Editor) */}
+      <div className="form-group" style={{ marginBottom: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 8,
+          }}
+        >
+          <label
+            className="form-label"
+            style={{ marginBottom: 0, fontWeight: 700 }}
+          >
+            {t("workspaceBioLabel") || "نبذة عن مساحة العمل (وصف HTML غني)"}
+          </label>
+
+          {/* Language Toggle Pills */}
+          <div style={{ display: "flex", gap: 6 }}>
+            <button
+              type="button"
+              onClick={() => setDescLang("ar")}
+              style={{
+                padding: "4px 10px",
+                borderRadius: 14,
+                fontSize: "0.76rem",
+                fontWeight: descLang === "ar" ? 700 : 500,
+                border:
+                  descLang === "ar"
+                    ? "1px solid var(--primary)"
+                    : "1px solid var(--border-light)",
+                background:
+                  descLang === "ar" ? "var(--primary)" : "transparent",
+                color: descLang === "ar" ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+              }}
+            >
+              🇸🇦 {t("arabic") || "بالعربية"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setDescLang("en")}
+              style={{
+                padding: "4px 10px",
+                borderRadius: 14,
+                fontSize: "0.76rem",
+                fontWeight: descLang === "en" ? 700 : 500,
+                border:
+                  descLang === "en"
+                    ? "1px solid var(--primary)"
+                    : "1px solid var(--border-light)",
+                background:
+                  descLang === "en" ? "var(--primary)" : "transparent",
+                color: descLang === "en" ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+              }}
+            >
+              🇬🇧 {t("english") || "بالإنجليزية"}
+            </button>
+          </div>
+        </div>
+
+        {descLang === "ar" ? (
+          <RichTextEditor
+            key="desc-ar"
+            value={
+              typeof basicForm.description === "object"
+                ? basicForm.description?.ar || ""
+                : basicForm.description || ""
+            }
+            onChange={(val) =>
+              setBasicForm({
+                ...basicForm,
+                description:
+                  typeof basicForm.description === "object"
+                    ? { ...basicForm.description, ar: val }
+                    : { ar: val, en: "" },
+              })
+            }
+            disabled={!canEdit}
+            minHeight={220}
+            placeholder={t("placeholderDescAr")}
+          />
+        ) : (
+          <RichTextEditor
+            key="desc-en"
+            value={
+              typeof basicForm.description === "object"
+                ? basicForm.description?.en || ""
+                : ""
+            }
+            onChange={(val) =>
+              setBasicForm({
+                ...basicForm,
+                description:
+                  typeof basicForm.description === "object"
+                    ? { ...basicForm.description, en: val }
+                    : { ar: basicForm.description || "", en: val },
+              })
+            }
+            disabled={!canEdit}
+            minHeight={220}
+            placeholder={t("placeholderDescEn")}
+          />
+        )}
+      </div>
+
+      {/* Customer Terminology & Explorer Visibility Section */}
+      <div
+        style={{
+          background: "var(--background-subtle, #f8fafc)",
+          border: "1px solid var(--border-light, #e2e8f0)",
+          borderRadius: "var(--radius-lg, 12px)",
+          padding: 20,
+          marginBottom: 24,
+        }}
+      >
+        <h4
+          style={{ margin: "0 0 4px 0", fontSize: "1.05rem", fontWeight: 800 }}
+        >
+          {t("customerLabelSectionTitle") ||
+            "مسمى العملاء والظهور في الاستكشاف"}
+        </h4>
+        <p
+          style={{
+            margin: "0 0 16px 0",
+            fontSize: "0.84rem",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {t("customerLabelSectionDesc") ||
+            "تخصيص المسمى الخـاص بالعملاء في هذه مساحة العمل (مثلاً: مرضى، طلاب، عملاء) وإعدادات الظهور في البحث العام."}
+        </p>
+
+        <div
+          className="form-row"
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+            gap: 16,
+            marginBottom: 16,
+          }}
+        >
+          <div className="form-group">
+            <label className="form-label">
+              {t("customerLabelSingularLabel") || "مسمى العميل (مفرد)"}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={basicForm.customer_label_singular || ""}
+              onChange={(e) =>
+                setBasicForm({
+                  ...basicForm,
+                  customer_label_singular: e.target.value,
+                })
+              }
+              placeholder={
+                t("customerLabelSingularPlaceholder") ||
+                "مثال: مريض، طالب، عميل"
+              }
+              disabled={!canEdit}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              {t("customerLabelPluralLabel") || "مسمى العملاء (جمع)"}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={basicForm.customer_label_plural || ""}
+              onChange={(e) =>
+                setBasicForm({
+                  ...basicForm,
+                  customer_label_plural: e.target.value,
+                })
+              }
+              placeholder={
+                t("customerLabelPluralPlaceholder") || "مثال: مرضى، طلاب، عملاء"
+              }
+              disabled={!canEdit}
+            />
+          </div>
+        </div>
+
+        {/* Explorer Visibility Toggle Switch */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingTop: 14,
+            borderTop: "1px solid var(--border-light, #e2e8f0)",
+          }}
+        >
+          <div>
+            <div
+              style={{ fontWeight: 700, fontSize: "0.9rem", marginBottom: 2 }}
+            >
+              {t("showInExplorerLabel") ||
+                "إظهار مساحة العمل في صفحة الاستكشاف والبحث العام"}
+            </div>
+            <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+              {t("showInExplorerHelp") ||
+                "عند تعطيل هذا الخيار، لن تظهر مساحة العمل وخدماتها في البحث العام، ولكن يمكن الوصول إليها عبر الرابط المباشر."}
+            </div>
+          </div>
+          <label
+            style={{
+              position: "relative",
+              display: "inline-block",
+              width: 44,
+              height: 24,
+              cursor: canEdit ? "pointer" : "not-allowed",
+              flexShrink: 0,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={basicForm.is_visible_in_explorer !== false}
+              onChange={(e) =>
+                setBasicForm({
+                  ...basicForm,
+                  is_visible_in_explorer: e.target.checked,
+                })
+              }
+              disabled={!canEdit}
+              style={{ opacity: 0, width: 0, height: 0 }}
+            />
+            <span
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundColor:
+                  basicForm.is_visible_in_explorer !== false
+                    ? "var(--primary, #0a9099)"
+                    : "#cbd5e1",
+                borderRadius: 24,
+                transition: "0.3s",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  content: '""',
+                  height: 18,
+                  width: 18,
+                  left: basicForm.is_visible_in_explorer !== false ? 22 : 3,
+                  bottom: 3,
+                  backgroundColor: "#fff",
+                  borderRadius: "50%",
+                  transition: "0.3s",
+                }}
+              />
+            </span>
+          </label>
+        </div>
       </div>
 
       {/* Row 3: Email, Phone, Website */}

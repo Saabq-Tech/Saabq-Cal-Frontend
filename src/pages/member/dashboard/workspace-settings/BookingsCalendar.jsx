@@ -460,8 +460,16 @@ export default function BookingsCalendar({ onSelectBooking }) {
                 {isRTL ? "مواعيد يوم" : "Appointments for"}{" "}
                 {(() => {
                   const parts = selectedDay.split("-");
-                  const d = new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
-                  return d.toLocaleDateString(isRTL ? "ar" : "en", { weekday: "long", day: "numeric", month: "long" });
+                  const d = new Date(
+                    parseInt(parts[0]),
+                    parseInt(parts[1]),
+                    parseInt(parts[2]),
+                  );
+                  return d.toLocaleDateString(isRTL ? "ar" : "en", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  });
                 })()}
               </h3>
               <div

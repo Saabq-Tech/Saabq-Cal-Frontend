@@ -561,7 +561,6 @@ export default function BookingsTab({
           </div>
         </div>
       )}
-
     </div>
   );
 }
