@@ -1,13 +1,20 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import client, { endpoints } from '../api/client';
-import { applyWorkspaceBranding } from '../utils/theme';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import client, { endpoints } from "../api/client";
+import { applyWorkspaceBranding } from "../utils/theme";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem('saabq_user');
+      const stored = localStorage.getItem("saabq_user");
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
@@ -15,11 +22,11 @@ export function AuthProvider({ children }) {
   });
 
   const [userType, setUserType] = useState(
-    () => localStorage.getItem('saabq_user_type') || null
+    () => localStorage.getItem("saabq_user_type") || null,
   );
 
   const [token, setToken] = useState(
-    () => localStorage.getItem('saabq_token') || null
+    () => localStorage.getItem("saabq_token") || null,
   );
 
   const [loading, setLoading] = useState(false);
@@ -30,30 +37,30 @@ export function AuthProvider({ children }) {
   // Persist state changes to localStorage
   useEffect(() => {
     if (token) {
-      localStorage.setItem('saabq_token', token);
+      localStorage.setItem("saabq_token", token);
     } else {
-      localStorage.removeItem('saabq_token');
+      localStorage.removeItem("saabq_token");
     }
   }, [token]);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('saabq_user', JSON.stringify(user));
+      localStorage.setItem("saabq_user", JSON.stringify(user));
       const ws = user.workspace;
       if (ws) {
         applyWorkspaceBranding(ws.primary_color, ws.secondary_color);
       }
     } else {
-      localStorage.removeItem('saabq_user');
+      localStorage.removeItem("saabq_user");
       applyWorkspaceBranding(null, null);
     }
   }, [user]);
 
   useEffect(() => {
     if (userType) {
-      localStorage.setItem('saabq_user_type', userType);
+      localStorage.setItem("saabq_user_type", userType);
     } else {
-      localStorage.removeItem('saabq_user_type');
+      localStorage.removeItem("saabq_user_type");
     }
   }, [userType]);
 
@@ -67,7 +74,7 @@ export function AuthProvider({ children }) {
           ...workspaceData,
         },
       };
-      localStorage.setItem('saabq_user', JSON.stringify(updated));
+      localStorage.setItem("saabq_user", JSON.stringify(updated));
       return updated;
     });
   }, []);
@@ -83,12 +90,16 @@ export function AuthProvider({ children }) {
       setToken(newToken);
       setUser(userData);
       setUserType(type);
-      return { success: true, data: response.data, message: response.data?.message };
+      return {
+        success: true,
+        data: response.data,
+        message: response.data?.message,
+      };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Login failed',
+        message: errorData?.message || "Login failed",
         errors: errorData?.errors || {},
       };
     } finally {
@@ -97,41 +108,53 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Google Login
-  const googleAuth = useCallback(async (type, googleToken, extraPayload = {}) => {
-    setLoading(true);
-    try {
-      const payload = typeof extraPayload === 'string'
-        ? { token: googleToken, fcm_token: extraPayload }
-        : { token: googleToken, ...extraPayload };
-      const response = await client.post(endpoints.googleAuth(type), payload);
-      const { token: newToken, user: userData } = response.data.data;
-      setToken(newToken);
-      setUser(userData);
-      setUserType(type);
-      return { success: true, data: response.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Google authentication failed',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const googleAuth = useCallback(
+    async (type, googleToken, extraPayload = {}) => {
+      setLoading(true);
+      try {
+        const payload =
+          typeof extraPayload === "string"
+            ? { token: googleToken, fcm_token: extraPayload }
+            : { token: googleToken, ...extraPayload };
+        const response = await client.post(endpoints.googleAuth(type), payload);
+        const { token: newToken, user: userData } = response.data.data;
+        setToken(newToken);
+        setUser(userData);
+        setUserType(type);
+        return {
+          success: true,
+          data: response.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Google authentication failed",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   // Registration
   const register = useCallback(async (type, data) => {
     setLoading(true);
     try {
       const response = await client.post(endpoints.register(type), data);
-      return { success: true, data: response.data, message: response.data?.message };
+      return {
+        success: true,
+        data: response.data,
+        message: response.data?.message,
+      };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Registration failed',
+        message: errorData?.message || "Registration failed",
         errors: errorData?.errors || {},
       };
     } finally {
@@ -160,13 +183,15 @@ export function AuthProvider({ children }) {
   const forgotPassword = useCallback(async (type, email) => {
     setLoading(true);
     try {
-      const response = await client.post(endpoints.forgotPassword(type), { email });
+      const response = await client.post(endpoints.forgotPassword(type), {
+        email,
+      });
       return { success: true, message: response.data.message };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Failed to send reset email',
+        message: errorData?.message || "Failed to send reset email",
         errors: errorData?.errors || {},
       };
     } finally {
@@ -184,7 +209,7 @@ export function AuthProvider({ children }) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Failed to reset password',
+        message: errorData?.message || "Failed to reset password",
         errors: errorData?.errors || {},
       };
     } finally {
@@ -219,44 +244,47 @@ export function AuthProvider({ children }) {
   const isFetchingUnreadRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
 
-  const refreshUnreadCounts = useCallback((force = false) => {
-    if (!token || isFetchingUnreadRef.current) return;
-    if (document.hidden && !force) return;
+  const refreshUnreadCounts = useCallback(
+    (force = false) => {
+      if (!token || isFetchingUnreadRef.current) return;
+      if (document.hidden && !force) return;
 
-    const now = Date.now();
-    if (!force && now - lastFetchTimeRef.current < 4_000) {
-      return;
-    }
+      const now = Date.now();
+      if (!force && now - lastFetchTimeRef.current < 4_000) {
+        return;
+      }
 
-    isFetchingUnreadRef.current = true;
-    lastFetchTimeRef.current = now;
+      isFetchingUnreadRef.current = true;
+      lastFetchTimeRef.current = now;
 
-    Promise.allSettled([
-      client.get(endpoints.notificationsUnreadCount),
-      client.get('/chats/unread-count'),
-    ])
-      .then(([notifRes, chatRes]) => {
-        if (notifRes.status === 'fulfilled') {
-          setUnreadCount(notifRes.value.data?.data?.unread_count ?? 0);
-        }
-        if (chatRes.status === 'fulfilled') {
-          setUnreadChatCount(chatRes.value.data?.data?.unread_count ?? 0);
-        }
-      })
-      .finally(() => {
-        isFetchingUnreadRef.current = false;
-      });
-  }, [token]);
+      Promise.allSettled([
+        client.get(endpoints.notificationsUnreadCount),
+        client.get("/chats/unread-count"),
+      ])
+        .then(([notifRes, chatRes]) => {
+          if (notifRes.status === "fulfilled") {
+            setUnreadCount(notifRes.value.data?.data?.unread_count ?? 0);
+          }
+          if (chatRes.status === "fulfilled") {
+            setUnreadChatCount(chatRes.value.data?.data?.unread_count ?? 0);
+          }
+        })
+        .finally(() => {
+          isFetchingUnreadRef.current = false;
+        });
+    },
+    [token],
+  );
 
   useEffect(() => {
     if (token) {
       refreshUnreadCounts(true);
       const interval = setInterval(() => refreshUnreadCounts(false), 60_000);
       const handleFocus = () => refreshUnreadCounts(true);
-      window.addEventListener('focus', handleFocus);
+      window.addEventListener("focus", handleFocus);
       return () => {
         clearInterval(interval);
-        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener("focus", handleFocus);
       };
     } else {
       setUnreadCount(0);
@@ -265,127 +293,168 @@ export function AuthProvider({ children }) {
   }, [token, refreshUnreadCounts]);
 
   // Update Profile
-  const updateProfile = useCallback(async (data) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.put(endpoints.profile(userType), data);
-      setUser(response.data.data);
-      return { success: true, data: response.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to update profile',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const updateProfile = useCallback(
+    async (data) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.put(endpoints.profile(userType), data);
+        setUser(response.data.data);
+        return {
+          success: true,
+          data: response.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to update profile",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   // Update Password
-  const updatePassword = useCallback(async (data) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.put(endpoints.updatePassword(userType), data);
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to update password',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const updatePassword = useCallback(
+    async (data) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.put(
+          endpoints.updatePassword(userType),
+          data,
+        );
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to update password",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   // Delete Account
-  const deleteAccount = useCallback(async (password) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.delete(endpoints.profile(userType), {
-        data: password ? { password } : {},
-      });
-      setToken(null);
-      setUser(null);
-      setUserType(null);
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to delete account',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const deleteAccount = useCallback(
+    async (password) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.delete(endpoints.profile(userType), {
+          data: password ? { password } : {},
+        });
+        setToken(null);
+        setUser(null);
+        setUserType(null);
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to delete account",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   // Upload Avatar
-  const uploadAvatar = useCallback(async (file) => {
-    if (userType !== 'customer') return { success: false, message: 'Avatar upload is only available for customers' };
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      const response = await client.post(endpoints.uploadAvatar, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setUser(response.data.data);
-      return { success: true, data: response.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to upload avatar',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const uploadAvatar = useCallback(
+    async (file) => {
+      if (userType !== "customer")
+        return {
+          success: false,
+          message: "Avatar upload is only available for customers",
+        };
+      setLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append("avatar", file);
+        const response = await client.post(endpoints.uploadAvatar, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        setUser(response.data.data);
+        return {
+          success: true,
+          data: response.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to upload avatar",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   // --- Email Verification ---
-  const sendEmailVerification = useCallback(async (email = null, overrideUserType = null) => {
-    const targetType = overrideUserType || userType || 'customer';
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.sendVerification(targetType), email ? { email } : {});
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Failed to send verification notification',
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
-
-  const verifyEmailOTP = useCallback(async (email, otp, overrideUserType = null) => {
-    const targetType = overrideUserType || userType || 'customer';
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.verifyEmail(targetType), { email, otp });
-      if (token) {
-        await fetchProfile();
+  const sendEmailVerification = useCallback(
+    async (email = null, overrideUserType = null) => {
+      const targetType = overrideUserType || userType || "customer";
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.sendVerification(targetType),
+          email ? { email } : {},
+        );
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            "Failed to send verification notification",
+        };
+      } finally {
+        setLoading(false);
       }
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Verification failed',
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType, token, fetchProfile]);
+    },
+    [userType],
+  );
+
+  const verifyEmailOTP = useCallback(
+    async (email, otp, overrideUserType = null) => {
+      const targetType = overrideUserType || userType || "customer";
+      setLoading(true);
+      try {
+        const response = await client.post(endpoints.verifyEmail(targetType), {
+          email,
+          otp,
+        });
+        if (token) {
+          await fetchProfile();
+        }
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.response?.data?.message || "Verification failed",
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType, token, fetchProfile],
+  );
 
   // --- 2FA Methods ---
   const enable2FA = useCallback(async () => {
@@ -393,47 +462,59 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       const response = await client.post(endpoints.twoFactorEnable(userType));
-      return { success: true, data: response.data.data, message: response.data.message };
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to start 2FA setup',
+        message: error.response?.data?.message || "Failed to start 2FA setup",
       };
     } finally {
       setLoading(false);
     }
   }, [userType]);
 
-  const verify2FA = useCallback(async (code) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.twoFactorVerify(userType), { code });
-      await fetchProfile();
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to verify 2FA code',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType, fetchProfile]);
+  const verify2FA = useCallback(
+    async (code) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.twoFactorVerify(userType),
+          { code },
+        );
+        await fetchProfile();
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to verify 2FA code",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType, fetchProfile],
+  );
 
   const disable2FA = useCallback(async () => {
     if (!userType) return;
     setLoading(true);
     try {
-      const response = await client.delete(endpoints.twoFactorDisable(userType));
+      const response = await client.delete(
+        endpoints.twoFactorDisable(userType),
+      );
       await fetchProfile();
       return { success: true, message: response.data.message };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to disable 2FA',
+        message: error.response?.data?.message || "Failed to disable 2FA",
       };
     } finally {
       setLoading(false);
@@ -444,12 +525,18 @@ export function AuthProvider({ children }) {
     if (!userType) return;
     setLoading(true);
     try {
-      const response = await client.get(endpoints.twoFactorRecoveryCodes(userType));
-      return { success: true, recovery_codes: response.data.data.recovery_codes };
+      const response = await client.get(
+        endpoints.twoFactorRecoveryCodes(userType),
+      );
+      return {
+        success: true,
+        recovery_codes: response.data.data.recovery_codes,
+      };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to fetch recovery codes',
+        message:
+          error.response?.data?.message || "Failed to fetch recovery codes",
       };
     } finally {
       setLoading(false);
@@ -470,40 +557,58 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
-  const registerPasskey = useCallback(async (name, credentialId, credential) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.passkeysRegister(userType), {
-        name,
-        credential_id: credentialId,
-        credential,
-      });
-      return { success: true, data: response.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Passkey registration failed',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const registerPasskey = useCallback(
+    async (name, credentialId, credential) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.passkeysRegister(userType),
+          {
+            name,
+            credential_id: credentialId,
+            credential,
+          },
+        );
+        return {
+          success: true,
+          data: response.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Passkey registration failed",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
-  const deletePasskey = useCallback(async (id) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.delete(endpoints.passkeysDelete(userType, id));
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Failed to delete passkey' };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const deletePasskey = useCallback(
+    async (id) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.delete(
+          endpoints.passkeysDelete(userType, id),
+        );
+        return { success: true, message: response.data.message };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.response?.data?.message || "Failed to delete passkey",
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   const passkeyLogin = useCallback(async (type, credentialId) => {
     setLoading(true);
@@ -515,12 +620,16 @@ export function AuthProvider({ children }) {
       setToken(newToken);
       setUser(userData);
       setUserType(type);
-      return { success: true, data: response.data, message: response.data.message };
+      return {
+        success: true,
+        data: response.data,
+        message: response.data.message,
+      };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Passkey login failed',
+        message: errorData?.message || "Passkey login failed",
         errors: errorData?.errors || {},
       };
     } finally {
@@ -542,34 +651,51 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
-  const connectGoogleIntegration = useCallback(async (payload) => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.googleIntegration(userType), payload);
-      await fetchProfile();
-      return { success: true, data: response.data.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Google integration failed',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType, fetchProfile]);
+  const connectGoogleIntegration = useCallback(
+    async (payload) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.googleIntegration(userType),
+          payload,
+        );
+        await fetchProfile();
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Google integration failed",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType, fetchProfile],
+  );
 
   const disconnectGoogleIntegration = useCallback(async () => {
     if (!userType) return;
     setLoading(true);
     try {
-      const response = await client.delete(endpoints.googleIntegration(userType));
+      const response = await client.delete(
+        endpoints.googleIntegration(userType),
+      );
       await fetchProfile();
       return { success: true, message: response.data.message };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Failed to disconnect Google account' };
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Failed to disconnect Google account",
+      };
     } finally {
       setLoading(false);
     }
@@ -577,10 +703,10 @@ export function AuthProvider({ children }) {
 
   // --- Webhook Integration Methods (Workspace Members) ---
   const fetchWebhookIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.get(endpoints.webhookIntegration('member'));
+      const response = await client.get(endpoints.webhookIntegration("member"));
       return { success: true, data: response.data.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message };
@@ -589,32 +715,49 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
-  const saveWebhookIntegration = useCallback(async (payload) => {
-    if (userType !== 'member') return;
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.webhookIntegration('member'), payload);
-      return { success: true, data: response.data.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to save Webhook settings',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const saveWebhookIntegration = useCallback(
+    async (payload) => {
+      if (userType !== "member") return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.webhookIntegration("member"),
+          payload,
+        );
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to save Webhook settings",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   const deleteWebhookIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.delete(endpoints.webhookIntegration('member'));
+      const response = await client.delete(
+        endpoints.webhookIntegration("member"),
+      );
       return { success: true, message: response.data.message };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Failed to delete Webhook integration' };
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Failed to delete Webhook integration",
+      };
     } finally {
       setLoading(false);
     }
@@ -622,10 +765,12 @@ export function AuthProvider({ children }) {
 
   // --- Telegram Integration Methods (Workspace Members) ---
   const fetchTelegramIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.get(endpoints.telegramIntegration('member'));
+      const response = await client.get(
+        endpoints.telegramIntegration("member"),
+      );
       return { success: true, data: response.data.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message };
@@ -634,48 +779,71 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
-  const saveTelegramIntegration = useCallback(async (payload) => {
-    if (userType !== 'member') return;
+  const saveTelegramIntegration = useCallback(
+    async (payload) => {
+      if (userType !== "member") return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.telegramIntegration("member"),
+          payload,
+        );
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to save Telegram settings",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
+
+  const deleteTelegramIntegration = useCallback(async () => {
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.post(endpoints.telegramIntegration('member'), payload);
-      return { success: true, data: response.data.data, message: response.data.message };
+      const response = await client.delete(
+        endpoints.telegramIntegration("member"),
+      );
+      return { success: true, message: response.data.message };
     } catch (error) {
-      const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Failed to save Telegram settings',
-        errors: errorData?.errors || {},
+        message:
+          error.response?.data?.message ||
+          "Failed to delete Telegram integration",
       };
     } finally {
       setLoading(false);
     }
   }, [userType]);
 
-  const deleteTelegramIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
-    setLoading(true);
-    try {
-      const response = await client.delete(endpoints.telegramIntegration('member'));
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Failed to delete Telegram integration' };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
-
   const activateTelegramWebhook = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.post(endpoints.telegramActivateWebhook('member'));
-      return { success: true, data: response.data.data, message: response.data.message };
+      const response = await client.post(
+        endpoints.telegramActivateWebhook("member"),
+      );
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Failed to activate Telegram webhook',
+        message: errorData?.message || "Failed to activate Telegram webhook",
       };
     } finally {
       setLoading(false);
@@ -684,10 +852,10 @@ export function AuthProvider({ children }) {
 
   // --- Email Integration Methods (Workspace Members) ---
   const fetchEmailIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.get(endpoints.emailIntegration('member'));
+      const response = await client.get(endpoints.emailIntegration("member"));
       return { success: true, data: response.data.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message };
@@ -696,54 +864,75 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
-  const saveEmailIntegration = useCallback(async (payload) => {
-    if (userType !== 'member') return;
-    setLoading(true);
-    try {
-      const response = await client.post(endpoints.emailIntegration('member'), payload);
-      return { success: true, data: response.data.data, message: response.data.message };
-    } catch (error) {
-      const errorData = error.response?.data;
-      return {
-        success: false,
-        message: errorData?.message || 'Failed to save Email settings',
-        errors: errorData?.errors || {},
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType]);
+  const saveEmailIntegration = useCallback(
+    async (payload) => {
+      if (userType !== "member") return;
+      setLoading(true);
+      try {
+        const response = await client.post(
+          endpoints.emailIntegration("member"),
+          payload,
+        );
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message,
+        };
+      } catch (error) {
+        const errorData = error.response?.data;
+        return {
+          success: false,
+          message: errorData?.message || "Failed to save Email settings",
+          errors: errorData?.errors || {},
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType],
+  );
 
   const deleteEmailIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.delete(endpoints.emailIntegration('member'));
+      const response = await client.delete(
+        endpoints.emailIntegration("member"),
+      );
       return { success: true, message: response.data.message };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Failed to delete Email integration' };
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to delete Email integration",
+      };
     } finally {
       setLoading(false);
     }
   }, [userType]);
 
   const testEmailIntegration = useCallback(async () => {
-    if (userType !== 'member') return;
+    if (userType !== "member") return;
     setLoading(true);
     try {
-      const response = await client.post(endpoints.emailIntegrationTest('member'));
-      return { success: true, data: response.data.data, message: response.data.message };
+      const response = await client.post(
+        endpoints.emailIntegrationTest("member"),
+      );
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
     } catch (error) {
       const errorData = error.response?.data;
       return {
         success: false,
-        message: errorData?.message || 'Failed to send test email',
+        message: errorData?.message || "Failed to send test email",
       };
     } finally {
       setLoading(false);
     }
   }, [userType]);
-
 
   const value = {
     user,
@@ -794,7 +983,6 @@ export function AuthProvider({ children }) {
     testEmailIntegration,
   };
 
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
@@ -802,7 +990,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

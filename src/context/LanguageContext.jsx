@@ -1,33 +1,39 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { translations } from '../translations/translations';
-import client from '../api/client';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { translations } from "../translations/translations";
+import client from "../api/client";
 
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
   const [lang] = useState(() => {
-    return localStorage.getItem('saabq_lang') || 'ar';
+    return localStorage.getItem("saabq_lang") || "ar";
   });
 
-  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  const dir = lang === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
-    localStorage.setItem('saabq_lang', lang);
-    document.documentElement.setAttribute('lang', lang);
-    document.documentElement.setAttribute('dir', dir);
-    client.defaults.headers.common['Accept-Language'] = lang;
+    localStorage.setItem("saabq_lang", lang);
+    document.documentElement.setAttribute("lang", lang);
+    document.documentElement.setAttribute("dir", dir);
+    client.defaults.headers.common["Accept-Language"] = lang;
   }, [lang, dir]);
 
   const setLanguage = useCallback((newLang) => {
-    if (newLang === 'ar' || newLang === 'en') {
-      localStorage.setItem('saabq_lang', newLang);
+    if (newLang === "ar" || newLang === "en") {
+      localStorage.setItem("saabq_lang", newLang);
       window.location.reload();
     }
   }, []);
 
   const toggleLanguage = useCallback(() => {
-    const nextLang = lang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('saabq_lang', nextLang);
+    const nextLang = lang === "ar" ? "en" : "ar";
+    localStorage.setItem("saabq_lang", nextLang);
     window.location.reload();
   }, [lang]);
 
@@ -39,26 +45,30 @@ export function LanguageProvider({ children }) {
       if (fallback !== undefined) return fallback;
       return undefined;
     },
-    [lang]
+    [lang],
   );
 
   const value = {
     lang,
     dir,
-    isRTL: dir === 'rtl',
+    isRTL: dir === "rtl",
     setLanguage,
     toggleLanguage,
     t,
   };
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 }

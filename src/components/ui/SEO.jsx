@@ -1,9 +1,9 @@
-import { Helmet } from 'react-helmet-async';
-import { getPublicAssetUrl } from '../../utils/url';
+import { Helmet } from "react-helmet-async";
+import { getPublicAssetUrl } from "../../utils/url";
 
-const SITE_NAME = 'Saabq Cal';
-const DEFAULT_OG_IMAGE = getPublicAssetUrl('/logo.png');
-const BASE_URL = 'https://cal.saabq.com';
+const SITE_NAME = "Saabq Cal";
+const DEFAULT_OG_IMAGE = getPublicAssetUrl("/logo.png");
+const BASE_URL = "https://cal.saabq.com";
 
 /**
  * Reusable SEO head component.
@@ -21,7 +21,7 @@ export default function SEO({
   title,
   description,
   canonical,
-  ogType = 'website',
+  ogType = "website",
   ogImage,
   noindex = false,
   jsonLd,
@@ -56,9 +56,7 @@ export default function SEO({
 
       {/* JSON-LD Structured Data */}
       {jsonLd && (
-        <script type="application/ld+json">
-          {JSON.stringify(jsonLd)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       )}
 
       {children}

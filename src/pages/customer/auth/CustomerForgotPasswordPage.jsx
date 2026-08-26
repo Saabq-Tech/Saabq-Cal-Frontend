@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import { useToast } from '../../../context/ToastContext';
-import { useLanguage } from '../../../context/LanguageContext';
-import AuthCardLayout from '../../../components/auth/AuthCardLayout';
-import SEO from '../../../components/ui/SEO';
-import Icon from '../../../components/common/Icon';
+import { useState, useEffect } from "react";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../context/ToastContext";
+import { useLanguage } from "../../../context/LanguageContext";
+import AuthCardLayout from "../../../components/auth/AuthCardLayout";
+import SEO from "../../../components/ui/SEO";
+import Icon from "../../../components/common/Icon";
 
 export default function CustomerForgotPasswordPage() {
   const { forgotPassword, resetPassword, loading } = useAuth();
@@ -15,20 +20,27 @@ export default function CustomerForgotPasswordPage() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const userType = 'customer';
-  const emailFromParams = searchParams.get('email') || location.state?.email || '';
-  const otpFromParams = searchParams.get('otp') || searchParams.get('code') || searchParams.get('token') || '';
+  const userType = "customer";
+  const emailFromParams =
+    searchParams.get("email") || location.state?.email || "";
+  const otpFromParams =
+    searchParams.get("otp") ||
+    searchParams.get("code") ||
+    searchParams.get("token") ||
+    "";
 
   const [email, setEmail] = useState(emailFromParams);
   const [sent, setSent] = useState(Boolean(emailFromParams));
   const [otp, setOtp] = useState(otpFromParams);
-  const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [errors, setErrors] = useState({});
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    document.title = sent ? t('resetPasswordTitle') : t('pageTitleForgotPassword');
+    document.title = sent
+      ? t("resetPasswordTitle")
+      : t("pageTitleForgotPassword");
   }, [sent, t]);
 
   const handleSendCode = async (e) => {
@@ -39,10 +51,10 @@ export default function CustomerForgotPasswordPage() {
 
     if (result.success) {
       setSent(true);
-      toast.success(result.message || t('resetLinkSent'));
+      toast.success(result.message || t("resetLinkSent"));
     } else {
       setErrors(result.errors || {});
-      toast.error(result.message || t('failedToSendResetCode'));
+      toast.error(result.message || t("failedToSendResetCode"));
     }
   };
 
@@ -51,12 +63,12 @@ export default function CustomerForgotPasswordPage() {
     setErrors({});
 
     if (!otp || otp.length < 4) {
-      toast.error(t('enterValidOtpCode'));
+      toast.error(t("enterValidOtpCode"));
       return;
     }
 
     if (password !== passwordConfirmation) {
-      const msg = t('passwordsDoNotMatch');
+      const msg = t("passwordsDoNotMatch");
       setErrors({ password_confirmation: [msg] });
       toast.error(msg);
       return;
@@ -70,11 +82,11 @@ export default function CustomerForgotPasswordPage() {
     });
 
     if (result.success) {
-      toast.success(result.message || t('passwordResetSuccess'));
-      navigate('/customer/login', { replace: true, state: { email } });
+      toast.success(result.message || t("passwordResetSuccess"));
+      navigate("/customer/login", { replace: true, state: { email } });
     } else {
       setErrors(result.errors || {});
-      toast.error(result.message || 'Failed to reset password');
+      toast.error(result.message || "Failed to reset password");
     }
   };
 
@@ -84,33 +96,54 @@ export default function CustomerForgotPasswordPage() {
     setResending(false);
 
     if (result.success) {
-      toast.success(result.message || t('codeResent'));
+      toast.success(result.message || t("codeResent"));
     } else {
-      toast.error(result.message || t('failedToSendResetCode'));
+      toast.error(result.message || t("failedToSendResetCode"));
     }
   };
 
   return (
-    <AuthCardLayout illustration="/images/forgot-password.svg" illustrationAlt={t('pageTitleForgotPassword')}>
-      <SEO title={sent ? t('resetPasswordTitle') : t('pageTitleForgotPassword')} noindex />
+    <AuthCardLayout
+      illustration="/images/forgot-password.svg"
+      illustrationAlt={t("pageTitleForgotPassword")}
+    >
+      <SEO
+        title={sent ? t("resetPasswordTitle") : t("pageTitleForgotPassword")}
+        noindex
+      />
       {sent ? (
         <>
-          <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-full)', background: 'var(--primary-subtle)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "var(--radius-full)",
+              background: "var(--primary-subtle)",
+              color: "var(--primary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px",
+            }}
+          >
             <Icon name="key" size={28} />
           </div>
 
-          <h1 style={{ textAlign: 'center' }}>{t('resetPasswordTitle')}</h1>
-          <p style={{ textAlign: 'center', marginBottom: 24 }}>
-            {t('resetPasswordSubtitle')} <strong style={{ color: 'var(--primary)' }}>{email}</strong>
+          <h1 style={{ textAlign: "center" }}>{t("resetPasswordTitle")}</h1>
+          <p style={{ textAlign: "center", marginBottom: 24 }}>
+            {t("resetPasswordSubtitle")}{" "}
+            <strong style={{ color: "var(--primary)" }}>{email}</strong>
           </p>
 
           <form className="auth-form" onSubmit={handleResetPassword}>
             <div className="form-group">
-              <label className="form-label" htmlFor="reset-otp">{t('enterOtpCode')}</label>
+              <label className="form-label" htmlFor="reset-otp">
+                {t("enterOtpCode")}
+              </label>
               <input
                 id="reset-otp"
                 type="text"
-                className={`form-input${errors.otp || errors.code ? ' is-invalid' : ''}`}
+                className={`form-input${errors.otp || errors.code ? " is-invalid" : ""}`}
                 placeholder="123456"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
@@ -119,65 +152,101 @@ export default function CustomerForgotPasswordPage() {
                 autoComplete="one-time-code"
                 inputMode="numeric"
                 maxLength={6}
-                style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: 4, fontWeight: 700 }}
+                style={{
+                  textAlign: "center",
+                  fontSize: "1.25rem",
+                  letterSpacing: 4,
+                  fontWeight: 700,
+                }}
               />
-              {(errors.otp || errors.code) && <span className="form-error">{(errors.otp || errors.code)[0]}</span>}
+              {(errors.otp || errors.code) && (
+                <span className="form-error">
+                  {(errors.otp || errors.code)[0]}
+                </span>
+              )}
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="reset-password">{t('newPassword')}</label>
+              <label className="form-label" htmlFor="reset-password">
+                {t("newPassword")}
+              </label>
               <input
                 id="reset-password"
                 type="password"
-                className={`form-input${errors.password ? ' is-invalid' : ''}`}
+                className={`form-input${errors.password ? " is-invalid" : ""}`}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
               />
-              {errors.password && <span className="form-error">{errors.password[0]}</span>}
+              {errors.password && (
+                <span className="form-error">{errors.password[0]}</span>
+              )}
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="reset-password-confirm">{t('confirmNewPassword')}</label>
+              <label className="form-label" htmlFor="reset-password-confirm">
+                {t("confirmNewPassword")}
+              </label>
               <input
                 id="reset-password-confirm"
                 type="password"
-                className={`form-input${errors.password_confirmation ? ' is-invalid' : ''}`}
+                className={`form-input${errors.password_confirmation ? " is-invalid" : ""}`}
                 placeholder="••••••••"
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 required
                 minLength={8}
               />
-              {errors.password_confirmation && <span className="form-error">{errors.password_confirmation[0]}</span>}
+              {errors.password_confirmation && (
+                <span className="form-error">
+                  {errors.password_confirmation[0]}
+                </span>
+              )}
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary btn-block btn-lg"
+              disabled={loading}
+            >
               {loading ? (
                 <>
-                  <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
-                  {t('loading')}
+                  <span
+                    className="spinner spinner-sm"
+                    style={{ borderTopColor: "#fff" }}
+                  />
+                  {t("loading")}
                 </>
               ) : (
-                t('resetPasswordButton')
+                t("resetPasswordButton")
               )}
             </button>
           </form>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, fontSize: '0.88rem' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 24,
+              fontSize: "0.88rem",
+            }}
+          >
             <button
               type="button"
               className="btn btn-ghost btn-sm"
               onClick={handleResend}
               disabled={resending}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             >
-              {resending ? t('loading') : (
+              {resending ? (
+                t("loading")
+              ) : (
                 <>
                   <Icon name="refresh-cw" size={14} />
-                  {t('resendCode')}
+                  {t("resendCode")}
                 </>
               )}
             </button>
@@ -186,28 +255,32 @@ export default function CustomerForgotPasswordPage() {
               type="button"
               className="btn btn-ghost btn-sm"
               onClick={() => setSent(false)}
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: "var(--text-secondary)" }}
             >
-              {t('changeEmail')}
+              {t("changeEmail")}
             </button>
           </div>
 
           <div className="auth-footer" style={{ marginTop: 20 }}>
-            <Link to="/customer/login">{t('backToSignIn')}</Link>
+            <Link to="/customer/login">{t("backToSignIn")}</Link>
           </div>
         </>
       ) : (
         <>
-          <h1>{t('forgotPasswordTitle')}</h1>
-          <p>{t('forgotPasswordSubtitle')} ({t('customer')})</p>
+          <h1>{t("forgotPasswordTitle")}</h1>
+          <p>
+            {t("forgotPasswordSubtitle")} ({t("customer")})
+          </p>
 
           <form className="auth-form" onSubmit={handleSendCode}>
             <div className="form-group">
-              <label className="form-label" htmlFor="forgot-email">{t('emailAddress')}</label>
+              <label className="form-label" htmlFor="forgot-email">
+                {t("emailAddress")}
+              </label>
               <input
                 id="forgot-email"
                 type="email"
-                className={`form-input${errors.email ? ' is-invalid' : ''}`}
+                className={`form-input${errors.email ? " is-invalid" : ""}`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -215,28 +288,36 @@ export default function CustomerForgotPasswordPage() {
                 autoComplete="email"
                 autoFocus
               />
-              {errors.email && <span className="form-error">{errors.email[0]}</span>}
+              {errors.email && (
+                <span className="form-error">{errors.email[0]}</span>
+              )}
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary btn-block btn-lg"
+              disabled={loading}
+            >
               {loading ? (
                 <>
-                  <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
-                  {t('loading')}
+                  <span
+                    className="spinner spinner-sm"
+                    style={{ borderTopColor: "#fff" }}
+                  />
+                  {t("loading")}
                 </>
               ) : (
-                t('sendResetCode')
+                t("sendResetCode")
               )}
             </button>
           </form>
 
           <div className="auth-footer">
-            {t('rememberPassword')}{' '}
-            <Link to="/customer/login">{t('signIn')}</Link>
+            {t("rememberPassword")}{" "}
+            <Link to="/customer/login">{t("signIn")}</Link>
           </div>
         </>
       )}
     </AuthCardLayout>
   );
 }
-

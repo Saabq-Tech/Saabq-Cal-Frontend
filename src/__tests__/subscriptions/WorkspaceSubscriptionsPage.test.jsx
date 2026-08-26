@@ -1,13 +1,13 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import WorkspaceSubscriptionsPage from '../../pages/member/dashboard/WorkspaceSubscriptionsPage';
-import { LanguageProvider } from '../../context/LanguageContext';
-import { ToastProvider } from '../../context/ToastContext';
-import client from '../../api/client';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import WorkspaceSubscriptionsPage from "../../pages/member/dashboard/WorkspaceSubscriptionsPage";
+import { LanguageProvider } from "../../context/LanguageContext";
+import { ToastProvider } from "../../context/ToastContext";
+import client from "../../api/client";
 
-vi.mock('../../api/client', async () => {
-  const actual = await vi.importActual('../../api/client');
+vi.mock("../../api/client", async () => {
+  const actual = await vi.importActual("../../api/client");
   return {
     ...actual,
     default: {
@@ -25,9 +25,9 @@ vi.mock('../../api/client', async () => {
   };
 });
 
-vi.mock('../../context/AuthContext', () => ({
+vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { is_owner: true, permissions: ['settings_write'] },
+    user: { is_owner: true, permissions: ["settings_write"] },
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,
 }));
@@ -40,30 +40,30 @@ const renderComponent = () => {
           <WorkspaceSubscriptionsPage />
         </ToastProvider>
       </LanguageProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
-describe('WorkspaceSubscriptionsPage Component', () => {
+describe("WorkspaceSubscriptionsPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders active subscription status and plan details', async () => {
+  it("renders active subscription status and plan details", async () => {
     client.get.mockImplementation((url) => {
-      if (url.includes('/subscription')) {
+      if (url.includes("/subscription")) {
         return Promise.resolve({
           data: {
             data: {
               id: 1,
-              status: 'active',
-              starts_at: '2026-01-01',
-              ends_at: '2026-12-31',
+              status: "active",
+              starts_at: "2026-01-01",
+              ends_at: "2026-12-31",
               plan: {
                 id: 2,
-                name: 'الخطة الاحترافية',
+                name: "الخطة الاحترافية",
                 price: 299,
-                features: ['خدمات غير محدودة'],
+                features: ["خدمات غير محدودة"],
               },
             },
           },
@@ -79,28 +79,30 @@ describe('WorkspaceSubscriptionsPage Component', () => {
       expect(screen.getByText(/نشط/i)).toBeInTheDocument();
     });
 
-    expect(client.get).toHaveBeenCalledWith('/workspace-members/workspace/subscription');
+    expect(client.get).toHaveBeenCalledWith(
+      "/workspace-members/workspace/subscription",
+    );
   });
 
-  it('renders available plans inside upgrade modal on upgrade click', async () => {
+  it("renders available plans inside upgrade modal on upgrade click", async () => {
     client.get.mockImplementation((url) => {
-      if (url.includes('/subscription')) {
+      if (url.includes("/subscription")) {
         return Promise.resolve({
           data: {
             data: {
               id: 1,
-              status: 'active',
-              plan: { id: 1, name: 'الخطة الأساسية', price: 99 },
+              status: "active",
+              plan: { id: 1, name: "الخطة الأساسية", price: 99 },
             },
           },
         });
       }
-      if (url.includes('/plans')) {
+      if (url.includes("/plans")) {
         return Promise.resolve({
           data: {
             data: [
-              { id: 1, name: 'الخطة الأساسية', price: 99 },
-              { id: 2, name: 'الخطة الاحترافية', price: 299 },
+              { id: 1, name: "الخطة الأساسية", price: 99 },
+              { id: 2, name: "الخطة الاحترافية", price: 299 },
             ],
           },
         });

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
 /**
  * Lazy-loaded image using IntersectionObserver.
@@ -19,10 +19,10 @@ export default function LazyImage({
   alt,
   width,
   height,
-  className = '',
+  className = "",
   style = {},
   fallbackSrc,
-  objectFit = 'cover',
+  objectFit = "cover",
   ...rest
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -34,7 +34,7 @@ export default function LazyImage({
     if (!el) return;
 
     // If IntersectionObserver is not available, load immediately
-    if (!('IntersectionObserver' in window)) {
+    if (!("IntersectionObserver" in window)) {
       setIsVisible(true);
       return;
     }
@@ -46,7 +46,7 @@ export default function LazyImage({
           observer.unobserve(el);
         }
       },
-      { rootMargin: '200px 0px', threshold: 0.01 }
+      { rootMargin: "200px 0px", threshold: 0.01 },
     );
 
     observer.observe(el);
@@ -62,15 +62,19 @@ export default function LazyImage({
   const resolvedSrc = hasError && fallbackSrc ? fallbackSrc : src;
 
   const placeholderStyle = {
-    width: width || '100%',
-    height: height || 'auto',
-    backgroundColor: 'var(--surface-alt, #f1f5f9)',
-    borderRadius: 'inherit',
+    width: width || "100%",
+    height: height || "auto",
+    backgroundColor: "var(--surface-alt, #f1f5f9)",
+    borderRadius: "inherit",
     ...style,
   };
 
   return (
-    <div ref={imgRef} style={{ display: 'inline-block', lineHeight: 0, ...placeholderStyle }} className={className}>
+    <div
+      ref={imgRef}
+      style={{ display: "inline-block", lineHeight: 0, ...placeholderStyle }}
+      className={className}
+    >
       {isVisible && resolvedSrc ? (
         <img
           src={resolvedSrc}
@@ -80,10 +84,10 @@ export default function LazyImage({
           loading="lazy"
           onError={handleError}
           style={{
-            width: width || '100%',
-            height: height || '100%',
+            width: width || "100%",
+            height: height || "100%",
             objectFit,
-            display: 'block',
+            display: "block",
             ...style,
           }}
           {...rest}
@@ -92,10 +96,10 @@ export default function LazyImage({
         <div
           className="skeleton-pulse"
           style={{
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
             minHeight: height || 40,
-            borderRadius: 'inherit',
+            borderRadius: "inherit",
           }}
           aria-hidden="true"
         />

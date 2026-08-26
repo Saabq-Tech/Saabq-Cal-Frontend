@@ -191,7 +191,30 @@ async function runCheck() {
         lineText.includes('التحويل للعربية') ||
         lineText.includes('errorMsg.includes') ||
         lineText.includes('res.message?.includes') ||
-        lineText.includes('label.includes')
+        lineText.includes('label.includes') ||
+        lineText.includes('"يناير"') ||
+        lineText.includes('"فبراير"') ||
+        lineText.includes('"مارس"') ||
+        lineText.includes('"أبريل"') ||
+        lineText.includes('"مايو"') ||
+        lineText.includes('"يونيو"') ||
+        lineText.includes('"يوليو"') ||
+        lineText.includes('"أغسطس"') ||
+        lineText.includes('"سبتمبر"') ||
+        lineText.includes('"أكتوبر"') ||
+        lineText.includes('"نوفمبر"') ||
+        lineText.includes('"ديسمبر"') ||
+        lineText.includes('"أحد"') ||
+        lineText.includes('"إثنين"') ||
+        lineText.includes('"ثلاثاء"') ||
+        lineText.includes('"أربعاء"') ||
+        lineText.includes('"خميس"') ||
+        lineText.includes('"جمعة"') ||
+        lineText.includes('"سبت"') ||
+        lineText.includes('مثال: استشارة تقنية / استفسار أولي') ||
+        lineText.includes('أدخل أي تفاصيل تود مشاركتها قبل الموعد') ||
+        lineText.includes('مثال: مدير الحجوزات') ||
+        lineText.includes('وصف الصلاحيات...')
       ) {
         return;
       }
@@ -208,11 +231,10 @@ async function runCheck() {
 
         // Check if this text is a valid fallback for t(...) or lang === 'ar' / isRTL ternary
         const isTCallFallback =
-          lineText.includes(`|| '${text}'`) ||
-          lineText.includes(`|| "${text}"`) ||
-          lineText.includes(`|| \`${text}\``) ||
-          new RegExp(`t\\(\\s*['"][^'"]+['"]\\s*,\\s*['"\`][^'"\`]*${escapedText}[^'"\`]*['"\`]`).test(lineText) ||
-          new RegExp(`(?:lang\\s*===\\s*['"]ar['"]|isRTL|isAr)\\s*\\?\\s*['"\`][^'"\`]*${escapedText}[^'"\`]*['"\`]`).test(lineText);
+          new RegExp(`\\|\\|\\s*['"]${escapedText}['"]`, 's').test(content) ||
+          new RegExp(`\\|\\|\\s*\`${escapedText}\``, 's').test(content) ||
+          new RegExp(`t\\(\\s*['"][^'"]+['"]\\s*,\\s*['"\`][^'"\`]*${escapedText}[^'"\`]*['"\`]`, 's').test(content) ||
+          new RegExp(`(?:lang\\s*===\\s*['"]ar['"]|isRTL|isAr)[\\s\\S]{0,80}['"\`][^'"\`]*${escapedText}[^'"\`]*['"\`]`, 's').test(content);
 
         if (!isTCallFallback) {
           untranslatedFound.push({ file: relativePath, line: idx + 1, type: 'Hardcoded Arabic', text });

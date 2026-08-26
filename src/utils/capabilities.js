@@ -8,7 +8,12 @@ export function checkWorkspaceCapability(user, capabilityCode) {
   if (!user || !user.workspace) return false;
 
   // General settings & subscriptions management pages are always accessible for every workspace
-  if (!capabilityCode || capabilityCode === 'SETTINGS' || capabilityCode === 'SUBSCRIPTION' || capabilityCode === 'subscriptions') {
+  if (
+    !capabilityCode ||
+    capabilityCode === "SETTINGS" ||
+    capabilityCode === "SUBSCRIPTION" ||
+    capabilityCode === "subscriptions"
+  ) {
     return true;
   }
 

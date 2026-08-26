@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * Reusable Icon component rendering SVG symbols from in-memory DOM sprite.
@@ -9,7 +9,7 @@ export default function Icon({
   width,
   height,
   color,
-  className = '',
+  className = "",
   style = {},
   ...props
 }) {

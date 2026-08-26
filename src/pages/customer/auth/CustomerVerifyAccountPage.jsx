@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import { useToast } from '../../../context/ToastContext';
-import { useLanguage } from '../../../context/LanguageContext';
-import AuthCardLayout from '../../../components/auth/AuthCardLayout';
-import SEO from '../../../components/ui/SEO';
-import Icon from '../../../components/common/Icon';
-
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../context/ToastContext";
+import { useLanguage } from "../../../context/LanguageContext";
+import AuthCardLayout from "../../../components/auth/AuthCardLayout";
+import SEO from "../../../components/ui/SEO";
+import Icon from "../../../components/common/Icon";
 
 export default function CustomerVerifyAccountPage() {
   const { verifyEmailOTP, sendEmailVerification, loading } = useAuth();
@@ -15,31 +14,34 @@ export default function CustomerVerifyAccountPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userType = 'customer';
-  const emailFromState = location.state?.email || '';
+  const userType = "customer";
+  const emailFromState = location.state?.email || "";
 
   const [email, setEmail] = useState(emailFromState);
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState("");
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    document.title = t('pageTitleVerifyAccount');
+    document.title = t("pageTitleVerifyAccount");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!otp || otp.length < 4) {
-      toast.error(t('enterValidOtpCode'));
+      toast.error(t("enterValidOtpCode"));
       return;
     }
 
     const result = await verifyEmailOTP(email, otp, userType);
     if (result.success) {
-      toast.success(result.message || t('verificationSuccess'));
-      navigate('/customer/login', { replace: true, state: { email, userType } });
+      toast.success(result.message || t("verificationSuccess"));
+      navigate("/customer/login", {
+        replace: true,
+        state: { email, userType },
+      });
     } else {
-      toast.error(result.message || 'Invalid verification code.');
+      toast.error(result.message || "Invalid verification code.");
     }
   };
 
@@ -49,27 +51,47 @@ export default function CustomerVerifyAccountPage() {
     setResending(false);
 
     if (result.success) {
-      toast.success(result.message || t('codeResent'));
+      toast.success(result.message || t("codeResent"));
     } else {
-      toast.error(result.message || 'Failed to resend verification code.');
+      toast.error(result.message || "Failed to resend verification code.");
     }
   };
 
   return (
-    <AuthCardLayout illustration="/images/otp.svg" illustrationAlt={t('pageTitleVerifyAccount')}>
-      <SEO title={t('pageTitleVerifyAccount')} noindex />
-      <div style={{ width: 64, height: 64, borderRadius: 'var(--radius-full)', background: 'var(--primary-subtle)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+    <AuthCardLayout
+      illustration="/images/otp.svg"
+      illustrationAlt={t("pageTitleVerifyAccount")}
+    >
+      <SEO title={t("pageTitleVerifyAccount")} noindex />
+      <div
+        style={{
+          width: 64,
+          height: 64,
+          borderRadius: "var(--radius-full)",
+          background: "var(--primary-subtle)",
+          color: "var(--primary)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 20px",
+        }}
+      >
         <Icon name="mail" size={28} />
       </div>
 
-      <h1 style={{ textAlign: 'center' }}>{t('verifyAccountTitle')}</h1>
-      <p style={{ textAlign: 'center', marginBottom: 24 }}>
-        {t('verifyAccountDesc')} <strong style={{ color: 'var(--primary)' }}>{email || 'your email'}</strong>
+      <h1 style={{ textAlign: "center" }}>{t("verifyAccountTitle")}</h1>
+      <p style={{ textAlign: "center", marginBottom: 24 }}>
+        {t("verifyAccountDesc")}{" "}
+        <strong style={{ color: "var(--primary)" }}>
+          {email || "your email"}
+        </strong>
       </p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label" htmlFor="verify-email">{t('emailAddress')}</label>
+          <label className="form-label" htmlFor="verify-email">
+            {t("emailAddress")}
+          </label>
           <input
             id="verify-email"
             type="email"
@@ -81,7 +103,9 @@ export default function CustomerVerifyAccountPage() {
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="verify-otp">{t('enterOtpCode')}</label>
+          <label className="form-label" htmlFor="verify-otp">
+            {t("enterOtpCode")}
+          </label>
           <input
             id="verify-otp"
             type="text"
@@ -94,40 +118,65 @@ export default function CustomerVerifyAccountPage() {
             autoComplete="one-time-code"
             inputMode="numeric"
             maxLength={6}
-            style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: 4, fontWeight: 700 }}
+            style={{
+              textAlign: "center",
+              fontSize: "1.25rem",
+              letterSpacing: 4,
+              fontWeight: 700,
+            }}
           />
         </div>
 
-        <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+        <button
+          type="submit"
+          className="btn btn-primary btn-block btn-lg"
+          disabled={loading}
+        >
           {loading ? (
             <>
-              <span className="spinner spinner-sm" style={{ borderTopColor: '#fff' }} />
-              {t('loading')}
+              <span
+                className="spinner spinner-sm"
+                style={{ borderTopColor: "#fff" }}
+              />
+              {t("loading")}
             </>
           ) : (
-            t('verifyButton')
+            t("verifyButton")
           )}
         </button>
       </form>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, fontSize: '0.88rem' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 24,
+          fontSize: "0.88rem",
+        }}
+      >
         <button
           type="button"
           className="btn btn-ghost btn-sm"
           onClick={handleResend}
           disabled={resending}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
         >
-          {resending ? t('loading') : (
+          {resending ? (
+            t("loading")
+          ) : (
             <>
               <Icon name="refresh-cw" size={14} />
-              {t('resendCode')}
+              {t("resendCode")}
             </>
           )}
         </button>
 
-        <Link to="/customer/login" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
-          {t('backToSignIn')}
+        <Link
+          to="/customer/login"
+          style={{ color: "var(--text-secondary)", fontWeight: 500 }}
+        >
+          {t("backToSignIn")}
         </Link>
       </div>
     </AuthCardLayout>

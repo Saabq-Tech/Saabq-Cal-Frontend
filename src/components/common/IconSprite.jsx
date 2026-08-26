@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const spriteMarkup = `<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="icon-eye" viewBox="0 0 24 24">
@@ -420,7 +420,7 @@ const spriteMarkup = `<svg xmlns="http://www.w3.org/2000/svg" style="display: no
 export default function IconSprite() {
   return (
     <div
-      style={{ display: 'none' }}
+      style={{ display: "none" }}
       aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: spriteMarkup }}
     />

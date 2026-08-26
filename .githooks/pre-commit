@@ -1,6 +1,16 @@
 #!/bin/sh
 # Pre-commit hook to verify formatting, translation keys, and tests before committing in the frontend
 
+echo "🎨 Step 0: Formatting code with prettier..."
+npm run format
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Formatting failed!"
+    echo "💡 Please fix the formatting errors before committing."
+    echo ""
+    exit 1
+fi
+
 echo "🔍 Step 1: Checking code quality with oxlint..."
 npm run lint
 if [ $? -ne 0 ]; then

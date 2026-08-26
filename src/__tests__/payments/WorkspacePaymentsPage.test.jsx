@@ -1,13 +1,13 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import WorkspacePaymentsPage from '../../pages/member/dashboard/WorkspacePaymentsPage';
-import { LanguageProvider } from '../../context/LanguageContext';
-import { ToastProvider } from '../../context/ToastContext';
-import client from '../../api/client';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import WorkspacePaymentsPage from "../../pages/member/dashboard/WorkspacePaymentsPage";
+import { LanguageProvider } from "../../context/LanguageContext";
+import { ToastProvider } from "../../context/ToastContext";
+import client from "../../api/client";
 
-vi.mock('../../api/client', async () => {
-  const actual = await vi.importActual('../../api/client');
+vi.mock("../../api/client", async () => {
+  const actual = await vi.importActual("../../api/client");
   return {
     ...actual,
     default: {
@@ -25,9 +25,9 @@ vi.mock('../../api/client', async () => {
   };
 });
 
-vi.mock('../../context/AuthContext', () => ({
+vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { is_owner: true, permissions: ['payment_read', 'payment_write'] },
+    user: { is_owner: true, permissions: ["payment_read", "payment_write"] },
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,
 }));
@@ -40,22 +40,22 @@ const renderComponent = () => {
           <WorkspacePaymentsPage />
         </ToastProvider>
       </LanguageProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
-describe('WorkspacePaymentsPage Component', () => {
+describe("WorkspacePaymentsPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders workspace safe wallet summary cards and metrics', async () => {
+  it("renders workspace safe wallet summary cards and metrics", async () => {
     client.get.mockImplementation((url) => {
-      if (typeof url === 'string' && url.includes('wallet')) {
+      if (typeof url === "string" && url.includes("wallet")) {
         return Promise.resolve({
           data: {
             data: {
-              currency: 'SAR',
+              currency: "SAR",
               net_balance: 1500,
               total_credit: 2000,
               total_debit: 500,
@@ -72,15 +72,15 @@ describe('WorkspacePaymentsPage Component', () => {
           data: [
             {
               id: 101,
-              payable_type: 'App\\Models\\Appointment',
+              payable_type: "App\\Models\\Appointment",
               payable_id: 12,
-              amount: '200.00',
-              currency: 'SAR',
-              status: 'paid',
-              type: 'credit',
-              method: 'bank_transfer',
-              provider: 'manual',
-              created_at: '2026-08-24T10:00:00Z',
+              amount: "200.00",
+              currency: "SAR",
+              status: "paid",
+              type: "credit",
+              method: "bank_transfer",
+              provider: "manual",
+              created_at: "2026-08-24T10:00:00Z",
             },
           ],
           meta: { current_page: 1, last_page: 1, total: 1 },
@@ -91,15 +91,15 @@ describe('WorkspacePaymentsPage Component', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('1500 SAR')).toBeInTheDocument();
-      expect(screen.getByText('2000 SAR')).toBeInTheDocument();
-      expect(screen.getByText('500 SAR')).toBeInTheDocument();
+      expect(screen.getByText("1500 SAR")).toBeInTheDocument();
+      expect(screen.getByText("2000 SAR")).toBeInTheDocument();
+      expect(screen.getByText("500 SAR")).toBeInTheDocument();
     });
   });
 
-  it('renders credit and debit badges correctly in transaction list', async () => {
+  it("renders credit and debit badges correctly in transaction list", async () => {
     client.get.mockImplementation((url) => {
-      if (typeof url === 'string' && url.includes('wallet')) {
+      if (typeof url === "string" && url.includes("wallet")) {
         return Promise.resolve({ data: { data: { net_balance: 0 } } });
       }
       return Promise.resolve({
@@ -107,25 +107,25 @@ describe('WorkspacePaymentsPage Component', () => {
           data: [
             {
               id: 1,
-              payable_type: 'App\\Models\\Appointment',
+              payable_type: "App\\Models\\Appointment",
               payable_id: 10,
-              amount: '150.00',
-              currency: 'SAR',
-              status: 'paid',
-              type: 'credit',
-              method: 'card',
-              created_at: '2026-08-24T10:00:00Z',
+              amount: "150.00",
+              currency: "SAR",
+              status: "paid",
+              type: "credit",
+              method: "card",
+              created_at: "2026-08-24T10:00:00Z",
             },
             {
               id: 2,
-              payable_type: 'App\\Models\\Subscription',
+              payable_type: "App\\Models\\Subscription",
               payable_id: 2,
-              amount: '99.00',
-              currency: 'SAR',
-              status: 'paid',
-              type: 'debit',
-              method: 'bank_transfer',
-              created_at: '2026-08-24T11:00:00Z',
+              amount: "99.00",
+              currency: "SAR",
+              status: "paid",
+              type: "debit",
+              method: "bank_transfer",
+              created_at: "2026-08-24T11:00:00Z",
             },
           ],
         },
@@ -140,9 +140,9 @@ describe('WorkspacePaymentsPage Component', () => {
     });
   });
 
-  it('triggers payment verification API call on verify click', async () => {
+  it("triggers payment verification API call on verify click", async () => {
     client.get.mockImplementation((url) => {
-      if (typeof url === 'string' && url.includes('wallet')) {
+      if (typeof url === "string" && url.includes("wallet")) {
         return Promise.resolve({ data: { data: { net_balance: 100 } } });
       }
       return Promise.resolve({
@@ -150,15 +150,15 @@ describe('WorkspacePaymentsPage Component', () => {
           data: [
             {
               id: 55,
-              payable_type: 'App\\Models\\Appointment',
+              payable_type: "App\\Models\\Appointment",
               payable_id: 4,
-              amount: '100.00',
-              currency: 'SAR',
-              status: 'verifying',
-              type: 'credit',
-              method: 'bank_transfer',
-              proof_file: 'http://example.com/receipt.jpg',
-              created_at: '2026-08-24T10:00:00Z',
+              amount: "100.00",
+              currency: "SAR",
+              status: "verifying",
+              type: "credit",
+              method: "bank_transfer",
+              proof_file: "http://example.com/receipt.jpg",
+              created_at: "2026-08-24T10:00:00Z",
             },
           ],
         },
@@ -166,13 +166,15 @@ describe('WorkspacePaymentsPage Component', () => {
     });
 
     client.post.mockResolvedValue({
-      data: { status: 'success', message: 'تم الاعتماد بنجاح' },
+      data: { status: "success", message: "تم الاعتماد بنجاح" },
     });
 
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getAllByText(/التفاصيل \/ الإيصال/i)[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByText(/التفاصيل \/ الإيصال/i)[0],
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getAllByText(/التفاصيل \/ الإيصال/i)[0]);
@@ -184,7 +186,9 @@ describe('WorkspacePaymentsPage Component', () => {
     fireEvent.click(screen.getByText(/اعتماد والدفع/i));
 
     await waitFor(() => {
-      expect(client.post).toHaveBeenCalledWith('/workspace-members/workspace/payments/55/verify');
+      expect(client.post).toHaveBeenCalledWith(
+        "/workspace-members/workspace/payments/55/verify",
+      );
     });
   });
 });

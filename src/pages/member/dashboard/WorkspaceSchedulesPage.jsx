@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { useToast } from '../../../context/ToastContext';
-import { useLanguage } from '../../../context/LanguageContext';
-import client, { endpoints } from '../../../api/client';
-import SchedulesTab from './workspace-settings/SchedulesTab';
-import SEO from '../../../components/ui/SEO';
-import { SkeletonRect } from '../../../components/ui/Skeleton';
-import CapabilityGate from '../../../components/common/CapabilityGate';
-import { checkWorkspaceCapability } from '../../../utils/capabilities';
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../context/ToastContext";
+import { useLanguage } from "../../../context/LanguageContext";
+import client, { endpoints } from "../../../api/client";
+import SchedulesTab from "./workspace-settings/SchedulesTab";
+import SEO from "../../../components/ui/SEO";
+import { SkeletonRect } from "../../../components/ui/Skeleton";
+import CapabilityGate from "../../../components/common/CapabilityGate";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 
 export default function WorkspaceSchedulesPage() {
   const { user } = useAuth();
@@ -15,15 +15,23 @@ export default function WorkspaceSchedulesPage() {
   const toast = useToast();
 
   const [schedules, setSchedules] = useState([]);
-  const [startOfWeek, setStartOfWeek] = useState('sunday');
+  const [startOfWeek, setStartOfWeek] = useState("sunday");
   const [loading, setLoading] = useState(true);
 
   const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canRead = isOwner || userPermissions.includes('schedule_read') || userPermissions.includes('schedules_read');
-  const canEdit = isOwner || userPermissions.includes('schedule_write') || userPermissions.includes('schedules_write');
+  const userPermissions = Array.isArray(user?.permissions)
+    ? user.permissions
+    : [];
+  const canRead =
+    isOwner ||
+    userPermissions.includes("schedule_read") ||
+    userPermissions.includes("schedules_read");
+  const canEdit =
+    isOwner ||
+    userPermissions.includes("schedule_write") ||
+    userPermissions.includes("schedules_write");
 
-  const isCapAllowed = checkWorkspaceCapability(user, 'PER_MEMBER_CALENDAR');
+  const isCapAllowed = checkWorkspaceCapability(user, "PER_MEMBER_CALENDAR");
 
   const loadingRef = useRef(false);
   const loadSchedules = async () => {
@@ -45,7 +53,7 @@ export default function WorkspaceSchedulesPage() {
       }
     } catch (err) {
       if (err.response?.status !== 403) {
-        toast.error(t('schedulesLoadFailed') || 'فشل تحميل الجداول والتوفر');
+        toast.error(t("schedulesLoadFailed") || "فشل تحميل الجداول والتوفر");
       }
     } finally {
       setLoading(false);
@@ -61,15 +69,20 @@ export default function WorkspaceSchedulesPage() {
   return (
     <CapabilityGate capabilityCode="PER_MEMBER_CALENDAR">
       <div className="card" style={{ padding: 24 }}>
-        <SEO title={t('schedules') || 'الجداول الزمنية'} noindex />
+        <SEO title={t("schedules") || "الجداول الزمنية"} noindex />
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <SkeletonRect height={48} />
             <SkeletonRect height={64} />
             <SkeletonRect height={64} />
           </div>
         ) : (
-          <SchedulesTab schedules={schedules} startOfWeek={startOfWeek} canEdit={canEdit} onRefresh={loadSchedules} />
+          <SchedulesTab
+            schedules={schedules}
+            startOfWeek={startOfWeek}
+            canEdit={canEdit}
+            onRefresh={loadSchedules}
+          />
         )}
       </div>
     </CapabilityGate>

@@ -1,21 +1,21 @@
-import React from 'react';
+import React from "react";
 
-export default function Flag({ country = 'us', className = '', style = {} }) {
+export default function Flag({ country = "us", className = "", style = {} }) {
   const c = country.toLowerCase();
 
   const defaultStyle = {
-    display: 'inline-block',
-    verticalAlign: 'middle',
+    display: "inline-block",
+    verticalAlign: "middle",
     width: 20,
     height: 14,
     borderRadius: 2,
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-    border: '1px solid rgba(0, 0, 0, 0.1)',
+    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
     flexShrink: 0,
     ...style,
   };
 
-  if (c === 'eg' || c === 'egypt' || c === 'ar') {
+  if (c === "eg" || c === "egypt" || c === "ar") {
     return (
       <svg
         viewBox="0 0 640 480"
@@ -28,16 +28,26 @@ export default function Flag({ country = 'us', className = '', style = {} }) {
         <path fill="#ffffff" d="M0 160h640v160H0z" />
         <path fill="#000000" d="M0 320h640v160H0z" />
         {/* Eagle of Saladin */}
-        <g fill="#c69214" stroke="#a0750c" strokeWidth="1.5" transform="translate(285, 175) scale(0.7)">
+        <g
+          fill="#c69214"
+          stroke="#a0750c"
+          strokeWidth="1.5"
+          transform="translate(285, 175) scale(0.7)"
+        >
           <path d="M50 5 C45 15 35 22 25 40 C15 58 10 78 0 95 C15 90 30 85 40 75 C38 90 35 105 20 125 C35 115 50 105 50 90 C50 105 65 115 80 125 C65 105 62 90 60 75 C70 85 85 90 100 95 C90 78 85 58 75 40 C65 22 55 15 50 5 Z" />
-          <path fill="#ffffff" stroke="#c69214" strokeWidth="3" d="M35 52 L65 52 L60 88 L50 98 L40 88 Z" />
+          <path
+            fill="#ffffff"
+            stroke="#c69214"
+            strokeWidth="3"
+            d="M35 52 L65 52 L60 88 L50 98 L40 88 Z"
+          />
           <path fill="#c69214" d="M43 60 h14 v20 h-14 z" />
         </g>
       </svg>
     );
   }
 
-  if (c === 'sa' || c === 'saudi') {
+  if (c === "sa" || c === "saudi") {
     return (
       <svg
         viewBox="0 0 640 480"
@@ -49,7 +59,11 @@ export default function Flag({ country = 'us', className = '', style = {} }) {
         <path fill="#006c35" d="M0 0h640v480H0z" />
         <g fill="#ffffff">
           <path d="M180 325 h280 v8 h-280 z M460 320 l18 9 l-18 9 z M180 310 v38 h8 v-38 z" />
-          <path d="M210 240 Q250 210 320 225 Q390 210 430 240 Q390 270 320 255 Q250 270 210 240 Z" fill="#ffffff" opacity="0.95" />
+          <path
+            d="M210 240 Q250 210 320 225 Q390 210 430 240 Q390 270 320 255 Q250 270 210 240 Z"
+            fill="#ffffff"
+            opacity="0.95"
+          />
         </g>
       </svg>
     );
@@ -66,11 +80,18 @@ export default function Flag({ country = 'us', className = '', style = {} }) {
     >
       <g fillRule="evenodd">
         <path fill="#bd3d44" d="M0 0h640v480H0z" />
-        <path stroke="#fff" strokeWidth="37" d="M0 55.5h640M0 129.5h640M0 203.5h640M0 277.5h640M0 351.5h640M0 425.5h640" />
+        <path
+          stroke="#fff"
+          strokeWidth="37"
+          d="M0 55.5h640M0 129.5h640M0 203.5h640M0 277.5h640M0 351.5h640M0 425.5h640"
+        />
         <path fill="#192f5d" d="M0 0h296v259H0z" />
         <g fill="#fff">
           <g id="us-star">
-            <polygon points="24.6,18 27.6,27.3 37.3,27.3 29.5,33 32.5,42.3 24.6,36.6 16.8,42.3 19.8,33 12,27.3 21.7,27.3" transform="scale(0.52) translate(-6,-4)" />
+            <polygon
+              points="24.6,18 27.6,27.3 37.3,27.3 29.5,33 32.5,42.3 24.6,36.6 16.8,42.3 19.8,33 12,27.3 21.7,27.3"
+              transform="scale(0.52) translate(-6,-4)"
+            />
           </g>
           <use href="#us-star" x="25" />
           <use href="#us-star" x="50" />
