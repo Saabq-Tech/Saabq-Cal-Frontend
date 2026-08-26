@@ -53,6 +53,7 @@ export default function InstallAppButton({
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
+      setIsModalOpen(false);
       return;
     }
     // Show the install prompt
@@ -72,10 +73,7 @@ export default function InstallAppButton({
     return null;
   }
 
-  // If no deferred prompt is available (e.g., iOS Safari), do not show the button at all.
-  if (!deferredPrompt) {
-    return null;
-  }
+  // If no deferred prompt is available (e.g., iOS Safari), the user can still open the modal for manual instructions.
 
   const isRtl = lang === "ar";
 
@@ -211,6 +209,24 @@ export default function InstallAppButton({
                 "Install our application on your device for a faster, full-screen experience and quick access from your home screen."}
             </p>
 
+            {!deferredPrompt && (
+              <div
+                style={{
+                  margin: "-16px 0 32px 0",
+                  padding: "16px",
+                  background: "var(--surface-alt, #f3f4f6)",
+                  borderRadius: "12px",
+                  color: "var(--text, #374151)",
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  lineHeight: 1.5,
+                }}
+              >
+                {t("installManualInstruction") ||
+                  "Tap your browser menu or the share icon, then select 'Add to Home Screen'."}
+              </div>
+            )}
+
             <div
               style={{
                 display: "flex",
@@ -241,37 +257,39 @@ export default function InstallAppButton({
                 }
                 onClick={() => setIsModalOpen(false)}
               >
-                {t("cancel") || "Cancel"}
+                {deferredPrompt ? (t("cancel") || "Cancel") : (t("close") || "Close")}
               </button>
 
-              <button
-                style={{
-                  flex: 1,
-                  padding: "12px 20px",
-                  borderRadius: "12px",
-                  border: "none",
-                  background: "var(--primary, #0d9488)",
-                  color: "#ffffff",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "flex",
-                  gap: "8px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.2s",
-                  boxShadow: "0 4px 6px -1px rgba(13, 148, 136, 0.2)",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.transform = "translateY(-1px)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.transform = "translateY(0)")
-                }
-                onClick={handleInstallClick}
-              >
-                <span>{t("installApp") || "Install App"}</span>
-              </button>
+              {deferredPrompt && (
+                <button
+                  style={{
+                    flex: 1,
+                    padding: "12px 20px",
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "var(--primary, #0d9488)",
+                    color: "#ffffff",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    gap: "8px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s",
+                    boxShadow: "0 4px 6px -1px rgba(13, 148, 136, 0.2)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "translateY(-1px)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "translateY(0)")
+                  }
+                  onClick={handleInstallClick}
+                >
+                  <span>{t("installApp") || "Install App"}</span>
+                </button>
+              )}
             </div>
           </div>
 

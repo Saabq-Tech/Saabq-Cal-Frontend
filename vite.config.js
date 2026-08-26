@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'favicon.svg', 'icons.svg', 'logo.png'],
       manifest: {
         name: 'Saabq Calendar',
-        short_name: 'Saabq',
+        short_name: 'Saabq Cal',
         description: 'The Saabq Calendar progressive web application.',
         theme_color: '#0a9099',
         background_color: '#ffffff',
