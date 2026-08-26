@@ -26,6 +26,9 @@ const CustomerWorkspaceProfilePage = lazy(
 const CustomerBookAppointmentPage = lazy(
   () => import("./pages/customer/CustomerBookAppointmentPage"),
 );
+const CustomerSpecialistPage = lazy(
+  () => import("./pages/customer/CustomerSpecialistPage"),
+);
 
 // Customer Suite Auth & Dashboard Pages
 const CustomerLoginPage = lazy(
@@ -187,6 +190,14 @@ export default function App() {
                     element={
                       <MainLayout>
                         <CustomerWorkspaceProfilePage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/workspaces/:idOrSlug/specialist/:specialistId"
+                    element={
+                      <MainLayout>
+                        <CustomerSpecialistPage />
                       </MainLayout>
                     }
                   />

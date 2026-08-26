@@ -316,7 +316,7 @@ export default function CustomerAppointmentsTab() {
       case "pending":
         return {
           label: isRTL ? "قيد الانتظار" : "Pending",
-          className: "unverified",
+          className: "pending",
         };
       case "completed":
         return { label: isRTL ? "مكتمل" : "Completed", className: "member" };
@@ -745,18 +745,40 @@ export default function CustomerAppointmentsTab() {
                         />
                       )}
                       <div>
-                        <h4
+                        <div
                           style={{
-                            margin: 0,
-                            fontSize: "0.98rem",
-                            fontWeight: 700,
-                            color: "var(--heading)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
                           }}
                         >
-                          {appt.snapshot?.service_name ||
-                            appt.service?.name ||
-                            (isRTL ? "خدمة حجز" : "Booking Service")}
-                        </h4>
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontSize: "0.98rem",
+                              fontWeight: 700,
+                              color: "var(--heading)",
+                            }}
+                          >
+                            {appt.snapshot?.service_name ||
+                              appt.service?.name ||
+                              (isRTL ? "خدمة حجز" : "Booking Service")}
+                          </h4>
+                          {appt.follow_up_to_id && (
+                            <span
+                              style={{
+                                padding: "2px 6px",
+                                fontSize: "0.7rem",
+                                background: "rgba(59, 130, 246, 0.1)",
+                                color: "#2563eb",
+                                borderRadius: 10,
+                                fontWeight: 700,
+                              }}
+                            >
+                              {isRTL ? "متابعة" : "Follow-up"}
+                            </span>
+                          )}
+                        </div>
                         <div
                           style={{
                             display: "flex",

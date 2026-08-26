@@ -71,6 +71,8 @@ export const endpoints = {
   publicWorkspaceDetail: (idOrSlug) => `/customers/workspaces/${idOrSlug}`,
   publicWorkspaceServices: (idOrSlug) =>
     `/customers/workspaces/${idOrSlug}/services`,
+  publicWorkspaceSpecialists: (idOrSlug) =>
+    `/customers/workspaces/${idOrSlug}/specialists`,
   publicWorkspaceSlots: (idOrSlug, serviceId) =>
     `/customers/workspaces/${idOrSlug}/services/${serviceId}/slots`,
 

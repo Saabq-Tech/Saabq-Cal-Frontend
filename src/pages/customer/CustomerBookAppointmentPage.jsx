@@ -65,6 +65,8 @@ export default function CustomerBookAppointmentPage() {
 
   const preselectedServiceId =
     searchParams.get("service") || searchParams.get("service_id");
+  const preselectedMemberId =
+    searchParams.get("member") || searchParams.get("member_id");
 
   const [workspace, setWorkspace] = useState(null);
   const [services, setServices] = useState([]);
@@ -227,9 +229,14 @@ export default function CustomerBookAppointmentPage() {
     if (!selectedService || !selectedDate) return;
     setSlotsLoading(true);
     setSelectedSlot("");
+    const params = { date: selectedDate };
+    if (preselectedMemberId) {
+      params.workspace_member_id = preselectedMemberId;
+    }
+
     client
       .get(endpoints.publicWorkspaceSlots(idOrSlug, selectedService.id), {
-        params: { date: selectedDate },
+        params,
       })
       .then((res) => {
         setSlots(res.data.data || []);
@@ -239,7 +246,7 @@ export default function CustomerBookAppointmentPage() {
         setSlots([]);
         setSlotsLoading(false);
       });
-  }, [idOrSlug, selectedService, selectedDate]);
+  }, [idOrSlug, selectedService, selectedDate, preselectedMemberId]);
 
   // Calendar generation helpers
   const calendarDays = useMemo(() => {

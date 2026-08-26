@@ -36,6 +36,14 @@ export default function BookingDetailsPage({
   const [rescheduleReason, setRescheduleReason] = useState("");
   const [rescheduling, setRescheduling] = useState(false);
 
+  // Follow-up Modal State
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [followUpDate, setFollowUpDate] = useState("");
+  const [followUpTime, setFollowUpTime] = useState("");
+  const [followUpNotes, setFollowUpNotes] = useState("");
+  const [followUpPaid, setFollowUpPaid] = useState(false);
+  const [creatingFollowUp, setCreatingFollowUp] = useState(false);
+
   const fetchDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -168,12 +176,10 @@ export default function BookingDetailsPage({
       case "pending":
         return (
           <span
-            className="profile-badge unverified"
+            className="profile-badge pending"
             style={{
               padding: "6px 16px",
               fontSize: "0.86rem",
-              background: "rgba(234, 179, 8, 0.12)",
-              color: "#b45309",
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
@@ -364,6 +370,48 @@ export default function BookingDetailsPage({
       );
     } finally {
       setRescheduling(false);
+    }
+  };
+
+  const handleCreateFollowUp = async (e) => {
+    e.preventDefault();
+    if (!followUpDate || !followUpTime) {
+      toast.error(
+        isRTL ? "يرجى اختيار التاريخ والوقت" : "Please select a date and time",
+      );
+      return;
+    }
+    setCreatingFollowUp(true);
+    try {
+      const startsAt = `${followUpDate}T${followUpTime}:00`;
+      await client.post(
+        `/workspace-members/workspace/bookings/${bookingId}/follow-up`,
+        {
+          starts_at: startsAt,
+          notes: followUpNotes || undefined,
+          is_paid: followUpPaid ? 1 : 0,
+        },
+      );
+      toast.success(
+        isRTL
+          ? "تم إنشاء موعد المتابعة بنجاح"
+          : "Follow-up booking created successfully",
+      );
+      setShowFollowUpModal(false);
+      setFollowUpDate("");
+      setFollowUpTime("");
+      setFollowUpNotes("");
+      setFollowUpPaid(false);
+      if (typeof onReloadBookings === "function") {
+        onReloadBookings();
+      }
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message ||
+          (isRTL ? "فشل إنشاء المتابعة" : "Failed to create follow-up"),
+      );
+    } finally {
+      setCreatingFollowUp(false);
     }
   };
 
@@ -1312,27 +1360,56 @@ export default function BookingDetailsPage({
           </div>
 
           {isCompleted ? (
-            <div
-              style={{
-                background: "rgba(16, 185, 129, 0.1)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-                borderRadius: "var(--radius-md)",
-                padding: "16px 20px",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <Icon name="check" size={22} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div
                 style={{
-                  fontSize: "0.92rem",
-                  fontWeight: 700,
-                  color: "#059669",
+                  background: "rgba(16, 185, 129, 0.1)",
+                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "16px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
                 }}
               >
-                هذا الموعد مكتمل بنجاح، ولا يمكن إجراء تعديلات أو إلغاء أو تحويل
-                للانتظار بعد الانتهاء.
+                <Icon name="check" size={22} />
+                <div
+                  style={{
+                    fontSize: "0.92rem",
+                    fontWeight: 700,
+                    color: "#059669",
+                  }}
+                >
+                  هذا الموعد مكتمل بنجاح، ولا يمكن إجراء تعديلات أو إلغاء أو
+                  تحويل للانتظار بعد الانتهاء.
+                </div>
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+                  gap: 14,
+                  width: "100%",
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary"
+                  onClick={() => setShowFollowUpModal(true)}
+                  style={{
+                    fontSize: "0.92rem",
+                    fontWeight: 800,
+                    padding: "12px 18px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 8,
+                    width: "100%",
+                  }}
+                >
+                  <Icon name="plus" size={16} />
+                  {isRTL ? "إنشاء موعد متابعة" : "Create Follow-up"}
+                </button>
               </div>
             </div>
           ) : isCancelled ? (
@@ -1859,6 +1936,169 @@ export default function BookingDetailsPage({
                       "تأكيد الجدولة"
                     ) : (
                       "Confirm Reschedule"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
+      {/* FOLLOW-UP MODAL */}
+      {showFollowUpModal &&
+        createPortal(
+          <div
+            className="modal-backdrop"
+            onClick={() => setShowFollowUpModal(false)}
+            style={{ zIndex: 999999 }}
+          >
+            <div
+              className="modal-card animate-scale-up"
+              style={{ maxWidth: 480, width: "100%", padding: 24 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <h4
+                  style={{
+                    margin: 0,
+                    fontWeight: 800,
+                    fontSize: "1.15rem",
+                    color: "var(--heading)",
+                  }}
+                >
+                  {isRTL ? "إنشاء موعد متابعة" : "Create Follow-up Booking"}
+                </h4>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setShowFollowUpModal(false)}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  color: "var(--text-secondary)",
+                  marginBottom: 16,
+                }}
+              >
+                {isRTL
+                  ? "اختر تاريخاً ووقتاً لإنشاء موعد متابعة للعميل:"
+                  : "Select a date and time to create a follow-up booking:"}
+              </p>
+
+              <form onSubmit={handleCreateFollowUp}>
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label className="form-label">
+                    {isRTL ? "التاريخ" : "Date"}
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    min={new Date().toISOString().split("T")[0]}
+                    value={followUpDate}
+                    onChange={(e) => setFollowUpDate(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label className="form-label">
+                    {isRTL ? "الوقت" : "Time"}
+                  </label>
+                  <input
+                    type="time"
+                    className="form-input"
+                    value={followUpTime}
+                    onChange={(e) => setFollowUpTime(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label className="form-label">
+                    {isRTL ? "ملاحظات (اختياري)" : "Notes (Optional)"}
+                  </label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    value={followUpNotes}
+                    onChange={(e) => setFollowUpNotes(e.target.value)}
+                    placeholder={isRTL ? "أدخل ملاحظات..." : "Enter notes..."}
+                  />
+                </div>
+
+                <div
+                  className="form-group"
+                  style={{
+                    marginBottom: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id="followUpPaid"
+                    checked={followUpPaid}
+                    onChange={(e) => setFollowUpPaid(e.target.checked)}
+                    style={{ width: 16, height: 16 }}
+                  />
+                  <label
+                    htmlFor="followUpPaid"
+                    style={{
+                      fontSize: "0.9rem",
+                      color: "var(--heading)",
+                      margin: 0,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isRTL
+                      ? "يتطلب دفع مالي (إلا فسيكون مجانياً)"
+                      : "Requires payment (otherwise it will be free)"}
+                  </label>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 8,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setShowFollowUpModal(false)}
+                  >
+                    {isRTL ? "إلغاء" : "Cancel"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={creatingFollowUp}
+                  >
+                    {creatingFollowUp ? (
+                      <>
+                        <span
+                          className="spinner spinner-sm"
+                          style={{ borderTopColor: "#fff" }}
+                        />
+                        {isRTL ? "جاري الإنشاء..." : "Creating..."}
+                      </>
+                    ) : isRTL ? (
+                      "تأكيد الإنشاء"
+                    ) : (
+                      "Confirm Create"
                     )}
                   </button>
                 </div>

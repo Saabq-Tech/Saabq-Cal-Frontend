@@ -1,44 +1,12 @@
 #!/bin/sh
 # Pre-commit hook to verify formatting, translation keys, and tests before committing in the frontend
 
-echo "🎨 Step 0: Formatting code with prettier..."
-npm run format
+echo "Running verify.bat..."
+cmd.exe /c "verify.bat"
 if [ $? -ne 0 ]; then
-    echo ""
-    echo "❌ Formatting failed!"
-    echo "💡 Please fix the formatting errors before committing."
-    echo ""
-    exit 1
-fi
-
-echo "🔍 Step 1: Checking code quality with oxlint..."
-npm run lint
-if [ $? -ne 0 ]; then
-    echo ""
-    echo "❌ Linting failed!"
-    echo "💡 Please fix the linting errors before committing."
-    echo ""
-    exit 1
-fi
-
-echo "🌐 Step 2: Checking translation keys with lang:check..."
-npm run lang:check
-if [ $? -ne 0 ]; then
-    echo ""
-    echo "❌ Language check failed!"
-    echo "💡 Please ensure all translation keys are correctly mapped between Arabic and English."
-    echo ""
-    exit 1
-fi
-
-echo "🧪 Step 3: Running frontend test suite with vitest..."
-npm run test -- --run
-if [ $? -ne 0 ]; then
-    echo ""
-    echo "❌ Tests failed!"
-    echo "💡 Please fix the failing tests before committing."
-    echo ""
+    echo "❌ verify.bat failed! Please fix the errors before committing."
     exit 1
 fi
 
 echo "✅ All frontend pre-commit checks passed cleanly!"
+exit 0

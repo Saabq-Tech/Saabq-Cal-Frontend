@@ -11,13 +11,13 @@ import {
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
 
-export default function WorkspaceProfilePage() {
-  const { idOrSlug } = useParams();
+export default function CustomerSpecialistPage() {
+  const { idOrSlug, specialistId } = useParams();
   const { t, isRTL } = useLanguage();
 
   const [workspace, setWorkspace] = useState(null);
   const [services, setServices] = useState([]);
-  const [specialistRoles, setSpecialistRoles] = useState([]);
+  const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
@@ -43,7 +43,7 @@ export default function WorkspaceProfilePage() {
 
   // Fetch workspace detail & services
   useEffect(() => {
-    if (!idOrSlug) return;
+    if (!idOrSlug || !specialistId) return;
     setLoading(true);
     setServicesLoading(true);
     Promise.all([
@@ -57,19 +57,41 @@ export default function WorkspaceProfilePage() {
     ])
       .then(([wsRes, srvRes, specRes]) => {
         setWorkspace(wsRes.data?.data || null);
-        setServices(srvRes.data?.data || []);
-        setSpecialistRoles(specRes.data?.data || []);
+
+        let foundSpecialist = null;
+        const roles = specRes.data?.data || [];
+        for (const role of roles) {
+          if (role.members) {
+            const m = role.members.find(
+              (m) => String(m.id) === String(specialistId),
+            );
+            if (m) {
+              foundSpecialist = m;
+              break;
+            }
+          }
+        }
+        setSpecialist(foundSpecialist);
+
+        const allServices = srvRes.data?.data || [];
+        setServices(
+          allServices.filter(
+            (s) =>
+              !s.workspace_member_id ||
+              String(s.workspace_member_id) === String(specialistId),
+          ),
+        );
       })
       .catch(() => {
         setWorkspace(null);
         setServices([]);
-        setSpecialistRoles([]);
+        setSpecialist(null);
       })
       .finally(() => {
         setLoading(false);
         setServicesLoading(false);
       });
-  }, [idOrSlug]);
+  }, [idOrSlug, specialistId]);
 
   // Fetch available slots for a service when date or service changes
   const fetchSlots = useCallback(
@@ -107,7 +129,7 @@ export default function WorkspaceProfilePage() {
     );
   }
 
-  if (!workspace) {
+  if (!workspace || !specialist) {
     return (
       <main className="main-content">
         <div
@@ -123,11 +145,11 @@ export default function WorkspaceProfilePage() {
             </h1>
             <p style={{ color: "var(--text-secondary)", marginBottom: 24 }}>
               {isRTL
-                ? "عذراً، مساحة العمل غير موجودة أو تم تعطيلها."
-                : "Sorry, this workspace was not found or is disabled."}
+                ? "عذراً، المتخصص غير موجود."
+                : "Sorry, this specialist was not found."}
             </p>
-            <Link to="/workspaces" className="btn btn-primary">
-              {t("exploreWorkspaces")}
+            <Link to={`/workspaces/${idOrSlug}`} className="btn btn-primary">
+              {isRTL ? "العودة لمساحة العمل" : "Back to Workspace"}
             </Link>
           </div>
         </div>
@@ -761,7 +783,7 @@ export default function WorkspaceProfilePage() {
 
                   {srv.booking_enabled !== false ? (
                     <Link
-                      to={`/workspaces/${idOrSlug}/book?service=${srv.slug || srv.id}`}
+                      to={`/workspaces/${idOrSlug}/book?service=${srv.slug || srv.id}&member=${specialistId}`}
                       className="btn btn-primary btn-md"
                       style={{
                         width: "100%",
@@ -813,170 +835,6 @@ export default function WorkspaceProfilePage() {
           )}
         </div>
       </section>
-
-      {/* Specialists Section */}
-      {specialistRoles.length > 0 && (
-        <section
-          style={{
-            padding: "40px 20px 80px",
-            background: "var(--surface)",
-            borderTop: "1px solid var(--border)",
-          }}
-        >
-          <div className="container" style={{ maxWidth: 1000 }}>
-            <h2
-              style={{
-                fontSize: "1.5rem",
-                fontWeight: 800,
-                marginBottom: 24,
-                color: "var(--text)",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <Icon name="users" size={24} style={{ color: primaryColor }} />
-              {isRTL ? "المتخصصون" : "Specialists"}
-            </h2>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: 32,
-              }}
-            >
-              {specialistRoles.map((role) => (
-                <div key={role.id}>
-                  <h3
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      marginBottom: 16,
-                      color: "var(--text)",
-                      paddingBottom: 8,
-                      borderBottom: "1px solid var(--border)",
-                    }}
-                  >
-                    {getTranslatableText(role.name_translations || role.name)}
-                  </h3>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 12,
-                    }}
-                  >
-                    {role.members && role.members.length > 0 ? (
-                      role.members.map((member) => (
-                        <Link
-                          key={member.id}
-                          to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 16,
-                            padding: 16,
-                            background: "var(--surface-alt)",
-                            borderRadius: 16,
-                            textDecoration: "none",
-                            color: "var(--text)",
-                            border: "1px solid var(--border)",
-                            transition: "all 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = primaryColor;
-                            e.currentTarget.style.transform =
-                              "translateY(-2px)";
-                            e.currentTarget.style.boxShadow =
-                              "0 8px 16px rgba(0,0,0,0.05)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "var(--border)";
-                            e.currentTarget.style.transform = "none";
-                            e.currentTarget.style.boxShadow = "none";
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: "50%",
-                              background: primaryColor + "20",
-                              color: primaryColor,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: 700,
-                              fontSize: "1.2rem",
-                              flexShrink: 0,
-                              overflow: "hidden",
-                            }}
-                          >
-                            {member.avatar_url ? (
-                              <LazyImage
-                                src={member.avatar_url}
-                                alt={member.name}
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                }}
-                              />
-                            ) : (
-                              member.name.charAt(0).toUpperCase()
-                            )}
-                          </div>
-                          <div>
-                            <div
-                              style={{ fontWeight: 700, fontSize: "1.05rem" }}
-                            >
-                              {member.name}
-                            </div>
-                            {member.title && (
-                              <div
-                                style={{
-                                  fontSize: "0.85rem",
-                                  color: "var(--text-secondary)",
-                                  marginTop: 2,
-                                }}
-                              >
-                                {member.title}
-                              </div>
-                            )}
-                          </div>
-                          <div
-                            style={{
-                              marginInlineStart: "auto",
-                              color: "var(--text-secondary)",
-                            }}
-                          >
-                            <Icon
-                              name={isRTL ? "chevron-left" : "chevron-right"}
-                              size={20}
-                            />
-                          </div>
-                        </Link>
-                      ))
-                    ) : (
-                      <p
-                        style={{
-                          color: "var(--text-secondary)",
-                          fontSize: "0.9rem",
-                          fontStyle: "italic",
-                        }}
-                      >
-                        {isRTL
-                          ? "لا يوجد متخصصون متاحون حالياً."
-                          : "No specialists available at the moment."}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </main>
   );
 }

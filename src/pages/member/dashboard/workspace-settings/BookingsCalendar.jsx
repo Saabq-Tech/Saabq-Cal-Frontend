@@ -472,6 +472,22 @@ export default function BookingsCalendar({ onSelectBooking }) {
                           </div>
                           <div className="booking-list-service-title">
                             {serviceTitle}
+                            {b.follow_up_to_id && (
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  marginInlineStart: 8,
+                                  padding: "2px 6px",
+                                  fontSize: "0.7rem",
+                                  background: "rgba(59, 130, 246, 0.1)",
+                                  color: "#2563eb",
+                                  borderRadius: 10,
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {isRTL ? "متابعة" : "Follow-up"}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

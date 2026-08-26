@@ -51,12 +51,10 @@ export default function BookingsTab({
       case "pending":
         return (
           <span
-            className="profile-badge unverified"
+            className="profile-badge pending"
             style={{
               padding: "4px 12px",
               fontSize: "0.8rem",
-              background: "rgba(234, 179, 8, 0.12)",
-              color: "#b45309",
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
@@ -485,7 +483,23 @@ export default function BookingsTab({
                         fontSize: "0.88rem",
                       }}
                     >
-                      {serviceTitle}
+                      <div>{serviceTitle}</div>
+                      {b.follow_up_to_id && (
+                        <span
+                          style={{
+                            display: "inline-block",
+                            marginTop: 4,
+                            padding: "2px 8px",
+                            fontSize: "0.75rem",
+                            background: "rgba(59, 130, 246, 0.1)",
+                            color: "#2563eb",
+                            borderRadius: 12,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {isRTL ? "متابعة" : "Follow-up"}
+                        </span>
+                      )}
                     </td>
                     <td
                       style={{
