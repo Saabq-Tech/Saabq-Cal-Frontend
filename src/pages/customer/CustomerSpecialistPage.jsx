@@ -121,6 +121,24 @@ export default function CustomerSpecialistPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSlots]);
 
+  // Apply workspace custom colors to CSS variables
+  useEffect(() => {
+    if (workspace) {
+      if (workspace.primary_color) {
+        document.documentElement.style.setProperty("--primary", workspace.primary_color);
+        document.documentElement.style.setProperty("--primary-hover", workspace.hover_color || workspace.primary_color);
+      }
+      if (workspace.secondary_color) {
+        document.documentElement.style.setProperty("--secondary", workspace.secondary_color);
+      }
+      return () => {
+        document.documentElement.style.removeProperty("--primary");
+        document.documentElement.style.removeProperty("--primary-hover");
+        document.documentElement.style.removeProperty("--secondary");
+      };
+    }
+  }, [workspace]);
+
   if (loading) {
     return (
       <main className="main-content">
@@ -159,7 +177,6 @@ export default function CustomerSpecialistPage() {
 
   const primaryColor = workspace.primary_color || "var(--primary)";
   const secondaryColor = workspace.secondary_color || "var(--secondary)";
-  const hoverColor = workspace.hover_color || primaryColor;
   const initial = workspace.name ? workspace.name.charAt(0).toUpperCase() : "W";
 
   // JSON-LD for LocalBusiness
@@ -214,14 +231,7 @@ export default function CustomerSpecialistPage() {
   };
 
   return (
-    <main
-      className="main-content"
-      style={{
-        "--primary": primaryColor,
-        "--primary-hover": hoverColor,
-        "--secondary": secondaryColor,
-      }}
-    >
+    <main className="main-content">
       <SEO
         title={workspace.name}
         description={

@@ -324,6 +324,27 @@ export default function BookingsCalendar({ onSelectBooking }) {
               </div>
             )}
           </div>
+          {/* Mobile dots - visible only on small screens */}
+          {dayBookings.length > 0 && (
+            <div className="calendar-mobile-dots">
+              {dayBookings.slice(0, 5).map((b) => {
+                const isMine = b.workspace_member_id === user.id;
+                return (
+                  <span
+                    key={b.id}
+                    className="calendar-mobile-dot"
+                    style={{ background: getStatusColor(b.status, isMine) }}
+                  />
+                );
+              })}
+              {dayBookings.length > 5 && (
+                <span
+                  className="calendar-mobile-dot"
+                  style={{ background: "var(--text-secondary)" }}
+                />
+              )}
+            </div>
+          )}
         </div>
       );
     });
@@ -341,10 +362,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
           marginBottom: 24,
         }}
       >
-        <div>
+        <div style={{ flex: "1 1 0", minWidth: 0 }}>
           <h2
             style={{
-              fontSize: "1.25rem",
+              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
               fontWeight: 800,
               margin: 0,
               color: "var(--heading)",
@@ -355,7 +376,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
           </h2>
           <p
             style={{
-              fontSize: "0.9rem",
+              fontSize: "0.86rem",
               color: "var(--text-secondary)",
               margin: "6px 0 0",
             }}
@@ -364,7 +385,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
               "استعراض وتحديث حالة كافة الحجوزات والجلسات المقررة للمساحة"}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           <button
             type="button"
             className="btn btn-secondary btn-sm"
@@ -436,7 +457,12 @@ export default function BookingsCalendar({ onSelectBooking }) {
                   color: "var(--heading)",
                 }}
               >
-                {isRTL ? "مواعيد يوم" : "Appointments for"} {selectedDay}
+                {isRTL ? "مواعيد يوم" : "Appointments for"}{" "}
+                {(() => {
+                  const parts = selectedDay.split("-");
+                  const d = new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+                  return d.toLocaleDateString(isRTL ? "ar" : "en", { weekday: "long", day: "numeric", month: "long" });
+                })()}
               </h3>
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 12 }}
@@ -575,6 +601,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .calendar-wrapper {
           overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
           border-radius: var(--radius-md);
           border: 1px solid var(--border-light);
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
@@ -589,31 +616,33 @@ export default function BookingsCalendar({ onSelectBooking }) {
         }
         .calendar-grid {
           display: grid;
-          grid-template-columns: repeat(7, 1fr);
+          grid-template-columns: repeat(7, minmax(0, 1fr));
           width: 100%;
+          min-width: 0;
         }
         .calendar-header-cell {
           text-align: center;
-          padding: 10px 4px;
+          padding: 12px 4px;
           font-weight: 700;
           font-size: 0.82rem;
           color: var(--text-secondary);
-          border-right: 1px solid var(--border-light);
+          border-inline-end: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
           background: var(--surface-alt);
         }
         .calendar-header-cell:nth-child(7n) {
-          border-right: none;
+          border-inline-end: none;
         }
         .calendar-day-cell {
-          min-height: 85px;
-          border-right: 1px solid var(--border-light);
+          min-height: 100px;
+          border-inline-end: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
-          padding: 6px 6px;
+          padding: 6px;
           cursor: pointer;
           transition: all 0.2s ease;
           background: var(--surface);
           position: relative;
+          overflow: hidden;
         }
         .calendar-grid > .calendar-day-cell:nth-last-child(-n+7) {
           border-bottom: none;
@@ -622,7 +651,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
           border-bottom: none;
         }
         .calendar-day-cell:nth-child(7n) {
-          border-right: none;
+          border-inline-end: none;
         }
         .calendar-day-cell:hover {
           background: var(--surface-alt) !important;
@@ -635,13 +664,13 @@ export default function BookingsCalendar({ onSelectBooking }) {
           box-shadow: inset 0 0 0 2px var(--primary);
         }
         .calendar-day-blank {
-          min-height: 85px;
-          border-right: 1px solid var(--border-light);
+          min-height: 100px;
+          border-inline-end: 1px solid var(--border-light);
           border-bottom: 1px solid var(--border-light);
           background: rgba(0,0,0,0.02);
         }
         .calendar-day-blank:nth-child(7n) {
-          border-right: none;
+          border-inline-end: none;
         }
         .calendar-event {
           font-size: 0.72rem;
@@ -660,27 +689,52 @@ export default function BookingsCalendar({ onSelectBooking }) {
           transform: translateY(-1px);
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        @media (max-width: 768px) {
+
+        /* ── Tablet (≤ 1024px) ── */
+        @media (max-width: 1024px) {
+          .calendar-day-cell,
+          .calendar-day-blank {
+            min-height: 80px;
+            padding: 5px 4px;
+          }
+          .calendar-event {
+            font-size: 0.68rem;
+            padding: 3px 5px;
+          }
+        }
+
+        /* ── Mobile (≤ 640px): compact grid, hide event names, show only dots ── */
+        @media (max-width: 640px) {
           .calendar-header-cell {
-            padding: 6px 2px !important;
-            font-size: 0.72rem !important;
+            padding: 8px 2px;
+            font-size: 0.7rem;
           }
           .calendar-day-cell,
           .calendar-day-blank {
-            min-height: 44px !important;
-            padding: 3px 2px !important;
+            min-height: 48px;
+            padding: 4px 2px;
+          }
+          .calendar-day-cell > div:first-child {
+            margin-bottom: 4px !important;
+          }
+          .calendar-day-cell > div:first-child > span:first-child {
+            font-size: 0.78rem !important;
+            width: 20px !important;
+            height: 20px !important;
           }
           .calendar-event {
-            font-size: 0.62rem !important;
-            padding: 2px 3px !important;
-            margin-bottom: 2px !important;
-            line-height: 1.1 !important;
-            white-space: nowrap !important;
+            font-size: 0 !important;
+            padding: 0 !important;
+            margin-bottom: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
             overflow: hidden !important;
-            text-overflow: ellipsis !important;
           }
           .calendar-event-name {
             display: none !important;
+          }
+          .calendar-mobile-dots {
+            display: flex !important;
           }
           .booking-list-item {
             flex-wrap: wrap !important;
@@ -700,6 +754,21 @@ export default function BookingsCalendar({ onSelectBooking }) {
             padding-top: 8px !important;
           }
         }
+
+        /* mobile dots - hidden on desktop */
+        .calendar-mobile-dots {
+          display: none;
+          gap: 3px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .calendar-mobile-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
         .booking-list-item {
           display: flex;
           justify-content: space-between;

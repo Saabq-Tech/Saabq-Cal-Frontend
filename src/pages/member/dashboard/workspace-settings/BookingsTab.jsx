@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
-import CreateBookingModal from "./CreateBookingModal";
 
 export default function BookingsTab({
   bookings,
@@ -11,13 +10,12 @@ export default function BookingsTab({
   onPageChange,
   onSelectBooking,
   canEdit,
-  onReloadBookings,
+  _onReloadBookings,
 }) {
   const { t, isRTL } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const formatTranslatable = (val) => {
     if (!val) return "";
@@ -198,25 +196,7 @@ export default function BookingsTab({
               "استعراض وتحديث حالة كافة الحجوزات والجلسات المقررة للمساحة"}
           </p>
         </div>
-        {canEdit ? (
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => setShowCreateModal(true)}
-            style={{
-              padding: "8px 18px",
-              fontWeight: 800,
-              fontSize: "0.86rem",
-              borderRadius: 20,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Icon name="plus" size={14} />
-            <span>{t("bookNewAppointment") || "حجز موعد جديد"}</span>
-          </button>
-        ) : (
+        {!canEdit && (
           <span
             className="profile-badge unverified"
             style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
@@ -582,12 +562,6 @@ export default function BookingsTab({
         </div>
       )}
 
-      {/* Create Booking Modal for Workspace Members */}
-      <CreateBookingModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={onReloadBookings}
-      />
     </div>
   );
 }
