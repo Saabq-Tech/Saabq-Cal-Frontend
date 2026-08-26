@@ -7,6 +7,7 @@ import AuthCardLayout from '../../../components/auth/AuthCardLayout';
 import SEO from '../../../components/ui/SEO';
 import client, { endpoints } from '../../../api/client';
 import Icon from '../../../components/common/Icon';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function MemberRegisterPage() {
   const { register, loading } = useAuth();
@@ -27,6 +28,7 @@ export default function MemberRegisterPage() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [workspaceTypes, setWorkspaceTypes] = useState([]);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   useEffect(() => {
     client.get(endpoints.workspaceTypes).then((res) => {
@@ -60,6 +62,7 @@ export default function MemberRegisterPage() {
       phone: formData.phone || undefined,
       workspace_name: formData.workspace_name,
       workspace_type_id: formData.workspace_type_id || undefined,
+      'cf-turnstile-response': turnstileToken,
     };
 
     const result = await register(userType, data);
@@ -228,6 +231,25 @@ export default function MemberRegisterPage() {
             ))}
           </select>
         </div>
+
+        <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, width: '100%', overflow: 'hidden' }}>
+          <Turnstile
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+            onSuccess={(token) => {
+              setTurnstileToken(token);
+              if (errors['cf-turnstile-response']) {
+                setErrors((prev) => ({ ...prev, 'cf-turnstile-response': undefined }));
+              }
+            }}
+            onError={() => setTurnstileToken('')}
+            onExpire={() => setTurnstileToken('')}
+            options={{
+              theme: 'auto',
+              size: 'flexible',
+            }}
+          />
+        </div>
+        {errors['cf-turnstile-response'] && <div className="form-error" style={{ textAlign: 'center', marginBottom: 16 }}>{errors['cf-turnstile-response'][0]}</div>}
 
         <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
           {loading ? (

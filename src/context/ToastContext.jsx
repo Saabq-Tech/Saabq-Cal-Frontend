@@ -20,7 +20,7 @@ export function ToastProvider({ children }) {
   }, []);
 
   const addToast = useCallback(
-    (message, type = 'info', duration = 4000) => {
+    (message, type = 'info', duration = 5000) => {
       if (!message) return null;
       let newId = null;
       setToasts((prev) => {

@@ -9,6 +9,7 @@ import LazyImage from '../../components/ui/LazyImage';
 import { BookingFormSkeleton } from '../../components/ui/Skeleton';
 import Icon from '../../components/common/Icon';
 import { formatCurrency } from '../../utils/currency';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 
 const MONTH_NAMES_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
@@ -98,6 +99,7 @@ export default function CustomerBookAppointmentPage() {
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [guestBookingResult, setGuestBookingResult] = useState(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   // Sync logged in user details if available
   useEffect(() => {
@@ -256,6 +258,13 @@ export default function CustomerBookAppointmentPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error(
+        isRTL ? 'يرجى التحقق من اختبار الكابتشا' : 'Please verify the CAPTCHA'
+      );
+      return;
+    }
+
     // Email validation (Mandatory for both guest and authenticated users)
     const emailVal = (formFields.email || user?.email || '').trim();
     if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
@@ -341,6 +350,7 @@ export default function CustomerBookAppointmentPage() {
           currency: currencyCode,
           currency_id: currencyId,
         },
+        'cf-turnstile-response': turnstileToken,
       };
 
       await client.post('/customers/appointments', payload);
@@ -394,7 +404,7 @@ export default function CustomerBookAppointmentPage() {
       <main className="main-content">
         <SEO title={isRTL ? 'مساحة العمل غير موجودة' : 'Workspace Not Found'} noindex />
         <div className="container" style={{ padding: '60px 20px', textAlign: 'center' }}>
-          <div className="card" style={{ padding: 48, maxWidth: 500, margin: '0 auto' }}>
+          <div className="card p-mobile-md" style={{ padding: 'var(--card-padding, 48px)', maxWidth: 500, margin: '0 auto' }}>
             <h1 style={{ fontSize: '1.4rem', marginBottom: 12 }}>{t('noWorkspacesFound')}</h1>
             <Link to="/workspaces" className="btn btn-primary">
               {t('exploreWorkspaces')}
@@ -479,7 +489,7 @@ export default function CustomerBookAppointmentPage() {
 
       <div className="container" style={{ marginTop: -30 }}>
         {guestBookingResult ? (
-          <div className="card" style={{ maxWidth: 640, margin: '0 auto', padding: '48px 32px', textAlign: 'center', borderRadius: 'var(--radius-xl, 16px)', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}>
+          <div className="card p-mobile-md" style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--card-padding, 48px 32px)', textAlign: 'center', borderRadius: 'var(--radius-xl, 16px)', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }}>
             <div
               style={{
                 width: 72,
@@ -506,7 +516,7 @@ export default function CustomerBookAppointmentPage() {
 
             <div
               style={{
-                background: 'var(--surface-muted, #f8fafc)',
+                background: 'var(--surface-alt)',
                 border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-lg, 12px)',
                 padding: '20px',
@@ -517,17 +527,17 @@ export default function CustomerBookAppointmentPage() {
                 gap: 10,
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex-wrap-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'الخدمة:' : 'Service:'}</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--heading)' }}>{guestBookingResult.serviceName}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex-wrap-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'الموعد:' : 'Date & Time:'}</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--heading)' }} dir="ltr">
                   {guestBookingResult.date} | {guestBookingResult.time}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="flex-wrap-mobile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{isRTL ? 'البريد الإلكتروني:' : 'Email:'}</span>
                 <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--primary)' }} dir="ltr">{guestBookingResult.email}</span>
               </div>
@@ -1003,6 +1013,21 @@ export default function CustomerBookAppointmentPage() {
                       )}
 
                     </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0', width: '100%', overflow: 'hidden' }}>
+                    <Turnstile
+                      siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                      onSuccess={(token) => setTurnstileToken(token)}
+                      onError={() => setTurnstileToken('')}
+                      onExpire={() => setTurnstileToken('')}
+                      options={{
+                        theme: 'auto',
+                        size: 'flexible',
+                      }}
+                    />
                   </div>
                 )}
 

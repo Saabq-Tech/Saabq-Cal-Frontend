@@ -95,6 +95,10 @@ jobs:
           echo "→ Installing Frontend dependencies..."
           npm ci
 
+          echo "→ Configuring environment variables..."
+          cp .env.example .env
+          sed -i 's|VITE_BASE_PATH=.*|VITE_BASE_PATH=/|g' .env
+
           echo "→ Building Frontend assets..."
           npm run build
 

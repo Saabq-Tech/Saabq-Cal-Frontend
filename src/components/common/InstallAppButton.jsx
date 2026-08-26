@@ -60,9 +60,9 @@ export default function InstallAppButton({ className = '', style = {}, ...props 
     }
   };
 
-  if (isInstalled || !isInstallable) {
-    return null;
-  }
+  // if (isInstalled) {
+  //   return null;
+  // }
 
   const isRtl = lang === 'ar';
 
@@ -115,10 +115,16 @@ export default function InstallAppButton({ className = '', style = {}, ...props 
               <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setIsModalOpen(false)}>
                 {t('cancel') || 'Cancel'}
               </button>
-              <button className="btn btn-primary" style={{ flex: 1, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }} onClick={handleInstallClick}>
-                <Icon name="download" size={16} />
-                <span>{t('installApp') || 'Install App'}</span>
-              </button>
+              {deferredPrompt ? (
+                <button className="btn btn-primary" style={{ flex: 1, display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'center' }} onClick={handleInstallClick}>
+                  <Icon name="download" size={16} />
+                  <span>{t('installApp') || 'Install App'}</span>
+                </button>
+              ) : (
+                <div style={{ flex: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text)', fontSize: '0.85rem', textAlign: 'center', lineHeight: 1.4, background: 'var(--surface-alt)', padding: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                  {t('installManualInstruction') || "Tap your browser's menu or Share icon, then select 'Add to Home Screen'."}
+                </div>
+              )}
             </div>
           </div>
         </div>

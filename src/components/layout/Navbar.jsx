@@ -414,7 +414,6 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
-            <InstallAppButton className="mobile-only" />
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}

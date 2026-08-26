@@ -617,6 +617,15 @@ export default function ChatsPage() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!sending && (textInput.trim() || imageFile)) {
+        sendMessage();
+      }
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     sendMessage();
@@ -1034,7 +1043,7 @@ export default function ChatsPage() {
                       onClick={() => fileInputRef.current?.click()}
                       title={t('imageAttachment')}
                     >
-                      <Icon name="calendar" size={18} />
+                      <Icon name="image" size={18} />
                     </button>
 
                     {/* Mic button */}
@@ -1048,14 +1057,15 @@ export default function ChatsPage() {
                     </button>
 
                     {/* Text Input */}
-                    <input
+                    <textarea
                       ref={textInputRef}
-                      type="text"
                       className="chat-input"
                       placeholder={t('typeMessagePlaceholder')}
                       value={textInput}
                       onChange={(e) => setTextInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       disabled={sending}
+                      rows="1"
                     />
 
                     {/* Send Button */}
@@ -1088,7 +1098,7 @@ export default function ChatsPage() {
                         onClick={() => fileInputRef.current?.click()}
                         title={t('imageAttachment')}
                       >
-                        <Icon name="calendar" size={18} />
+                        <Icon name="image" size={18} />
                       </button>
 
                       {/* Mic button */}
@@ -1102,14 +1112,15 @@ export default function ChatsPage() {
                       </button>
 
                       {/* Text Input */}
-                      <input
+                      <textarea
                         ref={textInputRef}
-                        type="text"
                         className="chat-input"
                         placeholder={t('typeMessagePlaceholder')}
                         value={textInput}
                         onChange={(e) => setTextInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         disabled={sending}
+                        rows="1"
                       />
 
                       {/* Send button */}
