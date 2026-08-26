@@ -716,6 +716,10 @@ export const translations = {
     fullNameLabel: "الاسم الكامل ",
     optionalPhoneLabel: "رقم الهاتف (اختياري)",
     assignedRoleLabel: "الدور المسند في مساحة العمل",
+    memberPasswordLabel: "كلمة المرور (اختياري)",
+    memberPasswordPlaceholder: "أدخل كلمة المرور أو اتركه فارغاً للافتراضية",
+    memberPasswordHint:
+      "8 أحرف على الأقل. إذا تُرِك فارغاً، سيتم تعيين كلمة المرور الافتراضية.",
     selectRoleOption: "-- اختر الدور --",
     memberStatusLabel: "حالة العضو",
     sendInviteBtn: "إرسال الدعوة",
@@ -1436,6 +1440,9 @@ export const translations = {
     active: "نشط",
     inactive: "غير نشط",
     confirmDelete: "تأكيد الحذف",
+    confirmDeleteResource: "حذف المورد",
+    editResourceSubtitle: "تعديل بيانات وقدرة استيعاب المورد",
+    addResourceSubtitle: "أدخل بيانات المورد أو القاعة المتاحة للحجز",
     deleteResourceWarning:
       "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.",
     logsLoadFailed: "فشل تحميل سجل النشاطات",
@@ -2149,6 +2156,10 @@ export const translations = {
     fullNameLabel: "Full Name ",
     optionalPhoneLabel: "Phone Number (Optional)",
     assignedRoleLabel: "Assigned Workspace Role",
+    memberPasswordLabel: "Password (Optional)",
+    memberPasswordPlaceholder: "Enter password or leave blank for default",
+    memberPasswordHint:
+      "At least 8 characters. If left blank, default policy password will be set.",
     selectRoleOption: "-- Select Role --",
     memberStatusLabel: "Member Status",
     sendInviteBtn: "Send Invitation",
@@ -2903,6 +2914,9 @@ export const translations = {
     active: "Active",
     inactive: "Inactive",
     confirmDelete: "Confirm Delete",
+    confirmDeleteResource: "Delete Resource",
+    editResourceSubtitle: "Update resource details and capacity",
+    addResourceSubtitle: "Enter details for the new resource or room",
     deleteResourceWarning:
       "Are you sure you want to delete this resource? This action cannot be undone.",
     logsLoadFailed: "Failed to load audit logs",

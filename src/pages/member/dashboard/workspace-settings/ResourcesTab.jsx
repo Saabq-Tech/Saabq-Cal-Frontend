@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
+import ConfirmationModal from "./ConfirmationModal";
 
 const defaultFormState = {
   id: null,
@@ -21,8 +23,13 @@ export default function ResourcesTab({
   const { t, isRTL } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    isDanger: true,
+  });
 
   const handleOpenCreate = () => {
     setForm(defaultFormState);
@@ -51,16 +58,23 @@ export default function ResourcesTab({
   };
 
   const handleOpenDelete = (id) => {
-    setDeletingId(id);
-    setIsConfirmOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (onDeleteResource && deletingId) {
-      await onDeleteResource(deletingId);
-    }
-    setIsConfirmOpen(false);
-    setDeletingId(null);
+    setConfirmModal({
+      isOpen: true,
+      title:
+        t("confirmDeleteResource") ||
+        (isRTL ? "حذف المورد" : "Delete Resource"),
+      message:
+        t("deleteResourceWarning") ||
+        (isRTL
+          ? "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء."
+          : "Are you sure you want to delete this resource? This action cannot be undone."),
+      isDanger: true,
+      onConfirm: async () => {
+        if (onDeleteResource) {
+          await onDeleteResource(id);
+        }
+      },
+    });
   };
 
   const resourcesList = Array.isArray(resources) ? resources : [];
@@ -118,7 +132,7 @@ export default function ResourcesTab({
             textAlign: "center",
             background: "var(--surface-alt)",
             borderRadius: "var(--radius-lg)",
-            border: "1px border-dashed var(--border)",
+            border: "1px dashed var(--border)",
           }}
         >
           <div
@@ -255,7 +269,7 @@ export default function ResourcesTab({
                       gap: 4,
                     }}
                   >
-                    <Icon name="custom-0c2e06fd" size={12} />
+                    <Icon name="users" size={12} />
                     {r.capacity} {t("persons") || (isRTL ? "أشخاص" : "persons")}
                   </span>
                 )}
@@ -291,73 +305,118 @@ export default function ResourcesTab({
         </div>
       )}
 
-      {/* Form Modal */}
-      {isModalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: 500 }}>
-            <div className="modal-header">
-              <h3>
-                {form.id
-                  ? t("editResource") ||
-                    (isRTL ? "تعديل المورد" : "Edit Resource")
-                  : t("addResource") || (isRTL ? "إضافة مورد" : "Add Resource")}
-              </h3>
-              <button
-                className="close-btn"
-                onClick={() => setIsModalOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleSubmit}>
+      {/* Form Modal using React Portal */}
+      {isModalOpen &&
+        createPortal(
+          <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
+            <div
+              className="modal-card animate-fade-in-up"
+              style={{ maxWidth: 520, width: "100%" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <div>
+                  <h3 className="modal-title">
+                    {form.id
+                      ? t("editResource") ||
+                        (isRTL ? "تعديل المورد" : "Edit Resource")
+                      : t("addResource") ||
+                        (isRTL ? "إضافة مورد" : "Add Resource")}
+                  </h3>
+                  <p className="modal-subtitle">
+                    {form.id
+                      ? t("editResourceSubtitle") ||
+                        (isRTL
+                          ? "تعديل بيانات وقدرة استيعاب المورد"
+                          : "Update resource details and capacity")
+                      : t("addResourceSubtitle") ||
+                        (isRTL
+                          ? "أدخل بيانات المورد أو القاعة المتاحة للحجز"
+                          : "Enter details for the new resource or room")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="modal-body">
                 <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     {t("resourceName") ||
                       (isRTL ? "اسم المورد/القاعة" : "Resource Name")}{" "}
-                    <span className="required">*</span>
+                    <span
+                      className="required"
+                      style={{ color: "var(--error)" }}
+                    >
+                      *
+                    </span>
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-input"
                     required
+                    placeholder={
+                      isRTL ? "مثال: قاعة الاجتماعات A" : "e.g. Meeting Room A"
+                    }
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     {t("description") || (isRTL ? "الوصف" : "Description")}
                   </label>
                   <textarea
-                    className="form-control"
+                    className="form-textarea"
                     rows="3"
+                    placeholder={
+                      isRTL
+                        ? "وصف مختصر للمورد والمعدات المتاحة به..."
+                        : "Brief description of resource..."
+                    }
                     value={form.description}
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
                   />
                 </div>
-                <div style={{ display: "flex", gap: 16 }}>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>{t("type") || (isRTL ? "النوع" : "Type")}</label>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 16,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("type") || (isRTL ? "النوع" : "Type")}
+                    </label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-input"
                       value={form.type}
                       onChange={(e) =>
                         setForm({ ...form, type: e.target.value })
                       }
-                      placeholder="e.g. room, equipment"
+                      placeholder={
+                        isRTL
+                          ? "مثال: room أو equipment"
+                          : "e.g. room, equipment"
+                      }
                     />
                   </div>
-                  <div className="form-group" style={{ flex: 1 }}>
-                    <label>
+                  <div className="form-group">
+                    <label className="form-label">
                       {t("capacity") || (isRTL ? "السعة" : "Capacity")}
                     </label>
                     <input
                       type="number"
-                      className="form-control"
+                      className="form-input"
                       min="1"
                       value={form.capacity}
                       onChange={(e) =>
@@ -370,12 +429,15 @@ export default function ResourcesTab({
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     {t("location") || (isRTL ? "الموقع" : "Location")}
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-input"
+                    placeholder={
+                      isRTL ? "مثال: الطابق الثاني" : "e.g. 2nd Floor"
+                    }
                     value={form.location}
                     onChange={(e) =>
                       setForm({ ...form, location: e.target.value })
@@ -383,9 +445,11 @@ export default function ResourcesTab({
                   />
                 </div>
                 <div className="form-group">
-                  <label>{t("status") || (isRTL ? "الحالة" : "Status")}</label>
+                  <label className="form-label">
+                    {t("status") || (isRTL ? "الحالة" : "Status")}
+                  </label>
                   <select
-                    className="form-control"
+                    className="form-select"
                     value={form.status}
                     onChange={(e) =>
                       setForm({ ...form, status: e.target.value })
@@ -406,6 +470,8 @@ export default function ResourcesTab({
                     justifyContent: "flex-end",
                     gap: 12,
                     marginTop: 24,
+                    paddingTop: 16,
+                    borderTop: "1px solid var(--border-light)",
                   }}
                 >
                   <button
@@ -421,56 +487,15 @@ export default function ResourcesTab({
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
-      {/* Delete Confirm Modal */}
-      {isConfirmOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: 400 }}>
-            <div className="modal-header">
-              <h3>
-                {t("confirmDelete") ||
-                  (isRTL ? "تأكيد الحذف" : "Confirm Delete")}
-              </h3>
-              <button
-                className="close-btn"
-                onClick={() => setIsConfirmOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body text-center">
-              <p>
-                {t("deleteResourceWarning") ||
-                  (isRTL
-                    ? "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء."
-                    : "Are you sure you want to delete this resource? This action cannot be undone.")}
-              </p>
-              <div
-                className="modal-actions"
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 12,
-                  marginTop: 24,
-                }}
-              >
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setIsConfirmOpen(false)}
-                >
-                  {t("cancel") || (isRTL ? "إلغاء" : "Cancel")}
-                </button>
-                <button className="btn btn-danger" onClick={confirmDelete}>
-                  {t("delete") || (isRTL ? "حذف" : "Delete")}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        modalState={confirmModal}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

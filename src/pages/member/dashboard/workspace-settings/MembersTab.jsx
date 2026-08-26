@@ -13,11 +13,13 @@ export default function MembersTab({
 }) {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     editing_id: null,
     name: "",
     email: "",
     phone: "",
+    password: "",
     role_id: "",
     status: "active",
   });
@@ -28,9 +30,11 @@ export default function MembersTab({
       name: "",
       email: "",
       phone: "",
+      password: "",
       role_id: "",
       status: "active",
     });
+    setShowPassword(false);
     setIsModalOpen(true);
   };
 
@@ -40,16 +44,22 @@ export default function MembersTab({
       name: member.name || "",
       email: member.email || "",
       phone: member.phone || "",
+      password: "",
       role_id: member.role_id || member.role?.id || "",
       status: member.status || "active",
     });
+    setShowPassword(false);
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (onSaveMember) {
-      await onSaveMember(form);
+      const payload = { ...form };
+      if (!payload.password) {
+        delete payload.password;
+      }
+      await onSaveMember(payload);
     }
     setIsModalOpen(false);
   };
@@ -334,6 +344,62 @@ export default function MembersTab({
                       setForm({ ...form, phone: e.target.value })
                     }
                   />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">
+                    {t("memberPasswordLabel") || "كلمة المرور (اختياري)"}
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-input"
+                      value={form.password}
+                      onChange={(e) =>
+                        setForm({ ...form, password: e.target.value })
+                      }
+                      placeholder={
+                        t("memberPasswordPlaceholder") ||
+                        "أدخل كلمة المرور أو اتركه فارغاً للافتراضية"
+                      }
+                      minLength={8}
+                      style={{ paddingInlineEnd: 40 }}
+                    />
+                    <button
+                      type="button"
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        insetInlineEnd: 10,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--muted)",
+                        padding: 4,
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      onClick={() => setShowPassword(!showPassword)}
+                      title={
+                        showPassword
+                          ? t("hidePassword") || "إخفاء كلمة المرور"
+                          : t("showPassword") || "إظهار كلمة المرور"
+                      }
+                    >
+                      <Icon name={showPassword ? "eye-off" : "eye"} size={16} />
+                    </button>
+                  </div>
+                  <small
+                    style={{
+                      fontSize: "0.76rem",
+                      color: "var(--text-secondary)",
+                      marginTop: 4,
+                      display: "block",
+                    }}
+                  >
+                    {t("memberPasswordHint") ||
+                      "8 أحرف على الأقل. إذا تُرِك فارغاً، سيتم تعيين كلمة المرور الافتراضية."}
+                  </small>
                 </div>
                 <div className="form-group">
                   <label className="form-label">

@@ -460,6 +460,42 @@ export default function Navbar() {
                         {t("workspaceSettings")}
                       </Link>
                     )}
+                    {canViewPermission(["schedule_read", "schedule_write"]) && (
+                      <Link
+                        to="/member/workspace/schedules"
+                        onClick={() => setWsDropdownOpen(false)}
+                      >
+                        <Icon name="clock" size={16} />
+                        {t("navSchedules")}
+                      </Link>
+                    )}
+                    {canViewPermission(["service_read", "service_write"]) && (
+                      <Link
+                        to="/member/workspace/services"
+                        onClick={() => setWsDropdownOpen(false)}
+                      >
+                        <Icon name="custom-bc148024" size={16} />
+                        {t("navServices")}
+                      </Link>
+                    )}
+                    {canViewPermission(["member_read", "member_write"]) && (
+                      <Link
+                        to="/member/workspace/members"
+                        onClick={() => setWsDropdownOpen(false)}
+                      >
+                        <Icon name="custom-cdbb0862" size={16} />
+                        {t("navMembers")}
+                      </Link>
+                    )}
+                    {canViewPermission(["role_read", "role_write"]) && (
+                      <Link
+                        to="/member/workspace/roles"
+                        onClick={() => setWsDropdownOpen(false)}
+                      >
+                        <Icon name="shield" size={16} />
+                        {t("workspaceRoles")}
+                      </Link>
+                    )}
                     {canViewPermission(["booking_read", "booking_write"]) && (
                       <Link
                         to="/member/workspace/bookings"
@@ -484,24 +520,6 @@ export default function Navbar() {
                         )}
                       </Link>
                     )}
-                    {canViewPermission(["service_read", "service_write"]) && (
-                      <Link
-                        to="/member/workspace/services"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="clock" size={16} />
-                        {t("navServices")}
-                      </Link>
-                    )}
-                    {canViewPermission(["schedule_read", "schedule_write"]) && (
-                      <Link
-                        to="/member/workspace/schedules"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="clock" size={16} />
-                        {t("navSchedules")}
-                      </Link>
-                    )}
                     {canViewPermission([
                       "subscription_read",
                       "subscription_write",
@@ -514,22 +532,36 @@ export default function Navbar() {
                         {t("navSubscriptions")}
                       </Link>
                     )}
-                    {canViewPermission(["member_read", "member_write"]) && (
+                    {canViewPermission(["resource_read", "resource_write"]) && (
                       <Link
-                        to="/member/workspace/members"
+                        to="/member/workspace/resources"
                         onClick={() => setWsDropdownOpen(false)}
                       >
-                        <Icon name="custom-0c2e06fd" size={16} />
-                        {t("navMembers")}
+                        <Icon name="briefcase" size={16} />
+                        {t("workspaceResources") || "الموارد والقاعات"}
                       </Link>
                     )}
-                    {canViewPermission(["role_read", "role_write"]) && (
+                    {canViewPermission(["settings_read"]) && (
                       <Link
-                        to="/member/workspace/roles"
+                        to="/member/workspace/logs"
                         onClick={() => setWsDropdownOpen(false)}
                       >
-                        <Icon name="shield" size={16} />
-                        {t("workspaceRoles")}
+                        <Icon name="clipboard-list" size={16} />
+                        {t("auditLogs") || "سجل النشاطات"}
+                      </Link>
+                    )}
+                    {canViewPermission([
+                      "payment_read",
+                      "payment_write",
+                      "booking_read",
+                      "booking_write",
+                    ]) && (
+                      <Link
+                        to="/member/workspace/payments"
+                        onClick={() => setWsDropdownOpen(false)}
+                      >
+                        <Icon name="credit-card" size={16} />
+                        {t("paymentsAndFinance") || "المدفوعات والمالية"}
                       </Link>
                     )}
                   </div>
