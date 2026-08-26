@@ -268,8 +268,8 @@ export default function WorkspacePaymentsPage() {
       {/* Workspace Safe / Wallet Summary Cards */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          display: "flex",
+          flexWrap: "wrap",
           gap: 16,
           marginBottom: 24,
         }}
@@ -277,6 +277,7 @@ export default function WorkspacePaymentsPage() {
         {/* Net Safe Balance */}
         <div
           style={{
+            flex: "1 1 220px",
             background:
               "linear-gradient(135deg, rgba(13, 104, 92, 0.12) 0%, rgba(13, 104, 92, 0.04) 100%)",
             border: "1px solid rgba(13, 104, 92, 0.25)",
@@ -333,6 +334,7 @@ export default function WorkspacePaymentsPage() {
         {/* Total Income (Credit) */}
         <div
           style={{
+            flex: "1 1 220px",
             background: "var(--bg-card)",
             border: "1px solid var(--border)",
             borderRadius: 16,
@@ -379,6 +381,7 @@ export default function WorkspacePaymentsPage() {
         {/* Total Expenses & Refunds (Debit) */}
         <div
           style={{
+            flex: "1 1 220px",
             background: "var(--bg-card)",
             border: "1px solid var(--border)",
             borderRadius: 16,
@@ -425,6 +428,7 @@ export default function WorkspacePaymentsPage() {
         {/* Pending Verification */}
         <div
           style={{
+            flex: "1 1 220px",
             background: "var(--bg-card)",
             border: "1px solid var(--border)",
             borderRadius: 16,
