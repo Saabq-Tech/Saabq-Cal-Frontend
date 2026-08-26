@@ -115,29 +115,101 @@ export default function WorkspacesPage() {
       {/* Page Hero Header */}
       <section
         className="hero"
-        style={{ borderBottom: "1px solid var(--border)", paddingBottom: 48 }}
+        style={{
+          position: "relative",
+          padding: "60px 0 80px",
+          marginBottom: 48,
+          background:
+            "linear-gradient(135deg, var(--surface) 0%, var(--surface-alt) 100%)",
+          overflow: "hidden",
+        }}
       >
-        <div className="container">
+        {/* Soft Mesh Gradients */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-50%",
+            left: "-10%",
+            width: "60%",
+            height: "150%",
+            background:
+              "radial-gradient(ellipse at center, rgba(10, 144, 153, 0.1) 0%, transparent 70%)",
+            transform: "rotate(-15deg)",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-30%",
+            right: "-10%",
+            width: "50%",
+            height: "100%",
+            background:
+              "radial-gradient(ellipse at center, rgba(234, 88, 12, 0.08) 0%, transparent 70%)",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div
             className="hero-content"
-            style={{ maxWidth: 760, margin: "0 auto" }}
+            style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}
           >
-            <div className="hero-badge">
+            <div
+              className="hero-badge"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 16px",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 30,
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "var(--primary)",
+                marginBottom: 24,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+              }}
+            >
               <Icon name="custom-d3d330f2" size={14} />
               {t("exploreWorkspaces")}
             </div>
 
-            <h1>
+            <h1
+              style={{
+                fontSize: "clamp(2.5rem, 5vw, 3.5rem)",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.1,
+                marginBottom: 24,
+                color: "var(--heading)",
+              }}
+            >
               {isRTL ? "استكشاف " : "Explore "}
-              <span>{isRTL ? "مساحات العمل" : "Workspaces"}</span>
+              <span
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--primary) 0%, var(--secondary, #3b82f6) 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {isRTL ? "مساحات العمل" : "Workspaces"}
+              </span>
             </h1>
 
             <p
               style={{
                 color: "var(--text-secondary)",
-                fontSize: "1.08rem",
+                fontSize: "1.15rem",
                 lineHeight: 1.6,
-                marginBottom: 28,
+                marginBottom: 40,
+                maxWidth: 600,
+                margin: "0 auto 40px",
               }}
             >
               {t("exploreWorkspacesSubtitle")}
@@ -317,63 +389,87 @@ export default function WorkspacesPage() {
                       className="card card-hover"
                       style={{
                         padding: 0,
-                        borderRadius: "var(--radius-xl, 16px)",
+                        borderRadius: "var(--radius-2xl, 20px)",
                         border: "1px solid var(--border)",
                         background: "var(--surface)",
-                        boxShadow: "var(--shadow-sm)",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.04)",
                         display: "flex",
                         flexDirection: "column",
                         position: "relative",
                         transition:
-                          "transform 0.25s ease, box-shadow 0.25s ease",
+                          "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        overflow: "hidden",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-6px)";
+                        e.currentTarget.style.boxShadow =
+                          "0 20px 40px rgba(0,0,0,0.08)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "none";
+                        e.currentTarget.style.boxShadow =
+                          "0 10px 30px rgba(0,0,0,0.04)";
                       }}
                     >
                       {/* Top Cover Banner */}
                       <div
                         style={{
-                          height: 110,
-                          borderRadius: "16px 16px 0 0",
+                          height: 140,
                           background: ws.cover_url
                             ? `url(${ws.cover_url}) center/cover no-repeat`
                             : `linear-gradient(135deg, rgba(13,79,78,0.12) 0%, rgba(232,141,34,0.12) 100%)`,
-                          borderBottom: "1px solid var(--border)",
                           position: "relative",
-                          padding: "16px 16px 0",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
-                          justifyContent: "center",
+                          justifyContent: "flex-end",
+                          paddingBottom: 20,
                         }}
                       >
+                        {/* Gradient Overlay for seamless transition */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            background:
+                              "linear-gradient(to top, var(--surface) 0%, transparent 60%)",
+                            pointerEvents: "none",
+                          }}
+                        />
+
                         {/* Status Badge */}
                         <div
                           style={{
                             position: "absolute",
-                            top: 12,
-                            insetInlineEnd: 12,
+                            top: 16,
+                            insetInlineEnd: 16,
+                            zIndex: 2,
                           }}
                         >
                           {ws.booking_enabled ? (
                             <span
                               style={{
-                                background: "var(--surface)",
-                                color: "#10B981",
+                                background: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(4px)",
+                                color: "#059669",
                                 fontWeight: 700,
                                 fontSize: "0.75rem",
-                                padding: "4px 10px",
+                                padding: "6px 12px",
                                 borderRadius: "var(--radius-full, 9999px)",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: 5,
+                                gap: 6,
                               }}
                             >
                               <span
                                 style={{
-                                  width: 6,
-                                  height: 6,
+                                  width: 8,
+                                  height: 8,
                                   borderRadius: "50%",
                                   background: "#10B981",
+                                  boxShadow:
+                                    "0 0 0 2px rgba(16, 185, 129, 0.2)",
                                 }}
                                 aria-hidden="true"
                               />
@@ -382,13 +478,14 @@ export default function WorkspacesPage() {
                           ) : (
                             <span
                               style={{
-                                background: "var(--surface)",
-                                color: "#F59E0B",
+                                background: "rgba(255, 255, 255, 0.9)",
+                                backdropFilter: "blur(4px)",
+                                color: "#D97706",
                                 fontWeight: 700,
                                 fontSize: "0.75rem",
-                                padding: "4px 10px",
+                                padding: "6px 12px",
                                 borderRadius: "var(--radius-full, 9999px)",
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                               }}
                             >
                               {isRTL ? "غير متاح" : "Unavailable"}
@@ -399,27 +496,31 @@ export default function WorkspacesPage() {
                         {/* Profile Icon */}
                         <div
                           style={{
-                            width: 60,
-                            height: 60,
+                            width: 72,
+                            height: 72,
                             borderRadius: "50%",
                             background: "var(--surface)",
-                            border: "3px solid var(--surface)",
-                            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+                            border: "4px solid var(--surface)",
+                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
                             overflow: "hidden",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: "1.5rem",
+                            fontSize: "1.8rem",
                             fontWeight: 800,
                             color: primaryBg,
+                            zIndex: 2,
+                            transform: "translateY(50%)",
+                            position: "absolute",
+                            bottom: 0,
                           }}
                         >
                           {ws.logo_url ? (
                             <LazyImage
                               src={ws.logo_url}
                               alt={`${ws.name} logo`}
-                              width={60}
-                              height={60}
+                              width={72}
+                              height={72}
                               objectFit="cover"
                               style={{ borderRadius: "50%" }}
                             />
@@ -432,7 +533,7 @@ export default function WorkspacesPage() {
                       {/* Card Content Body */}
                       <div
                         style={{
-                          padding: "16px 20px 20px",
+                          padding: "48px 24px 24px",
                           flex: 1,
                           display: "flex",
                           flexDirection: "column",
@@ -553,10 +654,21 @@ export default function WorkspacesPage() {
                             justifyContent: "center",
                             gap: 8,
                             fontWeight: 700,
-                            borderRadius: "var(--radius-md, 8px)",
+                            borderRadius: "var(--radius-lg, 12px)",
                             background: ws.primary_color || "var(--primary)",
                             borderColor: ws.primary_color || "var(--primary)",
                             color: "#ffffff",
+                            padding: "12px",
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.filter = "brightness(1.1)";
+                            e.currentTarget.style.transform =
+                              "translateY(-2px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.filter = "none";
+                            e.currentTarget.style.transform = "none";
                           }}
                         >
                           <span>{t("viewWorkspaceProfile")}</span>

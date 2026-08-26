@@ -219,53 +219,74 @@ export default function WorkspaceProfilePage() {
       <div
         className="workspace-profile-cover"
         style={{
-          height: 180,
+          height: 240,
           background: workspace.cover_url
             ? `url(${workspace.cover_url}) center/cover no-repeat`
             : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
           position: "relative",
+          borderBottom: "1px solid rgba(0,0,0,0.05)",
         }}
         role="img"
         aria-label={
           isRTL ? `غلاف ${workspace.name}` : `${workspace.name} cover`
         }
-      />
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, var(--background) 0%, transparent 50%)",
+            pointerEvents: "none",
+          }}
+        />
+      </div>
 
       <div
         className="container"
         style={{
-          marginTop: -50,
+          marginTop: -80,
           position: "relative",
           zIndex: 2,
           marginBottom: 40,
         }}
       >
-        <article className="card" style={{ padding: 28 }}>
+        <article
+          className="card"
+          style={{
+            padding: 32,
+            borderRadius: "var(--radius-2xl, 24px)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: 24,
+              gap: 28,
               alignItems: "flex-start",
             }}
           >
             {/* Logo */}
             <div
               style={{
-                width: 96,
-                height: 96,
-                borderRadius: "var(--radius-xl, 16px)",
+                width: 110,
+                height: 110,
+                borderRadius: "var(--radius-2xl, 20px)",
                 background: "var(--surface)",
-                border: "4px solid var(--background)",
-                boxShadow: "var(--shadow-md)",
+                border: "4px solid var(--surface)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                 overflow: "hidden",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "2.4rem",
+                fontSize: "2.8rem",
                 fontWeight: 800,
                 color: primaryColor,
                 flexShrink: 0,
+                marginTop: -16,
               }}
             >
               {workspace.logo_url ? (
@@ -875,27 +896,43 @@ export default function WorkspaceProfilePage() {
                             display: "flex",
                             alignItems: "center",
                             gap: 16,
-                            padding: 16,
-                            background: "var(--surface-alt)",
-                            borderRadius: 16,
+                            padding: 20,
+                            background: "var(--surface)",
+                            borderRadius: "var(--radius-xl, 16px)",
                             textDecoration: "none",
                             color: "var(--text)",
                             border: "1px solid var(--border)",
-                            transition: "all 0.2s ease",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.02)",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = primaryColor;
                             e.currentTarget.style.transform =
-                              "translateY(-2px)";
-                            e.currentTarget.style.boxShadow =
-                              "0 8px 16px rgba(0,0,0,0.05)";
+                              "translateY(-4px)";
+                            e.currentTarget.style.boxShadow = `0 12px 24px ${primaryColor}20`;
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.borderColor = "var(--border)";
                             e.currentTarget.style.transform = "none";
-                            e.currentTarget.style.boxShadow = "none";
+                            e.currentTarget.style.boxShadow =
+                              "0 4px 12px rgba(0,0,0,0.02)";
                           }}
                         >
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "4px",
+                              height: "100%",
+                              background: primaryColor,
+                              opacity: 0,
+                              transition: "opacity 0.2s ease",
+                            }}
+                            className="hover-indicator"
+                          />
                           <div
                             style={{
                               width: 48,
