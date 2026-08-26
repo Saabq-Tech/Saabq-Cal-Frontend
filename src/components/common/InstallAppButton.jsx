@@ -257,7 +257,9 @@ export default function InstallAppButton({
                 }
                 onClick={() => setIsModalOpen(false)}
               >
-                {deferredPrompt ? (t("cancel") || "Cancel") : (t("close") || "Close")}
+                {deferredPrompt
+                  ? t("cancel") || "Cancel"
+                  : t("close") || "Close"}
               </button>
 
               {deferredPrompt && (
