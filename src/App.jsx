@@ -101,6 +101,12 @@ const WorkspaceSchedulesPage = lazy(
 const WorkspacePaymentsPage = lazy(
   () => import("./pages/member/dashboard/WorkspacePaymentsPage"),
 );
+const WorkspaceResourcesPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceResourcesPage"),
+);
+const WorkspaceLogsPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceLogsPage"),
+);
 
 // Frontend Error Pages
 const NotFoundPage = lazy(() => import("./pages/error/NotFoundPage"));
@@ -372,6 +378,14 @@ export default function App() {
                     <Route
                       path="payments"
                       element={<WorkspacePaymentsPage />}
+                    />
+                    <Route
+                      path="resources"
+                      element={<WorkspaceResourcesPage />}
+                    />
+                    <Route
+                      path="logs"
+                      element={<WorkspaceLogsPage />}
                     />
                   </Route>
 

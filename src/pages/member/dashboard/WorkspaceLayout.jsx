@@ -110,6 +110,22 @@ export default function WorkspaceLayout() {
       capability: "SUBSCRIPTION",
     },
     {
+      id: "resources",
+      path: "/member/workspace/resources",
+      label: t("workspaceResources") || "الموارد والقاعات",
+      icon: "briefcase",
+      permissions: ["resource_read", "resource_write"],
+      capability: null,
+    },
+    {
+      id: "logs",
+      path: "/member/workspace/logs",
+      label: t("auditLogs") || "سجل النشاطات",
+      icon: "clipboard-list",
+      permissions: ["settings_read"],
+      capability: null,
+    },
+    {
       id: "payments",
       path: "/member/workspace/payments",
       label: t("paymentsAndFinance") || "المدفوعات والمالية",
