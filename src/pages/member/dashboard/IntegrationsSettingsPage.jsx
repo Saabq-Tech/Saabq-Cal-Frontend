@@ -931,7 +931,7 @@ export default function IntegrationsSettingsPage() {
         style={{
           display: "grid",
           gridTemplateColumns:
-            "repeat(auto-fill, minmax(min(100%, 260px), 1fr))",
+            "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
           gap: 20,
         }}
       >
@@ -966,8 +966,8 @@ export default function IntegrationsSettingsPage() {
                     display: "flex",
                     alignItems: "center",
                     gap: 12,
-                    minWidth: 0,
-                    flex: 1,
+                    minWidth: 160,
+                    flex: "1 1 160px",
                   }}
                 >
                   <div
@@ -993,7 +993,8 @@ export default function IntegrationsSettingsPage() {
                         fontWeight: 800,
                         margin: 0,
                         color: "var(--heading)",
-                        wordBreak: "break-word",
+                        wordBreak: "normal",
+                        overflowWrap: "break-word",
                       }}
                     >
                       {item.title}
@@ -1006,7 +1007,8 @@ export default function IntegrationsSettingsPage() {
                           : "var(--muted)",
                         fontWeight: 600,
                         display: "block",
-                        wordBreak: "break-all",
+                        wordBreak: "normal",
+                        overflowWrap: "break-word",
                         lineHeight: 1.3,
                         marginTop: 2,
                       }}
@@ -2502,28 +2504,19 @@ export default function IntegrationsSettingsPage() {
       {activeModalId === "notifications" &&
         createPortal(
           <div className="modal-backdrop">
-            <div
-              className="modal-card animate-scale-up"
-              style={{
-                maxWidth: 640,
-                width: "95%",
-                maxHeight: "90vh",
-                display: "flex",
-                flexDirection: "column",
-                padding: 0,
-                borderRadius: "var(--radius-lg, 16px)",
-                overflow: "hidden",
-              }}
-            >
-              {/* Header with Driver Radio Toggle matching Image 1 & 2 */}
+            <div className="modal-card modal-lg animate-scale-up">
+              {/* Header with Driver Radio Toggle & Close Button */}
               <div
+                className="modal-header"
                 style={{
-                  padding: "20px 28px 16px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  flexShrink: 0,
+                  flexWrap: "wrap",
+                  gap: 12,
+                  paddingBottom: 16,
                   borderBottom: "1px solid var(--border-light)",
+                  marginBottom: 16,
                 }}
               >
                 <h3
@@ -2540,60 +2533,77 @@ export default function IntegrationsSettingsPage() {
                   ✉️ {t("emailSettingsTitle") || "إعدادات البريد الإلكتروني"}
                 </h3>
 
-                {/* Radio Driver Selector */}
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      fontWeight: 600,
-                    }}
+                  {/* Radio Driver Selector */}
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 16 }}
                   >
-                    <input
-                      type="radio"
-                      name="mail_driver"
-                      value="smtp"
-                      checked={mailDriver === "smtp"}
-                      onChange={() => setMailDriver("smtp")}
-                      style={{ accentColor: "#0d685c", width: 16, height: 16 }}
-                    />
-                    SMTP
-                  </label>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      fontWeight: 600,
-                    }}
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="mail_driver"
+                        value="smtp"
+                        checked={mailDriver === "smtp"}
+                        onChange={() => setMailDriver("smtp")}
+                        style={{
+                          accentColor: "#0d685c",
+                          width: 16,
+                          height: 16,
+                        }}
+                      />
+                      SMTP
+                    </label>
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="mail_driver"
+                        value="resend"
+                        checked={mailDriver === "resend"}
+                        onChange={() => setMailDriver("resend")}
+                        style={{
+                          accentColor: "#0d685c",
+                          width: 16,
+                          height: 16,
+                        }}
+                      />
+                      Resend
+                    </label>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="modal-close-btn"
+                    onClick={() => setActiveModalId(null)}
                   >
-                    <input
-                      type="radio"
-                      name="mail_driver"
-                      value="resend"
-                      checked={mailDriver === "resend"}
-                      onChange={() => setMailDriver("resend")}
-                      style={{ accentColor: "#0d685c", width: 16, height: 16 }}
-                    />
-                    Resend
-                  </label>
+                    <Icon name="x" size={16} />
+                  </button>
                 </div>
               </div>
 
               <div
-                className="modal-scroll-area"
+                className="modal-body"
                 style={{
-                  padding: "20px 28px",
                   display: "flex",
                   flexDirection: "column",
                   gap: 18,
-                  overflowY: "auto",
-                  flex: 1,
                 }}
               >
                 {/* RESEND DRIVER FIELDS */}
@@ -2886,7 +2896,7 @@ export default function IntegrationsSettingsPage() {
                   </div>
                 )}
 
-                {/* COMMON FROM ADDRESS FIELD (Image 1 & Image 2) */}
+                {/* COMMON FROM ADDRESS FIELD */}
                 <div className="form-group">
                   <label
                     className="form-label"
@@ -2933,21 +2943,19 @@ export default function IntegrationsSettingsPage() {
                 </div>
               </div>
 
-              {/* Modal Actions Footer matching design */}
+              {/* Modal Actions Footer */}
               <div
                 className="modal-actions"
                 style={{
-                  padding: "16px 28px 20px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  background: "var(--bg-card)",
-                  marginTop: 0,
-                  flexShrink: 0,
+                  marginTop: 16,
+                  paddingTop: 16,
                   borderTop: "1px solid var(--border-light)",
                 }}
               >
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {emailIntegration && emailIntegration.is_connected && (
                     <>
                       <button
@@ -2970,7 +2978,7 @@ export default function IntegrationsSettingsPage() {
                   )}
                 </div>
 
-                <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"

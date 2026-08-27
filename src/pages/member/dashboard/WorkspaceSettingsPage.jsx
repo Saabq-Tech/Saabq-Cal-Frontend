@@ -264,39 +264,6 @@ export default function WorkspaceSettingsPage() {
             city_id: data.city_id || data.city?.id || "",
             website: data.website || "",
           });
-          const defaultFeatures = [
-            {
-              title: "VIP Pampering Experience",
-              icon: "check",
-              description:
-                "Private suites with personalized complimentary beverages.",
-              image_url:
-                "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&auto=format&fit=crop&q=60",
-            },
-            {
-              title: "Bespoke Facials & Spa",
-              icon: "star",
-              description:
-                "Advanced skincare treatments designed for ultimate radiance.",
-              image_url:
-                "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=60",
-            },
-            {
-              title: "Luxury Hair Styling",
-              icon: "sparkles",
-              description:
-                "World class cuts, coloring and styling by international stylists.",
-              image_url:
-                "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=500&auto=format&fit=crop&q=60",
-            },
-          ];
-
-          const loadedFeatures =
-            Array.isArray(data.feature_highlights) &&
-            data.feature_highlights.length > 0
-              ? data.feature_highlights
-              : defaultFeatures;
-
           setBrandingForm({
             logo_url: data.logo_url || data.logo || "",
             cover_url: data.cover_url || data.cover || "",
@@ -306,7 +273,9 @@ export default function WorkspaceSettingsPage() {
             gallery_urls: Array.isArray(data.gallery_urls)
               ? data.gallery_urls
               : [],
-            feature_highlights: loadedFeatures,
+            feature_highlights: Array.isArray(data.feature_highlights)
+              ? data.feature_highlights
+              : [],
           });
           const timeFmt =
             data.time_format === "24h" || data.time_format === "H:i"
@@ -358,6 +327,9 @@ export default function WorkspaceSettingsPage() {
           });
           setFormFieldsForm({
             field_statuses: data.field_statuses || {},
+            booking_questions: data.booking_questions || [],
+            custom_questions:
+              data.booking_questions || data.custom_questions || [],
             collect_phone: !!data.collect_phone,
             collect_notes: !!data.collect_notes,
             require_phone: !!data.require_phone,
@@ -418,10 +390,25 @@ export default function WorkspaceSettingsPage() {
       const res = await client.put(targetEndpoint, data);
       if (res.data?.data) {
         setSettings(res.data.data);
-        if (res.data.data.gallery_urls) {
-          setBrandingForm((prev) => ({
+        setBrandingForm((prev) => ({
+          ...prev,
+          logo_url:
+            res.data.data.logo_url || res.data.data.logo || prev.logo_url,
+          cover_url:
+            res.data.data.cover_url || res.data.data.cover || prev.cover_url,
+          gallery_urls: Array.isArray(res.data.data.gallery_urls)
+            ? res.data.data.gallery_urls
+            : prev.gallery_urls,
+          feature_highlights: Array.isArray(res.data.data.feature_highlights)
+            ? res.data.data.feature_highlights
+            : prev.feature_highlights,
+        }));
+        if (res.data.data.booking_questions) {
+          setFormFieldsForm((prev) => ({
             ...prev,
-            gallery_urls: res.data.data.gallery_urls,
+            field_statuses: res.data.data.field_statuses || prev.field_statuses,
+            booking_questions: res.data.data.booking_questions,
+            custom_questions: res.data.data.booking_questions,
           }));
         }
         if (updateWorkspaceState) {

@@ -60,7 +60,9 @@ export default function DashboardLayout() {
                   </>
                 )}
               </span>
-              <span className="profile-badge member">{userTypeLabel}</span>
+              {!(userType === "member" && user.is_owner) && (
+                <span className="profile-badge member">{userTypeLabel}</span>
+              )}
               {has2FA && (
                 <span
                   className="profile-badge verified"

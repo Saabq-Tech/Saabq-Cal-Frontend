@@ -74,7 +74,7 @@ export default function CustomerBookAppointmentPage() {
   const [disabledNotice, setDisabledNotice] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const _formatTranslatable = (val) => {
+  const getTranslatableText = (val) => {
     if (val === null || val === undefined) return "";
     if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
@@ -92,6 +92,7 @@ export default function CustomerBookAppointmentPage() {
     }
     return "";
   };
+  const _formatTranslatable = getTranslatableText;
 
   // Calendar State
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
@@ -1339,12 +1340,20 @@ export default function CustomerBookAppointmentPage() {
                                 );
                               }
 
-                              // Convert 24-hour HH:mm to 12-hour AM/PM format
-                              const formatTime12h = (time24) => {
+                              const activeTimeFormat =
+                                selectedService?.time_format ||
+                                workspace?.time_format ||
+                                "12h";
+
+                              const formatSlotTime = (time24) => {
                                 if (!time24) return "";
                                 const [hStr, mStr] = time24.split(":");
                                 let h = parseInt(hStr, 10);
+                                if (isNaN(h)) return time24;
                                 const m = mStr || "00";
+                                if (activeTimeFormat === "24h") {
+                                  return `${String(h).padStart(2, "0")}:${m}`;
+                                }
                                 const period = isRTL
                                   ? h >= 12
                                     ? "م"
@@ -1374,7 +1383,7 @@ export default function CustomerBookAppointmentPage() {
                                         ? slot
                                         : slot.start_time || slot.time;
                                     const formattedTime =
-                                      formatTime12h(rawTime);
+                                      formatSlotTime(rawTime);
                                     const isSelected = selectedSlot === rawTime;
 
                                     return (
@@ -1517,6 +1526,21 @@ export default function CustomerBookAppointmentPage() {
                               placeholderEn: "Enter any notes...",
                               type: "textarea",
                             },
+                            terms_and_conditions: {
+                              ar: "الشروط والأحكام",
+                              en: "Terms & Conditions",
+                              type: "checkbox",
+                            },
+                            privacy_policy: {
+                              ar: "سياسة الخصوصية",
+                              en: "Privacy Policy",
+                              type: "checkbox",
+                            },
+                            data_consent: {
+                              ar: "الموافقة على معالجة البيانات الشخصية",
+                              en: "Consent to Personal Data Processing",
+                              type: "checkbox",
+                            },
                           };
 
                           const effectiveFieldStatuses = {
@@ -1561,6 +1585,61 @@ export default function CustomerBookAppointmentPage() {
                                 formFields[fieldKey] !== null
                                   ? formFields[fieldKey]
                                   : "";
+
+                              if (meta.type === "checkbox") {
+                                return (
+                                  <div
+                                    key={fieldKey}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 10,
+                                      padding: "10px 14px",
+                                      borderRadius: "var(--radius-md)",
+                                      background: "var(--surface-alt)",
+                                      border: "1px solid var(--border-light)",
+                                      marginTop: 4,
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      id={`chk_${fieldKey}`}
+                                      checked={!!val}
+                                      onChange={(e) =>
+                                        setFormFields((p) => ({
+                                          ...p,
+                                          [fieldKey]: e.target.checked,
+                                        }))
+                                      }
+                                      required={isRequired}
+                                      style={{
+                                        width: 18,
+                                        height: 18,
+                                        cursor: "pointer",
+                                        accentColor: "var(--primary)",
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`chk_${fieldKey}`}
+                                      style={{
+                                        margin: 0,
+                                        fontSize: "0.88rem",
+                                        fontWeight: 600,
+                                        color: "var(--text)",
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 4,
+                                      }}
+                                    >
+                                      <span>{labelText}</span>
+                                      {isRequired && (
+                                        <span style={{ color: "red" }}> *</span>
+                                      )}
+                                    </label>
+                                  </div>
+                                );
+                              }
 
                               if (meta.type === "file") {
                                 return (
@@ -1758,6 +1837,14 @@ export default function CustomerBookAppointmentPage() {
                               }}
                             >
                               {activeQuestions.map((q) => {
+                                const questionLabel =
+                                  getTranslatableText(q.label) || "سؤال";
+                                const questionDesc = getTranslatableText(
+                                  q.description,
+                                );
+                                const questionPlaceholder = getTranslatableText(
+                                  q.placeholder,
+                                );
                                 const answerVal =
                                   questionAnswers[q.id]?.answer || "";
                                 return (
@@ -1771,12 +1858,12 @@ export default function CustomerBookAppointmentPage() {
                                         marginBottom: 6,
                                       }}
                                     >
-                                      {q.label}
+                                      {questionLabel}
                                       {q.is_required && (
                                         <span style={{ color: "red" }}> *</span>
                                       )}
                                     </label>
-                                    {q.description && (
+                                    {questionDesc && (
                                       <p
                                         style={{
                                           fontSize: "0.8rem",
@@ -1784,7 +1871,7 @@ export default function CustomerBookAppointmentPage() {
                                           marginBottom: 6,
                                         }}
                                       >
-                                        {q.description}
+                                        {questionDesc}
                                       </p>
                                     )}
 
@@ -1792,12 +1879,12 @@ export default function CustomerBookAppointmentPage() {
                                       <textarea
                                         className="form-control"
                                         rows={3}
-                                        placeholder={q.placeholder || ""}
+                                        placeholder={questionPlaceholder || ""}
                                         value={answerVal}
                                         onChange={(e) =>
                                           handleQuestionAnswerChange(
                                             q.id,
-                                            q.label,
+                                            questionLabel,
                                             e.target.value,
                                           )
                                         }
@@ -1811,7 +1898,7 @@ export default function CustomerBookAppointmentPage() {
                                         onChange={(e) =>
                                           handleQuestionAnswerChange(
                                             q.id,
-                                            q.label,
+                                            questionLabel,
                                             e.target.value,
                                           )
                                         }
@@ -1822,20 +1909,25 @@ export default function CustomerBookAppointmentPage() {
                                             ? "اختر الإجابة"
                                             : "Select Option"}
                                         </option>
-                                        {q.options.map((opt, i) => (
-                                          <option
-                                            key={i}
-                                            value={
-                                              typeof opt === "string"
-                                                ? opt
-                                                : opt.value || opt.label
-                                            }
-                                          >
-                                            {typeof opt === "string"
+                                        {q.options.map((opt, i) => {
+                                          const optVal =
+                                            typeof opt === "string"
                                               ? opt
-                                              : opt.label || opt.value}
-                                          </option>
-                                        ))}
+                                              : opt.value || opt.label;
+                                          const optText =
+                                            typeof opt === "string"
+                                              ? opt
+                                              : getTranslatableText(
+                                                  opt.label || opt.label_ar,
+                                                ) ||
+                                                opt.value ||
+                                                optVal;
+                                          return (
+                                            <option key={i} value={optVal}>
+                                              {optText}
+                                            </option>
+                                          );
+                                        })}
                                       </select>
                                     ) : (
                                       <input
@@ -1845,12 +1937,12 @@ export default function CustomerBookAppointmentPage() {
                                             : "text"
                                         }
                                         className="form-control"
-                                        placeholder={q.placeholder || ""}
+                                        placeholder={questionPlaceholder || ""}
                                         value={answerVal}
                                         onChange={(e) =>
                                           handleQuestionAnswerChange(
                                             q.id,
-                                            q.label,
+                                            questionLabel,
                                             e.target.value,
                                           )
                                         }

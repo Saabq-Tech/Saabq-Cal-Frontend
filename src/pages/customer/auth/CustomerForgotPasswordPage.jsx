@@ -36,6 +36,8 @@ export default function CustomerForgotPasswordPage() {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [errors, setErrors] = useState({});
   const [resending, setResending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     document.title = sent
@@ -170,16 +172,57 @@ export default function CustomerForgotPasswordPage() {
               <label className="form-label" htmlFor="reset-password">
                 {t("newPassword")}
               </label>
-              <input
-                id="reset-password"
-                type="password"
-                className={`form-input${errors.password ? " is-invalid" : ""}`}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-              />
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <input
+                  id="reset-password"
+                  type={showPassword ? "text" : "password"}
+                  className={`form-input${errors.password ? " is-invalid" : ""}`}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  style={{ paddingInlineEnd: 44 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={
+                    showPassword
+                      ? t("hidePassword") || "إخفاء كلمة المرور"
+                      : t("showPassword") || "إظهار كلمة المرور"
+                  }
+                  title={
+                    showPassword
+                      ? t("hidePassword") || "إخفاء كلمة المرور"
+                      : t("showPassword") || "إظهار كلمة المرور"
+                  }
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    insetInlineEnd: 10,
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-secondary, #64748b)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 6,
+                    borderRadius: 6,
+                    transition: "color 0.2s",
+                  }}
+                >
+                  <Icon name={showPassword ? "eye-off" : "eye"} size={18} />
+                </button>
+              </div>
               {errors.password && (
                 <span className="form-error">{errors.password[0]}</span>
               )}
@@ -189,16 +232,60 @@ export default function CustomerForgotPasswordPage() {
               <label className="form-label" htmlFor="reset-password-confirm">
                 {t("confirmNewPassword")}
               </label>
-              <input
-                id="reset-password-confirm"
-                type="password"
-                className={`form-input${errors.password_confirmation ? " is-invalid" : ""}`}
-                placeholder="••••••••"
-                value={passwordConfirmation}
-                onChange={(e) => setPasswordConfirmation(e.target.value)}
-                required
-                minLength={8}
-              />
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <input
+                  id="reset-password-confirm"
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={`form-input${errors.password_confirmation ? " is-invalid" : ""}`}
+                  placeholder="••••••••"
+                  value={passwordConfirmation}
+                  onChange={(e) => setPasswordConfirmation(e.target.value)}
+                  required
+                  minLength={8}
+                  style={{ paddingInlineEnd: 44 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={
+                    showConfirmPassword
+                      ? t("hidePassword") || "إخفاء كلمة المرور"
+                      : t("showPassword") || "إظهار كلمة المرور"
+                  }
+                  title={
+                    showConfirmPassword
+                      ? t("hidePassword") || "إخفاء كلمة المرور"
+                      : t("showPassword") || "إظهار كلمة المرور"
+                  }
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    insetInlineEnd: 10,
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-secondary, #64748b)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 6,
+                    borderRadius: 6,
+                    transition: "color 0.2s",
+                  }}
+                >
+                  <Icon
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={18}
+                  />
+                </button>
+              </div>
               {errors.password_confirmation && (
                 <span className="form-error">
                   {errors.password_confirmation[0]}

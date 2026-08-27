@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 
@@ -40,6 +40,45 @@ export default function BookingFormFieldsTab({
     };
   });
 
+  const parseQuestions = (rawQuestions) => {
+    if (!Array.isArray(rawQuestions)) return [];
+    return rawQuestions.map((q, idx) => ({
+      id: q.id || `temp_${idx}_${Date.now()}`,
+      type: q.field_type || q.type || "text",
+      label_ar:
+        typeof q.label === "object"
+          ? q.label?.ar || ""
+          : q.label_ar || q.label || "",
+      label_en:
+        typeof q.label === "object" ? q.label?.en || "" : q.label_en || "",
+      description_ar:
+        typeof q.description === "object"
+          ? q.description?.ar || ""
+          : q.description_ar || q.description || "",
+      description_en:
+        typeof q.description === "object"
+          ? q.description?.en || ""
+          : q.description_en || "",
+      status:
+        q.status ||
+        (q.is_required
+          ? "required"
+          : q.is_active === false
+            ? "disabled"
+            : "optional"),
+      is_expanded: false,
+      options: Array.isArray(q.options) ? q.options : [],
+    }));
+  };
+
+  const [customQuestions, setCustomQuestions] = useState(() =>
+    parseQuestions(
+      formFieldsForm.custom_questions || formFieldsForm.booking_questions,
+    ),
+  );
+
+  const lastQuestionsJsonRef = useRef(null);
+
   useEffect(() => {
     if (
       formFieldsForm.field_statuses &&
@@ -52,10 +91,19 @@ export default function BookingFormFieldsTab({
         full_name: "required",
       }));
     }
-  }, [formFieldsForm]);
 
-  // Custom questions list state — starts empty until user clicks "+ إضافة سؤال"
-  const [customQuestions, setCustomQuestions] = useState([]);
+    const questions =
+      formFieldsForm.custom_questions || formFieldsForm.booking_questions;
+    if (Array.isArray(questions)) {
+      const currentJson = JSON.stringify(questions);
+      if (lastQuestionsJsonRef.current === null) {
+        lastQuestionsJsonRef.current = currentJson;
+      } else if (currentJson !== lastQuestionsJsonRef.current) {
+        lastQuestionsJsonRef.current = currentJson;
+        setCustomQuestions(parseQuestions(questions));
+      }
+    }
+  }, [formFieldsForm]);
 
   const updateFieldStatus = (fieldKey, status) => {
     setFieldStatuses((prev) => ({ ...prev, [fieldKey]: status }));

@@ -699,7 +699,8 @@ export default function BookingDetailsPage({
                       color: "var(--primary)",
                       fontWeight: 700,
                       textDecoration: "none",
-                      wordBreak: "break-all",
+                      wordBreak: "normal",
+                      overflowWrap: "break-word",
                     }}
                   >
                     {customerEmail}
@@ -1205,7 +1206,8 @@ export default function BookingDetailsPage({
                       fontSize: "0.92rem",
                       color: "var(--heading)",
                       fontWeight: 600,
-                      wordBreak: "break-all",
+                      wordBreak: "normal",
+                      overflowWrap: "break-word",
                     }}
                   >
                     {displayLoc}

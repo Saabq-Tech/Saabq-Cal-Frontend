@@ -1875,269 +1875,131 @@ export default function WorkspaceProfilePage() {
         </section>
 
         {/* Highlights / Value Features Section */}
-        <section
-          style={{
-            padding: "60px 0",
-            background: "var(--surface)",
-            borderTop: "1px solid var(--border)",
-            borderBottom: "1px solid var(--border)",
-            marginBottom: 60,
-          }}
-        >
-          <div className="container">
-            <div
+        {Array.isArray(workspace.feature_highlights) &&
+          workspace.feature_highlights.length > 0 && (
+            <section
               style={{
-                textAlign: "center",
-                maxWidth: 600,
-                margin: "0 auto 40px",
+                padding: "60px 0",
+                background: "var(--surface)",
+                borderTop: "1px solid var(--border)",
+                borderBottom: "1px solid var(--border)",
+                marginBottom: 60,
               }}
             >
-              <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  marginBottom: 8,
-                }}
-              >
-                {isRTL ? "لماذا تختار خدماتنا؟" : "Why Choose Our Workspace?"}
-              </h2>
-              <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-                {isRTL
-                  ? "تجربة حجز مواعيد سريعة، موثوقة، ومصممة لتلبية تطلعاتك."
-                  : "A smooth, reliable, and modern appointment booking experience."}
-              </p>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: 24,
-              }}
-            >
-              {Array.isArray(workspace.feature_highlights) &&
-              workspace.feature_highlights.length > 0 ? (
-                workspace.feature_highlights.map((feat, idx) => (
-                  <div
-                    key={idx}
-                    className="card card-hover animate-tab-card"
+              <div className="container">
+                <div
+                  style={{
+                    textAlign: "center",
+                    maxWidth: 600,
+                    margin: "0 auto 40px",
+                  }}
+                >
+                  <h2
                     style={{
-                      padding: 24,
-                      borderRadius: 20,
-                      textAlign: "center",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      position: "relative",
-                      overflow: "hidden",
-                      borderTop: `3px solid ${primaryColor}`,
+                      fontSize: "1.75rem",
+                      fontWeight: 800,
+                      marginBottom: 8,
                     }}
                   >
-                    {feat.image_url && (
+                    {isRTL
+                      ? "لماذا تختار خدماتنا؟"
+                      : "Why Choose Our Workspace?"}
+                  </h2>
+                  <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+                    {isRTL
+                      ? "تجربة حجز مواعيد سريعة، موثوقة، ومصممة لتلبية تطلعاتك."
+                      : "A smooth, reliable, and modern appointment booking experience."}
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                    gap: 24,
+                  }}
+                >
+                  {workspace.feature_highlights.map((feat, idx) => (
+                    <div
+                      key={idx}
+                      className="card card-hover animate-tab-card"
+                      style={{
+                        padding: 24,
+                        borderRadius: 20,
+                        textAlign: "center",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        position: "relative",
+                        overflow: "hidden",
+                        borderTop: `3px solid ${primaryColor}`,
+                      }}
+                    >
+                      {feat.image_url && (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: 140,
+                            borderRadius: 14,
+                            overflow: "hidden",
+                            marginBottom: 16,
+                          }}
+                        >
+                          <LazyImage
+                            src={feat.image_url}
+                            alt={feat.title || "Feature highlight"}
+                            width="100%"
+                            height="100%"
+                            objectFit="cover"
+                          />
+                        </div>
+                      )}
+
                       <div
                         style={{
-                          width: "100%",
-                          height: 140,
-                          borderRadius: 14,
-                          overflow: "hidden",
-                          marginBottom: 16,
+                          width: 54,
+                          height: 54,
+                          borderRadius: 16,
+                          background: `${primaryColor}15`,
+                          color: primaryColor,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginBottom: 14,
                         }}
                       >
-                        <LazyImage
-                          src={feat.image_url}
-                          alt={feat.title || "Feature highlight"}
-                          width="100%"
-                          height="100%"
-                          objectFit="cover"
-                        />
+                        <Icon name={feat.icon || "sparkles"} size={26} />
                       </div>
-                    )}
 
-                    <div
-                      style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 16,
-                        background: `${primaryColor}15`,
-                        color: primaryColor,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 14,
-                      }}
-                    >
-                      <Icon name={feat.icon || "sparkles"} size={26} />
-                    </div>
-
-                    <h3
-                      style={{
-                        fontSize: "1.15rem",
-                        fontWeight: 800,
-                        marginBottom: 8,
-                        color: "var(--text)",
-                      }}
-                    >
-                      {feat.title}
-                    </h3>
-
-                    {feat.description && (
-                      <p
+                      <h3
                         style={{
-                          fontSize: "0.9rem",
-                          color: "var(--text-secondary)",
-                          margin: 0,
-                          lineHeight: 1.6,
+                          fontSize: "1.15rem",
+                          fontWeight: 800,
+                          marginBottom: 8,
+                          color: "var(--text)",
                         }}
                       >
-                        {feat.description}
-                      </p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div
-                    className="card"
-                    style={{
-                      padding: 28,
-                      borderRadius: 20,
-                      textAlign: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 16,
-                        background: `${primaryColor}15`,
-                        color: primaryColor,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Icon name="check" size={28} />
-                    </div>
-                    <h3
-                      style={{
-                        fontSize: "1.15rem",
-                        fontWeight: 800,
-                        marginBottom: 8,
-                      }}
-                    >
-                      {isRTL ? "حجز فوري ومؤكد" : "Instant Booking"}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.9rem",
-                        color: "var(--text-secondary)",
-                        margin: 0,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {isRTL
-                        ? "تأكيد المواعيد بضغطة زر دون انتظار طويل."
-                        : "Instant slot confirmation with immediate notification."}
-                    </p>
-                  </div>
+                        {feat.title}
+                      </h3>
 
-                  <div
-                    className="card"
-                    style={{
-                      padding: 28,
-                      borderRadius: 20,
-                      textAlign: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 16,
-                        background: `${secondaryColor}15`,
-                        color: secondaryColor,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Icon name="users" size={28} />
+                      {feat.description && (
+                        <p
+                          style={{
+                            fontSize: "0.9rem",
+                            color: "var(--text-secondary)",
+                            margin: 0,
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {feat.description}
+                        </p>
+                      )}
                     </div>
-                    <h3
-                      style={{
-                        fontSize: "1.15rem",
-                        fontWeight: 800,
-                        marginBottom: 8,
-                      }}
-                    >
-                      {isRTL ? "خبراء ومتخصصون" : "Top Professionals"}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.9rem",
-                        color: "var(--text-secondary)",
-                        margin: 0,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {isRTL
-                        ? "فريق عمل مؤهل لتقديم أفضل الخدمات والنتائج."
-                        : "Highly trained team dedicated to delivering excellence."}
-                    </p>
-                  </div>
-
-                  <div
-                    className="card"
-                    style={{
-                      padding: 28,
-                      borderRadius: 20,
-                      textAlign: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 16,
-                        background: "rgba(16, 185, 129, 0.15)",
-                        color: "#10b981",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Icon name="clock" size={28} />
-                    </div>
-                    <h3
-                      style={{
-                        fontSize: "1.15rem",
-                        fontWeight: 800,
-                        marginBottom: 8,
-                      }}
-                    >
-                      {isRTL ? "مرونة في المواعيد" : "Flexible Hours"}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: "0.9rem",
-                        color: "var(--text-secondary)",
-                        margin: 0,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {isRTL
-                        ? "جدولة تناسب وقتك وإعادة جدولة بأي وقت."
-                        : "Convenient time slots tailored to suit your busy schedule."}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
       </div>
 
       {/* Bottom Conversion CTA Banner Card */}

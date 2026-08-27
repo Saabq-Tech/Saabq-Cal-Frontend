@@ -347,25 +347,43 @@ export default function CustomerAppointmentsTab() {
     });
   };
 
-  const formatTime = (isoString) => {
+  const formatTime = (isoString, timeFormat, timeZone) => {
     if (!isoString) return "—";
     const date = new Date(isoString);
-    return date.toLocaleTimeString(lang === "ar" ? "ar-SA" : "en-US", {
+    const options = {
       hour: "2-digit",
       minute: "2-digit",
-    });
+      hour12: timeFormat !== "24h",
+    };
+    if (timeZone) {
+      try {
+        options.timeZone = timeZone;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    return date.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-US", options);
   };
 
-  const formatFullTimestamp = (isoString) => {
+  const formatFullTimestamp = (isoString, timeFormat, timeZone) => {
     if (!isoString) return "—";
     const date = new Date(isoString);
-    return date.toLocaleString(lang === "ar" ? "ar-SA" : "en-US", {
+    const options = {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
+      hour12: timeFormat !== "24h",
+    };
+    if (timeZone) {
+      try {
+        options.timeZone = timeZone;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    return date.toLocaleString(lang === "ar" ? "ar-EG" : "en-US", options);
   };
 
   const getPaymentReceiptUrl = (b) => {
@@ -860,8 +878,17 @@ export default function CustomerAppointmentsTab() {
                         style={{ color: "var(--primary)" }}
                       />
                       <span>
-                        {formatTime(appt.starts_at)} -{" "}
-                        {formatTime(appt.ends_at)}
+                        {formatTime(
+                          appt.starts_at,
+                          appt.time_format,
+                          appt.timezone,
+                        )}{" "}
+                        -{" "}
+                        {formatTime(
+                          appt.ends_at,
+                          appt.time_format,
+                          appt.timezone,
+                        )}
                       </span>
                     </div>
 
@@ -1243,7 +1270,8 @@ export default function CustomerAppointmentsTab() {
                           style={{
                             fontSize: "0.85rem",
                             color: "var(--heading)",
-                            wordBreak: "break-all",
+                            wordBreak: "normal",
+                            overflowWrap: "break-word",
                           }}
                         >
                           {getMeetingUrl(selectedAppointment)}
@@ -1557,8 +1585,17 @@ export default function CustomerAppointmentsTab() {
                           display: "block",
                         }}
                       >
-                        {formatTime(selectedAppointment.starts_at)} -{" "}
-                        {formatTime(selectedAppointment.ends_at)}
+                        {formatTime(
+                          selectedAppointment.starts_at,
+                          selectedAppointment.time_format,
+                          selectedAppointment.timezone,
+                        )}{" "}
+                        -{" "}
+                        {formatTime(
+                          selectedAppointment.ends_at,
+                          selectedAppointment.time_format,
+                          selectedAppointment.timezone,
+                        )}
                       </span>
                       {selectedAppointment.timezone && (
                         <span

@@ -55,6 +55,7 @@ export default function SecuritySettings() {
   // Delete Account state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
   const handleDeleteAccountSubmit = async (e) => {
@@ -654,14 +655,60 @@ export default function SecuritySettings() {
                     <label className="form-label">
                       {t("deleteAccountPasswordPrompt")}
                     </label>
-                    <input
-                      type="password"
-                      className="form-input"
-                      placeholder={t("deleteAccountPasswordPlaceholder")}
-                      value={deletePassword}
-                      onChange={(e) => setDeletePassword(e.target.value)}
-                      required
-                    />
+                    <div
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        type={showDeletePassword ? "text" : "password"}
+                        className="form-input"
+                        placeholder={t("deleteAccountPasswordPlaceholder")}
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                        required
+                        style={{ paddingInlineEnd: 44 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowDeletePassword(!showDeletePassword)
+                        }
+                        aria-label={
+                          showDeletePassword
+                            ? t("hidePassword") || "إخفاء كلمة المرور"
+                            : t("showPassword") || "إظهار كلمة المرور"
+                        }
+                        title={
+                          showDeletePassword
+                            ? t("hidePassword") || "إخفاء كلمة المرور"
+                            : t("showPassword") || "إظهار كلمة المرور"
+                        }
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          insetInlineEnd: 10,
+                          background: "none",
+                          border: "none",
+                          color: "var(--text-secondary, #64748b)",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 6,
+                          borderRadius: 6,
+                          transition: "color 0.2s",
+                        }}
+                      >
+                        <Icon
+                          name={showDeletePassword ? "eye-off" : "eye"}
+                          size={18}
+                        />
+                      </button>
+                    </div>
                   </div>
                 )}
                 <div className="modal-actions">
