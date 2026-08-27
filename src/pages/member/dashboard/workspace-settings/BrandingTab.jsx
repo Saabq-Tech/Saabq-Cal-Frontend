@@ -10,7 +10,7 @@ export default function BrandingTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const galleryInputRef = useRef(null);
 
   const handleSubmit = (e) => {

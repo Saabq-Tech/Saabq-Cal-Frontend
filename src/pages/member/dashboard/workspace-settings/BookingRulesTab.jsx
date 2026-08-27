@@ -8,7 +8,7 @@ export default function BookingRulesTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();

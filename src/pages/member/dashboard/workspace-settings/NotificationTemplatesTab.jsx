@@ -15,7 +15,7 @@ export default function NotificationTemplatesTab({
   canEdit,
   getInterpolatedText: _getInterpolatedText,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
