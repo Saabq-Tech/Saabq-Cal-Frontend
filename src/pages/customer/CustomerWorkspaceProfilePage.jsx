@@ -24,10 +24,8 @@ export default function WorkspaceProfilePage() {
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
-  // Search, FAQ & Scroll Navigation states
+  // Search & Lightbox states
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedFaq, setExpandedFaq] = useState(null);
-  const [activeSection, setActiveSection] = useState("services");
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const getTranslatableText = useCallback(
@@ -115,37 +113,6 @@ export default function WorkspaceProfilePage() {
     }
   }, [workspace]);
 
-  // Update active section on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = [
-        "services",
-        "specialists",
-        "portfolio",
-        "testimonials",
-        "about",
-        "location",
-        "faq",
-      ];
-      const scrollPosition = window.scrollY + 200;
-
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(sectionId);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // Smooth scroll helper
   const scrollToSection = useCallback((sectionId) => {
     const el = document.getElementById(sectionId);
@@ -153,7 +120,6 @@ export default function WorkspaceProfilePage() {
       const yOffset = -130;
       const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
-      setActiveSection(sectionId);
     }
   }, []);
 
@@ -205,20 +171,6 @@ export default function WorkspaceProfilePage() {
       )
       .filter((item) => item && item.url);
   }, [workspace]);
-
-  // Real, attributed client testimonials only — never fabricated
-  const testimonials = useMemo(() => {
-    const raw = Array.isArray(workspace?.testimonials)
-      ? workspace.testimonials
-      : [];
-    return raw.filter((item) => item && item.client_name && item.quote);
-  }, [workspace]);
-
-  const averageRating = useMemo(() => {
-    const rated = testimonials.filter((t) => t.rating > 0);
-    if (rated.length === 0) return null;
-    return rated.reduce((acc, t) => acc + t.rating, 0) / rated.length;
-  }, [testimonials]);
 
   if (loading) {
     return (
@@ -325,21 +277,6 @@ export default function WorkspaceProfilePage() {
     whatsapp: { label: "WhatsApp", icon: <Icon name="whatsapp" size={14} /> },
   };
 
-  // In-page navigation pills — only include sections that actually have content
-  const navSections = [
-    { id: "services", label: isRTL ? "الخدمات" : "Services" },
-    ...(specialistRoles.length > 0
-      ? [{ id: "specialists", label: isRTL ? "الفريق" : "Team" }]
-      : []),
-    ...(galleryItems.length > 0
-      ? [{ id: "portfolio", label: isRTL ? "معرض الأعمال" : "Portfolio" }]
-      : []),
-    ...(testimonials.length > 0
-      ? [{ id: "testimonials", label: isRTL ? "آراء العملاء" : "Reviews" }]
-      : []),
-    { id: "faq", label: isRTL ? "الأسئلة الشائعة" : "FAQ" },
-  ];
-
   // Structured Data (JSON-LD)
   const jsonLd = {
     "@context": "https://schema.org",
@@ -363,68 +300,7 @@ export default function WorkspaceProfilePage() {
         ...(workspace.city?.name && { addressLocality: workspace.city.name }),
       },
     }),
-    ...(testimonials.length > 0 &&
-      averageRating && {
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: averageRating.toFixed(1),
-          reviewCount: testimonials.length,
-        },
-        review: testimonials.slice(0, 5).map((item) => ({
-          "@type": "Review",
-          author: { "@type": "Person", name: item.client_name },
-          reviewBody: item.quote,
-          ...(item.rating && {
-            reviewRating: {
-              "@type": "Rating",
-              ratingValue: item.rating,
-              bestRating: 5,
-            },
-          }),
-        })),
-      }),
   };
-
-  const faqItems = [
-    {
-      q: isRTL ? "كيف يتم تأكيد حجز الموعد؟" : "How is my booking confirmed?",
-      a: workspace.auto_confirm_appointments
-        ? isRTL
-          ? "يتم تأكيد الحجز فورياً وتلقائياً فور إرسال الطلب، وسوف تصلك تفاصيل الموعد مباشرة."
-          : "Bookings are automatically and instantly confirmed upon submission, and full details will be sent to you immediately."
-        : isRTL
-          ? "يتم مراجعة الطلب من فريق مساحة العمل وتأكيده خلال وقت قصير مع إرسال إشعار التأكيد."
-          : "Your request will be reviewed by the workspace team and confirmed shortly with a confirmation notification.",
-    },
-    {
-      q: isRTL
-        ? "ما هو أقصى حد متاح للحجز المسبق؟"
-        : "How far in advance can I book?",
-      a: workspace.maximum_booking_days
-        ? isRTL
-          ? `يمكنك حجز المواعيد مقدماً حتى ${workspace.maximum_booking_days} يوماً من اليوم.`
-          : `You can book appointments up to ${workspace.maximum_booking_days} days in advance.`
-        : isRTL
-          ? "الحجز متاح للأيام القادمة حسب جدول التوفر المعروض."
-          : "Booking is available according to the published schedule.",
-    },
-    {
-      q: isRTL
-        ? "هل يمكنني تعديل أو إلغاء موعدي لاحقاً؟"
-        : "Can I reschedule or cancel my appointment?",
-      a: isRTL
-        ? "نعم، يمكنك إدارة مواعيدك وتعديلها أو إلغائها عبر لوحة تحكم حسابك أو من خلال رابط الموعد المرسل إليك."
-        : "Yes, you can manage, reschedule, or cancel your appointment via your customer dashboard or the unique link provided.",
-    },
-    {
-      q: isRTL
-        ? "هل يتطلب الحجز إنشاء حساب؟"
-        : "Do I need an account to complete booking?",
-      a: isRTL
-        ? "يمكنك الحجز بسهولة كزائر أو تسجيل الدخول لمتابعة كافة حجوزاتك وإدارتها من مكان واحد."
-        : "You can easily complete booking as a guest or sign in to track and manage all your appointments in one place.",
-    },
-  ];
 
   return (
     <main
@@ -451,13 +327,17 @@ export default function WorkspaceProfilePage() {
         className="workspace-landing-hero"
         style={{
           position: "relative",
-          minHeight: 420,
+          minHeight: 500,
+          paddingTop: 40,
+          paddingBottom: 40,
+          marginBottom: 64,
           overflow: "hidden",
           background: workspace.cover_url
             ? `url(${workspace.cover_url}) center/cover no-repeat`
             : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "center",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)",
         }}
       >
         {/* Decorative brand-color blobs for a bolder, more vibrant first impression */}
@@ -493,7 +373,7 @@ export default function WorkspaceProfilePage() {
             position: "absolute",
             inset: 0,
             background:
-              "linear-gradient(to top, rgba(10, 12, 20, 0.92) 0%, rgba(10, 12, 20, 0.45) 55%, rgba(10, 12, 20, 0.15) 100%)",
+              "linear-gradient(180deg, rgba(10, 14, 26, 0.7) 0%, rgba(10, 14, 26, 0.92) 100%)",
             pointerEvents: "none",
           }}
         />
@@ -502,129 +382,117 @@ export default function WorkspaceProfilePage() {
           className="container animate-fade-in-up"
           style={{
             position: "relative",
-            zIndex: 2,
-            paddingBottom: 32,
-            paddingTop: 32,
+            zIndex: 3,
             width: "100%",
+            paddingTop: 48,
+            paddingBottom: 48,
           }}
         >
+          {/* Glassmorphic Landing Hero Box */}
           <div
             style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 16,
+              padding: "36px 38px",
+              borderRadius: 28,
+              background: "rgba(17, 24, 39, 0.8)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              boxShadow: `0 24px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px ${primaryColor}35`,
+              borderTop: `4px solid ${primaryColor}`,
             }}
           >
-            {/* Status Pills */}
+            {/* Hero Top Bar: Status Badges & Quick Action */}
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                gap: 10,
                 flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                paddingBottom: 22,
+                marginBottom: 26,
+                borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
               }}
             >
-              {workspace.booking_enabled ? (
-                <span
-                  style={{
-                    background: "rgba(16, 185, 129, 0.25)",
-                    border: "1px solid rgba(16, 185, 129, 0.5)",
-                    color: "#34d399",
-                    backdropFilter: "blur(8px)",
-                    fontSize: "0.84rem",
-                    fontWeight: 700,
-                    padding: "6px 16px",
-                    borderRadius: 999,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                {workspace.booking_enabled ? (
                   <span
                     style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: "#34d399",
-                      boxShadow: "0 0 10px #34d399",
+                      background: "rgba(16, 185, 129, 0.2)",
+                      border: "1px solid rgba(16, 185, 129, 0.4)",
+                      color: "#34d399",
+                      fontSize: "0.84rem",
+                      fontWeight: 700,
+                      padding: "6px 16px",
+                      borderRadius: 999,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
                     }}
-                  />
-                  {isRTL ? "الحجز مفعل أونلاين" : "Online Booking Active"}
-                </span>
-              ) : (
-                <span
-                  style={{
-                    background: "rgba(245, 158, 11, 0.25)",
-                    border: "1px solid rgba(245, 158, 11, 0.5)",
-                    color: "#fbbf24",
-                    backdropFilter: "blur(8px)",
-                    fontSize: "0.84rem",
-                    fontWeight: 700,
-                    padding: "6px 16px",
-                    borderRadius: 999,
-                  }}
-                >
-                  {isRTL ? "الحجز موقوف مؤقتاً" : "Booking Paused"}
-                </span>
-              )}
+                  >
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: "#34d399",
+                        boxShadow: "0 0 10px #34d399",
+                      }}
+                    />
+                    {isRTL ? "الحجز مفعل أونلاين" : "Online Booking Active"}
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      background: "rgba(245, 158, 11, 0.2)",
+                      border: "1px solid rgba(245, 158, 11, 0.4)",
+                      color: "#fbbf24",
+                      fontSize: "0.84rem",
+                      fontWeight: 700,
+                      padding: "6px 16px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    {isRTL ? "الحجز موقوف مؤقتاً" : "Booking Paused"}
+                  </span>
+                )}
 
-              {workspace.workspace_type?.name && (
-                <span
-                  style={{
-                    background: "rgba(255, 255, 255, 0.18)",
-                    border: "1px solid rgba(255, 255, 255, 0.3)",
-                    color: "#fff",
-                    backdropFilter: "blur(8px)",
-                    fontSize: "0.84rem",
-                    fontWeight: 600,
-                    padding: "6px 16px",
-                    borderRadius: 999,
-                  }}
-                >
-                  {workspace.workspace_type.name}
-                </span>
-              )}
+                {workspace.workspace_type?.name && (
+                  <span
+                    style={{
+                      background: "rgba(255, 255, 255, 0.12)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      color: "#e2e8f0",
+                      fontSize: "0.84rem",
+                      fontWeight: 600,
+                      padding: "6px 16px",
+                      borderRadius: 999,
+                    }}
+                  >
+                    {workspace.workspace_type.name}
+                  </span>
+                )}
+              </div>
 
-              {averageRating && (
-                <span
-                  style={{
-                    background: "rgba(245, 158, 11, 0.22)",
-                    border: "1px solid rgba(245, 158, 11, 0.45)",
-                    color: "#fcd34d",
-                    backdropFilter: "blur(8px)",
-                    fontSize: "0.84rem",
-                    fontWeight: 700,
-                    padding: "6px 16px",
-                    borderRadius: 999,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                >
-                  <Icon name="star" size={14} />
-                  {averageRating.toFixed(1)} · {testimonials.length}{" "}
-                  {isRTL ? "تقييم" : "reviews"}
-                </span>
-              )}
-            </div>
-
-            {/* Quick Actions */}
-            <div style={{ display: "flex", gap: 8 }}>
               <button
                 type="button"
                 onClick={handleShare}
                 style={{
-                  background: "rgba(255, 255, 255, 0.2)",
-                  border: "1px solid rgba(255, 255, 255, 0.35)",
-                  color: "#fff",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "#f8fafc",
                   padding: "8px 18px",
                   borderRadius: 999,
                   cursor: "pointer",
                   fontSize: "0.88rem",
                   fontWeight: 700,
-                  backdropFilter: "blur(8px)",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
@@ -638,426 +506,482 @@ export default function WorkspaceProfilePage() {
                 <span>{isRTL ? "مشاركة" : "Share"}</span>
               </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Main Workspace Header Profile Card */}
-      <div
-        className="container"
-        style={{
-          marginTop: -60,
-          position: "relative",
-          zIndex: 3,
-          marginBottom: 0,
-        }}
-      >
-        <div
-          className="card animate-fade-in-up"
-          style={{
-            padding: 32,
-            borderRadius: 24,
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-            border: "1px solid var(--border)",
-            background: "var(--surface)",
-            borderTop: `4px solid ${primaryColor}`,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 28,
-              alignItems: "flex-start",
-            }}
-          >
-            {/* Logo */}
+            {/* Main Content & Branding Body */}
             <div
               style={{
-                width: 120,
-                height: 120,
-                borderRadius: 24,
-                background: "var(--surface)",
-                border: "4px solid var(--surface)",
-                boxShadow: `0 12px 32px ${primaryColor}25`,
-                overflow: "hidden",
                 display: "flex",
+                flexWrap: "wrap",
+                gap: 28,
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "3rem",
-                fontWeight: 800,
-                color: primaryColor,
-                flexShrink: 0,
-                marginTop: -30,
+                justifyContent: "space-between",
               }}
             >
-              {workspace.logo_url ? (
-                <LazyImage
-                  src={workspace.logo_url}
-                  alt={`${workspace.name} logo`}
-                  width={112}
-                  height={112}
-                  objectFit="cover"
-                />
-              ) : (
-                initial
+              {/* Logo Thumbnail Badge */}
+              <div
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 24,
+                  background: "rgba(30, 41, 59, 0.8)",
+                  border: `3px solid ${primaryColor}60`,
+                  boxShadow: `0 12px 32px ${primaryColor}30`,
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "3rem",
+                  fontWeight: 800,
+                  color: primaryColor,
+                  flexShrink: 0,
+                }}
+              >
+                {workspace.logo_url ? (
+                  <LazyImage
+                    src={workspace.logo_url}
+                    alt={`${workspace.name} logo`}
+                    width={114}
+                    height={114}
+                    objectFit="cover"
+                  />
+                ) : (
+                  initial
+                )}
+              </div>
+
+              {/* Title, Bio & Contact Chips */}
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 8,
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontSize: "2.4rem",
+                      fontWeight: 900,
+                      color: "#ffffff",
+                      margin: 0,
+                      lineHeight: 1.15,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    <bdi style={{ unicodeBidi: "isolate" }}>
+                      {workspace.name}
+                    </bdi>
+                  </h1>
+
+                  {workspace.slug && (
+                    <span
+                      style={{
+                        direction: "ltr",
+                        color: "#38bdf8",
+                        fontWeight: 700,
+                        fontSize: "0.88rem",
+                        background: "rgba(56, 189, 248, 0.15)",
+                        border: "1px solid rgba(56, 189, 248, 0.3)",
+                        padding: "4px 14px",
+                        borderRadius: 999,
+                      }}
+                    >
+                      @{workspace.slug}
+                    </span>
+                  )}
+                </div>
+
+                {getTranslatableText(workspace.description) ? (
+                  <>
+                    <style>{`
+                      .workspace-hero-html-description,
+                      .workspace-hero-html-description * {
+                        color: #e2e8f0 !important;
+                      }
+                      .workspace-hero-html-description h1,
+                      .workspace-hero-html-description h2,
+                      .workspace-hero-html-description h3,
+                      .workspace-hero-html-description h4,
+                      .workspace-hero-html-description h5,
+                      .workspace-hero-html-description h6,
+                      .workspace-hero-html-description strong,
+                      .workspace-hero-html-description b {
+                        color: #ffffff !important;
+                        font-weight: 800 !important;
+                      }
+                      .workspace-hero-html-description ul,
+                      .workspace-hero-html-description ol {
+                        padding-inline-start: 22px;
+                        margin: 10px 0;
+                      }
+                    `}</style>
+                    <div
+                      className="workspace-hero-html-description"
+                      style={{
+                        color: "#e2e8f0",
+                        fontSize: "1.02rem",
+                        lineHeight: 1.7,
+                        marginTop: 10,
+                        marginBottom: 20,
+                        maxWidth: 750,
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: getTranslatableText(workspace.description),
+                      }}
+                    />
+                  </>
+                ) : (
+                  <p
+                    style={{
+                      color: "#cbd5e1",
+                      fontSize: "1.08rem",
+                      lineHeight: 1.65,
+                      marginTop: 8,
+                      marginBottom: 20,
+                      maxWidth: 720,
+                    }}
+                  >
+                    {getTranslatableText(workspace.booking_short_intro) ||
+                      (isRTL
+                        ? "مساحة عمل احترافية لحجز الخدمات والمواعيد الإلكترونية بكل سهولة."
+                        : "A professional business workspace offering seamless appointment booking services.")}
+                  </p>
+                )}
+
+                {/* Contact Pills & Social Media Links embedded directly in Hero */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 10,
+                    alignItems: "center",
+                  }}
+                >
+                  {workspace.phone && (
+                    <a
+                      href={`tel:${workspace.phone}`}
+                      style={{
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        color: "#e2e8f0",
+                        padding: "7px 16px",
+                        borderRadius: 999,
+                        fontSize: "0.88rem",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        textDecoration: "none",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <Icon name="phone" size={15} />
+                      <span>{workspace.phone}</span>
+                    </a>
+                  )}
+                  {workspace.email && (
+                    <a
+                      href={`mailto:${workspace.email}`}
+                      style={{
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.15)",
+                        color: "#e2e8f0",
+                        padding: "7px 16px",
+                        borderRadius: 999,
+                        fontSize: "0.88rem",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        textDecoration: "none",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <Icon name="mail" size={15} />
+                      <span>{workspace.email}</span>
+                    </a>
+                  )}
+                  {workspace.website && (
+                    <a
+                      href={workspace.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        background: `${primaryColor}20`,
+                        border: `1px solid ${primaryColor}40`,
+                        color: "#38bdf8",
+                        padding: "7px 16px",
+                        borderRadius: 999,
+                        fontSize: "0.88rem",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        textDecoration: "none",
+                      }}
+                    >
+                      <Icon name="globe" size={15} />
+                      <span>
+                        {workspace.website.replace(/^https?:\/\//, "")}
+                      </span>
+                    </a>
+                  )}
+
+                  {validSocialLinks.map((item, i) => {
+                    const url = typeof item === "string" ? item : item.url;
+                    const key = (
+                      typeof item === "object" ? item.platform : ""
+                    ).toLowerCase();
+                    const cfg = PLATFORM_CONFIG[key] || PLATFORM_CONFIG.website;
+                    return (
+                      <a
+                        key={i}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.12)",
+                          border: "1px solid rgba(255, 255, 255, 0.25)",
+                          color: "#ffffff",
+                          padding: "7px 16px",
+                          borderRadius: 999,
+                          fontSize: "0.86rem",
+                          fontWeight: 600,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          textDecoration: "none",
+                        }}
+                      >
+                        {cfg.icon}
+                        <span>{cfg.label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Main CTA Button */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  minWidth: 200,
+                  width: "100%",
+                  maxWidth: 240,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => scrollToSection("services")}
+                  className="btn btn-primary btn-lg"
+                  style={{
+                    width: "100%",
+                    justifyContent: "center",
+                    borderRadius: 16,
+                    padding: "14px 28px",
+                    fontSize: "1.05rem",
+                    fontWeight: 800,
+                    boxShadow: `0 10px 30px ${primaryColor}60`,
+                  }}
+                >
+                  <Icon name="calendar" size={20} />
+                  <span>
+                    {t("bookAppointment") ||
+                      (isRTL ? "حجز موعد الآن" : "Book Now")}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Metrics Bar at Bottom of Hero */}
+            <div
+              style={{
+                marginTop: 32,
+                paddingTop: 24,
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gap: 20,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 14,
+                    background: `${primaryColor}25`,
+                    color: "#38bdf8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="briefcase" size={22} />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "1.25rem",
+                      fontWeight: 800,
+                      color: "#ffffff",
+                    }}
+                  >
+                    {services.length}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "#94a3b8",
+                    }}
+                  >
+                    {isRTL ? "الخدمات المتاحة" : "Available Services"}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 14,
+                    background: `${secondaryColor}25`,
+                    color: "#a855f7",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="users" size={22} />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "1.25rem",
+                      fontWeight: 800,
+                      color: "#ffffff",
+                    }}
+                  >
+                    {totalSpecialistsCount}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "#94a3b8",
+                    }}
+                  >
+                    {isRTL ? "فريق المتخصصين" : "Team Specialists"}
+                  </div>
+                </div>
+              </div>
+
+              {workspace.maximum_booking_days > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 14,
+                      background: "rgba(16, 185, 129, 0.2)",
+                      color: "#34d399",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="clock" size={22} />
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "1.25rem",
+                        fontWeight: 800,
+                        color: "#ffffff",
+                      }}
+                    >
+                      {workspace.maximum_booking_days} {isRTL ? "يوم" : "days"}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "0.84rem",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      {isRTL ? "حجز متاح حتى" : "Max Advance Window"}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {workspace.timezone?.name && (
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 14,
+                      background: "rgba(139, 92, 246, 0.2)",
+                      color: "#c084fc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="globe" size={22} />
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "0.95rem",
+                        fontWeight: 800,
+                        color: "#ffffff",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 160,
+                      }}
+                    >
+                      {workspace.timezone.name}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "0.84rem",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      {isRTL ? "المنطقة الزمنية" : "Workspace Timezone"}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-
-            {/* Title & Short Bio */}
-            <div style={{ flex: 1, minWidth: 280 }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 6,
-                }}
-              >
-                <h1
-                  style={{
-                    fontSize: "2.3rem",
-                    fontWeight: 900,
-                    color: "var(--text)",
-                    margin: 0,
-                    lineHeight: 1.15,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  <bdi style={{ unicodeBidi: "isolate" }}>{workspace.name}</bdi>
-                </h1>
-
-                {workspace.slug && (
-                  <span
-                    style={{
-                      direction: "ltr",
-                      color: primaryColor,
-                      fontWeight: 700,
-                      fontSize: "0.85rem",
-                      background: `${primaryColor}15`,
-                      padding: "4px 12px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    @{workspace.slug}
-                  </span>
-                )}
-              </div>
-
-              {/* Tagline / Intro */}
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  fontSize: "1.08rem",
-                  lineHeight: 1.6,
-                  marginTop: 8,
-                  marginBottom: 16,
-                  maxWidth: 780,
-                }}
-              >
-                {getTranslatableText(workspace.booking_short_intro) ||
-                  stripHtml(getTranslatableText(workspace.description)) ||
-                  (isRTL
-                    ? "مساحة عمل احترافية لحجز الخدمات والمواعيد الإلكترونية بكل سهولة."
-                    : "A professional business workspace offering seamless appointment booking services.")}
-              </p>
-
-              {/* Quick Contact Chips */}
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 12,
-                  alignItems: "center",
-                  fontSize: "0.9rem",
-                }}
-              >
-                {workspace.phone && (
-                  <a
-                    href={`tel:${workspace.phone}`}
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      borderRadius: 999,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <Icon name="phone" size={15} />
-                    <span>{workspace.phone}</span>
-                  </a>
-                )}
-                {workspace.email && (
-                  <a
-                    href={`mailto:${workspace.email}`}
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      borderRadius: 999,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <Icon name="mail" size={15} />
-                    <span>{workspace.email}</span>
-                  </a>
-                )}
-                {workspace.website && (
-                  <a
-                    href={workspace.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      borderRadius: 999,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      color: primaryColor,
-                    }}
-                  >
-                    <Icon name="globe" size={15} />
-                    <span>{workspace.website.replace(/^https?:\/\//, "")}</span>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* Main CTA Button */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                minWidth: 200,
-                width: "100%",
-                maxWidth: 240,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => scrollToSection("services")}
-                className="btn btn-primary btn-lg"
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  boxShadow: `0 8px 24px ${primaryColor}40`,
-                }}
-              >
-                <Icon name="calendar" size={20} />
-                <span>
-                  {t("bookAppointment") ||
-                    (isRTL ? "حجز موعد الآن" : "Book Now")}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Metrics Strip */}
-          <div
-            style={{
-              marginTop: 28,
-              paddingTop: 24,
-              borderTop: "1px solid var(--border)",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: 20,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: `${primaryColor}15`,
-                  color: primaryColor,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="briefcase" size={22} />
-              </div>
-              <div>
-                <div style={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                  {services.length}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  {isRTL ? "الخدمات المتاحة" : "Available Services"}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: `${secondaryColor}15`,
-                  color: secondaryColor,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="users" size={22} />
-              </div>
-              <div>
-                <div style={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                  {totalSpecialistsCount}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  {isRTL ? "فريق المتخصصين" : "Team Specialists"}
-                </div>
-              </div>
-            </div>
-
-            {workspace.maximum_booking_days > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: "rgba(16, 185, 129, 0.15)",
-                    color: "#10b981",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="clock" size={22} />
-                </div>
-                <div>
-                  <div style={{ fontSize: "1.2rem", fontWeight: 800 }}>
-                    {workspace.maximum_booking_days} {isRTL ? "يوم" : "days"}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.82rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    {isRTL ? "حجز متاح حتى" : "Max Advance Window"}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {workspace.timezone?.name && (
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: "rgba(139, 92, 246, 0.15)",
-                    color: "#8b5cf6",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="globe" size={22} />
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: "0.95rem",
-                      fontWeight: 800,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: 160,
-                    }}
-                  >
-                    {workspace.timezone.name}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.82rem",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    {isRTL ? "المنطقة الزمنية" : "Workspace Timezone"}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      {/* Sticky In-Page Section Navigation */}
-      <div
-        style={{
-          position: "sticky",
-          top: "var(--navbar-height, 72px)",
-          zIndex: 8,
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--border)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-          marginTop: 24,
-          marginBottom: 24,
-        }}
-      >
+        {/* Sleek bottom section glow separator */}
         <div
-          className="container"
           style={{
-            display: "flex",
-            gap: 6,
-            overflowX: "auto",
-            padding: "8px 0",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "2px",
+            background: `linear-gradient(90deg, transparent 0%, ${primaryColor}80 50%, transparent 100%)`,
           }}
-        >
-          {navSections.map((section) => {
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => scrollToSection(section.id)}
-                style={{
-                  whiteSpace: "nowrap",
-                  padding: "10px 18px",
-                  borderRadius: 999,
-                  border: "none",
-                  background: isActive ? `${primaryColor}18` : "transparent",
-                  color: isActive ? primaryColor : "var(--text-secondary)",
-                  fontWeight: 700,
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {section.label}
-              </button>
-            );
-          })}
-        </div>
+        />
       </div>
 
       {/* CONTINUOUS LANDING PAGE SECTIONS */}
-      <div className="container">
+      <div className="container" style={{ paddingTop: 16, paddingBottom: 80 }}>
         {/* Section 1: Services Grid */}
         <section
           id="services"
-          style={{ scrollMarginTop: 140, marginBottom: 70 }}
+          style={{ scrollMarginTop: 100, marginBottom: 80 }}
         >
           <div
             style={{
@@ -1327,11 +1251,16 @@ export default function WorkspaceProfilePage() {
           )}
         </section>
 
-        {/* Section 2: Specialists & Team — professional bio-card presentation */}
+        {/* Section 3: Specialists & Team — professional bio-card presentation */}
         {specialistRoles.length > 0 && (
           <section
             id="specialists"
-            style={{ scrollMarginTop: 140, marginBottom: 70 }}
+            style={{
+              scrollMarginTop: 100,
+              marginBottom: 80,
+              paddingTop: 36,
+              borderTop: "1px solid var(--border)",
+            }}
           >
             <div style={{ marginBottom: 28 }}>
               <div
@@ -1519,236 +1448,16 @@ export default function WorkspaceProfilePage() {
           </section>
         )}
 
-        {/* Section 3: About Workspace & Booking Rules */}
-        <section id="about" style={{ scrollMarginTop: 140, marginBottom: 70 }}>
-          <div style={{ marginBottom: 28 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                color: primaryColor,
-                fontSize: "0.88rem",
-                fontWeight: 700,
-                marginBottom: 6,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              <Icon name="info" size={16} />
-              <span>{isRTL ? "معلومات العمل" : "Workspace Info"}</span>
-            </div>
-            <h2
-              style={{
-                fontSize: "1.75rem",
-                fontWeight: 800,
-                margin: 0,
-                color: "var(--text)",
-              }}
-            >
-              {isRTL
-                ? "عن مساحة العمل وشروط الحجز"
-                : "About & Booking Policies"}
-            </h2>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: 28,
-            }}
-          >
-            {/* Workspace Description Card */}
-            <div
-              className="card"
-              style={{ padding: 28, borderRadius: 20, flex: 1 }}
-            >
-              <h3
-                style={{
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  marginBottom: 16,
-                  color: "var(--text)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Icon
-                  name="briefcase"
-                  size={22}
-                  style={{ color: primaryColor }}
-                />
-                <span>
-                  {isRTL
-                    ? "نبذة تفصيلية عن مساحة العمل"
-                    : "About Our Workspace"}
-                </span>
-              </h3>
-
-              {getTranslatableText(workspace.description) ? (
-                <div
-                  className="workspace-html-description"
-                  style={{
-                    color: "var(--text-secondary)",
-                    lineHeight: 1.7,
-                    fontSize: "0.96rem",
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html: getTranslatableText(workspace.description),
-                  }}
-                />
-              ) : (
-                <p
-                  style={{
-                    color: "var(--text-secondary)",
-                    lineHeight: 1.7,
-                    fontSize: "0.96rem",
-                  }}
-                >
-                  {getTranslatableText(workspace.booking_short_intro) ||
-                    (isRTL
-                      ? "مساحة عمل متخصصة تقدم خدمات جليلة ومواعيد مرنة للعملاء."
-                      : "A specialized workspace delivering top quality scheduling services.")}
-                </p>
-              )}
-            </div>
-
-            {/* Policies & Booking Rules Card */}
-            <div
-              className="card"
-              style={{ padding: 28, borderRadius: 20, flex: 1 }}
-            >
-              <h3
-                style={{
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  marginBottom: 16,
-                  color: "var(--text)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Icon name="shield" size={22} style={{ color: primaryColor }} />
-                <span>
-                  {isRTL ? "قواعد وسياسات الحجز" : "Booking Rules & Policies"}
-                </span>
-              </h3>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
-                  fontSize: "0.92rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "12px 16px",
-                    background: "var(--background-subtle, #f8fafc)",
-                    borderRadius: 12,
-                  }}
-                >
-                  <span style={{ fontWeight: 600 }}>
-                    {isRTL ? "طريقة تأكيد الحجوزات:" : "Confirmation Policy:"}
-                  </span>
-                  <span
-                    style={{
-                      fontWeight: 700,
-                      color: workspace.auto_confirm_appointments
-                        ? "#10b981"
-                        : "#f59e0b",
-                    }}
-                  >
-                    {workspace.auto_confirm_appointments
-                      ? isRTL
-                        ? "تأكيد فوري تلقائي"
-                        : "Auto Confirmation"
-                      : isRTL
-                        ? "مراجعة قبل التأكيد"
-                        : "Manual Confirmation"}
-                  </span>
-                </div>
-
-                {workspace.minimum_booking_notice_minutes > 0 && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 12,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>
-                      {isRTL
-                        ? "الحد الأدنى للإشعار المسبق:"
-                        : "Minimum Notice:"}
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {workspace.minimum_booking_notice_minutes}{" "}
-                      {t("durationMinutes")}
-                    </span>
-                  </div>
-                )}
-
-                {workspace.maximum_booking_days > 0 && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 12,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>
-                      {isRTL ? "أقصى فترة حجز مسبق:" : "Max Advance Window:"}
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {workspace.maximum_booking_days}{" "}
-                      {isRTL ? "يوماً" : "days"}
-                    </span>
-                  </div>
-                )}
-
-                {workspace.timezone?.name && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 12,
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>
-                      {isRTL ? "المنطقة الزمنية للحجز:" : "Booking Timezone:"}
-                    </span>
-                    <span style={{ fontWeight: 700 }}>
-                      {workspace.timezone.name}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Portfolio Showcase — upgraded photo gallery with captions + lightbox */}
+        {/* Section 4: Portfolio Showcase — photo gallery with captions + lightbox */}
         {galleryItems.length > 0 && (
           <section
             id="portfolio"
-            style={{ scrollMarginTop: 140, marginBottom: 70 }}
+            style={{
+              scrollMarginTop: 100,
+              marginBottom: 80,
+              paddingTop: 36,
+              borderTop: "1px solid var(--border)",
+            }}
           >
             <div style={{ marginBottom: 24 }}>
               <div
@@ -1861,164 +1570,15 @@ export default function WorkspaceProfilePage() {
           </section>
         )}
 
-        {/* Testimonials & Reviews — only rendered when real, attributed client reviews exist */}
-        {testimonials.length > 0 && (
-          <section
-            id="testimonials"
-            style={{ scrollMarginTop: 140, marginBottom: 70 }}
-          >
-            <div
-              style={{
-                textAlign: "center",
-                maxWidth: 640,
-                margin: "0 auto 36px",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  color: primaryColor,
-                  fontSize: "0.88rem",
-                  fontWeight: 700,
-                  marginBottom: 6,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="quote" size={16} />
-                <span>{isRTL ? "آراء العملاء" : "Testimonials"}</span>
-              </div>
-              <h2
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  margin: 0,
-                  color: "var(--text)",
-                }}
-              >
-                {isRTL ? "ماذا يقول عملاؤنا عنا" : "What Our Clients Say"}
-              </h2>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: 24,
-              }}
-            >
-              {testimonials.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="card card-hover"
-                  style={{
-                    padding: 28,
-                    borderRadius: 20,
-                    border: "1px solid var(--border)",
-                    position: "relative",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <Icon
-                    name="quote"
-                    size={30}
-                    style={{
-                      color: `${primaryColor}25`,
-                      position: "absolute",
-                      top: 20,
-                      [isRTL ? "left" : "right"]: 20,
-                    }}
-                  />
-
-                  {item.rating > 0 && (
-                    <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Icon
-                          key={star}
-                          name="star"
-                          size={16}
-                          style={{
-                            color:
-                              star <= item.rating ? "#f59e0b" : "var(--border)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  <p
-                    style={{
-                      fontSize: "1rem",
-                      lineHeight: 1.7,
-                      color: "var(--text)",
-                      fontStyle: "italic",
-                      marginBottom: 22,
-                      flex: 1,
-                    }}
-                  >
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
-
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 12 }}
-                  >
-                    <div
-                      style={{
-                        width: 46,
-                        height: 46,
-                        borderRadius: "50%",
-                        background: `${primaryColor}18`,
-                        color: primaryColor,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 800,
-                        overflow: "hidden",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {item.avatar_url ? (
-                        <LazyImage
-                          src={item.avatar_url}
-                          alt={item.client_name}
-                          width={46}
-                          height={46}
-                          objectFit="cover"
-                        />
-                      ) : (
-                        item.client_name.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: "0.98rem" }}>
-                        {item.client_name}
-                      </div>
-                      {item.client_role && (
-                        <div
-                          style={{
-                            fontSize: "0.82rem",
-                            color: "var(--text-secondary)",
-                          }}
-                        >
-                          {item.client_role}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Section 4: Contact & Location */}
+        {/* Section 5: Booking Rules & Policies — grid of dedicated policy cards */}
         <section
-          id="location"
-          style={{ scrollMarginTop: 140, marginBottom: 70 }}
+          id="rules"
+          style={{
+            scrollMarginTop: 100,
+            marginBottom: 80,
+            paddingTop: 36,
+            borderTop: "1px solid var(--border)",
+          }}
         >
           <div style={{ marginBottom: 28 }}>
             <div
@@ -2034,10 +1594,8 @@ export default function WorkspaceProfilePage() {
                 letterSpacing: "0.5px",
               }}
             >
-              <Icon name="map-pin" size={16} />
-              <span>
-                {isRTL ? "وسائل التواصل والوصول" : "Contact & Location"}
-              </span>
+              <Icon name="shield" size={16} />
+              <span>{isRTL ? "سياسات وشروط الحجز" : "Booking Policies"}</span>
             </div>
             <h2
               style={{
@@ -2047,348 +1605,18 @@ export default function WorkspaceProfilePage() {
                 color: "var(--text)",
               }}
             >
-              {isRTL ? "التواصل والموقع الجغرافي" : "Get In Touch & Location"}
+              {isRTL ? "قواعد وسياسات الحجز" : "Booking Rules & Terms"}
             </h2>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: 28,
-            }}
-          >
-            {/* Contact Info Card */}
-            <div className="card" style={{ padding: 28, borderRadius: 20 }}>
-              <h3
-                style={{
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  marginBottom: 20,
-                  color: "var(--text)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Icon name="phone" size={22} style={{ color: primaryColor }} />
-                <span>{isRTL ? "معلومات التواصل" : "Contact Details"}</span>
-              </h3>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
-                }}
-              >
-                {workspace.phone && (
-                  <a
-                    href={`tel:${workspace.phone}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      color: "var(--text)",
-                      textDecoration: "none",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        background: `${primaryColor}20`,
-                        color: primaryColor,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon name="phone" size={18} />
-                    </div>
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {isRTL ? "رقم الهاتف" : "Phone Number"}
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: "1rem" }}>
-                        {workspace.phone}
-                      </div>
-                    </div>
-                  </a>
-                )}
-
-                {workspace.email && (
-                  <a
-                    href={`mailto:${workspace.email}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      color: "var(--text)",
-                      textDecoration: "none",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        background: `${primaryColor}20`,
-                        color: primaryColor,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon name="mail" size={18} />
-                    </div>
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {isRTL ? "البريد الإلكتروني" : "Email Address"}
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: "1rem" }}>
-                        {workspace.email}
-                      </div>
-                    </div>
-                  </a>
-                )}
-
-                {workspace.website && (
-                  <a
-                    href={workspace.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      color: "var(--text)",
-                      textDecoration: "none",
-                      padding: "12px 16px",
-                      background: "var(--background-subtle, #f8fafc)",
-                      borderRadius: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        background: `${primaryColor}20`,
-                        color: primaryColor,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Icon name="globe" size={18} />
-                    </div>
-                    <div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {isRTL ? "الموقع الإلكتروني الرسمي" : "Website"}
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: "1rem" }}>
-                        {workspace.website.replace(/^https?:\/\//, "")}
-                      </div>
-                    </div>
-                  </a>
-                )}
-              </div>
-
-              {/* Social Media Badges */}
-              {validSocialLinks.length > 0 && (
-                <div style={{ marginTop: 24 }}>
-                  <div
-                    style={{
-                      fontSize: "0.88rem",
-                      fontWeight: 700,
-                      color: "var(--text-secondary)",
-                      marginBottom: 12,
-                    }}
-                  >
-                    {isRTL
-                      ? "منصات التواصل الاجتماعي"
-                      : "Social Media Platforms"}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 10,
-                    }}
-                  >
-                    {validSocialLinks.map((item, idx) => {
-                      const platformKey = (
-                        typeof item === "object" && item.platform
-                          ? item.platform
-                          : "website"
-                      ).toLowerCase();
-                      const url = typeof item === "string" ? item : item.url;
-                      const href = url.startsWith("http")
-                        ? url
-                        : `https://${url}`;
-                      const config = PLATFORM_CONFIG[platformKey] || {
-                        label: platformKey.toUpperCase(),
-                        icon: <Icon name="globe" size={15} />,
-                      };
-
-                      return (
-                        <a
-                          key={idx}
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-secondary btn-sm"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 8,
-                            borderRadius: 999,
-                            padding: "8px 16px",
-                            fontSize: "0.88rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {config.icon}
-                          <span>{config.label}</span>
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Location Card */}
-            <div className="card" style={{ padding: 28, borderRadius: 20 }}>
-              <h3
-                style={{
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  marginBottom: 20,
-                  color: "var(--text)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Icon
-                  name="map-pin"
-                  size={22}
-                  style={{ color: primaryColor }}
-                />
-                <span>{isRTL ? "الموقع والعنوان" : "Location & Address"}</span>
-              </h3>
-
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 16 }}
-              >
-                {workspace.country?.name && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <Icon name="globe" size={18} style={{ opacity: 0.6 }} />
-                    <span style={{ fontSize: "0.98rem" }}>
-                      <strong>{isRTL ? "الدولة:" : "Country:"}</strong>{" "}
-                      {workspace.country.name}
-                    </span>
-                  </div>
-                )}
-
-                {workspace.city?.name && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <Icon name="map-pin" size={18} style={{ opacity: 0.6 }} />
-                    <span style={{ fontSize: "0.98rem" }}>
-                      <strong>{isRTL ? "المدينة:" : "City:"}</strong>{" "}
-                      {workspace.city.name}
-                    </span>
-                  </div>
-                )}
-
-                {workspace.address && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 12,
-                    }}
-                  >
-                    <Icon
-                      name="map-pin"
-                      size={18}
-                      style={{ opacity: 0.6, marginTop: 3 }}
-                    />
-                    <span style={{ fontSize: "0.98rem", lineHeight: 1.5 }}>
-                      <strong>{isRTL ? "العنوان:" : "Address:"}</strong>{" "}
-                      {workspace.address}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Highlights / Value Features Section */}
-      <section
-        style={{
-          padding: "60px 0",
-          background: "var(--surface)",
-          borderTop: "1px solid var(--border)",
-          borderBottom: "1px solid var(--border)",
-          marginBottom: 60,
-        }}
-      >
-        <div className="container">
-          <div
-            style={{
-              textAlign: "center",
-              maxWidth: 600,
-              margin: "0 auto 40px",
-            }}
-          >
-            <h2
-              style={{ fontSize: "1.75rem", fontWeight: 800, marginBottom: 8 }}
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                margin: "6px 0 0 0",
+                fontSize: "0.95rem",
+              }}
             >
-              {isRTL ? "لماذا تختار خدماتنا؟" : "Why Choose Our Workspace?"}
-            </h2>
-            <p style={{ color: "var(--text-secondary)", margin: 0 }}>
               {isRTL
-                ? "تجربة حجز مواعيد سريعة، موثوقة، ومصممة لتلبية تطلعاتك."
-                : "A smooth, reliable, and modern appointment booking experience."}
+                ? "سياسات واضحة لضمان تجربة حجز سلسة ومضمونة لجميع العملاء."
+                : "Clear workspace policies to guarantee a seamless booking experience."}
             </p>
           </div>
 
@@ -2396,299 +1624,494 @@ export default function WorkspaceProfilePage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 24,
+              gap: 20,
             }}
           >
-            {Array.isArray(workspace.feature_highlights) &&
-            workspace.feature_highlights.length > 0 ? (
-              workspace.feature_highlights.map((feat, idx) => (
+            {/* Policy Card 1: Confirmation */}
+            <div
+              className="card card-hover"
+              style={{
+                padding: 24,
+                borderRadius: 20,
+                border: "1px solid var(--border)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  background: workspace.auto_confirm_appointments
+                    ? "rgba(16, 185, 129, 0.15)"
+                    : "rgba(245, 158, 11, 0.15)",
+                  color: workspace.auto_confirm_appointments
+                    ? "#10b981"
+                    : "#f59e0b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="shield" size={24} />
+              </div>
+              <div>
                 <div
-                  key={idx}
-                  className="card card-hover animate-tab-card"
                   style={{
-                    padding: 24,
-                    borderRadius: 20,
-                    textAlign: "center",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    position: "relative",
-                    overflow: "hidden",
-                    borderTop: `3px solid ${primaryColor}`,
+                    fontSize: "0.84rem",
+                    color: "var(--text-secondary)",
+                    fontWeight: 600,
+                    marginBottom: 4,
                   }}
                 >
-                  {feat.image_url && (
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 140,
-                        borderRadius: 14,
-                        overflow: "hidden",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <LazyImage
-                        src={feat.image_url}
-                        alt={feat.title || "Feature highlight"}
-                        width="100%"
-                        height="100%"
-                        objectFit="cover"
-                      />
-                    </div>
-                  )}
+                  {isRTL ? "طريقة تأكيد الحجوزات" : "Confirmation Method"}
+                </div>
+                <div
+                  style={{
+                    fontSize: "1.1rem",
+                    fontWeight: 800,
+                    color: workspace.auto_confirm_appointments
+                      ? "#10b981"
+                      : "#f59e0b",
+                  }}
+                >
+                  {workspace.auto_confirm_appointments
+                    ? isRTL
+                      ? "تأكيد فوري تلقائي"
+                      : "Instant Auto Confirmation"
+                    : isRTL
+                      ? "مراجعة قبل التأكيد"
+                      : "Manual Approval"}
+                </div>
+              </div>
+            </div>
 
+            {/* Policy Card 2: Minimum Notice */}
+            {workspace.minimum_booking_notice_minutes > 0 && (
+              <div
+                className="card card-hover"
+                style={{
+                  padding: 24,
+                  borderRadius: 20,
+                  border: "1px solid var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: `${primaryColor}15`,
+                    color: primaryColor,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="clock" size={24} />
+                </div>
+                <div>
                   <div
                     style={{
-                      width: 54,
-                      height: 54,
-                      borderRadius: 16,
-                      background: `${primaryColor}15`,
-                      color: primaryColor,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 14,
+                      fontSize: "0.84rem",
+                      color: "var(--text-secondary)",
+                      fontWeight: 600,
+                      marginBottom: 4,
                     }}
                   >
-                    <Icon name={feat.icon || "sparkles"} size={26} />
+                    {isRTL ? "الحد الأدنى للإشعار المسبق" : "Minimum Notice"}
                   </div>
-
-                  <h3
+                  <div
                     style={{
-                      fontSize: "1.15rem",
+                      fontSize: "1.1rem",
                       fontWeight: 800,
-                      marginBottom: 8,
                       color: "var(--text)",
                     }}
                   >
-                    {feat.title}
-                  </h3>
+                    {workspace.minimum_booking_notice_minutes}{" "}
+                    {t("durationMinutes")}
+                  </div>
+                </div>
+              </div>
+            )}
 
-                  {feat.description && (
+            {/* Policy Card 3: Max Advance Window */}
+            {workspace.maximum_booking_days > 0 && (
+              <div
+                className="card card-hover"
+                style={{
+                  padding: 24,
+                  borderRadius: 20,
+                  border: "1px solid var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: `${secondaryColor}15`,
+                    color: secondaryColor,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="calendar" size={24} />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "var(--text-secondary)",
+                      fontWeight: 600,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {isRTL ? "أقصى فترة حجز مسبق" : "Max Advance Window"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "1.1rem",
+                      fontWeight: 800,
+                      color: "var(--text)",
+                    }}
+                  >
+                    {workspace.maximum_booking_days} {isRTL ? "يوماً" : "days"}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Policy Card 4: Timezone */}
+            {workspace.timezone?.name && (
+              <div
+                className="card card-hover"
+                style={{
+                  padding: 24,
+                  borderRadius: 20,
+                  border: "1px solid var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: "rgba(139, 92, 246, 0.15)",
+                    color: "#8b5cf6",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="globe" size={24} />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "var(--text-secondary)",
+                      fontWeight: 600,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {isRTL ? "المنطقة الزمنية للحجز" : "Booking Timezone"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "1.05rem",
+                      fontWeight: 800,
+                      color: "var(--text)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {workspace.timezone.name}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Highlights / Value Features Section */}
+        <section
+          style={{
+            padding: "60px 0",
+            background: "var(--surface)",
+            borderTop: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
+            marginBottom: 60,
+          }}
+        >
+          <div className="container">
+            <div
+              style={{
+                textAlign: "center",
+                maxWidth: 600,
+                margin: "0 auto 40px",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "1.75rem",
+                  fontWeight: 800,
+                  marginBottom: 8,
+                }}
+              >
+                {isRTL ? "لماذا تختار خدماتنا؟" : "Why Choose Our Workspace?"}
+              </h2>
+              <p style={{ color: "var(--text-secondary)", margin: 0 }}>
+                {isRTL
+                  ? "تجربة حجز مواعيد سريعة، موثوقة، ومصممة لتلبية تطلعاتك."
+                  : "A smooth, reliable, and modern appointment booking experience."}
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: 24,
+              }}
+            >
+              {Array.isArray(workspace.feature_highlights) &&
+              workspace.feature_highlights.length > 0 ? (
+                workspace.feature_highlights.map((feat, idx) => (
+                  <div
+                    key={idx}
+                    className="card card-hover animate-tab-card"
+                    style={{
+                      padding: 24,
+                      borderRadius: 20,
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      position: "relative",
+                      overflow: "hidden",
+                      borderTop: `3px solid ${primaryColor}`,
+                    }}
+                  >
+                    {feat.image_url && (
+                      <div
+                        style={{
+                          width: "100%",
+                          height: 140,
+                          borderRadius: 14,
+                          overflow: "hidden",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <LazyImage
+                          src={feat.image_url}
+                          alt={feat.title || "Feature highlight"}
+                          width="100%"
+                          height="100%"
+                          objectFit="cover"
+                        />
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        width: 54,
+                        height: 54,
+                        borderRadius: 16,
+                        background: `${primaryColor}15`,
+                        color: primaryColor,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 14,
+                      }}
+                    >
+                      <Icon name={feat.icon || "sparkles"} size={26} />
+                    </div>
+
+                    <h3
+                      style={{
+                        fontSize: "1.15rem",
+                        fontWeight: 800,
+                        marginBottom: 8,
+                        color: "var(--text)",
+                      }}
+                    >
+                      {feat.title}
+                    </h3>
+
+                    {feat.description && (
+                      <p
+                        style={{
+                          fontSize: "0.9rem",
+                          color: "var(--text-secondary)",
+                          margin: 0,
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {feat.description}
+                      </p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div
+                    className="card"
+                    style={{
+                      padding: 28,
+                      borderRadius: 20,
+                      textAlign: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 16,
+                        background: `${primaryColor}15`,
+                        color: primaryColor,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Icon name="check" size={28} />
+                    </div>
+                    <h3
+                      style={{
+                        fontSize: "1.15rem",
+                        fontWeight: 800,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {isRTL ? "حجز فوري ومؤكد" : "Instant Booking"}
+                    </h3>
                     <p
                       style={{
                         fontSize: "0.9rem",
                         color: "var(--text-secondary)",
                         margin: 0,
-                        lineHeight: 1.6,
+                        lineHeight: 1.5,
                       }}
                     >
-                      {feat.description}
+                      {isRTL
+                        ? "تأكيد المواعيد بضغطة زر دون انتظار طويل."
+                        : "Instant slot confirmation with immediate notification."}
                     </p>
-                  )}
-                </div>
-              ))
-            ) : (
-              <>
-                <div
-                  className="card"
-                  style={{ padding: 28, borderRadius: 20, textAlign: "center" }}
-                >
-                  <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 16,
-                      background: `${primaryColor}15`,
-                      color: primaryColor,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 16,
-                    }}
-                  >
-                    <Icon name="check" size={28} />
                   </div>
-                  <h3
-                    style={{
-                      fontSize: "1.15rem",
-                      fontWeight: 800,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {isRTL ? "حجز فوري ومؤكد" : "Instant Booking"}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "var(--text-secondary)",
-                      margin: 0,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {isRTL
-                      ? "تأكيد المواعيد بضغطة زر دون انتظار طويل."
-                      : "Instant slot confirmation with immediate notification."}
-                  </p>
-                </div>
 
-                <div
-                  className="card"
-                  style={{ padding: 28, borderRadius: 20, textAlign: "center" }}
-                >
                   <div
+                    className="card"
                     style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 16,
-                      background: `${secondaryColor}15`,
-                      color: secondaryColor,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 16,
+                      padding: 28,
+                      borderRadius: 20,
+                      textAlign: "center",
                     }}
                   >
-                    <Icon name="users" size={28} />
-                  </div>
-                  <h3
-                    style={{
-                      fontSize: "1.15rem",
-                      fontWeight: 800,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {isRTL ? "خبراء ومتخصصون" : "Top Professionals"}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "var(--text-secondary)",
-                      margin: 0,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {isRTL
-                      ? "فريق عمل مؤهل لتقديم أفضل الخدمات والنتائج."
-                      : "Highly trained team dedicated to delivering excellence."}
-                  </p>
-                </div>
-
-                <div
-                  className="card"
-                  style={{ padding: 28, borderRadius: 20, textAlign: "center" }}
-                >
-                  <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 16,
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#10b981",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 16,
-                    }}
-                  >
-                    <Icon name="clock" size={28} />
-                  </div>
-                  <h3
-                    style={{
-                      fontSize: "1.15rem",
-                      fontWeight: 800,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {isRTL ? "مرونة في المواعيد" : "Flexible Hours"}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "var(--text-secondary)",
-                      margin: 0,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {isRTL
-                      ? "جدولة تناسب وقتك وإعادة جدولة بأي وقت."
-                      : "Convenient time slots tailored to suit your busy schedule."}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Customer FAQs Section */}
-      <section id="faq" style={{ scrollMarginTop: 140, paddingBottom: 60 }}>
-        <div className="container" style={{ maxWidth: 840 }}>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <h2
-              style={{ fontSize: "1.75rem", fontWeight: 800, marginBottom: 8 }}
-            >
-              {isRTL ? "الأسئلة الشائعة" : "Frequently Asked Questions"}
-            </h2>
-            <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-              {isRTL
-                ? "إليك إجابات حول أبرز الاستفسارات الخاصة بالحجز والمواعيد."
-                : "Find answers to common questions about booking and appointments."}
-            </p>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {faqItems.map((item, index) => {
-              const isOpen = expandedFaq === index;
-              return (
-                <div
-                  key={index}
-                  className="card"
-                  style={{
-                    borderRadius: 18,
-                    overflow: "hidden",
-                    border: "1px solid var(--border)",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setExpandedFaq(isOpen ? null : index)}
-                    style={{
-                      width: "100%",
-                      padding: "20px 24px",
-                      background: "none",
-                      border: "none",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      cursor: "pointer",
-                      textAlign: isRTL ? "right" : "left",
-                      fontWeight: 700,
-                      fontSize: "1.02rem",
-                      color: "var(--text)",
-                    }}
-                  >
-                    <span>{item.q}</span>
-                    <Icon
-                      name={isOpen ? "chevron-up" : "chevron-down"}
-                      size={18}
-                      style={{
-                        color: primaryColor,
-                        flexShrink: 0,
-                        transition: "transform 0.2s ease",
-                      }}
-                    />
-                  </button>
-
-                  {isOpen && (
                     <div
                       style={{
-                        padding: "0 24px 22px",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.95rem",
-                        lineHeight: 1.65,
+                        width: 56,
+                        height: 56,
+                        borderRadius: 16,
+                        background: `${secondaryColor}15`,
+                        color: secondaryColor,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 16,
                       }}
                     >
-                      {item.a}
+                      <Icon name="users" size={28} />
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    <h3
+                      style={{
+                        fontSize: "1.15rem",
+                        fontWeight: 800,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {isRTL ? "خبراء ومتخصصون" : "Top Professionals"}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "0.9rem",
+                        color: "var(--text-secondary)",
+                        margin: 0,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {isRTL
+                        ? "فريق عمل مؤهل لتقديم أفضل الخدمات والنتائج."
+                        : "Highly trained team dedicated to delivering excellence."}
+                    </p>
+                  </div>
+
+                  <div
+                    className="card"
+                    style={{
+                      padding: 28,
+                      borderRadius: 20,
+                      textAlign: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 16,
+                        background: "rgba(16, 185, 129, 0.15)",
+                        color: "#10b981",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Icon name="clock" size={28} />
+                    </div>
+                    <h3
+                      style={{
+                        fontSize: "1.15rem",
+                        fontWeight: 800,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {isRTL ? "مرونة في المواعيد" : "Flexible Hours"}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "0.9rem",
+                        color: "var(--text-secondary)",
+                        margin: 0,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {isRTL
+                        ? "جدولة تناسب وقتك وإعادة جدولة بأي وقت."
+                        : "Convenient time slots tailored to suit your busy schedule."}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* Bottom Conversion CTA Banner Card */}
       <section style={{ padding: "0 0 80px 0" }}>
@@ -2747,38 +2170,54 @@ export default function WorkspaceProfilePage() {
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: 56,
-                  height: 56,
-                  borderRadius: 16,
-                  background: "rgba(255, 255, 255, 0.2)",
-                  backdropFilter: "blur(8px)",
-                  marginBottom: 20,
-                  boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.22)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255, 255, 255, 0.4)",
+                  marginBottom: 22,
+                  boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+                  color: "#ffffff",
                 }}
               >
-                <Icon name="calendar" size={26} color="#fff" />
+                <Icon name="sparkles" size={28} style={{ color: "#ffffff" }} />
               </div>
 
               <h2
                 style={{
-                  fontSize: "1.95rem",
-                  fontWeight: 800,
+                  fontSize: "2.1rem",
+                  fontWeight: 900,
                   marginBottom: 14,
-                  lineHeight: 1.4,
+                  lineHeight: 1.35,
+                  color: "#ffffff",
                 }}
               >
                 {isRTL ? (
-                  <span>
+                  <span style={{ color: "#ffffff" }}>
                     جاهز لحجز موعدك لدى{" "}
-                    <bdi style={{ unicodeBidi: "isolate" }}>
+                    <bdi
+                      style={{
+                        unicodeBidi: "isolate",
+                        color: "#ffffff",
+                        fontWeight: 900,
+                      }}
+                    >
                       {workspace.name}
                     </bdi>
                     ؟
                   </span>
                 ) : (
-                  <span>
+                  <span style={{ color: "#ffffff" }}>
                     Ready to book your appointment at{" "}
-                    <bdi style={{ unicodeBidi: "isolate" }}>
+                    <bdi
+                      style={{
+                        unicodeBidi: "isolate",
+                        color: "#ffffff",
+                        fontWeight: 900,
+                      }}
+                    >
                       {workspace.name}
                     </bdi>
                     ?
@@ -2788,8 +2227,8 @@ export default function WorkspaceProfilePage() {
 
               <p
                 style={{
-                  fontSize: "1.05rem",
-                  opacity: 0.92,
+                  fontSize: "1.08rem",
+                  color: "rgba(255, 255, 255, 0.95)",
                   maxWidth: 580,
                   margin: "0 auto 32px",
                   lineHeight: 1.6,
@@ -2805,23 +2244,27 @@ export default function WorkspaceProfilePage() {
                 onClick={() => scrollToSection("services")}
                 className="btn btn-lg"
                 style={{
-                  background: "#fff",
+                  background: "#ffffff",
                   color: primaryColor,
                   fontWeight: 800,
                   padding: "16px 36px",
                   borderRadius: 999,
                   border: "none",
-                  boxShadow: "0 10px 28px rgba(0,0,0,0.2)",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.25)",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 10,
-                  fontSize: "1.02rem",
+                  fontSize: "1.05rem",
                   transition: "all 0.25s ease",
                 }}
               >
-                <Icon name="calendar" size={20} />
-                <span>
+                <Icon
+                  name="calendar"
+                  size={20}
+                  style={{ color: primaryColor }}
+                />
+                <span style={{ color: primaryColor, fontWeight: 800 }}>
                   {isRTL ? "استعراض الخدمات والحجز" : "Browse Services & Book"}
                 </span>
               </button>
