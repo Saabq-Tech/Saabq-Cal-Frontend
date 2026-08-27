@@ -90,11 +90,11 @@ export default function SearchableSelect({
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.65 : 1,
           background: "var(--surface, #fff)",
-          paddingRight: "12px",
-          paddingLeft: "12px",
-          height: "42px",
-          border: error ? "1px solid #ef4444" : undefined,
-          borderRadius: "var(--radius-md, 8px)",
+          paddingRight: "16px",
+          paddingLeft: "16px",
+          minHeight: "46px",
+          border: error ? "1.5px solid var(--error, #dc2626)" : undefined,
+          borderRadius: "var(--radius-md, 12px)",
         }}
       >
         <span

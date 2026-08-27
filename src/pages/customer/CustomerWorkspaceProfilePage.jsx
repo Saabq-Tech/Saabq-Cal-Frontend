@@ -24,9 +24,10 @@ export default function WorkspaceProfilePage() {
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
-  // Search & Lightbox states
+  // Search, Filter & Lightbox states
   const [searchTerm, setSearchTerm] = useState("");
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [activeSpecialistRole, setActiveSpecialistRole] = useState("all");
 
   const getTranslatableText = useCallback(
     (val) => {
@@ -322,60 +323,60 @@ export default function WorkspaceProfilePage() {
         jsonLd={[jsonLd]}
       />
 
-      {/* Hero Cover Banner — bold gradient mesh built from the workspace's own brand colors */}
-      <div
-        className="workspace-landing-hero"
+      {/* SECTION 1: HERO & BRANDING BANNER */}
+      <section
+        className="workspace-public-hero-section"
         style={{
           position: "relative",
-          minHeight: 500,
-          paddingTop: 40,
-          paddingBottom: 40,
-          marginBottom: 64,
+          minHeight: 340,
+          paddingTop: 20,
+          paddingBottom: 20,
+          marginBottom: 36,
           overflow: "hidden",
           background: workspace.cover_url
             ? `url(${workspace.cover_url}) center/cover no-repeat`
-            : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+            : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor || primaryColor} 100%)`,
           display: "flex",
           alignItems: "center",
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)",
+          boxShadow: "0 6px 20px rgba(0, 0, 0, 0.12)",
         }}
       >
-        {/* Decorative brand-color blobs for a bolder, more vibrant first impression */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-25%",
-            insetInlineEnd: "-10%",
-            width: 420,
-            height: 420,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${secondaryColor}80 0%, transparent 70%)`,
-            filter: "blur(50px)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-30%",
-            insetInlineStart: "-8%",
-            width: 380,
-            height: 380,
-            borderRadius: "50%",
-            background: `radial-gradient(circle, ${primaryColor}90 0%, transparent 70%)`,
-            filter: "blur(50px)",
-            pointerEvents: "none",
-          }}
-        />
+        {/* Decorative brand-color blobs for vibrant primary & secondary glow */}
+        {!workspace.cover_url && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: "-20%",
+                insetInlineEnd: "-5%",
+                width: 480,
+                height: 480,
+                borderRadius: "50%",
+                background: `radial-gradient(circle, ${secondaryColor}80 0%, transparent 70%)`,
+                filter: "blur(50px)",
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: "-25%",
+                insetInlineStart: "-5%",
+                width: 460,
+                height: 460,
+                borderRadius: "50%",
+                background: `radial-gradient(circle, ${primaryColor}90 0%, transparent 70%)`,
+                filter: "blur(50px)",
+                pointerEvents: "none",
+              }}
+            />
+          </>
+        )}
 
         <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(180deg, rgba(10, 14, 26, 0.7) 0%, rgba(10, 14, 26, 0.92) 100%)",
-            pointerEvents: "none",
-          }}
+          className={`workspace-public-hero-overlay ${
+            workspace.cover_url ? "has-cover" : "no-cover"
+          }`}
         />
 
         <div
@@ -390,19 +391,15 @@ export default function WorkspaceProfilePage() {
         >
           {/* Glassmorphic Landing Hero Box */}
           <div
+            className="workspace-public-hero-card"
             style={{
-              padding: "36px 38px",
-              borderRadius: 28,
-              background: "rgba(17, 24, 39, 0.8)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
-              boxShadow: `0 24px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px ${primaryColor}35`,
-              borderTop: `4px solid ${primaryColor}`,
+              padding: "24px 28px",
+              borderRadius: 24,
             }}
           >
             {/* Hero Top Bar: Status Badges & Quick Action */}
             <div
+              className="workspace-hero-divider"
               style={{
                 display: "flex",
                 flexWrap: "wrap",
@@ -423,27 +420,14 @@ export default function WorkspaceProfilePage() {
                 }}
               >
                 {workspace.booking_enabled ? (
-                  <span
-                    style={{
-                      background: "rgba(16, 185, 129, 0.2)",
-                      border: "1px solid rgba(16, 185, 129, 0.4)",
-                      color: "#34d399",
-                      fontSize: "0.84rem",
-                      fontWeight: 700,
-                      padding: "6px 16px",
-                      borderRadius: 999,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
+                  <span className="workspace-hero-status-active">
                     <span
                       style={{
                         width: 8,
                         height: 8,
                         borderRadius: "50%",
-                        background: "#34d399",
-                        boxShadow: "0 0 10px #34d399",
+                        background: "currentColor",
+                        boxShadow: "0 0 8px currentColor",
                       }}
                     />
                     {isRTL ? "الحجز مفعل أونلاين" : "Online Booking Active"}
@@ -465,17 +449,7 @@ export default function WorkspaceProfilePage() {
                 )}
 
                 {workspace.workspace_type?.name && (
-                  <span
-                    style={{
-                      background: "rgba(255, 255, 255, 0.12)",
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                      color: "#e2e8f0",
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
-                      padding: "6px 16px",
-                      borderRadius: 999,
-                    }}
-                  >
+                  <span className="workspace-hero-type-badge">
                     {workspace.workspace_type.name}
                   </span>
                 )}
@@ -484,20 +458,7 @@ export default function WorkspaceProfilePage() {
               <button
                 type="button"
                 onClick={handleShare}
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
-                  color: "#f8fafc",
-                  padding: "8px 18px",
-                  borderRadius: 999,
-                  cursor: "pointer",
-                  fontSize: "0.88rem",
-                  fontWeight: 700,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  transition: "all 0.2s ease",
-                }}
+                className="workspace-hero-share-btn"
                 title={
                   isRTL ? "مشاركة رابط مساحة العمل" : "Share Workspace Link"
                 }
@@ -509,28 +470,27 @@ export default function WorkspaceProfilePage() {
 
             {/* Main Content & Branding Body */}
             <div
+              className="workspace-hero-body"
               style={{
                 display: "flex",
                 flexWrap: "wrap",
-                gap: 28,
+                gap: 24,
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
             >
               {/* Logo Thumbnail Badge */}
               <div
+                className="workspace-hero-logo-box"
                 style={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: 24,
-                  background: "rgba(30, 41, 59, 0.8)",
-                  border: `3px solid ${primaryColor}60`,
-                  boxShadow: `0 12px 32px ${primaryColor}30`,
+                  width: 95,
+                  height: 95,
+                  borderRadius: 20,
                   overflow: "hidden",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "3rem",
+                  fontSize: "2.4rem",
                   fontWeight: 800,
                   color: primaryColor,
                   flexShrink: 0,
@@ -540,8 +500,8 @@ export default function WorkspaceProfilePage() {
                   <LazyImage
                     src={workspace.logo_url}
                     alt={`${workspace.name} logo`}
-                    width={114}
-                    height={114}
+                    width={91}
+                    height={91}
                     objectFit="cover"
                   />
                 ) : (
@@ -550,21 +510,22 @@ export default function WorkspaceProfilePage() {
               </div>
 
               {/* Title, Bio & Contact Chips */}
-              <div style={{ flex: 1, minWidth: 280 }}>
+              <div style={{ flex: 1, minWidth: 260 }}>
                 <div
+                  className="workspace-hero-title-box"
                   style={{
                     display: "flex",
                     flexWrap: "wrap",
                     alignItems: "center",
-                    gap: 12,
-                    marginBottom: 8,
+                    gap: 10,
+                    marginBottom: 6,
                   }}
                 >
                   <h1
+                    className="workspace-hero-title"
                     style={{
                       fontSize: "2.4rem",
                       fontWeight: 900,
-                      color: "#ffffff",
                       margin: 0,
                       lineHeight: 1.15,
                       letterSpacing: "-0.02em",
@@ -579,12 +540,12 @@ export default function WorkspaceProfilePage() {
                     <span
                       style={{
                         direction: "ltr",
-                        color: "#38bdf8",
+                        color: primaryColor,
                         fontWeight: 700,
-                        fontSize: "0.88rem",
-                        background: "rgba(56, 189, 248, 0.15)",
-                        border: "1px solid rgba(56, 189, 248, 0.3)",
-                        padding: "4px 14px",
+                        fontSize: "0.84rem",
+                        background: `${primaryColor}15`,
+                        border: `1px solid ${primaryColor}30`,
+                        padding: "3px 12px",
                         borderRadius: 999,
                       }}
                     >
@@ -594,52 +555,27 @@ export default function WorkspaceProfilePage() {
                 </div>
 
                 {getTranslatableText(workspace.description) ? (
-                  <>
-                    <style>{`
-                      .workspace-hero-html-description,
-                      .workspace-hero-html-description * {
-                        color: #e2e8f0 !important;
-                      }
-                      .workspace-hero-html-description h1,
-                      .workspace-hero-html-description h2,
-                      .workspace-hero-html-description h3,
-                      .workspace-hero-html-description h4,
-                      .workspace-hero-html-description h5,
-                      .workspace-hero-html-description h6,
-                      .workspace-hero-html-description strong,
-                      .workspace-hero-html-description b {
-                        color: #ffffff !important;
-                        font-weight: 800 !important;
-                      }
-                      .workspace-hero-html-description ul,
-                      .workspace-hero-html-description ol {
-                        padding-inline-start: 22px;
-                        margin: 10px 0;
-                      }
-                    `}</style>
-                    <div
-                      className="workspace-hero-html-description"
-                      style={{
-                        color: "#e2e8f0",
-                        fontSize: "1.02rem",
-                        lineHeight: 1.7,
-                        marginTop: 10,
-                        marginBottom: 20,
-                        maxWidth: 750,
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: getTranslatableText(workspace.description),
-                      }}
-                    />
-                  </>
+                  <div
+                    className="workspace-hero-html-description"
+                    style={{
+                      fontSize: "0.96rem",
+                      lineHeight: 1.6,
+                      marginTop: 6,
+                      marginBottom: 14,
+                      maxWidth: 750,
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: getTranslatableText(workspace.description),
+                    }}
+                  />
                 ) : (
                   <p
                     style={{
-                      color: "#cbd5e1",
-                      fontSize: "1.08rem",
-                      lineHeight: 1.65,
-                      marginTop: 8,
-                      marginBottom: 20,
+                      color: "var(--text-secondary)",
+                      fontSize: "0.96rem",
+                      lineHeight: 1.6,
+                      marginTop: 6,
+                      marginBottom: 14,
                       maxWidth: 720,
                     }}
                   >
@@ -652,6 +588,7 @@ export default function WorkspaceProfilePage() {
 
                 {/* Contact Pills & Social Media Links embedded directly in Hero */}
                 <div
+                  className="workspace-hero-chips-wrap"
                   style={{
                     display: "flex",
                     flexWrap: "wrap",
@@ -662,20 +599,7 @@ export default function WorkspaceProfilePage() {
                   {workspace.phone && (
                     <a
                       href={`tel:${workspace.phone}`}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.08)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        color: "#e2e8f0",
-                        padding: "7px 16px",
-                        borderRadius: 999,
-                        fontSize: "0.88rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                        textDecoration: "none",
-                        transition: "all 0.2s ease",
-                      }}
+                      className="workspace-hero-contact-chip"
                     >
                       <Icon name="phone" size={15} />
                       <span>{workspace.phone}</span>
@@ -684,20 +608,7 @@ export default function WorkspaceProfilePage() {
                   {workspace.email && (
                     <a
                       href={`mailto:${workspace.email}`}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.08)",
-                        border: "1px solid rgba(255, 255, 255, 0.15)",
-                        color: "#e2e8f0",
-                        padding: "7px 16px",
-                        borderRadius: 999,
-                        fontSize: "0.88rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                        textDecoration: "none",
-                        transition: "all 0.2s ease",
-                      }}
+                      className="workspace-hero-contact-chip"
                     >
                       <Icon name="mail" size={15} />
                       <span>{workspace.email}</span>
@@ -708,19 +619,7 @@ export default function WorkspaceProfilePage() {
                       href={workspace.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        background: `${primaryColor}20`,
-                        border: `1px solid ${primaryColor}40`,
-                        color: "#38bdf8",
-                        padding: "7px 16px",
-                        borderRadius: 999,
-                        fontSize: "0.88rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                        textDecoration: "none",
-                      }}
+                      className="workspace-hero-contact-chip"
                     >
                       <Icon name="globe" size={15} />
                       <span>
@@ -741,19 +640,7 @@ export default function WorkspaceProfilePage() {
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{
-                          background: "rgba(255, 255, 255, 0.12)",
-                          border: "1px solid rgba(255, 255, 255, 0.25)",
-                          color: "#ffffff",
-                          padding: "7px 16px",
-                          borderRadius: 999,
-                          fontSize: "0.86rem",
-                          fontWeight: 600,
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          textDecoration: "none",
-                        }}
+                        className="workspace-hero-contact-chip"
                       >
                         {cfg.icon}
                         <span>{cfg.label}</span>
@@ -765,6 +652,7 @@ export default function WorkspaceProfilePage() {
 
               {/* Main CTA Button */}
               <div
+                className="workspace-hero-cta-wrap"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -799,13 +687,14 @@ export default function WorkspaceProfilePage() {
 
             {/* Quick Metrics Bar at Bottom of Hero */}
             <div
+              className="workspace-hero-metrics-bar"
               style={{
-                marginTop: 32,
-                paddingTop: 24,
-                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                marginTop: 20,
+                paddingTop: 14,
+                border: "none",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                gap: 20,
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: 16,
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -814,8 +703,8 @@ export default function WorkspaceProfilePage() {
                     width: 46,
                     height: 46,
                     borderRadius: 14,
-                    background: `${primaryColor}25`,
-                    color: "#38bdf8",
+                    background: `${primaryColor}20`,
+                    color: primaryColor,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -824,21 +713,10 @@ export default function WorkspaceProfilePage() {
                   <Icon name="briefcase" size={22} />
                 </div>
                 <div>
-                  <div
-                    style={{
-                      fontSize: "1.25rem",
-                      fontWeight: 800,
-                      color: "#ffffff",
-                    }}
-                  >
+                  <div className="workspace-hero-metric-val">
                     {services.length}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "0.84rem",
-                      color: "#94a3b8",
-                    }}
-                  >
+                  <div className="workspace-hero-metric-lbl">
                     {isRTL ? "الخدمات المتاحة" : "Available Services"}
                   </div>
                 </div>
@@ -850,8 +728,8 @@ export default function WorkspaceProfilePage() {
                     width: 46,
                     height: 46,
                     borderRadius: 14,
-                    background: `${secondaryColor}25`,
-                    color: "#a855f7",
+                    background: `${secondaryColor}20`,
+                    color: secondaryColor,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -860,21 +738,10 @@ export default function WorkspaceProfilePage() {
                   <Icon name="users" size={22} />
                 </div>
                 <div>
-                  <div
-                    style={{
-                      fontSize: "1.25rem",
-                      fontWeight: 800,
-                      color: "#ffffff",
-                    }}
-                  >
+                  <div className="workspace-hero-metric-val">
                     {totalSpecialistsCount}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "0.84rem",
-                      color: "#94a3b8",
-                    }}
-                  >
+                  <div className="workspace-hero-metric-lbl">
                     {isRTL ? "فريق المتخصصين" : "Team Specialists"}
                   </div>
                 </div>
@@ -887,8 +754,8 @@ export default function WorkspaceProfilePage() {
                       width: 46,
                       height: 46,
                       borderRadius: 14,
-                      background: "rgba(16, 185, 129, 0.2)",
-                      color: "#34d399",
+                      background: "rgba(16, 185, 129, 0.15)",
+                      color: "#10b981",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -897,21 +764,10 @@ export default function WorkspaceProfilePage() {
                     <Icon name="clock" size={22} />
                   </div>
                   <div>
-                    <div
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: 800,
-                        color: "#ffffff",
-                      }}
-                    >
+                    <div className="workspace-hero-metric-val">
                       {workspace.maximum_booking_days} {isRTL ? "يوم" : "days"}
                     </div>
-                    <div
-                      style={{
-                        fontSize: "0.84rem",
-                        color: "#94a3b8",
-                      }}
-                    >
+                    <div className="workspace-hero-metric-lbl">
                       {isRTL ? "حجز متاح حتى" : "Max Advance Window"}
                     </div>
                   </div>
@@ -974,7 +830,7 @@ export default function WorkspaceProfilePage() {
             background: `linear-gradient(90deg, transparent 0%, ${primaryColor}80 50%, transparent 100%)`,
           }}
         />
-      </div>
+      </section>
 
       {/* CONTINUOUS LANDING PAGE SECTIONS */}
       <div className="container" style={{ paddingTop: 16, paddingBottom: 80 }}>
@@ -1304,75 +1160,200 @@ export default function WorkspaceProfilePage() {
               </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-              {specialistRoles.map((role) => (
-                <div key={role.id}>
-                  <h3
+            {(() => {
+              const allSpecialistMembers = [];
+              specialistRoles.forEach((role) => {
+                if (role.members && Array.isArray(role.members)) {
+                  role.members.forEach((m) => {
+                    allSpecialistMembers.push({
+                      ...m,
+                      roleId: role.id,
+                      roleName: getTranslatableText(
+                        role.name_translations || role.name,
+                      ),
+                    });
+                  });
+                }
+              });
+
+              if (allSpecialistMembers.length === 0) {
+                return (
+                  <p
                     style={{
-                      fontSize: "1.15rem",
-                      fontWeight: 700,
-                      marginBottom: 16,
-                      color: "var(--text)",
-                      paddingBottom: 8,
-                      borderBottom: "2px solid var(--border)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
+                      color: "var(--text-secondary)",
+                      fontSize: "0.88rem",
+                      fontStyle: "italic",
                     }}
                   >
-                    <Icon
-                      name="tag"
-                      size={16}
-                      style={{ color: primaryColor }}
-                    />
-                    <span>
-                      {getTranslatableText(role.name_translations || role.name)}
-                    </span>
-                  </h3>
+                    {isRTL
+                      ? "لا يوجد أعضاء متخصصين حالياً."
+                      : "No specialist members currently."}
+                  </p>
+                );
+              }
 
-                  {role.members && role.members.length > 0 ? (
+              const displayedSpecialists =
+                activeSpecialistRole === "all"
+                  ? allSpecialistMembers
+                  : allSpecialistMembers.filter(
+                      (m) => String(m.roleId) === String(activeSpecialistRole),
+                    );
+
+              return (
+                <div>
+                  {/* Role / Specialist Filter Pill Buttons */}
+                  {specialistRoles.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        flexWrap: "wrap",
+                        marginBottom: 24,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setActiveSpecialistRole("all")}
+                        style={{
+                          padding: "8px 20px",
+                          borderRadius: 999,
+                          fontWeight: 700,
+                          fontSize: "0.86rem",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          background:
+                            activeSpecialistRole === "all"
+                              ? primaryColor
+                              : "var(--surface)",
+                          color:
+                            activeSpecialistRole === "all"
+                              ? "#ffffff"
+                              : "var(--heading)",
+                          border:
+                            activeSpecialistRole === "all"
+                              ? `1px solid ${primaryColor}`
+                              : "1px solid var(--border)",
+                          boxShadow:
+                            activeSpecialistRole === "all"
+                              ? `0 6px 16px ${primaryColor}35`
+                              : "0 2px 8px rgba(0,0,0,0.03)",
+                        }}
+                      >
+                        {isRTL ? "الكل" : "All"} ({allSpecialistMembers.length})
+                      </button>
+
+                      {specialistRoles.map((role) => {
+                        const roleName = getTranslatableText(
+                          role.name_translations || role.name,
+                        );
+                        const isSelected =
+                          String(activeSpecialistRole) === String(role.id);
+                        const count = role.members ? role.members.length : 0;
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            onClick={() => setActiveSpecialistRole(role.id)}
+                            style={{
+                              padding: "8px 20px",
+                              borderRadius: 999,
+                              fontWeight: 700,
+                              fontSize: "0.86rem",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                              background: isSelected
+                                ? primaryColor
+                                : "var(--surface)",
+                              color: isSelected ? "#ffffff" : "var(--heading)",
+                              border: isSelected
+                                ? `1px solid ${primaryColor}`
+                                : "1px solid var(--border)",
+                              boxShadow: isSelected
+                                ? `0 6px 16px ${primaryColor}35`
+                                : "0 2px 8px rgba(0,0,0,0.03)",
+                            }}
+                          >
+                            {roleName} ({count})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {displayedSpecialists.length > 0 ? (
                     <div
                       style={{
                         display: "grid",
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(200px, 1fr))",
-                        gap: 20,
+                          "repeat(auto-fill, minmax(220px, 1fr))",
+                        gap: 22,
                       }}
                     >
-                      {role.members.map((member) => (
-                        <Link
-                          key={member.id}
-                          to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
-                          className="card card-hover animate-tab-card"
+                      {displayedSpecialists.map((member) => (
+                    <Link
+                      key={member.id}
+                      to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
+                      className="specialist-profile-card animate-tab-card"
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        textAlign: "center",
+                        padding: "26px 20px 20px",
+                        borderRadius: 22,
+                        textDecoration: "none",
+                        color: "var(--text)",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position: "relative",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Top Accent Gradient Line */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: 4,
+                          background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
+                        }}
+                      />
+
+                      {/* Avatar Ring */}
+                      <div
+                        style={{
+                          position: "relative",
+                          marginBottom: 14,
+                        }}
+                      >
+                        <div
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            textAlign: "center",
-                            gap: 10,
-                            padding: "28px 20px",
-                            borderRadius: 20,
-                            textDecoration: "none",
-                            color: "var(--text)",
-                            border: "1px solid var(--border)",
-                            transition: "all 0.2s ease",
+                            width: 84,
+                            height: 84,
+                            borderRadius: "50%",
+                            padding: 3,
+                            background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                            boxShadow: `0 8px 20px ${primaryColor}22`,
                           }}
                         >
                           <div
                             style={{
-                              width: 78,
-                              height: 78,
+                              width: "100%",
+                              height: "100%",
                               borderRadius: "50%",
-                              background: `linear-gradient(135deg, ${primaryColor}25, ${secondaryColor}25)`,
-                              color: primaryColor,
+                              overflow: "hidden",
+                              background: "var(--surface)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontWeight: 800,
-                              fontSize: "1.6rem",
-                              flexShrink: 0,
-                              overflow: "hidden",
-                              border: `2px solid ${primaryColor}30`,
+                              fontSize: "1.7rem",
+                              color: primaryColor,
                             }}
                           >
                             {member.avatar_url ? (
@@ -1389,45 +1370,93 @@ export default function WorkspaceProfilePage() {
                               member.name.charAt(0).toUpperCase()
                             )}
                           </div>
+                        </div>
+                      </div>
 
-                          <div>
-                            <div
-                              style={{ fontWeight: 800, fontSize: "1.05rem" }}
-                            >
-                              {member.name}
-                            </div>
-                            {member.title && (
-                              <div
-                                style={{
-                                  fontSize: "0.85rem",
-                                  color: "var(--text-secondary)",
-                                  marginTop: 2,
-                                }}
-                              >
-                                {member.title}
-                              </div>
-                            )}
-                          </div>
+                      {/* Member Info */}
+                      <div
+                        style={{
+                          width: "100%",
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontWeight: 800,
+                            fontSize: "1.08rem",
+                            color: "var(--heading)",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {member.name}
+                        </div>
 
+                        {/* Category Specialty Pill */}
+                        {member.roleName && (
                           <span
                             style={{
-                              marginTop: 4,
-                              color: primaryColor,
+                              marginTop: 6,
+                              fontSize: "0.76rem",
                               fontWeight: 700,
-                              fontSize: "0.82rem",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 4,
+                              padding: "3px 12px",
+                              borderRadius: 20,
+                              background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}10)`,
+                              color: primaryColor,
+                              border: `1px solid ${primaryColor}25`,
+                              display: "inline-block",
                             }}
                           >
-                            {isRTL ? "عرض الملف الشخصي" : "View Profile"}
-                            <Icon
-                              name={isRTL ? "chevron-left" : "chevron-right"}
-                              size={14}
-                            />
+                            {member.roleName}
                           </span>
-                        </Link>
-                      ))}
+                        )}
+
+                        {member.title && (
+                          <div
+                            style={{
+                              fontSize: "0.83rem",
+                              color: "var(--text-secondary)",
+                              marginTop: 4,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {member.title}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* View Profile Action Link Button */}
+                      <div
+                        style={{
+                          marginTop: 18,
+                          width: "100%",
+                          padding: "9px 16px",
+                          borderRadius: 14,
+                          background: `linear-gradient(135deg, ${primaryColor}12, ${secondaryColor}08)`,
+                          border: `1px solid ${primaryColor}25`,
+                          color: primaryColor,
+                          fontWeight: 700,
+                          fontSize: "0.83rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span>
+                          {isRTL ? "عرض الملف الشخصي" : "View Profile"}
+                        </span>
+                        <Icon
+                          name={isRTL ? "chevron-left" : "chevron-right"}
+                          size={14}
+                        />
+                      </div>
+                    </Link>
+                  ))}
                     </div>
                   ) : (
                     <p
@@ -1435,16 +1464,17 @@ export default function WorkspaceProfilePage() {
                         color: "var(--text-secondary)",
                         fontSize: "0.88rem",
                         fontStyle: "italic",
+                        marginTop: 14,
                       }}
                     >
                       {isRTL
-                        ? "لا يوجد أعضاء بهذا التخصص حالياً."
-                        : "No members for this role currently."}
+                        ? "لا يوجد أعضاء متخصصين بهذا التصنيف حالياً."
+                        : "No specialists found for this category."}
                     </p>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </section>
         )}
 

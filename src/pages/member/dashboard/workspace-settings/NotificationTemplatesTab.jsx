@@ -230,9 +230,16 @@ export default function NotificationTemplatesTab({
               padding: "5px 16px",
               fontSize: "0.82rem",
               fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            العربية
+            <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
+              <rect width="24" height="16" fill="#007A3D" rx="2" />
+              <path d="M4 8.5L20 8.5M6 5.5H18" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            <span>{isRTL ? "العربية" : "Arabic"}</span>
           </button>
           <button
             type="button"
@@ -243,9 +250,19 @@ export default function NotificationTemplatesTab({
               padding: "5px 16px",
               fontSize: "0.82rem",
               fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            English
+            <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
+              <rect width="24" height="16" fill="#00247D" rx="2" />
+              <path d="M0 0L24 16M24 0L0 16" stroke="#FFFFFF" strokeWidth="2.2" />
+              <path d="M0 0L24 16M24 0L0 16" stroke="#CF142B" strokeWidth="1.2" />
+              <path d="M12 0V16M0 8H24" stroke="#FFFFFF" strokeWidth="4.2" />
+              <path d="M12 0V16M0 8H24" stroke="#CF142B" strokeWidth="2.2" />
+            </svg>
+            <span>English</span>
           </button>
         </div>
       </div>

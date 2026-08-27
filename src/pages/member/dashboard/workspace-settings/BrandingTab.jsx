@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
+import LazyImage from "../../../../components/ui/LazyImage";
 
 export default function BrandingTab({
   brandingForm,
@@ -9,10 +11,43 @@ export default function BrandingTab({
   canEdit,
 }) {
   const { t } = useLanguage();
+  const galleryInputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(brandingForm);
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const readPromises = files.map((file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const url = event.target?.result;
+          resolve(url ? { url, caption: "" } : null);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    const newItems = (await Promise.all(readPromises)).filter(Boolean);
+    if (newItems.length > 0) {
+      setBrandingForm((prev) => {
+        const current = Array.isArray(prev.gallery_urls)
+          ? prev.gallery_urls
+          : [];
+        return {
+          ...prev,
+          gallery_urls: [...current, ...newItems],
+        };
+      });
+    }
+
+    e.target.value = "";
   };
 
   const handleFileChange = (field, e) => {
@@ -533,6 +568,492 @@ export default function BrandingTab({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* SECTION: Photo Gallery Media */}
+      <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-light)" }}>
+        {/* Hidden File Input for Adding Gallery Images */}
+        <input
+          type="file"
+          ref={galleryInputRef}
+          accept="image/*"
+          multiple
+          style={{ display: "none" }}
+          onChange={handleGalleryUpload}
+        />
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              margin: 0,
+              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon name="image" size={18} style={{ color: "var(--primary)" }} />
+            <span>
+              {t("photoGalleryMedia") || "معرض الصور"}
+            </span>
+          </h3>
+
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            disabled={!canEdit}
+            className="btn btn-secondary btn-sm"
+          >
+            + {t("addImageToGallery") || "رفع صورة للمعرض"}
+          </button>
+        </div>
+
+        {Array.isArray(brandingForm.gallery_urls) &&
+        brandingForm.gallery_urls.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {brandingForm.gallery_urls.map((item, idx) => {
+              const galleryItem =
+                typeof item === "string" ? { url: item, caption: "" } : item;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                    background: "var(--surface-alt)",
+                    padding: 16,
+                    borderRadius: 14,
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  {/* Top Row: Image Thumbnail & Remove Button at the end */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        border: "1px solid var(--border)",
+                        background: "#000",
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {galleryItem.url ? (
+                        <LazyImage
+                          src={galleryItem.url}
+                          alt={`Gallery item ${idx + 1}`}
+                          width={64}
+                          height={64}
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <Icon
+                          name="image"
+                          size={24}
+                          style={{ color: "#fff", opacity: 0.5 }}
+                        />
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBrandingForm({
+                          ...brandingForm,
+                          gallery_urls: brandingForm.gallery_urls.filter(
+                            (_, i) => i !== idx,
+                          ),
+                        });
+                      }}
+                      disabled={!canEdit}
+                      className="btn btn-secondary btn-sm"
+                      style={{
+                        color: "var(--error)",
+                        width: 36,
+                        height: 36,
+                        borderRadius: "var(--radius-md)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
+                        flexShrink: 0,
+                      }}
+                      title={t("deleteImage") || "حذف الصورة"}
+                    >
+                      <Icon name="x" size={18} />
+                    </button>
+                  </div>
+
+                  {/* Caption Input Field (Higher Height) */}
+                  <div style={{ width: "100%" }}>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={galleryItem.caption || ""}
+                      onChange={(e) => {
+                        const updated = brandingForm.gallery_urls.map(
+                          (g, i) => {
+                            const existing =
+                              typeof g === "string"
+                                ? { url: g, caption: "" }
+                                : g;
+                            return i === idx
+                              ? { ...existing, caption: e.target.value }
+                              : existing;
+                          },
+                        );
+                        setBrandingForm({
+                          ...brandingForm,
+                          gallery_urls: updated,
+                        });
+                      }}
+                      disabled={!canEdit}
+                      placeholder={
+                        t("photoCaptionOptional") ||
+                        "وصف مختصر للصورة (اختياري)"
+                      }
+                      style={{
+                        width: "100%",
+                        height: 52,
+                        padding: "12px 16px",
+                        fontSize: "0.9rem",
+                        borderRadius: "var(--radius-md)",
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.88rem",
+              fontStyle: "italic",
+            }}
+          >
+            {t("noGalleryImagesYet") || "لم يتم إضافة صور في المعرض بعد."}
+          </p>
+        )}
+      </div>
+
+      {/* SECTION: Feature Highlights Cards (لماذا تختار خدماتنا؟ / Why Choose Our Services) */}
+      <div
+        style={{
+          marginTop: 24,
+          paddingTop: 20,
+          borderTop: "1px solid var(--border-light)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              margin: 0,
+              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon
+              name="sparkles"
+              size={18}
+              style={{ color: "var(--primary)" }}
+            />
+            <span>
+              {t("featureHighlightsCards") || "لماذا تختار خدماتنا؟ (بطاقات المزايا)"}
+            </span>
+          </h3>
+
+          <button
+            type="button"
+            onClick={() => {
+              const current = Array.isArray(brandingForm.feature_highlights)
+                ? brandingForm.feature_highlights
+                : [];
+              setBrandingForm({
+                ...brandingForm,
+                feature_highlights: [
+                  ...current,
+                  { title: "", icon: "sparkles", description: "", image_url: "" },
+                ],
+              });
+            }}
+            disabled={!canEdit}
+            className="btn btn-secondary btn-sm"
+          >
+            + {t("addFeatureHighlight") || "إضافة بطاقة ميزة"}
+          </button>
+        </div>
+
+        {Array.isArray(brandingForm.feature_highlights) &&
+        brandingForm.feature_highlights.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {brandingForm.feature_highlights.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: "var(--surface-alt)",
+                  padding: 16,
+                  borderRadius: 16,
+                  border: "1px solid var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                    }}
+                  >
+                    #{idx + 1} {t("featureHighlightCard") || "بطاقة ميزة"}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = Array.isArray(brandingForm.feature_highlights)
+                        ? brandingForm.feature_highlights
+                        : [];
+                      setBrandingForm({
+                        ...brandingForm,
+                        feature_highlights: current.filter((_, i) => i !== idx),
+                      });
+                    }}
+                    disabled={!canEdit}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      color: "var(--error)",
+                      padding: "4px 10px",
+                    }}
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </div>
+
+                {/* Image Upload for Card Header Image */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div
+                    style={{
+                      width: 80,
+                      height: 50,
+                      borderRadius: 8,
+                      overflow: "hidden",
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {item.image_url ? (
+                      <LazyImage
+                        src={item.image_url}
+                        alt={`Card image ${idx + 1}`}
+                        width={80}
+                        height={50}
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Icon
+                        name="image"
+                        size={20}
+                        style={{ color: "var(--muted)", opacity: 0.5 }}
+                      />
+                    )}
+                  </div>
+
+                  <label
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      cursor: canEdit ? "pointer" : "default",
+                      margin: 0,
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    📷 {t("uploadCardImage") || "رفع صورة للبطاقة"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            const url = ev.target?.result;
+                            if (url) {
+                              const current = Array.isArray(brandingForm.feature_highlights)
+                                ? brandingForm.feature_highlights
+                                : [];
+                              const updated = current.map((f, i) =>
+                                i === idx ? { ...f, image_url: url } : f,
+                              );
+                              setBrandingForm({
+                                ...brandingForm,
+                                feature_highlights: updated,
+                              });
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                        e.target.value = "";
+                      }}
+                      hidden
+                      disabled={!canEdit}
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-2" style={{ gap: 14 }}>
+                  <div className="form-group mb-0">
+                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                      {t("featureTitle") || "عنوان الميزة"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={item.title || ""}
+                      onChange={(e) => {
+                        const current = Array.isArray(brandingForm.feature_highlights)
+                          ? brandingForm.feature_highlights
+                          : [];
+                        const updated = current.map((f, i) =>
+                          i === idx ? { ...f, title: e.target.value } : f,
+                        );
+                        setBrandingForm({
+                          ...brandingForm,
+                          feature_highlights: updated,
+                        });
+                      }}
+                      disabled={!canEdit}
+                      placeholder={
+                        isRTL ? "مثال: تجربة حجز متميزة" : "Example: Exceptional Booking Experience"
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group mb-0">
+                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                      {t("cardIcon") || "رمز الأيقونة"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={item.icon || "sparkles"}
+                      onChange={(e) => {
+                        const current = Array.isArray(brandingForm.feature_highlights)
+                          ? brandingForm.feature_highlights
+                          : [];
+                        const updated = current.map((f, i) =>
+                          i === idx ? { ...f, icon: e.target.value } : f,
+                        );
+                        setBrandingForm({
+                          ...brandingForm,
+                          feature_highlights: updated,
+                        });
+                      }}
+                      disabled={!canEdit}
+                    >
+                      <option value="sparkles">✨ {t("sparkles") || "تمييز وسحر"}</option>
+                      <option value="shield">🛡️ {t("shield") || "حماية وخصوصية"}</option>
+                      <option value="clock">⏰ {t("clock") || "وقت وسرعة"}</option>
+                      <option value="users">👥 {t("users") || "فريق عمل"}</option>
+                      <option value="star">⭐ {t("star") || "نجمة وتقييم"}</option>
+                      <option value="phone">📞 {t("phone") || "هاتف وتواصل"}</option>
+                      <option value="map-pin">📍 {t("mapPin") || "موقع جغرافي"}</option>
+                      <option value="briefcase">💼 {t("briefcase") || "حقيبة عمل"}</option>
+                      <option value="check">✅ {t("check") || "تأكيد وصحة"}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    {t("featureDescription") || "وصف الميزة"}
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={item.description || ""}
+                    onChange={(e) => {
+                      const current = Array.isArray(brandingForm.feature_highlights)
+                        ? brandingForm.feature_highlights
+                        : [];
+                      const updated = current.map((f, i) =>
+                        i === idx ? { ...f, description: e.target.value } : f,
+                      );
+                      setBrandingForm({
+                        ...brandingForm,
+                        feature_highlights: updated,
+                      });
+                    }}
+                    disabled={!canEdit}
+                    placeholder={
+                      isRTL
+                        ? "مثال: تجربة حجز مواعيد سريعة، موثوقة، ومصممة لتلبية تطلعاتك."
+                        : "Example: Fast, reliable appointment booking designed for your expectations."
+                    }
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.88rem",
+              fontStyle: "italic",
+            }}
+          >
+            {t("noFeatureHighlightsYet") || "لم يتم إضافة بطاقات مميزات بعد."}
+          </p>
+        )}
       </div>
 
       {canEdit && (

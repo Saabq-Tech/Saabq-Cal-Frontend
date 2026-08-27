@@ -213,11 +213,11 @@ export default function SocialLinksTab({
                           borderRadius: "50%",
                           border: isActive
                             ? "1.5px solid var(--primary)"
-                            : "1px solid var(--border-light)",
+                            : "1px solid var(--border)",
                           background: isActive
-                            ? "var(--primary-subtle)"
-                            : "#ffffff",
-                          color: isActive ? "var(--primary)" : "var(--muted)",
+                            ? "var(--primary)"
+                            : "var(--surface)",
+                          color: isActive ? "#ffffff" : "var(--text-secondary)",
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -243,9 +243,9 @@ export default function SocialLinksTab({
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      border: "1px solid #fecdd3",
-                      background: "#fef2f2",
-                      color: "#e11d48",
+                      border: "1px solid rgba(225, 29, 72, 0.3)",
+                      background: "rgba(225, 29, 72, 0.12)",
+                      color: "#f43f5e",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -281,7 +281,6 @@ export default function SocialLinksTab({
                     direction: "ltr",
                     textAlign: "left",
                     borderRadius: "var(--radius-md)",
-                    background: "#ffffff",
                   }}
                 />
               </div>

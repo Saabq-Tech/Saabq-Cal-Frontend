@@ -140,14 +140,15 @@ export default function RichTextEditor({
     <div
       className="rich-text-editor-container"
       style={{
-        border: "1px solid var(--border-light, #e2e8f0)",
-        borderRadius: "var(--radius-md, 10px)",
+        border: "1.5px solid var(--border, #cbd5e1)",
+        borderRadius: "var(--radius-md, 12px)",
         background: "var(--surface, #ffffff)",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         opacity: disabled ? 0.7 : 1,
         pointerEvents: disabled ? "none" : "auto",
+        marginBottom: "22px",
       }}
     >
       {/* Hidden File Input for Image Upload */}
@@ -167,8 +168,8 @@ export default function RichTextEditor({
           alignItems: "center",
           gap: 4,
           padding: "8px 10px",
-          background: "var(--background-subtle, #f8fafc)",
-          borderBottom: "1px solid var(--border-light, #e2e8f0)",
+          background: "var(--surface-alt)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         {/* Format Block Dropdown */}
@@ -539,14 +540,16 @@ export default function RichTextEditor({
           <form
             onSubmit={handleInsertTable}
             style={{
-              background: "#fff",
+              background: "var(--surface)",
+              color: "var(--heading)",
+              border: "1px solid var(--border)",
               padding: 24,
               borderRadius: 12,
               width: 320,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
             }}
           >
-            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem" }}>
+            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem", color: "var(--heading)" }}>
               {t("insertTable") || "إدراج جدول"}
             </h4>
             <div style={{ marginBottom: 12 }}>
@@ -555,6 +558,7 @@ export default function RichTextEditor({
                   fontSize: "0.84rem",
                   display: "block",
                   marginBottom: 4,
+                  color: "var(--text-secondary)",
                 }}
               >
                 {t("rows") || "عدد الصفوف"}:
@@ -575,6 +579,7 @@ export default function RichTextEditor({
                   fontSize: "0.84rem",
                   display: "block",
                   marginBottom: 4,
+                  color: "var(--text-secondary)",
                 }}
               >
                 {t("cols") || "عدد الأعمدة"}:
@@ -623,14 +628,16 @@ export default function RichTextEditor({
           <form
             onSubmit={handleInsertLink}
             style={{
-              background: "#fff",
+              background: "var(--surface)",
+              color: "var(--heading)",
+              border: "1px solid var(--border)",
               padding: 24,
               borderRadius: 12,
               width: 360,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
             }}
           >
-            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem" }}>
+            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem", color: "var(--heading)" }}>
               {t("insertLink") || "إدراج رابط"}
             </h4>
             <div style={{ marginBottom: 20 }}>
@@ -683,5 +690,5 @@ const btnStyle = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  color: "var(--text-main, #334155)",
+  color: "var(--heading)",
 };

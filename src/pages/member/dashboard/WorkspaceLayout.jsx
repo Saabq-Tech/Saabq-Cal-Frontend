@@ -326,7 +326,7 @@ export default function WorkspaceLayout() {
             </div>
           </div>
 
-          <div style={{ marginInlineStart: "auto" }}>
+          <div className="profile-header-action">
             <Link
               to="/member/profile"
               className="btn btn-primary btn-sm"

@@ -151,9 +151,10 @@ export default function Navbar() {
     ? new URLSearchParams(location.search).get("tab") || "info"
     : null;
 
-  // Apply dark mode class
+  // Apply dark mode class and attribute
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
   }, [dark]);
 

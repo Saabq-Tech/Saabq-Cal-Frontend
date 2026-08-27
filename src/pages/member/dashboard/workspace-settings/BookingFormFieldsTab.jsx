@@ -343,8 +343,8 @@ export default function BookingFormFieldsTab({
               key={grp.id}
               style={{
                 borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border-light)",
-                background: "#ffffff",
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
                 overflow: "hidden",
               }}
             >
@@ -352,7 +352,7 @@ export default function BookingFormFieldsTab({
                 style={{
                   padding: "12px 18px",
                   background: "var(--surface-alt)",
-                  borderBottom: "1px solid var(--border-light)",
+                  borderBottom: "1px solid var(--border)",
                   fontSize: "0.84rem",
                   fontWeight: 800,
                   color: "var(--heading)",
@@ -531,8 +531,8 @@ export default function BookingFormFieldsTab({
             style={{
               padding: 20,
               borderRadius: "var(--radius-lg)",
-              border: "1px solid var(--border-light)",
-              background: "#ffffff",
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
               display: "flex",
               flexDirection: "column",
               gap: 16,
@@ -1023,10 +1023,10 @@ export default function BookingFormFieldsTab({
             position: "sticky",
             top: 20,
             borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-light)",
-            background: "#ffffff",
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
             padding: 20,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+            boxShadow: "var(--shadow-md)",
           }}
         >
           <div

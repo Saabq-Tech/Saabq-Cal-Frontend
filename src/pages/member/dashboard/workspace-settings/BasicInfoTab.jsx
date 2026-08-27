@@ -21,6 +21,14 @@ export default function BasicInfoTab({
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingCities, setLoadingCities] = useState(false);
 
+  // Helper to safely extract string from string or localized object
+  const getLabelValue = (val) => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    if (typeof val === "object") return val.ar || val.en || "";
+    return String(val);
+  };
+
   // Fetch states when country_id changes
   useEffect(() => {
     if (!basicForm.country_id) {
@@ -146,13 +154,12 @@ export default function BasicInfoTab({
         </div>
       </div>
 
-      {/* Row 1: Name, Slug (with Badge), Status */}
+      {/* Row 1: Name & Slug (50% each) */}
       <div
-        className="form-row"
+        className="form-row grid grid-2"
         style={{
           display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fill, minmax(min(100%, 200px), 1fr))",
+          gridTemplateColumns: "1fr 1fr",
           gap: 16,
           marginBottom: 16,
         }}
@@ -217,6 +224,38 @@ export default function BasicInfoTab({
             disabled={!canEdit}
           />
         </div>
+      </div>
+
+      {/* Row 2: Type & Status (50% each) */}
+      <div
+        className="form-row grid grid-2"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 16,
+          marginBottom: 16,
+        }}
+      >
+        <div className="form-group">
+          <label className="form-label">
+            {t("industryCategoryLabel") || "النوع / المجال (التخصص)"}
+          </label>
+          <SearchableSelect
+            value={basicForm.workspace_type_id}
+            options={typeOptions}
+            placeholder={
+              t("selectWorkspaceType") || "-- اختر النوع / المجال --"
+            }
+            searchPlaceholder={t("searchWorkspaceType") || "بحث في المجالات..."}
+            disabled={!canEdit}
+            onChange={(selectedVal) =>
+              setBasicForm({
+                ...basicForm,
+                workspace_type_id: selectedVal ? Number(selectedVal) : "",
+              })
+            }
+          />
+        </div>
 
         <div className="form-group">
           <label className="form-label">
@@ -231,19 +270,39 @@ export default function BasicInfoTab({
             disabled={!canEdit}
           >
             <option value="active">
-              {t("statusActiveLabel") || "نشط (Active)"}
+              {t("statusActiveLabel") || "نشط"}
             </option>
             <option value="inactive">
-              {t("statusInactiveLabel") || "غير نشط (Inactive)"}
+              {t("statusInactiveLabel") || "غير نشط"}
             </option>
             <option value="suspended">
-              {t("statusSuspendedLabel") || "معلق (Suspended)"}
+              {t("statusSuspendedLabel") || "معلق"}
             </option>
           </select>
         </div>
       </div>
 
-      {/* Row 2: Bio / Description (Rich Text HTML Translatable Editor) */}
+      {/* Tagline / Short Intro */}
+      <div className="form-group">
+        <label className="form-label">
+          {t("bookingShortIntro") || "نبذة مختصرة"}
+        </label>
+        <input
+          type="text"
+          className="form-input"
+          value={getLabelValue(basicForm.booking_short_intro)}
+          onChange={(e) =>
+            setBasicForm({ ...basicForm, booking_short_intro: e.target.value })
+          }
+          disabled={!canEdit}
+          placeholder={
+            t("bookingShortIntroPlaceholder") ||
+            "مثال: عيادة طبية متخصصة تقدم أحدث الاستشارات والرعاية الشاملة."
+          }
+        />
+      </div>
+
+      {/* Row 2: Bio / Description */}
       <div className="form-group" style={{ marginBottom: 24 }}>
         <div
           style={{
@@ -257,7 +316,7 @@ export default function BasicInfoTab({
             className="form-label"
             style={{ marginBottom: 0, fontWeight: 700 }}
           >
-            {t("workspaceBioLabel") || "نبذة عن مساحة العمل (وصف HTML غني)"}
+            {t("workspaceBioLabel") || "نبذة عن مساحة العمل"}
           </label>
 
           {/* Language Toggle Pills */}
@@ -266,41 +325,60 @@ export default function BasicInfoTab({
               type="button"
               onClick={() => setDescLang("ar")}
               style={{
-                padding: "4px 10px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
                 borderRadius: 14,
-                fontSize: "0.76rem",
+                fontSize: "0.78rem",
                 fontWeight: descLang === "ar" ? 700 : 500,
                 border:
                   descLang === "ar"
-                    ? "1px solid var(--primary)"
-                    : "1px solid var(--border-light)",
+                    ? "1.5px solid var(--primary)"
+                    : "1px solid var(--border)",
                 background:
-                  descLang === "ar" ? "var(--primary)" : "transparent",
-                color: descLang === "ar" ? "#fff" : "var(--text-secondary)",
+                  descLang === "ar" ? "var(--primary)" : "var(--surface)",
+                color: descLang === "ar" ? "#ffffff" : "var(--text-secondary)",
                 cursor: "pointer",
+                transition: "all 0.15s ease",
               }}
             >
-              🇸🇦 {t("arabic") || "بالعربية"}
+              <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
+                <rect width="24" height="16" fill="#007A3D" rx="2" />
+                <path d="M4 8.5L20 8.5M6 5.5H18" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+              <span>{t("arabic") || "بالعربية"}</span>
             </button>
             <button
               type="button"
               onClick={() => setDescLang("en")}
               style={{
-                padding: "4px 10px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 12px",
                 borderRadius: 14,
-                fontSize: "0.76rem",
+                fontSize: "0.78rem",
                 fontWeight: descLang === "en" ? 700 : 500,
                 border:
                   descLang === "en"
-                    ? "1px solid var(--primary)"
-                    : "1px solid var(--border-light)",
+                    ? "1.5px solid var(--primary)"
+                    : "1px solid var(--border)",
                 background:
-                  descLang === "en" ? "var(--primary)" : "transparent",
-                color: descLang === "en" ? "#fff" : "var(--text-secondary)",
+                  descLang === "en" ? "var(--primary)" : "var(--surface)",
+                color: descLang === "en" ? "#ffffff" : "var(--text-secondary)",
                 cursor: "pointer",
+                transition: "all 0.15s ease",
               }}
             >
-              🇬🇧 {t("english") || "بالإنجليزية"}
+              <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
+                <rect width="24" height="16" fill="#00247D" rx="2" />
+                <path d="M0 0L24 16M24 0L0 16" stroke="#FFFFFF" strokeWidth="2.2" />
+                <path d="M0 0L24 16M24 0L0 16" stroke="#CF142B" strokeWidth="1.2" />
+                <path d="M12 0V16M0 8H24" stroke="#FFFFFF" strokeWidth="4.2" />
+                <path d="M12 0V16M0 8H24" stroke="#CF142B" strokeWidth="2.2" />
+              </svg>
+              <span>{t("english") || "بالإنجليزية"}</span>
             </button>
           </div>
         </div>
@@ -353,15 +431,20 @@ export default function BasicInfoTab({
       {/* Customer Terminology & Explorer Visibility Section */}
       <div
         style={{
-          background: "var(--background-subtle, #f8fafc)",
-          border: "1px solid var(--border-light, #e2e8f0)",
+          background: "var(--surface-alt)",
+          border: "1px solid var(--border)",
           borderRadius: "var(--radius-lg, 12px)",
           padding: 20,
           marginBottom: 24,
         }}
       >
         <h4
-          style={{ margin: "0 0 4px 0", fontSize: "1.05rem", fontWeight: 800 }}
+          style={{
+            margin: "0 0 4px 0",
+            fontSize: "1.05rem",
+            fontWeight: 800,
+            color: "var(--heading)",
+          }}
         >
           {t("customerLabelSectionTitle") ||
             "مسمى العملاء والظهور في الاستكشاف"}
@@ -394,7 +477,7 @@ export default function BasicInfoTab({
             <input
               type="text"
               className="form-input"
-              value={basicForm.customer_label_singular || ""}
+              value={getLabelValue(basicForm.customer_label_singular)}
               onChange={(e) =>
                 setBasicForm({
                   ...basicForm,
@@ -416,7 +499,7 @@ export default function BasicInfoTab({
             <input
               type="text"
               className="form-input"
-              value={basicForm.customer_label_plural || ""}
+              value={getLabelValue(basicForm.customer_label_plural)}
               onChange={(e) =>
                 setBasicForm({
                   ...basicForm,
@@ -505,13 +588,12 @@ export default function BasicInfoTab({
         </div>
       </div>
 
-      {/* Row 3: Email, Phone, Website */}
+      {/* Row 3: Email & Phone (50% each) */}
       <div
-        className="form-row"
+        className="form-row grid grid-2"
         style={{
           display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fill, minmax(min(100%, 200px), 1fr))",
+          gridTemplateColumns: "1fr 1fr",
           gap: 16,
           marginBottom: 16,
         }}
@@ -546,55 +628,18 @@ export default function BasicInfoTab({
             disabled={!canEdit}
           />
         </div>
-
-        <div className="form-group">
-          <label className="form-label">
-            {t("websiteUrlLabel") || "الموقع الإلكتروني"}
-          </label>
-          <input
-            type="url"
-            className="form-input"
-            value={basicForm.website || ""}
-            onChange={(e) =>
-              setBasicForm({ ...basicForm, website: e.target.value })
-            }
-            placeholder="https://example.com"
-            disabled={!canEdit}
-          />
-        </div>
       </div>
 
-      {/* Row 4: Type, Country, State, City */}
+      {/* Row 4: Country, State, City (3 equal columns) */}
       <div
-        className="form-row"
+        className="form-row grid grid-3"
         style={{
           display: "grid",
-          gridTemplateColumns:
-            "repeat(auto-fill, minmax(min(100%, 200px), 1fr))",
+          gridTemplateColumns: "1fr 1fr 1fr",
           gap: 16,
           marginBottom: 24,
         }}
       >
-        <div className="form-group">
-          <label className="form-label">
-            {t("industryCategoryLabel") || "النوع / المجال"}
-          </label>
-          <SearchableSelect
-            value={basicForm.workspace_type_id}
-            options={typeOptions}
-            placeholder={
-              t("selectWorkspaceType") || "-- اختر النوع / المجال --"
-            }
-            searchPlaceholder={t("searchWorkspaceType") || "بحث في المجالات..."}
-            disabled={!canEdit}
-            onChange={(selectedVal) =>
-              setBasicForm({
-                ...basicForm,
-                workspace_type_id: selectedVal ? Number(selectedVal) : "",
-              })
-            }
-          />
-        </div>
 
         <div className="form-group">
           <label className="form-label">{t("countryLabel") || "الدولة"}</label>

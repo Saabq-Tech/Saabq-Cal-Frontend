@@ -10,7 +10,6 @@ import SEO from "../../../components/ui/SEO";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 
 // Sub-tabs
-import ProfileTab from "./workspace-settings/ProfileTab";
 import BasicInfoTab from "./workspace-settings/BasicInfoTab";
 import BrandingTab from "./workspace-settings/BrandingTab";
 import TimezoneTab from "./workspace-settings/TimezoneTab";
@@ -27,7 +26,7 @@ export default function WorkspaceSettingsPage() {
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const subSettingsTab = searchParams.get("sub") || "profile";
+  const subSettingsTab = searchParams.get("sub") || "basic";
 
   const setSubSettingsTab = (subId) => {
     setSearchParams({ sub: subId }, { replace: true });
@@ -85,29 +84,6 @@ export default function WorkspaceSettingsPage() {
   const canEdit = isOwner || userPermissions.includes("settings_write");
 
   // Forms
-  const [profileForm, setProfileForm] = useState({
-    name: "",
-    slug: "",
-    workspace_type_id: "",
-    booking_short_intro: "",
-    description: { ar: "", en: "" },
-    logo_url: "",
-    cover_url: "",
-    primary_color: "#0a9099",
-    secondary_color: "#166992",
-    hover_color: "#44f2fe",
-    email: "",
-    phone: "",
-    website: "",
-    country_id: "",
-    state_id: "",
-    city_id: "",
-    address: "",
-    social_links: [],
-    gallery_urls: [],
-    feature_highlights: [],
-    testimonials: [],
-  });
   const [basicForm, setBasicForm] = useState({
     name: "",
     email: "",
@@ -231,44 +207,6 @@ export default function WorkspaceSettingsPage() {
             data.secondary_color,
             data.hover_color,
           );
-          setProfileForm({
-            name: data.name || "",
-            slug: data.slug || "",
-            workspace_type_id:
-              data.workspace_type_id || data.workspace_type?.id || "",
-            booking_short_intro: data.booking_short_intro || "",
-            description:
-              typeof data.description === "object"
-                ? {
-                    ar: data.description?.ar || "",
-                    en: data.description?.en || "",
-                  }
-                : { ar: data.description || "", en: "" },
-            logo_url: data.logo_url || data.logo || "",
-            cover_url: data.cover_url || data.cover || "",
-            primary_color: data.primary_color || "#0a9099",
-            secondary_color: data.secondary_color || "#166992",
-            hover_color: data.hover_color || "#44f2fe",
-            email: data.email || "",
-            phone: data.phone || "",
-            website: data.website || "",
-            country_id: data.country_id || data.country?.id || "",
-            state_id: data.state_id || data.state?.id || "",
-            city_id: data.city_id || data.city?.id || "",
-            address: data.address || "",
-            social_links: Array.isArray(data.social_links)
-              ? data.social_links
-              : [],
-            gallery_urls: Array.isArray(data.gallery_urls)
-              ? data.gallery_urls
-              : [],
-            feature_highlights: Array.isArray(data.feature_highlights)
-              ? data.feature_highlights
-              : [],
-            testimonials: Array.isArray(data.testimonials)
-              ? data.testimonials
-              : [],
-          });
           setBasicForm({
             name: data.name || "",
             email: data.email || "",
@@ -280,8 +218,22 @@ export default function WorkspaceSettingsPage() {
                     en: data.description?.en || "",
                   }
                 : { ar: data.description || "", en: "" },
-            customer_label_singular: data.customer_label_singular || "",
-            customer_label_plural: data.customer_label_plural || "",
+            booking_short_intro:
+              typeof data.booking_short_intro === "object"
+                ? data.booking_short_intro?.ar || data.booking_short_intro?.en || ""
+                : data.booking_short_intro || "",
+            customer_label_singular:
+              typeof data.customer_label_singular === "object"
+                ? data.customer_label_singular?.ar ||
+                  data.customer_label_singular?.en ||
+                  ""
+                : data.customer_label_singular || "",
+            customer_label_plural:
+              typeof data.customer_label_plural === "object"
+                ? data.customer_label_plural?.ar ||
+                  data.customer_label_plural?.en ||
+                  ""
+                : data.customer_label_plural || "",
             is_visible_in_explorer: data.is_visible_in_explorer !== false,
             slug: data.slug || "",
             status: data.status || "active",
@@ -292,12 +244,49 @@ export default function WorkspaceSettingsPage() {
             city_id: data.city_id || data.city?.id || "",
             website: data.website || "",
           });
+          const defaultFeatures = [
+            {
+              title: "VIP Pampering Experience",
+              icon: "check",
+              description:
+                "Private suites with personalized complimentary beverages.",
+              image_url:
+                "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&auto=format&fit=crop&q=60",
+            },
+            {
+              title: "Bespoke Facials & Spa",
+              icon: "star",
+              description:
+                "Advanced skincare treatments designed for ultimate radiance.",
+              image_url:
+                "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=60",
+            },
+            {
+              title: "Luxury Hair Styling",
+              icon: "sparkles",
+              description:
+                "World class cuts, coloring and styling by international stylists.",
+              image_url:
+                "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=500&auto=format&fit=crop&q=60",
+            },
+          ];
+
+          const loadedFeatures =
+            Array.isArray(data.feature_highlights) &&
+            data.feature_highlights.length > 0
+              ? data.feature_highlights
+              : defaultFeatures;
+
           setBrandingForm({
             logo_url: data.logo_url || data.logo || "",
             cover_url: data.cover_url || data.cover || "",
             primary_color: data.primary_color || "#0a9099",
             secondary_color: data.secondary_color || "#166992",
             hover_color: data.hover_color || "#44f2fe",
+            gallery_urls: Array.isArray(data.gallery_urls)
+              ? data.gallery_urls
+              : [],
+            feature_highlights: loadedFeatures,
           });
           const timeFmt =
             data.time_format === "24h" || data.time_format === "H:i"
@@ -342,6 +331,10 @@ export default function WorkspaceSettingsPage() {
             minimum_booking_notice_minutes:
               data.minimum_booking_notice_minutes ?? 0,
             maximum_booking_days: data.maximum_booking_days ?? 30,
+            feature_highlights: loadedFeatures,
+            testimonials: Array.isArray(data.testimonials)
+              ? data.testimonials
+              : [],
           });
           setFormFieldsForm({
             field_statuses: data.field_statuses || {},
@@ -405,6 +398,12 @@ export default function WorkspaceSettingsPage() {
       const res = await client.put(targetEndpoint, data);
       if (res.data?.data) {
         setSettings(res.data.data);
+        if (res.data.data.gallery_urls) {
+          setBrandingForm((prev) => ({
+            ...prev,
+            gallery_urls: res.data.data.gallery_urls,
+          }));
+        }
         if (updateWorkspaceState) {
           updateWorkspaceState(res.data.data);
         }
@@ -465,11 +464,6 @@ export default function WorkspaceSettingsPage() {
 
   const settingsSubTabs = [
     {
-      id: "profile",
-      label: t("workspaceProfileSettings") || "الملف التعريفي والصفحة العامة",
-      icon: <Icon name="user" size={15} />,
-    },
-    {
       id: "basic",
       label: t("workspaceBasicInfo") || "المعلومات الأساسية",
       icon: <Icon name="custom-34f286e2" size={15} />,
@@ -514,14 +508,19 @@ export default function WorkspaceSettingsPage() {
   return (
     <div>
       <SEO title={t("settings")} noindex />
-      {/* Draggable & Arrow-Controlled Horizontal Pill Sub-Tabs Navigation */}
+      {/* Draggable & Arrow-Controlled Horizontal Pill Sub-Tabs Navigation Slider */}
       <div
         style={{
           display: "flex",
+          flexDirection: "row",
+          flexWrap: "nowrap",
           alignItems: "center",
           gap: 8,
           marginBottom: 16,
           position: "relative",
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
         }}
       >
         {/* Scroll Right / Back Arrow Button */}
@@ -530,15 +529,15 @@ export default function WorkspaceSettingsPage() {
           onClick={() => scrollByAmount(180)}
           title={t("scrollRightTooltip") || "التمرير لليمين"}
           style={{
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             borderRadius: "50%",
             border: "1px solid var(--border)",
             background: "var(--surface)",
             color: "var(--text-secondary)",
             display: "flex",
             alignItems: "center",
-            justify: "center",
+            justifyContent: "center",
             cursor: "pointer",
             flexShrink: 0,
             transition: "all 0.2s ease",
@@ -548,7 +547,7 @@ export default function WorkspaceSettingsPage() {
           <Icon name="chevron-right" size={16} />
         </button>
 
-        {/* Scrollable Container with Drag to Scroll & Hidden Scrollbar */}
+        {/* Scrollable Container Track */}
         <div
           ref={scrollRef}
           className="no-scrollbar"
@@ -557,62 +556,79 @@ export default function WorkspaceSettingsPage() {
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
           style={{
-            display: "flex",
-            gap: 8,
+            flex: "1 1 0%",
+            minWidth: 0,
+            maxWidth: "100%",
             overflowX: "auto",
-            paddingBottom: 4,
+            overflowY: "hidden",
             paddingTop: 4,
+            paddingBottom: 6,
             userSelect: "none",
             cursor: isMouseDown ? "grabbing" : "grab",
-            flex: 1,
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-x",
           }}
         >
-          {settingsSubTabs.map((sub) => {
-            const isSubActive = subSettingsTab === sub.id;
-            return (
-              <button
-                key={sub.id}
-                type="button"
-                onClick={() => {
-                  if (!dragged) {
-                    setSubSettingsTab(sub.id);
-                  }
-                }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "8px 16px",
-                  borderRadius: 20,
-                  border: isSubActive
-                    ? "1px solid var(--primary)"
-                    : "1px solid var(--border)",
-                  background: isSubActive ? "var(--primary)" : "var(--surface)",
-                  color: isSubActive ? "#ffffff" : "var(--text-secondary)",
-                  fontWeight: isSubActive ? 700 : 500,
-                  fontSize: "0.84rem",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  transition: "all 0.2s ease",
-                  boxShadow: isSubActive
-                    ? "0 2px 8px rgba(17,100,106,0.22)"
-                    : "none",
-                  flexShrink: 0,
-                }}
-              >
-                <span
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "nowrap",
+              alignItems: "center",
+              gap: 8,
+              width: "max-content",
+              minWidth: "max-content",
+            }}
+          >
+            {settingsSubTabs.map((sub) => {
+              const isSubActive = subSettingsTab === sub.id;
+              return (
+                <button
+                  key={sub.id}
+                  type="button"
+                  onClick={() => {
+                    if (!dragged) {
+                      setSubSettingsTab(sub.id);
+                    }
+                  }}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    color: "currentColor",
+                    gap: 6,
+                    padding: "8px 16px",
+                    borderRadius: 20,
+                    border: isSubActive
+                      ? "1.5px solid var(--primary)"
+                      : "1px solid var(--border)",
+                    background: isSubActive
+                      ? "var(--primary)"
+                      : "var(--surface)",
+                    color: isSubActive ? "#ffffff" : "var(--text-secondary)",
+                    fontWeight: isSubActive ? 700 : 500,
+                    fontSize: "0.84rem",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    transition: "all 0.2s ease",
+                    boxShadow: isSubActive
+                      ? "0 2px 8px rgba(17,100,106,0.22)"
+                      : "none",
                   }}
                 >
-                  {sub.icon}
-                </span>
-                <span>{sub.label}</span>
-              </button>
-            );
-          })}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      color: "currentColor",
+                    }}
+                  >
+                    {sub.icon}
+                  </span>
+                  <span>{sub.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Scroll Left / Forward Arrow Button */}
@@ -621,15 +637,15 @@ export default function WorkspaceSettingsPage() {
           onClick={() => scrollByAmount(-180)}
           title={t("scrollLeftTooltip") || "التمرير لليسار"}
           style={{
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             borderRadius: "50%",
             border: "1px solid var(--border)",
             background: "var(--surface)",
             color: "var(--text-secondary)",
             display: "flex",
             alignItems: "center",
-            justify: "center",
+            justifyContent: "center",
             cursor: "pointer",
             flexShrink: 0,
             transition: "all 0.2s ease",
@@ -658,19 +674,6 @@ export default function WorkspaceSettingsPage() {
           </div>
         ) : (
           <>
-            {subSettingsTab === "profile" && (
-              <ProfileTab
-                profileForm={profileForm}
-                setProfileForm={setProfileForm}
-                workspaceTypes={workspaceTypes}
-                countries={countries}
-                onSave={(data) =>
-                  handleSaveSection(data, endpoints.workspaceSettingsProfile)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
             {subSettingsTab === "basic" && (
               <BasicInfoTab
                 basicForm={basicForm}
