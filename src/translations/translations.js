@@ -1584,6 +1584,45 @@ export const translations = {
       "اعرض صفحة الموظف الشخصية بدل صفحة الشركة عند حجز هذه الخدمة",
     showMemberProfileDesc:
       "إذا كان معطّلاً، لن يظهر زر «الملف الشخصي» إطلاقًا في صفحة الحجز — ولن يعود إلى صفحة الشركة.",
+    telegramChatSectionTitle: "ربط الخدمة بمحادثة تلجرام",
+    telegramChatSectionDesc:
+      "تخصيص محادثة أو مجموعة تلجرام لتلقي إشعارات الحجوزات الخاصة بهذه الخدمة",
+    telegramOptionNone: "بدون ربط بتلجرام",
+    telegramOptionNoneDesc: "استخدام الإعدادات الإفتراضية للمساحة",
+    telegramOptionProvider: "محادثة مقدم الخدمة",
+    telegramOptionProviderDesc:
+      "إرسال إشعارات الحجز إلى حساب تلجرام المربوط بمقدم الخدمة",
+    telegramOptionOtherProvider: "محادثة مقدم خدمة آخر (مالك المساحة)",
+    telegramOptionOtherProviderDesc:
+      "اختر حساب تلجرام الخاص بمقدم خدمة آخر داخل مساحة العمل",
+    telegramOptionCustom: "إنشاء / ربط محادثة خاصة لهذه الخدمة فقط",
+    telegramOptionCustomDesc:
+      "ربط الخدمة بمجموعة أو محادثة تلجرام خاصة باستخدام معرف المحادثة (Chat ID)",
+    telegramProviderConnected: "مربوط بتلجرام",
+    telegramProviderNotConnected: "مقدم الخدمة لم يقم بربط حسابه بتلجرام بعد",
+    selectOtherProviderTelegram: "اختر مقدم الخدمة لتسليم الإشعارات:",
+    noOtherProvidersTelegram:
+      "لا يوجد مقدمو خدمات آخرون لديهم حساب تلجرام فعال",
+    telegramChatIdLabel: "معرف محادثة تلجرام (Chat ID):",
+    telegramChatIdPlaceholder: "مثال: -100123456789",
+    howToGetTelegramChatId: "كيفية الحصول على معرف المحادثة؟",
+    serviceTelegramModalTitle:
+      "إرشادات الحصول على معرف محادثة تلجرام (Chat ID)",
+    telegramStep1Title: "الخطوة 1: إنشاء المجموعة أو القناة",
+    telegramStep1Desc:
+      "افتح تطبيق تلجرام وقم بإنشاء مجموعة أو قناة خاصة بالخدمة، أو استخدم مجموعة حالية.",
+    telegramStep2Title: "الخطوة 2: إضافة بوت المنصة",
+    telegramStep2Desc:
+      "أضف بوت المنصة كعضو أو مشرف داخل المجموعة لتلقي الإشعارات والتحكم.",
+    telegramStep3Title: "الخطوة 3: استخراج معرف المحادثة (Chat ID)",
+    telegramStep3Desc:
+      "قم بإضافة البوت @userinfobot أو @raw_data_bot إلى المجموعة، أو قم بتوجيه رسالة من المجموعة للبوت للحصول على معرف المحادثة الذي يبدأ عادةً بـ -100.",
+    telegramStep4Title: "الخطوة 4: إدخال المعرف وحفظه",
+    telegramStep4Desc:
+      "انسخ المعرف الذي حصلت عليه (مثال: -100123456789) وضعه في خانة معرف المحادثة أدناه.",
+    applyChatId: "تطبيق معرف المحادثة",
+    applyAndSaveChatId: "تطبيق وحفظ معرف المحادثة",
+    instructions: "الإرشادات",
   },
   en: {
     installApp: "Install App",
@@ -3196,5 +3235,43 @@ export const translations = {
       "Show employee personal page instead of company page when booking this service",
     showMemberProfileDesc:
       "If disabled, the 'Profile' button will not appear at all on the booking page — and will not return to the company page.",
+    telegramChatSectionTitle: "Telegram Chat Integration",
+    telegramChatSectionDesc:
+      "Attach a Telegram chat or group to receive booking notifications for this service",
+    telegramOptionNone: "No Telegram Attachment",
+    telegramOptionNoneDesc: "Use default workspace settings",
+    telegramOptionProvider: "Provider's Telegram Chat",
+    telegramOptionProviderDesc:
+      "Send booking notifications to the assigned service provider's Telegram chat",
+    telegramOptionOtherProvider: "Other Provider's Telegram Chat (Owner Only)",
+    telegramOptionOtherProviderDesc:
+      "Select another workspace provider's connected Telegram chat",
+    telegramOptionCustom: "Custom Chat for this Service Only",
+    telegramOptionCustomDesc:
+      "Attach a custom Telegram group or chat ID exclusively to this service",
+    telegramProviderConnected: "Connected to Telegram",
+    telegramProviderNotConnected: "Provider has not connected Telegram yet",
+    selectOtherProviderTelegram: "Select provider for notifications:",
+    noOtherProvidersTelegram:
+      "No other providers with active Telegram integration",
+    telegramChatIdLabel: "Telegram Chat ID:",
+    telegramChatIdPlaceholder: "e.g. -100123456789",
+    howToGetTelegramChatId: "How to get Telegram Chat ID?",
+    serviceTelegramModalTitle: "Instructions to Obtain Telegram Chat ID",
+    telegramStep1Title: "Step 1: Create Group or Channel",
+    telegramStep1Desc:
+      "Open Telegram and create a new group or channel for this service, or use an existing group.",
+    telegramStep2Title: "Step 2: Add Platform Bot",
+    telegramStep2Desc:
+      "Add the platform bot as a member or administrator in the group to send notifications.",
+    telegramStep3Title: "Step 3: Extract Chat ID",
+    telegramStep3Desc:
+      "Add @userinfobot or @raw_data_bot to the group, or forward a group message to get the Chat ID starting with -100.",
+    telegramStep4Title: "Step 4: Enter & Save Chat ID",
+    telegramStep4Desc:
+      "Copy the Chat ID (e.g. -100123456789) and paste it into the field below.",
+    applyChatId: "Apply Chat ID",
+    applyAndSaveChatId: "Apply & Save Chat ID",
+    instructions: "Instructions",
   },
 };

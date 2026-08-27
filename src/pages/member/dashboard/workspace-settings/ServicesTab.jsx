@@ -33,6 +33,9 @@ const defaultFormState = {
   maximum_booking_days: 30,
   workspace_member_id: "",
   schedule_id: "",
+  telegram_chat_option: "none",
+  telegram_chat_id: "",
+  telegram_member_id: "",
 };
 
 export default function ServicesTab({
@@ -46,6 +49,8 @@ export default function ServicesTab({
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTelegramInstructionModalOpen, setIsTelegramInstructionModalOpen] =
+    useState(false);
   const [form, setForm] = useState(defaultFormState);
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -207,6 +212,9 @@ export default function ServicesTab({
       maximum_booking_days: service.maximum_booking_days ?? 30,
       workspace_member_id:
         service.workspace_member_id || service.workspace_member?.id || "",
+      telegram_chat_option: service.telegram_chat_option || "none",
+      telegram_chat_id: service.telegram_chat_id || "",
+      telegram_member_id: service.telegram_member_id || "",
     });
     setIsModalOpen(true);
   };
@@ -261,6 +269,18 @@ export default function ServicesTab({
         workspace_member_id: form.workspace_member_id
           ? parseInt(form.workspace_member_id, 10)
           : null,
+        telegram_chat_option: form.telegram_chat_option || "none",
+        telegram_chat_id:
+          form.telegram_chat_option === "custom"
+            ? form.telegram_chat_id
+              ? form.telegram_chat_id.trim()
+              : null
+            : null,
+        telegram_member_id:
+          form.telegram_chat_option === "other_provider" &&
+          form.telegram_member_id
+            ? parseInt(form.telegram_member_id, 10)
+            : null,
         show_member_profile: Boolean(form.show_member_profile),
         name: {
           ar: name_ar || name_en || "",
@@ -825,8 +845,10 @@ export default function ServicesTab({
                     style={{
                       display: "flex",
                       alignItems: "center",
+                      flexWrap: "wrap",
                       gap: 8,
                       width: "100%",
+                      boxSizing: "border-box",
                     }}
                   >
                     {s.booking_enabled ? (
@@ -836,18 +858,19 @@ export default function ServicesTab({
                         rel="noopener noreferrer"
                         className="btn btn-secondary btn-sm"
                         style={{
-                          flex: "1 1 0px",
-                          minWidth: 0,
+                          flex: "1 1 auto",
+                          minWidth: "max-content",
                           justifyContent: "center",
-                          fontSize: "0.78rem",
+                          fontSize: "0.8rem",
                           fontWeight: 600,
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
-                          padding: "7px 8px",
+                          gap: 5,
+                          padding: "8px 12px",
                           textDecoration: "none",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
+                          boxSizing: "border-box",
                         }}
                         title={
                           t("openCustomerBookingPage") ||
@@ -861,22 +884,23 @@ export default function ServicesTab({
                       <span
                         className="btn btn-ghost btn-sm"
                         style={{
-                          flex: "1 1 0px",
-                          minWidth: 0,
+                          flex: "1 1 auto",
+                          minWidth: "max-content",
                           justifyContent: "center",
-                          fontSize: "0.78rem",
+                          fontSize: "0.8rem",
                           fontWeight: 600,
                           opacity: 0.65,
                           cursor: "not-allowed",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
-                          padding: "7px 8px",
+                          gap: 5,
+                          padding: "8px 12px",
                           background: "var(--surface-alt)",
                           border: "1px solid var(--border-light)",
                           color: "var(--muted)",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
+                          boxSizing: "border-box",
                         }}
                         title={
                           t("bookingDisabledNotice") ||
@@ -894,21 +918,26 @@ export default function ServicesTab({
                         className="btn btn-primary btn-sm"
                         onClick={() => handleOpenEdit(s)}
                         style={{
-                          flex: "1 1 0px",
-                          minWidth: 0,
+                          flex: "1 1 auto",
+                          minWidth: "max-content",
                           justifyContent: "center",
                           fontWeight: 700,
-                          fontSize: "0.78rem",
-                          padding: "7px 8px",
+                          fontSize: "0.8rem",
+                          padding: "8px 12px",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
+                          gap: 5,
+                          boxSizing: "border-box",
                         }}
+                        title={
+                          t("editService") ||
+                          (isRTL ? "تعديل الخدمة" : "Edit Service")
+                        }
                       >
                         <Icon name="edit" size={13} />
-                        {t("editService") || "تعديل الخدمة"}
+                        {t("edit") || (isRTL ? "تعديل" : "Edit")}
                       </button>
                     )}
 
@@ -918,17 +947,17 @@ export default function ServicesTab({
                         className="btn btn-danger btn-sm"
                         onClick={() => handleDeleteClick(s)}
                         style={{
-                          flex: "1 1 0px",
-                          minWidth: 0,
+                          flex: "0 0 auto",
                           justifyContent: "center",
                           fontWeight: 700,
-                          fontSize: "0.78rem",
-                          padding: "7px 8px",
+                          fontSize: "0.8rem",
+                          padding: "8px 12px",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
+                          gap: 5,
+                          boxSizing: "border-box",
                         }}
                         title={
                           t("deleteService") ||
@@ -2227,6 +2256,530 @@ export default function ServicesTab({
                   </label>
                 </div>
 
+                {/* Section 6: Telegram Chat Integration */}
+                {(() => {
+                  const membersWithTelegram = Array.isArray(members)
+                    ? members.filter(
+                        (m) =>
+                          m.is_telegram_connected ||
+                          (m.telegram_integration &&
+                            (m.telegram_integration.chat_id ||
+                              m.telegram_integration.chats)),
+                      )
+                    : [];
+
+                  const assignedProviderId = form.workspace_member_id
+                    ? Number(form.workspace_member_id)
+                    : user?.id;
+                  const assignedProvider = Array.isArray(members)
+                    ? members.find(
+                        (m) => Number(m.id) === Number(assignedProviderId),
+                      )
+                    : null;
+
+                  const selectedProviderHasTelegram = Boolean(
+                    assignedProvider?.is_telegram_connected ||
+                    assignedProvider?.telegram_integration?.is_connected ||
+                    assignedProvider?.telegram_integration?.chat_id ||
+                    (user?.id === assignedProviderId &&
+                      (user?.telegram_integration ||
+                        user?.is_telegram_connected)),
+                  );
+
+                  return (
+                    <div
+                      style={{
+                        background: "var(--surface-alt)",
+                        padding: 14,
+                        borderRadius: "var(--radius-md)",
+                        border: "1px solid var(--border-light)",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <h4
+                        style={{
+                          fontSize: "0.88rem",
+                          fontWeight: 800,
+                          margin: "0 0 4px",
+                          color: "var(--primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <Icon
+                          name="send"
+                          size={16}
+                          style={{ color: "var(--primary)" }}
+                        />
+                        {t("telegramChatSectionTitle") ||
+                          (isRTL
+                            ? "ربط الخدمة بمحادثة تلجرام"
+                            : "Telegram Chat Integration")}
+                      </h4>
+                      <p
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "var(--text-secondary)",
+                          margin: "0 0 12px",
+                        }}
+                      >
+                        {t("telegramChatSectionDesc") ||
+                          (isRTL
+                            ? "تخصيص محادثة أو مجموعة تلجرام لتلقي إشعارات الحجوزات الخاصة بهذه الخدمة"
+                            : "Attach a Telegram chat or group to receive booking notifications for this service")}
+                      </p>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                        }}
+                      >
+                        {/* Option 0: None */}
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 12px",
+                            borderRadius: "var(--radius-md)",
+                            background:
+                              form.telegram_chat_option === "none"
+                                ? "var(--surface)"
+                                : "transparent",
+                            border:
+                              form.telegram_chat_option === "none"
+                                ? "1.5px solid var(--primary)"
+                                : "1px solid var(--border-light)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="telegram_chat_option"
+                            value="none"
+                            checked={form.telegram_chat_option === "none"}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                telegram_chat_option: e.target.value,
+                              })
+                            }
+                          />
+                          <div>
+                            <div
+                              style={{ fontSize: "0.84rem", fontWeight: 700 }}
+                            >
+                              {t("telegramOptionNone") ||
+                                (isRTL
+                                  ? "بدون ربط بتلجرام"
+                                  : "No Telegram Attachment")}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "var(--muted)",
+                              }}
+                            >
+                              {t("telegramOptionNoneDesc") ||
+                                (isRTL
+                                  ? "استخدام الإعدادات الإفتراضية للمساحة"
+                                  : "Use default workspace settings")}
+                            </div>
+                          </div>
+                        </label>
+
+                        {/* Option 1: Provider Chat */}
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 12px",
+                            borderRadius: "var(--radius-md)",
+                            background:
+                              form.telegram_chat_option === "provider"
+                                ? "var(--surface)"
+                                : "transparent",
+                            border:
+                              form.telegram_chat_option === "provider"
+                                ? "1.5px solid var(--primary)"
+                                : "1px solid var(--border-light)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="telegram_chat_option"
+                            value="provider"
+                            checked={form.telegram_chat_option === "provider"}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                telegram_chat_option: e.target.value,
+                              })
+                            }
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div
+                              style={{
+                                fontSize: "0.84rem",
+                                fontWeight: 700,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              {t("telegramOptionProvider") ||
+                                (isRTL
+                                  ? "محادثة مقدم الخدمة"
+                                  : "Provider's Telegram Chat")}
+                              {selectedProviderHasTelegram ? (
+                                <span
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    background: "#dcfce7",
+                                    color: "#15803d",
+                                    padding: "2px 8px",
+                                    borderRadius: 10,
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  ✓{" "}
+                                  {t("telegramProviderConnected") ||
+                                    (isRTL ? "مربوط بتلجرام" : "Connected")}
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    background: "#fef3c7",
+                                    color: "#b45309",
+                                    padding: "2px 8px",
+                                    borderRadius: 10,
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  ⚠️{" "}
+                                  {t("telegramProviderNotConnected") ||
+                                    (isRTL ? "غير مربوط" : "Not Connected")}
+                                </span>
+                              )}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "var(--muted)",
+                              }}
+                            >
+                              {t("telegramOptionProviderDesc") ||
+                                (isRTL
+                                  ? "إرسال إشعارات الحجز إلى حساب تلجرام المربوط بمقدم الخدمة"
+                                  : "Send booking notifications to the assigned service provider's Telegram chat")}
+                            </div>
+                          </div>
+                        </label>
+
+                        {/* Option 2: Other Provider Chat (Only visible for Owner) */}
+                        {isOwner && (
+                          <label
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 6,
+                              padding: "10px 12px",
+                              borderRadius: "var(--radius-md)",
+                              background:
+                                form.telegram_chat_option === "other_provider"
+                                  ? "var(--surface)"
+                                  : "transparent",
+                              border:
+                                form.telegram_chat_option === "other_provider"
+                                  ? "1.5px solid var(--primary)"
+                                  : "1px solid var(--border-light)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                              }}
+                            >
+                              <input
+                                type="radio"
+                                name="telegram_chat_option"
+                                value="other_provider"
+                                checked={
+                                  form.telegram_chat_option === "other_provider"
+                                }
+                                onChange={(e) =>
+                                  setForm({
+                                    ...form,
+                                    telegram_chat_option: e.target.value,
+                                  })
+                                }
+                              />
+                              <div>
+                                <div
+                                  style={{
+                                    fontSize: "0.84rem",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {t("telegramOptionOtherProvider") ||
+                                    (isRTL
+                                      ? "محادثة مقدم خدمة آخر (مالك المساحة)"
+                                      : "Other Provider's Telegram Chat (Owner Only)")}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "var(--muted)",
+                                  }}
+                                >
+                                  {t("telegramOptionOtherProviderDesc") ||
+                                    (isRTL
+                                      ? "اختر حساب تلجرام الخاص بمقدم خدمة آخر داخل مساحة العمل"
+                                      : "Select another workspace provider's connected Telegram chat")}
+                                </div>
+                              </div>
+                            </div>
+
+                            {form.telegram_chat_option === "other_provider" && (
+                              <div
+                                style={{
+                                  marginTop: 8,
+                                  paddingInlineStart: 28,
+                                }}
+                              >
+                                <label
+                                  className="form-label"
+                                  style={{
+                                    fontSize: "0.78rem",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {t("selectOtherProviderTelegram") ||
+                                    (isRTL
+                                      ? "اختر مقدم الخدمة لتسليم الإشعارات:"
+                                      : "Select provider for notifications:")}
+                                </label>
+                                <select
+                                  className="form-select"
+                                  value={form.telegram_member_id}
+                                  onChange={(e) =>
+                                    setForm({
+                                      ...form,
+                                      telegram_member_id: e.target.value,
+                                    })
+                                  }
+                                  style={{ width: "100%", marginTop: 4 }}
+                                >
+                                  <option value="">
+                                    --{" "}
+                                    {isRTL
+                                      ? "اختر مقدم الخدمة"
+                                      : "Select Provider"}{" "}
+                                    --
+                                  </option>
+                                  {membersWithTelegram.map((m) => (
+                                    <option key={m.id} value={m.id}>
+                                      {m.name || m.email}{" "}
+                                      {m.telegram_integration?.chat_id
+                                        ? `(ID: ${m.telegram_integration.chat_id})`
+                                        : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                                {membersWithTelegram.length === 0 && (
+                                  <p
+                                    style={{
+                                      fontSize: "0.75rem",
+                                      color: "#b45309",
+                                      marginTop: 4,
+                                    }}
+                                  >
+                                    {t("noOtherProvidersTelegram") ||
+                                      (isRTL
+                                        ? "لا يوجد مقدمو خدمات آخرون لديهم حساب تلجرام فعال"
+                                        : "No other providers with active Telegram integration")}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </label>
+                        )}
+
+                        {/* Option 3: Custom Chat */}
+                        <label
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 6,
+                            padding: "10px 12px",
+                            borderRadius: "var(--radius-md)",
+                            background:
+                              form.telegram_chat_option === "custom"
+                                ? "var(--surface)"
+                                : "transparent",
+                            border:
+                              form.telegram_chat_option === "custom"
+                                ? "1.5px solid var(--primary)"
+                                : "1px solid var(--border-light)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            <input
+                              type="radio"
+                              name="telegram_chat_option"
+                              value="custom"
+                              checked={form.telegram_chat_option === "custom"}
+                              onChange={(e) => {
+                                setForm({
+                                  ...form,
+                                  telegram_chat_option: e.target.value,
+                                });
+                                if (!form.telegram_chat_id) {
+                                  setIsTelegramInstructionModalOpen(true);
+                                }
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div
+                                style={{
+                                  fontSize: "0.84rem",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {t("telegramOptionCustom") ||
+                                  (isRTL
+                                    ? "إنشاء / ربط محادثة خاصة لهذه الخدمة فقط"
+                                    : "Custom Chat for this Service Only")}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "0.75rem",
+                                  color: "var(--muted)",
+                                }}
+                              >
+                                {t("telegramOptionCustomDesc") ||
+                                  (isRTL
+                                    ? "ربط الخدمة بمجموعة أو محادثة تلجرام خاصة باستخدام معرف المحادثة (Chat ID)"
+                                    : "Attach a custom Telegram group or chat ID exclusively to this service")}
+                              </div>
+                            </div>
+                          </div>
+
+                          {form.telegram_chat_option === "custom" && (
+                            <div
+                              style={{
+                                marginTop: 8,
+                                paddingInlineStart: 28,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <label
+                                  className="form-label"
+                                  style={{
+                                    fontSize: "0.78rem",
+                                    fontWeight: 700,
+                                    margin: 0,
+                                  }}
+                                >
+                                  {t("telegramChatIdLabel") ||
+                                    (isRTL
+                                      ? "معرف محادثة تلجرام (Chat ID):"
+                                      : "Telegram Chat ID:")}
+                                </label>
+                                <button
+                                  type="button"
+                                  className="btn btn-ghost btn-sm"
+                                  onClick={() =>
+                                    setIsTelegramInstructionModalOpen(true)
+                                  }
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "var(--primary)",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    padding: "2px 6px",
+                                  }}
+                                >
+                                  <Icon name="help-circle" size={13} />
+                                  {t("howToGetTelegramChatId") ||
+                                    (isRTL
+                                      ? "كيفية الحصول على معرف المحادثة؟"
+                                      : "How to get Telegram Chat ID?")}
+                                </button>
+                              </div>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <input
+                                  type="text"
+                                  dir="ltr"
+                                  className="form-input"
+                                  value={form.telegram_chat_id}
+                                  onChange={(e) =>
+                                    setForm({
+                                      ...form,
+                                      telegram_chat_id: e.target.value,
+                                    })
+                                  }
+                                  placeholder={
+                                    t("telegramChatIdPlaceholder") ||
+                                    "e.g. -100123456789"
+                                  }
+                                  style={{
+                                    flex: 1,
+                                    fontFamily: "monospace",
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() =>
+                                    setIsTelegramInstructionModalOpen(true)
+                                  }
+                                  style={{
+                                    fontSize: "0.78rem",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  <Icon name="info" size={13} />
+                                  {t("instructions") ||
+                                    (isRTL ? "الإرشادات" : "Instructions")}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Modal Action Buttons */}
                 <div
                   className="modal-actions"
@@ -2282,6 +2835,240 @@ export default function ServicesTab({
         modalState={confirmModal}
         onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
       />
+
+      {/* Telegram Chat ID Instructions Modal (Option 3) */}
+      {isTelegramInstructionModalOpen &&
+        createPortal(
+          <div className="modal-backdrop">
+            <div
+              className="modal-card modal-md animate-fade-in-up"
+              style={{ maxWidth: 540 }}
+            >
+              <div
+                className="modal-header"
+                style={{
+                  borderBottom: "1px solid var(--border-light)",
+                  paddingBottom: 14,
+                }}
+              >
+                <h3
+                  className="modal-title"
+                  style={{
+                    fontSize: "1rem",
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Icon
+                    name="send"
+                    size={18}
+                    style={{ color: "var(--primary)" }}
+                  />
+                  {t("serviceTelegramModalTitle") ||
+                    (isRTL
+                      ? "إرشادات الحصول على معرف محادثة تلجرام (Chat ID)"
+                      : "Instructions to Obtain Telegram Chat ID")}
+                </h3>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setIsTelegramInstructionModalOpen(false)}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+
+              <div
+                className="modal-body"
+                style={{
+                  padding: 20,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
+                }}
+              >
+                {/* Default Bot Notice & Direct Connect Link (Same as IntegrationsSettingsPage) */}
+                <div
+                  style={{
+                    background: "var(--surface-alt)",
+                    padding: 16,
+                    borderRadius: "var(--radius-lg)",
+                    border: "1px solid var(--border-light)",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.6,
+                      margin: "0 0 12px",
+                    }}
+                  >
+                    {t("telegramDefaultBotNotice") ||
+                      "سُترسل إشعارات حجوزات هذه المساحة عبر بوت Saabq Cal الافتراضي. اضغط الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائيًا من غير أي نسخ أو لصق."}
+                  </p>
+                  <a
+                    href="https://t.me/Saabq_cal_Bot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "8px 16px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Icon name="send" size={16} />
+                    {t("openBotAndConnect") || "فتح البوت وربط محادثة تلقائيًا"}
+                  </a>
+                  <div
+                    style={{
+                      fontSize: "0.78rem",
+                      color: "var(--muted)",
+                      marginTop: 10,
+                    }}
+                  >
+                    {t("orFindChatManually") ||
+                      "أو، إن أردت العثور على فتح المحادثة يدويًا:"}{" "}
+                    <a
+                      href="https://t.me/Saabq_cal_Bot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "var(--primary)", fontWeight: 600 }}
+                    >
+                      t.me/Saabq_cal_Bot ↗
+                    </a>
+                  </div>
+                </div>
+
+                {/* Instructions Box (Same as IntegrationsSettingsPage) */}
+                <div
+                  style={{
+                    background: "var(--surface)",
+                    padding: 14,
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid var(--border-light)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "0.85rem",
+                      color: "var(--heading)",
+                      marginBottom: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Icon
+                      name="info"
+                      size={16}
+                      style={{ color: "var(--primary)" }}
+                    />
+                    {t("howToGetTelegramChatId") ||
+                      (isRTL
+                        ? "كيفية الحصول على معرف المحادثة (Chat ID)؟"
+                        : "How to get Telegram Chat ID?")}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.6,
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {t("chatIdHelpText") ||
+                      (isRTL
+                        ? "• للمحادثات الشخصية: افتح بوت Saabq Cal وأرسل له أي رسالة وسيرد عليك برقم الـ Chat ID مباشرة.\n• للمجموعات/القنوات: أضف البوت إلى المجموعة وأعطه صلاحية الإرسال، ثم استخدم بوت مثل @userinfobot للحصول على ID المجموعة (يبدأ بـ -)."
+                        : "• Personal chats: Open Saabq Cal bot and send any message — it will reply immediately with your Chat ID.\n• Groups/Channels: Add the bot to your group with send permission, then use @userinfobot to get group ID (starts with -).")}
+                  </div>
+                </div>
+
+                {/* Input field inside modal */}
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label
+                    className="form-label"
+                    style={{ fontSize: "0.82rem", fontWeight: 700 }}
+                  >
+                    {t("telegramChatIdLabel") ||
+                      (isRTL
+                        ? "معرف محادثة تلجرام (Chat ID):"
+                        : "Telegram Chat ID:")}
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    className="form-input"
+                    value={form.telegram_chat_id}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        telegram_chat_id: e.target.value,
+                        telegram_chat_option: "custom",
+                      })
+                    }
+                    placeholder={
+                      t("telegramChatIdPlaceholder") || "e.g. -100123456789"
+                    }
+                    style={{
+                      width: "100%",
+                      fontFamily: "monospace",
+                      padding: "10px 14px",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div
+                className="modal-footer"
+                style={{
+                  borderTop: "1px solid var(--border-light)",
+                  padding: "12px 20px",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 10,
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setIsTelegramInstructionModalOpen(false)}
+                >
+                  {t("cancel") || "إلغاء"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={(e) => {
+                    setForm((prev) => ({
+                      ...prev,
+                      telegram_chat_option: "custom",
+                    }));
+                    setIsTelegramInstructionModalOpen(false);
+                    if (isModalOpen) {
+                      // Submit the main service form to actually save to backend
+                      handleSubmit(e);
+                    }
+                  }}
+                >
+                  <Icon name="check" size={14} />
+                  {t("applyAndSaveChatId") ||
+                    (isRTL
+                      ? "تطبيق وحفظ معرف المحادثة"
+                      : "Apply & Save Chat ID")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
