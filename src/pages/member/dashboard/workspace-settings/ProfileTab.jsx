@@ -128,6 +128,52 @@ export default function ProfileTab({
     setProfileForm({ ...profileForm, social_links: updated });
   };
 
+  // Normalize legacy plain-string gallery entries into { url, caption } objects
+  const galleryItems = (
+    Array.isArray(profileForm.gallery_urls) ? profileForm.gallery_urls : []
+  ).map((item) =>
+    typeof item === "string" ? { url: item, caption: "" } : item,
+  );
+
+  const handleAddTestimonial = () => {
+    const current = Array.isArray(profileForm.testimonials)
+      ? profileForm.testimonials
+      : [];
+    setProfileForm({
+      ...profileForm,
+      testimonials: [
+        ...current,
+        {
+          client_name: "",
+          client_role: "",
+          quote: "",
+          rating: 5,
+          avatar_url: "",
+        },
+      ],
+    });
+  };
+
+  const handleRemoveTestimonial = (index) => {
+    const current = Array.isArray(profileForm.testimonials)
+      ? profileForm.testimonials
+      : [];
+    setProfileForm({
+      ...profileForm,
+      testimonials: current.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleTestimonialChange = (index, field, value) => {
+    const current = Array.isArray(profileForm.testimonials)
+      ? profileForm.testimonials
+      : [];
+    const updated = current.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
+    setProfileForm({ ...profileForm, testimonials: updated });
+  };
+
   return (
     <form className="card-body" onSubmit={handleSubmit}>
       {/* Header */}
@@ -994,12 +1040,9 @@ export default function ProfileTab({
           <button
             type="button"
             onClick={() => {
-              const current = Array.isArray(profileForm.gallery_urls)
-                ? profileForm.gallery_urls
-                : [];
               setProfileForm({
                 ...profileForm,
-                gallery_urls: [...current, ""],
+                gallery_urls: [...galleryItems, { url: "", caption: "" }],
               });
             }}
             disabled={!canEdit}
@@ -1010,10 +1053,9 @@ export default function ProfileTab({
           </button>
         </div>
 
-        {Array.isArray(profileForm.gallery_urls) &&
-        profileForm.gallery_urls.length > 0 ? (
+        {galleryItems.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {profileForm.gallery_urls.map((url, idx) => (
+            {galleryItems.map((item, idx) => (
               <div
                 key={idx}
                 style={{
@@ -1040,9 +1082,9 @@ export default function ProfileTab({
                     justifyContent: "center",
                   }}
                 >
-                  {url ? (
+                  {item.url ? (
                     <LazyImage
-                      src={url}
+                      src={item.url}
                       alt={`Gallery item ${idx + 1}`}
                       width={50}
                       height={50}
@@ -1057,17 +1099,21 @@ export default function ProfileTab({
                   )}
                 </div>
 
-                <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
                   <input
                     type="url"
                     className="form-input"
-                    value={url || ""}
+                    value={item.url || ""}
                     onChange={(e) => {
-                      const current = Array.isArray(profileForm.gallery_urls)
-                        ? profileForm.gallery_urls
-                        : [];
-                      const updated = current.map((item, i) =>
-                        i === idx ? e.target.value : item,
+                      const updated = galleryItems.map((g, i) =>
+                        i === idx ? { ...g, url: e.target.value } : g,
                       );
                       setProfileForm({ ...profileForm, gallery_urls: updated });
                     }}
@@ -1075,17 +1121,31 @@ export default function ProfileTab({
                     dir="ltr"
                     placeholder="https://images.unsplash.com/photo-..."
                   />
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={item.caption || ""}
+                    onChange={(e) => {
+                      const updated = galleryItems.map((g, i) =>
+                        i === idx ? { ...g, caption: e.target.value } : g,
+                      );
+                      setProfileForm({ ...profileForm, gallery_urls: updated });
+                    }}
+                    disabled={!canEdit}
+                    placeholder={
+                      isRTL
+                        ? "وصف مختصر للصورة (اختياري)"
+                        : "Photo caption (optional)"
+                    }
+                  />
                 </div>
 
                 <button
                   type="button"
                   onClick={() => {
-                    const current = Array.isArray(profileForm.gallery_urls)
-                      ? profileForm.gallery_urls
-                      : [];
                     setProfileForm({
                       ...profileForm,
-                      gallery_urls: current.filter((_, i) => i !== idx),
+                      gallery_urls: galleryItems.filter((_, i) => i !== idx),
                     });
                   }}
                   disabled={!canEdit}
@@ -1402,6 +1462,291 @@ export default function ProfileTab({
             {isRTL
               ? "لم يتم إضافة مميزات مخصصة بعد (سيتم إظهار المميزات الافتراضية)."
               : "No custom feature highlights added yet (default features will be shown)."}
+          </p>
+        )}
+      </div>
+
+      {/* SECTION 8: Client Testimonials & Reviews */}
+      <div style={{ marginBottom: 32 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 18,
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              margin: 0,
+              color: "var(--text)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon name="quote" size={18} style={{ color: "var(--primary)" }} />
+            <span>
+              {isRTL
+                ? "8. آراء وتقييمات العملاء (Testimonials)"
+                : "8. Client Testimonials & Reviews"}
+            </span>
+          </h3>
+
+          <button
+            type="button"
+            onClick={handleAddTestimonial}
+            disabled={!canEdit}
+            className="btn btn-secondary btn-sm"
+            style={{ borderRadius: 999, fontWeight: 700 }}
+          >
+            + {isRTL ? "إضافة رأي عميل" : "Add Testimonial"}
+          </button>
+        </div>
+
+        <p
+          style={{
+            color: "var(--text-secondary)",
+            fontSize: "0.85rem",
+            marginTop: -10,
+            marginBottom: 16,
+          }}
+        >
+          {isRTL
+            ? "تظهر هذه الآراء في صفحتك العامة فقط عند إضافتها هنا — لن يتم عرض أي تقييمات وهمية."
+            : "These reviews only appear on your public page once added here — no placeholder reviews are ever shown."}
+        </p>
+
+        {Array.isArray(profileForm.testimonials) &&
+        profileForm.testimonials.length > 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {profileForm.testimonials.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: "var(--surface-alt, #f8fafc)",
+                  padding: 18,
+                  borderRadius: 16,
+                  border: "1px solid var(--border)",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 14,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.88rem",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                    }}
+                  >
+                    #{idx + 1} {isRTL ? "رأي عميل" : "Testimonial"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTestimonial(idx)}
+                    disabled={!canEdit}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      color: "#ef4444",
+                      borderRadius: 10,
+                      padding: "4px 10px",
+                    }}
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      border: "1px solid var(--border)",
+                      background: "var(--surface)",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {item.avatar_url ? (
+                      <LazyImage
+                        src={item.avatar_url}
+                        alt={item.client_name || "Client avatar"}
+                        width={44}
+                        height={44}
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Icon
+                        name="user"
+                        size={18}
+                        style={{ color: "var(--text-secondary)", opacity: 0.5 }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="url"
+                      className="form-input"
+                      value={item.avatar_url || ""}
+                      onChange={(e) =>
+                        handleTestimonialChange(
+                          idx,
+                          "avatar_url",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!canEdit}
+                      dir="ltr"
+                      placeholder={
+                        isRTL
+                          ? "رابط صورة العميل (اختياري)"
+                          : "Client avatar URL (optional)"
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="grid grid-2"
+                  style={{ gap: 14, marginBottom: 14 }}
+                >
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
+                      {isRTL ? "اسم العميل" : "Client Name"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={item.client_name || ""}
+                      onChange={(e) =>
+                        handleTestimonialChange(
+                          idx,
+                          "client_name",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!canEdit}
+                      placeholder={
+                        isRTL ? "مثال: أحمد يوسف" : "e.g. Sarah Mitchell"
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
+                      {isRTL
+                        ? "صفة العميل (اختياري)"
+                        : "Client Role (Optional)"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={item.client_role || ""}
+                      onChange={(e) =>
+                        handleTestimonialChange(
+                          idx,
+                          "client_role",
+                          e.target.value,
+                        )
+                      }
+                      disabled={!canEdit}
+                      placeholder={
+                        isRTL ? "مثال: عميل منذ 2024" : "e.g. Client since 2024"
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    {isRTL ? "نص رأي العميل" : "Testimonial Quote"}
+                  </label>
+                  <textarea
+                    className="form-textarea"
+                    rows={2}
+                    value={item.quote || ""}
+                    onChange={(e) =>
+                      handleTestimonialChange(idx, "quote", e.target.value)
+                    }
+                    disabled={!canEdit}
+                    placeholder={
+                      isRTL
+                        ? "مثال: تجربة رائعة وفريق محترف، أنصح بالتعامل معهم."
+                        : "e.g. Great experience and a professional team, highly recommend."
+                    }
+                  />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    {isRTL ? "التقييم" : "Rating"}
+                  </label>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() =>
+                          handleTestimonialChange(idx, "rating", star)
+                        }
+                        disabled={!canEdit}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: canEdit ? "pointer" : "default",
+                          padding: 2,
+                          color:
+                            star <= (item.rating || 0)
+                              ? "#f59e0b"
+                              : "var(--border)",
+                        }}
+                        title={`${star} / 5`}
+                      >
+                        <Icon name="star" size={20} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "0.88rem",
+              fontStyle: "italic",
+            }}
+          >
+            {isRTL
+              ? "لم يتم إضافة آراء عملاء بعد."
+              : "No client testimonials added yet."}
           </p>
         )}
       </div>

@@ -27,7 +27,8 @@ export default function WorkspaceProfilePage() {
   // Search, FAQ & Scroll Navigation states
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedFaq, setExpandedFaq] = useState(null);
-  const [, setActiveSection] = useState("services");
+  const [activeSection, setActiveSection] = useState("services");
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const getTranslatableText = useCallback(
     (val) => {
@@ -117,8 +118,16 @@ export default function WorkspaceProfilePage() {
   // Update active section on scroll
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["services", "specialists", "about", "location", "faq"];
-      const scrollPosition = window.scrollY + 160;
+      const sections = [
+        "services",
+        "specialists",
+        "portfolio",
+        "testimonials",
+        "about",
+        "location",
+        "faq",
+      ];
+      const scrollPosition = window.scrollY + 200;
 
       for (const sectionId of sections) {
         const el = document.getElementById(sectionId);
@@ -141,7 +150,7 @@ export default function WorkspaceProfilePage() {
   const scrollToSection = useCallback((sectionId) => {
     const el = document.getElementById(sectionId);
     if (el) {
-      const yOffset = -80;
+      const yOffset = -130;
       const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
       setActiveSection(sectionId);
@@ -184,6 +193,32 @@ export default function WorkspaceProfilePage() {
       0,
     );
   }, [specialistRoles]);
+
+  // Normalize gallery items — accepts legacy plain-string entries or { url, caption } objects
+  const galleryItems = useMemo(() => {
+    const raw = Array.isArray(workspace?.gallery_urls)
+      ? workspace.gallery_urls
+      : [];
+    return raw
+      .map((item) =>
+        typeof item === "string" ? { url: item, caption: "" } : item,
+      )
+      .filter((item) => item && item.url);
+  }, [workspace]);
+
+  // Real, attributed client testimonials only — never fabricated
+  const testimonials = useMemo(() => {
+    const raw = Array.isArray(workspace?.testimonials)
+      ? workspace.testimonials
+      : [];
+    return raw.filter((item) => item && item.client_name && item.quote);
+  }, [workspace]);
+
+  const averageRating = useMemo(() => {
+    const rated = testimonials.filter((t) => t.rating > 0);
+    if (rated.length === 0) return null;
+    return rated.reduce((acc, t) => acc + t.rating, 0) / rated.length;
+  }, [testimonials]);
 
   if (loading) {
     return (
@@ -290,6 +325,21 @@ export default function WorkspaceProfilePage() {
     whatsapp: { label: "WhatsApp", icon: <Icon name="whatsapp" size={14} /> },
   };
 
+  // In-page navigation pills — only include sections that actually have content
+  const navSections = [
+    { id: "services", label: isRTL ? "الخدمات" : "Services" },
+    ...(specialistRoles.length > 0
+      ? [{ id: "specialists", label: isRTL ? "الفريق" : "Team" }]
+      : []),
+    ...(galleryItems.length > 0
+      ? [{ id: "portfolio", label: isRTL ? "معرض الأعمال" : "Portfolio" }]
+      : []),
+    ...(testimonials.length > 0
+      ? [{ id: "testimonials", label: isRTL ? "آراء العملاء" : "Reviews" }]
+      : []),
+    { id: "faq", label: isRTL ? "الأسئلة الشائعة" : "FAQ" },
+  ];
+
   // Structured Data (JSON-LD)
   const jsonLd = {
     "@context": "https://schema.org",
@@ -313,6 +363,26 @@ export default function WorkspaceProfilePage() {
         ...(workspace.city?.name && { addressLocality: workspace.city.name }),
       },
     }),
+    ...(testimonials.length > 0 &&
+      averageRating && {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: averageRating.toFixed(1),
+          reviewCount: testimonials.length,
+        },
+        review: testimonials.slice(0, 5).map((item) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: item.client_name },
+          reviewBody: item.quote,
+          ...(item.rating && {
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: item.rating,
+              bestRating: 5,
+            },
+          }),
+        })),
+      }),
   };
 
   const faqItems = [
@@ -376,12 +446,13 @@ export default function WorkspaceProfilePage() {
         jsonLd={[jsonLd]}
       />
 
-      {/* Hero Cover Banner */}
+      {/* Hero Cover Banner — bold gradient mesh built from the workspace's own brand colors */}
       <div
         className="workspace-landing-hero"
         style={{
           position: "relative",
-          minHeight: 300,
+          minHeight: 420,
+          overflow: "hidden",
           background: workspace.cover_url
             ? `url(${workspace.cover_url}) center/cover no-repeat`
             : `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
@@ -389,22 +460,51 @@ export default function WorkspaceProfilePage() {
           alignItems: "flex-end",
         }}
       >
+        {/* Decorative brand-color blobs for a bolder, more vibrant first impression */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.3) 60%, transparent 100%)",
+            top: "-25%",
+            insetInlineEnd: "-10%",
+            width: 420,
+            height: 420,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, ${secondaryColor}80 0%, transparent 70%)`,
+            filter: "blur(50px)",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-30%",
+            insetInlineStart: "-8%",
+            width: 380,
+            height: 380,
+            borderRadius: "50%",
+            background: `radial-gradient(circle, ${primaryColor}90 0%, transparent 70%)`,
+            filter: "blur(50px)",
             pointerEvents: "none",
           }}
         />
 
         <div
-          className="container"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(10, 12, 20, 0.92) 0%, rgba(10, 12, 20, 0.45) 55%, rgba(10, 12, 20, 0.15) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          className="container animate-fade-in-up"
           style={{
             position: "relative",
             zIndex: 2,
-            paddingBottom: 28,
+            paddingBottom: 32,
+            paddingTop: 32,
             width: "100%",
           }}
         >
@@ -418,7 +518,14 @@ export default function WorkspaceProfilePage() {
             }}
           >
             {/* Status Pills */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
               {workspace.booking_enabled ? (
                 <span
                   style={{
@@ -479,6 +586,28 @@ export default function WorkspaceProfilePage() {
                   {workspace.workspace_type.name}
                 </span>
               )}
+
+              {averageRating && (
+                <span
+                  style={{
+                    background: "rgba(245, 158, 11, 0.22)",
+                    border: "1px solid rgba(245, 158, 11, 0.45)",
+                    color: "#fcd34d",
+                    backdropFilter: "blur(8px)",
+                    fontSize: "0.84rem",
+                    fontWeight: 700,
+                    padding: "6px 16px",
+                    borderRadius: 999,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Icon name="star" size={14} />
+                  {averageRating.toFixed(1)} · {testimonials.length}{" "}
+                  {isRTL ? "تقييم" : "reviews"}
+                </span>
+              )}
             </div>
 
             {/* Quick Actions */}
@@ -520,17 +649,18 @@ export default function WorkspaceProfilePage() {
           marginTop: -60,
           position: "relative",
           zIndex: 3,
-          marginBottom: 24,
+          marginBottom: 0,
         }}
       >
         <div
-          className="card"
+          className="card animate-fade-in-up"
           style={{
             padding: 32,
             borderRadius: 24,
-            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.08)",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
             border: "1px solid var(--border)",
             background: "var(--surface)",
+            borderTop: `4px solid ${primaryColor}`,
           }}
         >
           <div
@@ -587,11 +717,12 @@ export default function WorkspaceProfilePage() {
               >
                 <h1
                   style={{
-                    fontSize: "2.1rem",
-                    fontWeight: 800,
+                    fontSize: "2.3rem",
+                    fontWeight: 900,
                     color: "var(--text)",
                     margin: 0,
-                    lineHeight: 1.2,
+                    lineHeight: 1.15,
+                    letterSpacing: "-0.02em",
                   }}
                 >
                   <bdi style={{ unicodeBidi: "isolate" }}>{workspace.name}</bdi>
@@ -618,7 +749,7 @@ export default function WorkspaceProfilePage() {
               <p
                 style={{
                   color: "var(--text-secondary)",
-                  fontSize: "1.05rem",
+                  fontSize: "1.08rem",
                   lineHeight: 1.6,
                   marginTop: 8,
                   marginBottom: 16,
@@ -872,12 +1003,61 @@ export default function WorkspaceProfilePage() {
         </div>
       </div>
 
+      {/* Sticky In-Page Section Navigation */}
+      <div
+        style={{
+          position: "sticky",
+          top: "var(--navbar-height, 72px)",
+          zIndex: 8,
+          background: "var(--surface)",
+          borderBottom: "1px solid var(--border)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+          marginTop: 24,
+          marginBottom: 24,
+        }}
+      >
+        <div
+          className="container"
+          style={{
+            display: "flex",
+            gap: 6,
+            overflowX: "auto",
+            padding: "8px 0",
+          }}
+        >
+          {navSections.map((section) => {
+            const isActive = activeSection === section.id;
+            return (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => scrollToSection(section.id)}
+                style={{
+                  whiteSpace: "nowrap",
+                  padding: "10px 18px",
+                  borderRadius: 999,
+                  border: "none",
+                  background: isActive ? `${primaryColor}18` : "transparent",
+                  color: isActive ? primaryColor : "var(--text-secondary)",
+                  fontWeight: 700,
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {section.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* CONTINUOUS LANDING PAGE SECTIONS */}
       <div className="container">
         {/* Section 1: Services Grid */}
         <section
           id="services"
-          style={{ scrollMarginTop: 100, marginBottom: 70 }}
+          style={{ scrollMarginTop: 140, marginBottom: 70 }}
         >
           <div
             style={{
@@ -998,7 +1178,7 @@ export default function WorkspaceProfilePage() {
               {filteredServices.map((srv) => (
                 <article
                   key={srv.id}
-                  className="card"
+                  className="card card-hover"
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -1147,11 +1327,11 @@ export default function WorkspaceProfilePage() {
           )}
         </section>
 
-        {/* Section 2: Specialists & Team */}
+        {/* Section 2: Specialists & Team — professional bio-card presentation */}
         {specialistRoles.length > 0 && (
           <section
             id="specialists"
-            style={{ scrollMarginTop: 100, marginBottom: 70 }}
+            style={{ scrollMarginTop: 140, marginBottom: 70 }}
           >
             <div style={{ marginBottom: 28 }}>
               <div
@@ -1195,13 +1375,7 @@ export default function WorkspaceProfilePage() {
               </p>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-                gap: 28,
-              }}
-            >
+            <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
               {specialistRoles.map((role) => (
                 <div key={role.id}>
                   <h3
@@ -1227,25 +1401,28 @@ export default function WorkspaceProfilePage() {
                     </span>
                   </h3>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 14,
-                    }}
-                  >
-                    {role.members && role.members.length > 0 ? (
-                      role.members.map((member) => (
+                  {role.members && role.members.length > 0 ? (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fill, minmax(200px, 1fr))",
+                        gap: 20,
+                      }}
+                    >
+                      {role.members.map((member) => (
                         <Link
                           key={member.id}
                           to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
-                          className="card"
+                          className="card card-hover animate-tab-card"
                           style={{
                             display: "flex",
+                            flexDirection: "column",
                             alignItems: "center",
-                            gap: 16,
-                            padding: 18,
-                            borderRadius: 16,
+                            textAlign: "center",
+                            gap: 10,
+                            padding: "28px 20px",
+                            borderRadius: 20,
                             textDecoration: "none",
                             color: "var(--text)",
                             border: "1px solid var(--border)",
@@ -1254,18 +1431,19 @@ export default function WorkspaceProfilePage() {
                         >
                           <div
                             style={{
-                              width: 54,
-                              height: 54,
+                              width: 78,
+                              height: 78,
                               borderRadius: "50%",
-                              background: `${primaryColor}20`,
+                              background: `linear-gradient(135deg, ${primaryColor}25, ${secondaryColor}25)`,
                               color: primaryColor,
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontWeight: 800,
-                              fontSize: "1.3rem",
+                              fontSize: "1.6rem",
                               flexShrink: 0,
                               overflow: "hidden",
+                              border: `2px solid ${primaryColor}30`,
                             }}
                           >
                             {member.avatar_url ? (
@@ -1283,9 +1461,9 @@ export default function WorkspaceProfilePage() {
                             )}
                           </div>
 
-                          <div style={{ flex: 1 }}>
+                          <div>
                             <div
-                              style={{ fontWeight: 700, fontSize: "1.05rem" }}
+                              style={{ fontWeight: 800, fontSize: "1.05rem" }}
                             >
                               {member.name}
                             </div>
@@ -1302,28 +1480,39 @@ export default function WorkspaceProfilePage() {
                             )}
                           </div>
 
-                          <div style={{ color: "var(--text-secondary)" }}>
+                          <span
+                            style={{
+                              marginTop: 4,
+                              color: primaryColor,
+                              fontWeight: 700,
+                              fontSize: "0.82rem",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            {isRTL ? "عرض الملف الشخصي" : "View Profile"}
                             <Icon
                               name={isRTL ? "chevron-left" : "chevron-right"}
-                              size={18}
+                              size={14}
                             />
-                          </div>
+                          </span>
                         </Link>
-                      ))
-                    ) : (
-                      <p
-                        style={{
-                          color: "var(--text-secondary)",
-                          fontSize: "0.88rem",
-                          fontStyle: "italic",
-                        }}
-                      >
-                        {isRTL
-                          ? "لا يوجد أعضاء بهذا التخصص حالياً."
-                          : "No members for this role currently."}
-                      </p>
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p
+                      style={{
+                        color: "var(--text-secondary)",
+                        fontSize: "0.88rem",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      {isRTL
+                        ? "لا يوجد أعضاء بهذا التخصص حالياً."
+                        : "No members for this role currently."}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -1331,7 +1520,7 @@ export default function WorkspaceProfilePage() {
         )}
 
         {/* Section 3: About Workspace & Booking Rules */}
-        <section id="about" style={{ scrollMarginTop: 100, marginBottom: 70 }}>
+        <section id="about" style={{ scrollMarginTop: 140, marginBottom: 70 }}>
           <div style={{ marginBottom: 28 }}>
             <div
               style={{
@@ -1555,80 +1744,281 @@ export default function WorkspaceProfilePage() {
           </div>
         </section>
 
-        {/* Photo Gallery Grid */}
-        {Array.isArray(workspace.gallery_urls) &&
-          workspace.gallery_urls.length > 0 && (
-            <section style={{ marginBottom: 70 }}>
-              <div style={{ marginBottom: 24 }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    color: primaryColor,
-                    fontSize: "0.88rem",
-                    fontWeight: 700,
-                    marginBottom: 6,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  <Icon name="image" size={16} />
-                  <span>
-                    {isRTL ? "معرض الصور" : "Workspace Photo Gallery"}
-                  </span>
-                </div>
-                <h2
-                  style={{
-                    fontSize: "1.75rem",
-                    fontWeight: 800,
-                    margin: 0,
-                    color: "var(--text)",
-                  }}
-                >
-                  {isRTL
-                    ? "معرض صور مساحة العمل والخدمات"
-                    : "Photo Gallery & Facility Preview"}
-                </h2>
-              </div>
-
+        {/* Portfolio Showcase — upgraded photo gallery with captions + lightbox */}
+        {galleryItems.length > 0 && (
+          <section
+            id="portfolio"
+            style={{ scrollMarginTop: 140, marginBottom: 70 }}
+          >
+            <div style={{ marginBottom: 24 }}>
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                  gap: 20,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  color: primaryColor,
+                  fontSize: "0.88rem",
+                  fontWeight: 700,
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
                 }}
               >
-                {workspace.gallery_urls.map((imgUrl, idx) => (
+                <Icon name="image" size={16} />
+                <span>{isRTL ? "معرض الأعمال" : "Portfolio Showcase"}</span>
+              </div>
+              <h2
+                style={{
+                  fontSize: "1.75rem",
+                  fontWeight: 800,
+                  margin: 0,
+                  color: "var(--text)",
+                }}
+              >
+                {isRTL ? "لمحة من أعمالنا ومساحتنا" : "A Look Inside Our Work"}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {galleryItems.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setLightboxIndex(idx)}
+                  className="card animate-tab-card"
+                  style={{
+                    padding: 0,
+                    borderRadius: 20,
+                    overflow: "hidden",
+                    height: idx % 5 === 0 ? 320 : 220,
+                    border: "1px solid var(--border)",
+                    boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+                    position: "relative",
+                    cursor: "pointer",
+                    display: "block",
+                    width: "100%",
+                  }}
+                >
+                  <LazyImage
+                    src={item.url}
+                    alt={item.caption || `Portfolio image ${idx + 1}`}
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                  />
                   <div
-                    key={idx}
-                    className="card animate-tab-card"
                     style={{
-                      padding: 0,
-                      borderRadius: 20,
-                      overflow: "hidden",
-                      height: 220,
-                      border: "1px solid var(--border)",
-                      boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 45%)",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      padding: 16,
+                      opacity: item.caption ? 1 : 0,
+                      transition: "opacity 0.2s ease",
                     }}
                   >
-                    <LazyImage
-                      src={imgUrl}
-                      alt={`Gallery image ${idx + 1}`}
-                      width="100%"
-                      height="100%"
-                      objectFit="cover"
-                    />
+                    {item.caption && (
+                      <span
+                        style={{
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "0.92rem",
+                          textAlign: isRTL ? "right" : "left",
+                        }}
+                      >
+                        {item.caption}
+                      </span>
+                    )}
                   </div>
-                ))}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 12,
+                      [isRTL ? "left" : "right"]: 12,
+                      width: 34,
+                      height: 34,
+                      borderRadius: "50%",
+                      background: "rgba(0,0,0,0.4)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="search" size={16} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Testimonials & Reviews — only rendered when real, attributed client reviews exist */}
+        {testimonials.length > 0 && (
+          <section
+            id="testimonials"
+            style={{ scrollMarginTop: 140, marginBottom: 70 }}
+          >
+            <div
+              style={{
+                textAlign: "center",
+                maxWidth: 640,
+                margin: "0 auto 36px",
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  color: primaryColor,
+                  fontSize: "0.88rem",
+                  fontWeight: 700,
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="quote" size={16} />
+                <span>{isRTL ? "آراء العملاء" : "Testimonials"}</span>
               </div>
-            </section>
-          )}
+              <h2
+                style={{
+                  fontSize: "1.75rem",
+                  fontWeight: 800,
+                  margin: 0,
+                  color: "var(--text)",
+                }}
+              >
+                {isRTL ? "ماذا يقول عملاؤنا عنا" : "What Our Clients Say"}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gap: 24,
+              }}
+            >
+              {testimonials.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="card card-hover"
+                  style={{
+                    padding: 28,
+                    borderRadius: 20,
+                    border: "1px solid var(--border)",
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Icon
+                    name="quote"
+                    size={30}
+                    style={{
+                      color: `${primaryColor}25`,
+                      position: "absolute",
+                      top: 20,
+                      [isRTL ? "left" : "right"]: 20,
+                    }}
+                  />
+
+                  {item.rating > 0 && (
+                    <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Icon
+                          key={star}
+                          name="star"
+                          size={16}
+                          style={{
+                            color:
+                              star <= item.rating ? "#f59e0b" : "var(--border)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <p
+                    style={{
+                      fontSize: "1rem",
+                      lineHeight: 1.7,
+                      color: "var(--text)",
+                      fontStyle: "italic",
+                      marginBottom: 22,
+                      flex: 1,
+                    }}
+                  >
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                  >
+                    <div
+                      style={{
+                        width: 46,
+                        height: 46,
+                        borderRadius: "50%",
+                        background: `${primaryColor}18`,
+                        color: primaryColor,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        overflow: "hidden",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.avatar_url ? (
+                        <LazyImage
+                          src={item.avatar_url}
+                          alt={item.client_name}
+                          width={46}
+                          height={46}
+                          objectFit="cover"
+                        />
+                      ) : (
+                        item.client_name.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: "0.98rem" }}>
+                        {item.client_name}
+                      </div>
+                      {item.client_role && (
+                        <div
+                          style={{
+                            fontSize: "0.82rem",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          {item.client_role}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Section 4: Contact & Location */}
         <section
           id="location"
-          style={{ scrollMarginTop: 100, marginBottom: 70 }}
+          style={{ scrollMarginTop: 140, marginBottom: 70 }}
         >
           <div style={{ marginBottom: 28 }}>
             <div
@@ -2014,7 +2404,7 @@ export default function WorkspaceProfilePage() {
               workspace.feature_highlights.map((feat, idx) => (
                 <div
                   key={idx}
-                  className="card animate-tab-card"
+                  className="card card-hover animate-tab-card"
                   style={{
                     padding: 24,
                     borderRadius: 20,
@@ -2024,6 +2414,7 @@ export default function WorkspaceProfilePage() {
                     alignItems: "center",
                     position: "relative",
                     overflow: "hidden",
+                    borderTop: `3px solid ${primaryColor}`,
                   }}
                 >
                   {feat.image_url && (
@@ -2221,7 +2612,7 @@ export default function WorkspaceProfilePage() {
       </section>
 
       {/* Customer FAQs Section */}
-      <section id="faq" style={{ scrollMarginTop: 100, paddingBottom: 60 }}>
+      <section id="faq" style={{ scrollMarginTop: 140, paddingBottom: 60 }}>
         <div className="container" style={{ maxWidth: 840 }}>
           <div style={{ textAlign: "center", marginBottom: 36 }}>
             <h2
@@ -2438,6 +2829,145 @@ export default function WorkspaceProfilePage() {
           </div>
         </div>
       </section>
+
+      {/* Portfolio Lightbox Overlay */}
+      {lightboxIndex !== null && galleryItems[lightboxIndex] && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setLightboxIndex(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(10, 10, 15, 0.9)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(null)}
+            style={{
+              position: "absolute",
+              top: 20,
+              [isRTL ? "left" : "right"]: 20,
+              width: 44,
+              height: 44,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+            title={isRTL ? "إغلاق" : "Close"}
+          >
+            <Icon name="x" size={20} />
+          </button>
+
+          {galleryItems.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex(
+                  (lightboxIndex - 1 + galleryItems.length) %
+                    galleryItems.length,
+                );
+              }}
+              style={{
+                position: "absolute",
+                [isRTL ? "right" : "left"]: 20,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              title={isRTL ? "السابق" : "Previous"}
+            >
+              <Icon name={isRTL ? "chevron-right" : "chevron-left"} size={22} />
+            </button>
+          )}
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "min(900px, 90vw)",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <img
+              src={galleryItems[lightboxIndex].url}
+              alt={galleryItems[lightboxIndex].caption || "Portfolio image"}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "72vh",
+                borderRadius: 16,
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                objectFit: "contain",
+              }}
+            />
+            {galleryItems[lightboxIndex].caption && (
+              <p
+                style={{
+                  color: "#fff",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  textAlign: "center",
+                  margin: 0,
+                }}
+              >
+                {galleryItems[lightboxIndex].caption}
+              </p>
+            )}
+          </div>
+
+          {galleryItems.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex((lightboxIndex + 1) % galleryItems.length);
+              }}
+              style={{
+                position: "absolute",
+                [isRTL ? "left" : "right"]: 20,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              title={isRTL ? "التالي" : "Next"}
+            >
+              <Icon name={isRTL ? "chevron-left" : "chevron-right"} size={22} />
+            </button>
+          )}
+        </div>
+      )}
     </main>
   );
 }

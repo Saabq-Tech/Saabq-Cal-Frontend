@@ -106,6 +106,7 @@ export default function WorkspaceSettingsPage() {
     social_links: [],
     gallery_urls: [],
     feature_highlights: [],
+    testimonials: [],
   });
   const [basicForm, setBasicForm] = useState({
     name: "",
@@ -263,6 +264,9 @@ export default function WorkspaceSettingsPage() {
               : [],
             feature_highlights: Array.isArray(data.feature_highlights)
               ? data.feature_highlights
+              : [],
+            testimonials: Array.isArray(data.testimonials)
+              ? data.testimonials
               : [],
           });
           setBasicForm({
