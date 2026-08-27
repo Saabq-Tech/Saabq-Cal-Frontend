@@ -1561,6 +1561,7 @@ export const translations = {
     photoCaptionOptional: "تعليق توضيحي (اختياري)",
     noGalleryImagesYet: "لا توجد صور مضافة في المعرض حالياً.",
     uploadCardImage: "رفع صورة للبطاقة",
+    consentsSection: "الموافقات والشروط",
   },
   en: {
     installApp: "Install App",
@@ -3148,5 +3149,6 @@ export const translations = {
     photoCaptionOptional: "Photo Caption (Optional)",
     noGalleryImagesYet: "No gallery images uploaded yet.",
     uploadCardImage: "Upload Card Image",
+    consentsSection: "Consents & Terms",
   },
 };

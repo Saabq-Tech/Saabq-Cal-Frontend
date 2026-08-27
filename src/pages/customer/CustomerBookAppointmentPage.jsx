@@ -1527,18 +1527,18 @@ export default function CustomerBookAppointmentPage() {
                               type: "textarea",
                             },
                             terms_and_conditions: {
-                              ar: "الشروط والأحكام",
-                              en: "Terms & Conditions",
+                              ar: "أوافق على الشروط والأحكام الخاصة بالحجز والتأكيد",
+                              en: "I agree to the Terms & Conditions of booking",
                               type: "checkbox",
                             },
                             privacy_policy: {
-                              ar: "سياسة الخصوصية",
-                              en: "Privacy Policy",
+                              ar: "أوافق على سياسة الخصوصية وحماية البيانات",
+                              en: "I agree to the Privacy Policy & Data Protection",
                               type: "checkbox",
                             },
                             data_consent: {
-                              ar: "الموافقة على معالجة البيانات الشخصية",
-                              en: "Consent to Personal Data Processing",
+                              ar: "أوافق على جمع ومعالجة بياناتي الشخصية لإتمام الطلب",
+                              en: "I consent to the collection and processing of my personal data",
                               type: "checkbox",
                             },
                           };

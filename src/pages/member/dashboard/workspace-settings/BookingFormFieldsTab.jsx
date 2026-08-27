@@ -287,21 +287,25 @@ export default function BookingFormFieldsTab({
     },
     {
       id: "consents",
-      title: t("termsAndConditionsLabel") || "الشروط والأحكام",
+      title: t("consentsSection") || "الموافقات والشروط",
       fields: [
         {
           key: "terms_and_conditions",
-          label: t("termsAndConditionsLabel") || "الشروط والأحكام",
+          label:
+            t("termsAndConditionsLabel") ||
+            "أوافق على الشروط والأحكام الخاصة بالحجز والتأكيد",
         },
         {
           key: "privacy_policy",
-          label: t("privacyPolicyLabel") || "سياسة الخصوصية",
+          label:
+            t("privacyPolicyLabel") ||
+            "أوافق على سياسة الخصوصية وحماية البيانات",
         },
         {
           key: "data_consent",
           label:
             t("dataProcessingConsentLabel") ||
-            "الموافقة على معالجة البيانات الشخصية",
+            "أوافق على جمع ومعالجة البيانات الشخصية لإتمام الطلب",
         },
       ],
     },

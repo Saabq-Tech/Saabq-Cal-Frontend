@@ -59,22 +59,32 @@ function ReadStatusIcon({ isRead }) {
 /* ---------------------------------------------------------------
    Media URL Resolver Helper
 --------------------------------------------------------------- */
+const getBackendOrigin = () => {
+  const envUrl =
+    import.meta.env.VITE_API_BASE_URL || "https://admin.cal.saabq.com";
+  try {
+    const parsed = new URL(envUrl);
+    return parsed.origin;
+  } catch {
+    return "https://admin.cal.saabq.com";
+  }
+};
+
 const resolveMediaUrl = (urlOrPath) => {
   if (!urlOrPath) return "";
-  if (urlOrPath.startsWith("blob:") || urlOrPath.startsWith("data:")) {
-    return urlOrPath;
-  }
-  if (urlOrPath.startsWith("http://") || urlOrPath.startsWith("https://")) {
-    if (urlOrPath.includes("/storage/")) {
-      return urlOrPath.substring(urlOrPath.indexOf("/storage/"));
-    }
+  if (
+    urlOrPath.startsWith("blob:") ||
+    urlOrPath.startsWith("data:") ||
+    urlOrPath.startsWith("http://") ||
+    urlOrPath.startsWith("https://")
+  ) {
     return urlOrPath;
   }
   const cleanPath = urlOrPath.startsWith("/") ? urlOrPath : `/${urlOrPath}`;
-  if (cleanPath.startsWith("/storage")) {
-    return cleanPath;
-  }
-  return `/storage${cleanPath}`;
+  const fullPath = cleanPath.startsWith("/storage")
+    ? cleanPath
+    : `/storage${cleanPath}`;
+  return `${getBackendOrigin()}${fullPath}`;
 };
 
 /* ---------------------------------------------------------------
