@@ -358,9 +358,7 @@ export default function CustomerAppointmentsTab() {
     if (timeZone) {
       try {
         options.timeZone = timeZone;
-      } catch (e) {
-        console.log(e);
-      }
+      } catch {}
     }
     return date.toLocaleTimeString(lang === "ar" ? "ar-EG" : "en-US", options);
   };
