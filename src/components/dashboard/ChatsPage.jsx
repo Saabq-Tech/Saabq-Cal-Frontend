@@ -204,7 +204,7 @@ export default function ChatsPage() {
     last_page: 1,
     has_more: false,
   });
-  const [_loadingChats, setLoadingChats] = useState(true);
+  const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [sending, setSending] = useState(false);
@@ -322,7 +322,7 @@ export default function ChatsPage() {
 
   // Fetch Conversations List
   const fetchConversations = useCallback(async () => {
-    setLoadingChats(true);
+    setLoadingConversations(true);
     try {
       const res = await client.get(endpoints.chats);
       let list = res.data?.data || [];
@@ -355,7 +355,7 @@ export default function ChatsPage() {
     } catch {
       toast.error(t("failedToLoadChats"));
     } finally {
-      setLoadingChats(false);
+      setLoadingConversations(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast, targetConvId, passedConv, fetchConversationDetails]);
