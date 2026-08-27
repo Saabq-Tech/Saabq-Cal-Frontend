@@ -51,8 +51,9 @@ export class ErrorBoundary extends React.Component {
         import.meta.env.DEV ||
         import.meta.env.MODE === "development" ||
         import.meta.env.MODE === "test" ||
-        process.env.NODE_ENV === "development" ||
-        process.env.NODE_ENV === "test" ||
+        (typeof process !== "undefined" &&
+          (process.env?.NODE_ENV === "development" ||
+            process.env?.NODE_ENV === "test")) ||
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1";
 

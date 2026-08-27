@@ -15,7 +15,7 @@ export default function BasicInfoTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [descLang, setDescLang] = useState("ar");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);

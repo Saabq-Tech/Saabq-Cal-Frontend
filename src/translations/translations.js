@@ -495,7 +495,13 @@ export const translations = {
     maxAdvanceDays: "الحد الأقصى للحجز المسبق (أيام)",
     slotDurationMinutes: "مدة الجلسة الافتراضية (دقائق)",
     bufferBeforeMinutes: "فارق زمني قبل الحجز (دقائق)",
+    bufferBeforeMinutesDesc: "الوقت المطلوب قبل بدء الموعد للتجهيز والتحضير.",
     bufferAfterMinutes: "فارق زمني بعد الحجز (دقائق)",
+    bufferAfterMinutesDesc:
+      "الوقت المطلوب بعد انتهاء الموعد للاستراحة والإنهاء.",
+    minNoticeHoursDesc: "أقل فترة زمنية مسبقة يسمح فيها للعميل بحجز الموعد.",
+    maxAdvanceDaysDesc:
+      "أقصى مدى زمني في المستقبل يمكن للعميل حجز المواعيد خلاله.",
     completeWorkspaceDetails: "إكمال بيانات مساحة العمل (الخطوة 2)",
     workspaceDetailsDesc:
       "يرجى إدخال بيانات مساحة العمل الخاصة بك لإكمال إنشاء حسابك بواسطة جوجل",
@@ -675,6 +681,8 @@ export const translations = {
     autoSpreadsheetNotice: "اتركه فارغاً ليقوم النظام بإنشاء جدول تلقائي.",
     showId: "إظهر المعرف",
     hide: "إخفاء",
+    openSheetInDrive: "فتح المستند في Google Drive",
+    createNewSheet: "إنشاء مستند جديد",
     statusCompleted: "مكتمل",
     statusUpdatedSuccess: "تم تحديث حالة الموعد بنجاح",
     bookingCancelledSuccess: "تم إلغاء الموعد بنجاح",
@@ -2047,7 +2055,15 @@ export const translations = {
     maxAdvanceDays: "Max Advance Booking (Days)",
     slotDurationMinutes: "Default Slot Duration (Minutes)",
     bufferBeforeMinutes: "Buffer Before (Minutes)",
+    bufferBeforeMinutesDesc:
+      "Required preparation time buffer before the appointment starts.",
     bufferAfterMinutes: "Buffer After (Minutes)",
+    bufferAfterMinutesDesc:
+      "Required cleanup and rest time buffer after the appointment ends.",
+    minNoticeHoursDesc:
+      "Minimum advance notice required before a client can book.",
+    maxAdvanceDaysDesc:
+      "Maximum days into the future clients can book appointments.",
     completeWorkspaceDetails: "Complete Workspace Details (Step 2)",
     workspaceDetailsDesc:
       "Please enter your workspace details to complete your account creation via Google",
@@ -2225,6 +2241,8 @@ export const translations = {
     autoSpreadsheetNotice: "Leave blank to auto-create a spreadsheet.",
     showId: "Show ID",
     hide: "Hide",
+    openSheetInDrive: "Open Sheet in Google Drive",
+    createNewSheet: "Create New Sheet",
     statusCompleted: "Completed",
     statusUpdatedSuccess: "Appointment status updated successfully",
     bookingCancelledSuccess: "Appointment cancelled successfully",

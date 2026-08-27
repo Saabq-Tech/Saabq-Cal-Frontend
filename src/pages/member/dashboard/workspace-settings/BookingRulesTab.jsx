@@ -1,5 +1,4 @@
 import { useLanguage } from "../../../../context/LanguageContext";
-import Icon from "../../../../components/common/Icon";
 
 export default function BookingRulesTab({
   bookingRulesForm,
@@ -8,7 +7,7 @@ export default function BookingRulesTab({
   saving,
   canEdit,
 }) {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,7 +20,8 @@ export default function BookingRulesTab({
   );
 
   const handleMinNoticeHoursChange = (valStr) => {
-    const hours = Math.max(0, parseInt(valStr, 10) || 0);
+    const parsed = parseInt(valStr, 10);
+    const hours = Math.min(8760, Math.max(0, isNaN(parsed) ? 0 : parsed));
     setBookingRulesForm({
       ...bookingRulesForm,
       minimum_booking_notice_minutes: hours * 60,
@@ -189,12 +189,13 @@ export default function BookingRulesTab({
         </div>
       </div>
 
-      {/* 4 Numerical Rules Grid - Perfectly Aligned Inputs Baseline */}
+      {/* 4 Numerical Rules Grid - 2 per row responsive grid with descriptions */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 16,
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+          gap: 20,
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -215,14 +216,19 @@ export default function BookingRulesTab({
           <input
             type="number"
             min="0"
+            max="1440"
             className="form-input"
             value={bookingRulesForm.default_buffer_before_minutes ?? 0}
-            onChange={(e) =>
+            onChange={(e) => {
+              const val = Math.min(
+                1440,
+                Math.max(0, parseInt(e.target.value) || 0),
+              );
               setBookingRulesForm({
                 ...bookingRulesForm,
-                default_buffer_before_minutes: parseInt(e.target.value) || 0,
-              })
-            }
+                default_buffer_before_minutes: val,
+              });
+            }}
             disabled={!canEdit}
             style={{
               textAlign: "center",
@@ -231,6 +237,17 @@ export default function BookingRulesTab({
               borderRadius: "var(--radius-md)",
             }}
           />
+          <span
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--text-secondary)",
+              marginTop: 6,
+              lineHeight: 1.4,
+            }}
+          >
+            {t("bufferBeforeMinutesDesc") ||
+              "الوقت المطلوب قبل بدء الموعد للتجهيز والتحضير."}
+          </span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -251,14 +268,19 @@ export default function BookingRulesTab({
           <input
             type="number"
             min="0"
+            max="1440"
             className="form-input"
             value={bookingRulesForm.default_buffer_after_minutes ?? 0}
-            onChange={(e) =>
+            onChange={(e) => {
+              const val = Math.min(
+                1440,
+                Math.max(0, parseInt(e.target.value) || 0),
+              );
               setBookingRulesForm({
                 ...bookingRulesForm,
-                default_buffer_after_minutes: parseInt(e.target.value) || 0,
-              })
-            }
+                default_buffer_after_minutes: val,
+              });
+            }}
             disabled={!canEdit}
             style={{
               textAlign: "center",
@@ -267,6 +289,17 @@ export default function BookingRulesTab({
               borderRadius: "var(--radius-md)",
             }}
           />
+          <span
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--text-secondary)",
+              marginTop: 6,
+              lineHeight: 1.4,
+            }}
+          >
+            {t("bufferAfterMinutesDesc") ||
+              "الوقت المطلوب بعد انتهاء الموعد للاستراحة والإنهاء."}
+          </span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -288,6 +321,7 @@ export default function BookingRulesTab({
           <input
             type="number"
             min="0"
+            max="8760"
             className="form-input"
             value={minNoticeHours}
             onChange={(e) => handleMinNoticeHoursChange(e.target.value)}
@@ -299,6 +333,17 @@ export default function BookingRulesTab({
               borderRadius: "var(--radius-md)",
             }}
           />
+          <span
+            style={{
+              fontSize: "0.78rem",
+              color: "var(--text-secondary)",
+              marginTop: 6,
+              lineHeight: 1.4,
+            }}
+          >
+            {t("minNoticeHoursDesc") ||
+              "أقل فترة زمنية مسبقة يسمح فيها للعميل بحجز الموعد."}
+          </span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -322,12 +367,16 @@ export default function BookingRulesTab({
             max="365"
             className="form-input"
             value={bookingRulesForm.maximum_booking_days ?? 30}
-            onChange={(e) =>
+            onChange={(e) => {
+              const val = Math.min(
+                365,
+                Math.max(1, parseInt(e.target.value) || 1),
+              );
               setBookingRulesForm({
                 ...bookingRulesForm,
-                maximum_booking_days: parseInt(e.target.value) || 30,
-              })
-            }
+                maximum_booking_days: val,
+              });
+            }}
             disabled={!canEdit}
             style={{
               textAlign: "center",
@@ -336,539 +385,18 @@ export default function BookingRulesTab({
               borderRadius: "var(--radius-md)",
             }}
           />
-        </div>
-      </div>
-
-      {/* SECTION: Feature Highlights Cards */}
-      <div
-        style={{
-          marginTop: 24,
-          paddingTop: 20,
-          borderTop: "1px solid var(--border-light)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 18,
-          }}
-        >
-          <h3
+          <span
             style={{
-              fontSize: "1.05rem",
-              fontWeight: 700,
-              margin: 0,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon
-              name="sparkles"
-              size={18}
-              style={{ color: "var(--primary)" }}
-            />
-            <span>
-              {t("featureHighlightsCards") || "بطاقات مميزات مساحة العمل"}
-            </span>
-          </h3>
-
-          <button
-            type="button"
-            onClick={() => {
-              const current = Array.isArray(bookingRulesForm.feature_highlights)
-                ? bookingRulesForm.feature_highlights
-                : [];
-              setBookingRulesForm({
-                ...bookingRulesForm,
-                feature_highlights: [
-                  ...current,
-                  {
-                    title: "",
-                    icon: "sparkles",
-                    description: "",
-                    image_url: "",
-                  },
-                ],
-              });
-            }}
-            disabled={!canEdit}
-            className="btn btn-secondary btn-sm"
-          >
-            + {t("addFeatureHighlight") || "إضافة بطاقة ميزة"}
-          </button>
-        </div>
-
-        {Array.isArray(bookingRulesForm.feature_highlights) &&
-        bookingRulesForm.feature_highlights.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {bookingRulesForm.feature_highlights.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: "var(--surface-alt)",
-                  padding: 16,
-                  borderRadius: 16,
-                  border: "1px solid var(--border)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.85rem",
-                      fontWeight: 700,
-                      color: "var(--primary)",
-                    }}
-                  >
-                    #{idx + 1} {t("featureHighlightCard") || "بطاقة ميزة"}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const current = Array.isArray(
-                        bookingRulesForm.feature_highlights,
-                      )
-                        ? bookingRulesForm.feature_highlights
-                        : [];
-                      setBookingRulesForm({
-                        ...bookingRulesForm,
-                        feature_highlights: current.filter((_, i) => i !== idx),
-                      });
-                    }}
-                    disabled={!canEdit}
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      color: "var(--error)",
-                      padding: "4px 10px",
-                    }}
-                  >
-                    <Icon name="x" size={16} />
-                  </button>
-                </div>
-
-                <div className="grid grid-2" style={{ gap: 14 }}>
-                  <div className="form-group mb-0">
-                    <label
-                      className="form-label"
-                      style={{ fontSize: "0.82rem" }}
-                    >
-                      {t("featureTitle") || "عنوان الميزة (Title)"}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={item.title || ""}
-                      onChange={(e) => {
-                        const current = Array.isArray(
-                          bookingRulesForm.feature_highlights,
-                        )
-                          ? bookingRulesForm.feature_highlights
-                          : [];
-                        const updated = current.map((f, i) =>
-                          i === idx ? { ...f, title: e.target.value } : f,
-                        );
-                        setBookingRulesForm({
-                          ...bookingRulesForm,
-                          feature_highlights: updated,
-                        });
-                      }}
-                      disabled={!canEdit}
-                      placeholder={
-                        isRTL
-                          ? "مثال: أطباء ومتخصصون معتمدون"
-                          : "Example: Certified doctors & specialists"
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group mb-0">
-                    <label
-                      className="form-label"
-                      style={{ fontSize: "0.82rem" }}
-                    >
-                      {t("cardIcon") || "رمز الأيقونة (Icon)"}
-                    </label>
-                    <select
-                      className="form-select"
-                      value={item.icon || "sparkles"}
-                      onChange={(e) => {
-                        const current = Array.isArray(
-                          bookingRulesForm.feature_highlights,
-                        )
-                          ? bookingRulesForm.feature_highlights
-                          : [];
-                        const updated = current.map((f, i) =>
-                          i === idx ? { ...f, icon: e.target.value } : f,
-                        );
-                        setBookingRulesForm({
-                          ...bookingRulesForm,
-                          feature_highlights: updated,
-                        });
-                      }}
-                      disabled={!canEdit}
-                    >
-                      <option value="sparkles">
-                        ✨ {t("sparkles") || "تمييز وسحر"}
-                      </option>
-                      <option value="shield">
-                        🛡️ {t("shield") || "حماية وخصوصية"}
-                      </option>
-                      <option value="clock">
-                        ⏰ {t("clock") || "وقت وسرعة"}
-                      </option>
-                      <option value="users">
-                        👥 {t("users") || "فريق عمل"}
-                      </option>
-                      <option value="star">
-                        ⭐ {t("star") || "نجمة وتقييم"}
-                      </option>
-                      <option value="phone">
-                        📞 {t("phone") || "هاتف وتواصل"}
-                      </option>
-                      <option value="map-pin">
-                        📍 {t("mapPin") || "موقع جغرافي"}
-                      </option>
-                      <option value="briefcase">
-                        💼 {t("briefcase") || "حقيبة عمل"}
-                      </option>
-                      <option value="check">
-                        ✅ {t("check") || "تأكيد وصحة"}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-group mb-0">
-                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
-                    {t("featureDescription") || "وصف الميزة (Description)"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={item.description || ""}
-                    onChange={(e) => {
-                      const current = Array.isArray(
-                        bookingRulesForm.feature_highlights,
-                      )
-                        ? bookingRulesForm.feature_highlights
-                        : [];
-                      const updated = current.map((f, i) =>
-                        i === idx ? { ...f, description: e.target.value } : f,
-                      );
-                      setBookingRulesForm({
-                        ...bookingRulesForm,
-                        feature_highlights: updated,
-                      });
-                    }}
-                    disabled={!canEdit}
-                    placeholder={
-                      isRTL
-                        ? "مثال: طاقم طبي متكامل لتقديم أعلى مستويات الرعاية."
-                        : "Example: Full medical team providing top care."
-                    }
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p
-            style={{
+              fontSize: "0.78rem",
               color: "var(--text-secondary)",
-              fontSize: "0.88rem",
-              fontStyle: "italic",
+              marginTop: 6,
+              lineHeight: 1.4,
             }}
           >
-            {t("noFeatureHighlightsYet") || "لم يتم إضافة بطاقات مميزات بعد."}
-          </p>
-        )}
-      </div>
-
-      {/* SECTION: Client Testimonials */}
-      <div
-        style={{
-          marginTop: 24,
-          paddingTop: 20,
-          borderTop: "1px solid var(--border-light)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 18,
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "1.05rem",
-              fontWeight: 700,
-              margin: 0,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon name="star" size={18} style={{ color: "var(--primary)" }} />
-            <span>
-              {t("clientTestimonials") ||
-                "آراء وانطباعات العملاء (Testimonials)"}
-            </span>
-          </h3>
-
-          <button
-            type="button"
-            onClick={() => {
-              const current = Array.isArray(bookingRulesForm.testimonials)
-                ? bookingRulesForm.testimonials
-                : [];
-              setBookingRulesForm({
-                ...bookingRulesForm,
-                testimonials: [
-                  ...current,
-                  {
-                    client_name: "",
-                    client_role: "",
-                    quote: "",
-                    rating: 5,
-                    avatar_url: "",
-                  },
-                ],
-              });
-            }}
-            disabled={!canEdit}
-            className="btn btn-secondary btn-sm"
-          >
-            + {t("addTestimonial") || "إضافة رأي عميل"}
-          </button>
+            {t("maxAdvanceDaysDesc") ||
+              "أقصى مدى زمني في المستقبل يمكن للعميل حجز المواعيد خلاله."}
+          </span>
         </div>
-
-        {Array.isArray(bookingRulesForm.testimonials) &&
-        bookingRulesForm.testimonials.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {bookingRulesForm.testimonials.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  background: "var(--surface-alt)",
-                  padding: 16,
-                  borderRadius: 16,
-                  border: "1px solid var(--border)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.85rem",
-                      fontWeight: 700,
-                      color: "var(--primary)",
-                    }}
-                  >
-                    #{idx + 1} {t("testimonial") || "رأي عميل"}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const current = Array.isArray(
-                        bookingRulesForm.testimonials,
-                      )
-                        ? bookingRulesForm.testimonials
-                        : [];
-                      setBookingRulesForm({
-                        ...bookingRulesForm,
-                        testimonials: current.filter((_, i) => i !== idx),
-                      });
-                    }}
-                    disabled={!canEdit}
-                    className="btn btn-secondary btn-sm"
-                    style={{
-                      color: "var(--error)",
-                      padding: "4px 10px",
-                    }}
-                  >
-                    <Icon name="x" size={16} />
-                  </button>
-                </div>
-
-                <div className="grid grid-2" style={{ gap: 14 }}>
-                  <div className="form-group mb-0">
-                    <label
-                      className="form-label"
-                      style={{ fontSize: "0.82rem" }}
-                    >
-                      {t("clientName") || "اسم العميل (Client Name)"}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={item.client_name || ""}
-                      onChange={(e) => {
-                        const current = Array.isArray(
-                          bookingRulesForm.testimonials,
-                        )
-                          ? bookingRulesForm.testimonials
-                          : [];
-                        const updated = current.map((t, i) =>
-                          i === idx ? { ...t, client_name: e.target.value } : t,
-                        );
-                        setBookingRulesForm({
-                          ...bookingRulesForm,
-                          testimonials: updated,
-                        });
-                      }}
-                      disabled={!canEdit}
-                      placeholder={
-                        isRTL ? "مثال: د. أحمد علي" : "Example: Dr. Ahmed Ali"
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group mb-0">
-                    <label
-                      className="form-label"
-                      style={{ fontSize: "0.82rem" }}
-                    >
-                      {t("clientRole") || "الصفة / الوظيفة (Role / Company)"}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={item.client_role || ""}
-                      onChange={(e) => {
-                        const current = Array.isArray(
-                          bookingRulesForm.testimonials,
-                        )
-                          ? bookingRulesForm.testimonials
-                          : [];
-                        const updated = current.map((t, i) =>
-                          i === idx ? { ...t, client_role: e.target.value } : t,
-                        );
-                        setBookingRulesForm({
-                          ...bookingRulesForm,
-                          testimonials: updated,
-                        });
-                      }}
-                      disabled={!canEdit}
-                      placeholder={
-                        isRTL
-                          ? "مثال: مدير شركة التقنية"
-                          : "Example: Tech Company Director"
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group mb-0">
-                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
-                    {t("testimonialQuote") || "نص التقييم (Quote)"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={item.quote || ""}
-                    onChange={(e) => {
-                      const current = Array.isArray(
-                        bookingRulesForm.testimonials,
-                      )
-                        ? bookingRulesForm.testimonials
-                        : [];
-                      const updated = current.map((t, i) =>
-                        i === idx ? { ...t, quote: e.target.value } : t,
-                      );
-                      setBookingRulesForm({
-                        ...bookingRulesForm,
-                        testimonials: updated,
-                      });
-                    }}
-                    disabled={!canEdit}
-                    placeholder={
-                      isRTL
-                        ? "مثال: تجربة رائعة وفريق محترف أنصح بالتعامل معهم."
-                        : "Example: Great experience and professional team."
-                    }
-                  />
-                </div>
-
-                <div className="form-group mb-0">
-                  <label className="form-label" style={{ fontSize: "0.82rem" }}>
-                    {t("rating") || "التقييم"}
-                  </label>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => {
-                          const current = Array.isArray(
-                            bookingRulesForm.testimonials,
-                          )
-                            ? bookingRulesForm.testimonials
-                            : [];
-                          const updated = current.map((t, i) =>
-                            i === idx ? { ...t, rating: star } : t,
-                          );
-                          setBookingRulesForm({
-                            ...bookingRulesForm,
-                            testimonials: updated,
-                          });
-                        }}
-                        disabled={!canEdit}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: canEdit ? "pointer" : "default",
-                          padding: 2,
-                          color:
-                            star <= (item.rating || 0)
-                              ? "#f59e0b"
-                              : "var(--border)",
-                        }}
-                        title={`${star} / 5`}
-                      >
-                        <Icon name="star" size={20} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "0.88rem",
-              fontStyle: "italic",
-            }}
-          >
-            {t("noClientTestimonialsYet") || "لم يتم إضافة آراء عملاء بعد."}
-          </p>
-        )}
       </div>
 
       {/* Primary Save Button */}

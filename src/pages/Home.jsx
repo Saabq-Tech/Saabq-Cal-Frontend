@@ -22,7 +22,7 @@ const FEATURE_ICONS = [
 ];
 
 export default function Home() {
-  const { t, lang } = useLanguage();
+  const { t, lang, isRTL } = useLanguage();
   const { isAuthenticated } = useAuth();
 
   const [banners, setBanners] = useState([]);

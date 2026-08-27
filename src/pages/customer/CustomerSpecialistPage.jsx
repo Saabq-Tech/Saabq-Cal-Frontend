@@ -49,6 +49,8 @@ export default function CustomerSpecialistPage() {
     return "";
   };
 
+  const getTranslatableText = _formatTranslatable;
+
   // Fetch workspace detail & services
   useEffect(() => {
     if (!idOrSlug || !specialistId) return;

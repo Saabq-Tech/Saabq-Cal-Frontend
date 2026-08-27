@@ -320,7 +320,9 @@ export default function WorkspaceSettingsPage() {
             minimum_booking_notice_minutes:
               data.minimum_booking_notice_minutes ?? 0,
             maximum_booking_days: data.maximum_booking_days ?? 30,
-            feature_highlights: loadedFeatures,
+            feature_highlights: Array.isArray(data.feature_highlights)
+              ? data.feature_highlights
+              : [],
             testimonials: Array.isArray(data.testimonials)
               ? data.testimonials
               : [],

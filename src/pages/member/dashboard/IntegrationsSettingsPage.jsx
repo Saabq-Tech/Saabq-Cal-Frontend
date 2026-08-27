@@ -28,6 +28,8 @@ function _getTranslatableText(textObj, currentLang = "ar") {
   return "";
 }
 
+const getLocalizedText = _getTranslatableText;
+
 // Custom iOS-style Toggle Switch Component
 
 function ToggleSwitch({ checked, onChange, disabled = false }) {
@@ -1582,6 +1584,54 @@ export default function IntegrationsSettingsPage() {
                       ? t("hide") || "إخفاء"
                       : t("showId") || "إظهر المعرف"}
                   </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginTop: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {spreadsheetId?.trim() && (
+                    <a
+                      href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary btn-sm"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        textDecoration: "none",
+                        fontSize: "0.82rem",
+                        padding: "6px 12px",
+                      }}
+                    >
+                      <Icon name="external-link" size={14} />
+                      {t("openSheetInDrive") || "فتح المستند في Google Drive"}
+                    </a>
+                  )}
+
+                  <a
+                    href="https://sheets.new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      textDecoration: "none",
+                      fontSize: "0.82rem",
+                      padding: "6px 12px",
+                    }}
+                  >
+                    <Icon name="plus" size={14} />
+                    {t("createNewSheet") || "إنشاء مستند جديد"}
+                  </a>
                 </div>
               </div>
 
