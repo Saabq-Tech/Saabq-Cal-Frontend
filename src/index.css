@@ -310,6 +310,32 @@ select {
   background-position: right 14px center;
 }
 
+/* ── Explicit Select Option Styling for Light & Dark Themes ── */
+select option,
+.form-select option {
+  background-color: var(--surface, #ffffff);
+  color: var(--text, #1e293b);
+  padding: 8px 12px;
+}
+
+html.dark select option,
+html.dark .form-select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+select option:disabled,
+.form-select option:disabled {
+  color: var(--muted, #94a3b8);
+  background-color: var(--surface-alt, #f8fafc);
+}
+
+html.dark select option:disabled,
+html.dark .form-select option:disabled {
+  color: #64748b !important;
+  background-color: #0f172a !important;
+}
+
 .form-control:hover:not(:disabled),
 .form-select:hover:not(:disabled),
 .form-input:hover:not(:disabled),

@@ -1580,6 +1580,10 @@ export const translations = {
     noGalleryImagesYet: "لا توجد صور مضافة في المعرض حالياً.",
     uploadCardImage: "رفع صورة للبطاقة",
     consentsSection: "الموافقات والشروط",
+    showMemberProfileLabel:
+      "اعرض صفحة الموظف الشخصية بدل صفحة الشركة عند حجز هذه الخدمة",
+    showMemberProfileDesc:
+      "إذا كان معطّلاً، لن يظهر زر «الملف الشخصي» إطلاقًا في صفحة الحجز — ولن يعود إلى صفحة الشركة.",
   },
   en: {
     installApp: "Install App",
@@ -3188,5 +3192,9 @@ export const translations = {
     noGalleryImagesYet: "No gallery images uploaded yet.",
     uploadCardImage: "Upload Card Image",
     consentsSection: "Consents & Terms",
+    showMemberProfileLabel:
+      "Show employee personal page instead of company page when booking this service",
+    showMemberProfileDesc:
+      "If disabled, the 'Profile' button will not appear at all on the booking page — and will not return to the company page.",
   },
 };

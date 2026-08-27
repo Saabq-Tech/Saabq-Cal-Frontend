@@ -638,29 +638,59 @@ export default function CustomerBookAppointmentPage() {
               marginBottom: 12,
             }}
           >
-            <Link
-              to={`/workspaces/${workspace.slug}`}
-              style={{
-                color: "rgba(255,255,255,0.9)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.9rem",
-                textDecoration: "none",
-                background: "rgba(255,255,255,0.15)",
-                padding: "4px 12px",
-                borderRadius: "var(--radius-full, 9999px)",
-              }}
-            >
-              <Icon
-                name="arrow-left"
-                size={14}
-                style={{ transform: isRTL ? "rotate(180deg)" : "none" }}
-              />
-              <span>
-                {isRTL ? "العودة إلى مساحة العمل" : "Back to Workspace"}
-              </span>
-            </Link>
+            {(() => {
+              const showMemberProfile =
+                selectedService?.show_member_profile === true;
+              const memberId =
+                selectedService?.workspace_member_id ||
+                selectedService?.workspace_member?.id;
+
+              if (
+                selectedService &&
+                selectedService.show_member_profile === false
+              ) {
+                // If disabled for this service, profile button will not appear at all
+                return null;
+              }
+
+              const targetUrl =
+                showMemberProfile && memberId
+                  ? `/workspaces/${workspace.slug}/specialist/${memberId}`
+                  : `/workspaces/${workspace.slug}`;
+
+              const labelText =
+                showMemberProfile && memberId
+                  ? isRTL
+                    ? "الملف الشخصي للمتخصص"
+                    : "Specialist Profile"
+                  : isRTL
+                    ? "العودة إلى مساحة العمل"
+                    : "Back to Workspace";
+
+              return (
+                <Link
+                  to={targetUrl}
+                  style={{
+                    color: "rgba(255,255,255,0.9)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: "0.9rem",
+                    textDecoration: "none",
+                    background: "rgba(255,255,255,0.15)",
+                    padding: "4px 12px",
+                    borderRadius: "var(--radius-full, 9999px)",
+                  }}
+                >
+                  <Icon
+                    name="arrow-left"
+                    size={14}
+                    style={{ transform: isRTL ? "rotate(180deg)" : "none" }}
+                  />
+                  <span>{labelText}</span>
+                </Link>
+              );
+            })()}
           </div>
           <h1
             style={{

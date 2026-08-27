@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
-import { useToast } from "../../../../context/ToastContext";
 import { useAuth } from "../../../../context/AuthContext";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
@@ -29,6 +28,7 @@ const defaultFormState = {
   status: "active",
   is_featured: false,
   booking_enabled: true,
+  show_member_profile: false,
   minimum_booking_notice_minutes: 0,
   maximum_booking_days: 30,
   workspace_member_id: "",
@@ -45,7 +45,6 @@ export default function ServicesTab({
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
-  const toast = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
   const [confirmModal, setConfirmModal] = useState({
@@ -136,14 +135,6 @@ export default function ServicesTab({
     return `${window.location.origin}/workspaces/${workspaceSlug}/book?service=${serviceSlug}`;
   };
 
-  const handleCopyBookingLink = (e, service) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const url = getCustomerBookingUrl(service);
-    navigator.clipboard.writeText(url);
-    toast.success(t("bookingLinkCopied") || "تم نسخ رابط حجز الخدمة بنجاح!");
-  };
-
   const handleOpenCreate = () => {
     setForm(defaultFormState);
     setIsModalOpen(true);
@@ -210,6 +201,7 @@ export default function ServicesTab({
       status: service.status || "active",
       is_featured: service.is_featured ?? false,
       booking_enabled: service.booking_enabled ?? true,
+      show_member_profile: service.show_member_profile ?? false,
       minimum_booking_notice_minutes:
         service.minimum_booking_notice_minutes ?? 0,
       maximum_booking_days: service.maximum_booking_days ?? 30,
@@ -269,6 +261,7 @@ export default function ServicesTab({
         workspace_member_id: form.workspace_member_id
           ? parseInt(form.workspace_member_id, 10)
           : null,
+        show_member_profile: Boolean(form.show_member_profile),
         name: {
           ar: name_ar || name_en || "",
           en: name_en || name_ar || "",
@@ -805,7 +798,7 @@ export default function ServicesTab({
                     borderTop: "1px solid var(--border-light)",
                     display: "flex",
                     flexDirection: "column",
-                    gap: 10,
+                    gap: 12,
                   }}
                 >
                   <div
@@ -826,38 +819,13 @@ export default function ServicesTab({
                         ? `${price} ${currencySymbol}`
                         : t("freeService") || (isRTL ? "مجاناً" : "Free")}
                     </div>
-
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={(e) => handleCopyBookingLink(e, s)}
-                      style={{
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                        padding: "4px 8px",
-                        background: "var(--surface-alt)",
-                        border: "1px solid var(--border-light)",
-                        borderRadius: "var(--radius-md)",
-                        color: "var(--text-secondary)",
-                      }}
-                      title={t("copyBookingLink") || "نسخ رابط الحجز المباشر"}
-                    >
-                      <Icon name="copy" size={13} />
-                      <span style={{ fontSize: "0.75rem" }}>
-                        {t("copy") || "نسخ الرابط"}
-                      </span>
-                    </button>
                   </div>
 
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: 6,
+                      gap: 8,
                       width: "100%",
                     }}
                   >
@@ -868,7 +836,8 @@ export default function ServicesTab({
                         rel="noopener noreferrer"
                         className="btn btn-secondary btn-sm"
                         style={{
-                          flex: "1 1 min(100%, 120px)",
+                          flex: "1 1 0px",
+                          minWidth: 0,
                           justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
@@ -892,7 +861,8 @@ export default function ServicesTab({
                       <span
                         className="btn btn-ghost btn-sm"
                         style={{
-                          flex: "1 1 min(100%, 120px)",
+                          flex: "1 1 0px",
+                          minWidth: 0,
                           justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
@@ -924,7 +894,8 @@ export default function ServicesTab({
                         className="btn btn-primary btn-sm"
                         onClick={() => handleOpenEdit(s)}
                         style={{
-                          flex: "1 1 min(100%, 110px)",
+                          flex: "1 1 0px",
+                          minWidth: 0,
                           justifyContent: "center",
                           fontWeight: 700,
                           fontSize: "0.78rem",
@@ -947,7 +918,8 @@ export default function ServicesTab({
                         className="btn btn-danger btn-sm"
                         onClick={() => handleDeleteClick(s)}
                         style={{
-                          flex: "1 1 min(100%, 70px)",
+                          flex: "1 1 0px",
+                          minWidth: 0,
                           justifyContent: "center",
                           fontWeight: 700,
                           fontSize: "0.78rem",
@@ -1211,12 +1183,20 @@ export default function ServicesTab({
                           "جميع أعضاء مساحة العمل (عامة)"}
                       </option>
                       {Array.isArray(members) &&
-                        members.map((m) => (
-                          <option key={m.id} value={m.id}>
-                            {m.name} {m.title ? `(${m.title})` : ""}{" "}
-                            {m.is_owner ? `— ${t("owner") || "مالك"}` : ""}
-                          </option>
-                        ))}
+                        members.map((m) => {
+                          const memberName =
+                            typeof m.name === "object" && m.name !== null
+                              ? isRTL
+                                ? m.name.ar || m.name.en || ""
+                                : m.name.en || m.name.ar || ""
+                              : m.name || "";
+                          return (
+                            <option key={m.id} value={m.id}>
+                              {memberName} {m.title ? `(${m.title})` : ""}{" "}
+                              {m.is_owner ? `— ${t("owner") || "مالك"}` : ""}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
 
@@ -1249,14 +1229,22 @@ export default function ServicesTab({
                             : "Default Workspace Schedule")}
                       </option>
                       {Array.isArray(schedules) &&
-                        schedules.map((sch) => (
-                          <option key={sch.id} value={sch.id}>
-                            {sch.name}{" "}
-                            {sch.is_default
-                              ? `— (${t("defaultScheduleTag") || (isRTL ? "افتراضي" : "Default")})`
-                              : ""}
-                          </option>
-                        ))}
+                        schedules.map((sch) => {
+                          const scheduleName =
+                            typeof sch.name === "object" && sch.name !== null
+                              ? isRTL
+                                ? sch.name.ar || sch.name.en || ""
+                                : sch.name.en || sch.name.ar || ""
+                              : sch.name || "";
+                          return (
+                            <option key={sch.id} value={sch.id}>
+                              {scheduleName}{" "}
+                              {sch.is_default
+                                ? `— (${t("defaultScheduleTag") || (isRTL ? "افتراضي" : "Default")})`
+                                : ""}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
 
@@ -2120,6 +2108,123 @@ export default function ServicesTab({
                       </span>
                     </label>
                   </div>
+
+                  {/* Show Member Profile Instead of Company Page Option */}
+                  <label
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      cursor: "pointer",
+                      padding: "14px 16px",
+                      marginTop: 12,
+                      boxSizing: "border-box",
+                      background: form.show_member_profile
+                        ? "rgba(14, 165, 233, 0.06)"
+                        : "var(--surface)",
+                      border: form.show_member_profile
+                        ? "1.5px solid rgba(14, 165, 233, 0.3)"
+                        : "1px solid var(--border-light)",
+                      borderRadius: "var(--radius-md)",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        width: "100%",
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          fontWeight: 700,
+                          fontSize: "0.86rem",
+                          color: form.show_member_profile
+                            ? "var(--heading)"
+                            : "var(--text-secondary)",
+                        }}
+                      >
+                        <Icon
+                          name="user"
+                          size={16}
+                          style={{
+                            color: form.show_member_profile
+                              ? "var(--primary)"
+                              : "var(--muted)",
+                            flexShrink: 0,
+                          }}
+                        />
+                        {t("showMemberProfileLabel") ||
+                          (isRTL
+                            ? "اعرض صفحة الموظف الشخصية بدل صفحة الشركة عند حجز هذه الخدمة"
+                            : "Show employee personal page instead of company page when booking this service")}
+                      </span>
+                      <span
+                        dir="ltr"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: form.show_member_profile
+                            ? "flex-end"
+                            : "flex-start",
+                          width: 40,
+                          height: 22,
+                          minWidth: 40,
+                          borderRadius: 99,
+                          background: form.show_member_profile
+                            ? "var(--primary)"
+                            : "#cbd5e1",
+                          padding: 2,
+                          boxSizing: "border-box",
+                          transition: "background 0.25s ease",
+                          flexShrink: 0,
+                          direction: "ltr",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="toggle-checkbox"
+                          checked={form.show_member_profile}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              show_member_profile: e.target.checked,
+                            })
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span
+                          style={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: "50%",
+                            background: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+                            flexShrink: 0,
+                          }}
+                        />
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--muted)",
+                        lineHeight: 1.45,
+                        marginInlineStart: 24,
+                      }}
+                    >
+                      {t("showMemberProfileDesc") ||
+                        (isRTL
+                          ? "إذا كان معطّلاً، لن يظهر زر «الملف الشخصي» إطلاقًا في صفحة الحجز — ولن يعود إلى صفحة الشركة."
+                          : "If disabled, the 'Profile' button will not appear at all on the booking page — and will not return to the company page.")}
+                    </span>
+                  </label>
                 </div>
 
                 {/* Modal Action Buttons */}
