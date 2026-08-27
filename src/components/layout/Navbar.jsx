@@ -154,7 +154,10 @@ export default function Navbar() {
   // Apply dark mode class and attribute
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    document.documentElement.setAttribute(
+      "data-theme",
+      dark ? "dark" : "light",
+    );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
   }, [dark]);
 

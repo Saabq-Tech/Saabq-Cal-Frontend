@@ -5,6 +5,7 @@ import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import ResourcesTab from "./workspace-settings/ResourcesTab";
 import SEO from "../../../components/ui/SEO";
+import { TableSkeleton } from "../../../components/ui/Skeleton";
 
 export default function WorkspaceResourcesPage() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export default function WorkspaceResourcesPage() {
   const toast = useToast();
 
   const [resources, setResources] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const isOwner = user?.is_owner === true;
@@ -22,7 +24,7 @@ export default function WorkspaceResourcesPage() {
   const canEdit = isOwner || userPermissions.includes("resource_write");
 
   const loadingRef = useRef(false);
-  const loadResources = async () => {
+  const loadData = async () => {
     if (!canRead) {
       setLoading(false);
       return;
@@ -31,8 +33,12 @@ export default function WorkspaceResourcesPage() {
     loadingRef.current = true;
     try {
       setLoading(true);
-      const res = await client.get(endpoints.workspaceResources);
-      setResources(res.data?.data || []);
+      const [resResponse, statsResponse] = await Promise.all([
+        client.get(endpoints.workspaceResources),
+        client.get(endpoints.workspaceResourceStats).catch(() => null),
+      ]);
+      setResources(resResponse.data?.data || []);
+      setStats(statsResponse?.data?.data || null);
     } catch (err) {
       if (err.response?.status !== 403) {
         toast.error(t("resourcesLoadFailed") || "فشل تحميل موارد مساحة العمل");
@@ -44,7 +50,7 @@ export default function WorkspaceResourcesPage() {
   };
 
   useEffect(() => {
-    loadResources();
+    loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
@@ -61,7 +67,7 @@ export default function WorkspaceResourcesPage() {
         await client.post(endpoints.workspaceResources, resourceForm);
         toast.success(t("resourceAddedSuccess") || "تم إضافة المورد بنجاح");
       }
-      loadResources();
+      loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "حدث خطأ في حفظ المورد");
     }
@@ -71,7 +77,7 @@ export default function WorkspaceResourcesPage() {
     try {
       await client.delete(endpoints.workspaceResourceItem(id));
       toast.success(t("resourceDeletedSuccess") || "تم حذف المورد بنجاح");
-      loadResources();
+      loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "حدث خطأ في حذف المورد");
     }
@@ -79,12 +85,16 @@ export default function WorkspaceResourcesPage() {
 
   return (
     <div className="card" style={{ padding: 24 }}>
-      <SEO title={t("workspaceResources") || "الموارد والقاعات"} noindex />
+      <SEO
+        title={t("workspaceResources") || "إدارة الموارد والمخزون"}
+        noindex
+      />
       {loading ? (
-        <div style={{ padding: 20 }}>جاري التحميل...</div>
+        <TableSkeleton rows={3} />
       ) : (
         <ResourcesTab
           resources={resources}
+          stats={stats}
           canEdit={canEdit}
           onSaveResource={handleSaveResource}
           onDeleteResource={handleDeleteResource}

@@ -147,6 +147,7 @@ export const endpoints = {
   workspaceRoleItem: (id) => `/workspace-members/workspace/roles/${id}`,
   workspaceRolesPermissions: "/workspace-members/workspace/roles/permissions",
   workspaceResources: "/workspace-members/workspace/resources",
+  workspaceResourceStats: "/workspace-members/workspace/resources/stats",
   workspaceResourceItem: (id) => `/workspace-members/workspace/resources/${id}`,
   workspaceLogs: "/workspace-members/workspace/logs",
   workspaceCustomers: "/workspace-members/workspace/customers",

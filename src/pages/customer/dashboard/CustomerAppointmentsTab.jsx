@@ -1203,8 +1203,8 @@ export default function CustomerAppointmentsTab() {
               </div>
 
               {loadingDetails ? (
-                <div style={{ padding: 40, textAlign: "center" }}>
-                  <span className="spinner spinner-md" />
+                <div style={{ padding: "20px 0" }}>
+                  <SkeletonRect height={160} radius="12px" />
                 </div>
               ) : (
                 <div

@@ -30,7 +30,6 @@ export default function BookingRulesTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit} style={{ gap: 24 }}>
-
       {/* Toggles Row (Online Booking & Auto Confirm) - 2 Columns Grid */}
       <div
         style={{
@@ -341,7 +340,13 @@ export default function BookingRulesTab({
       </div>
 
       {/* SECTION: Feature Highlights Cards */}
-      <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-light)" }}>
+      <div
+        style={{
+          marginTop: 24,
+          paddingTop: 20,
+          borderTop: "1px solid var(--border-light)",
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -381,7 +386,12 @@ export default function BookingRulesTab({
                 ...bookingRulesForm,
                 feature_highlights: [
                   ...current,
-                  { title: "", icon: "sparkles", description: "", image_url: "" },
+                  {
+                    title: "",
+                    icon: "sparkles",
+                    description: "",
+                    image_url: "",
+                  },
                 ],
               });
             }}
@@ -428,7 +438,9 @@ export default function BookingRulesTab({
                   <button
                     type="button"
                     onClick={() => {
-                      const current = Array.isArray(bookingRulesForm.feature_highlights)
+                      const current = Array.isArray(
+                        bookingRulesForm.feature_highlights,
+                      )
                         ? bookingRulesForm.feature_highlights
                         : [];
                       setBookingRulesForm({
@@ -447,12 +459,12 @@ export default function BookingRulesTab({
                   </button>
                 </div>
 
-                <div
-                  className="grid grid-2"
-                  style={{ gap: 14 }}
-                >
+                <div className="grid grid-2" style={{ gap: 14 }}>
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("featureTitle") || "عنوان الميزة (Title)"}
                     </label>
                     <input
@@ -460,7 +472,9 @@ export default function BookingRulesTab({
                       className="form-input"
                       value={item.title || ""}
                       onChange={(e) => {
-                        const current = Array.isArray(bookingRulesForm.feature_highlights)
+                        const current = Array.isArray(
+                          bookingRulesForm.feature_highlights,
+                        )
                           ? bookingRulesForm.feature_highlights
                           : [];
                         const updated = current.map((f, i) =>
@@ -481,14 +495,19 @@ export default function BookingRulesTab({
                   </div>
 
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("cardIcon") || "رمز الأيقونة (Icon)"}
                     </label>
                     <select
                       className="form-select"
                       value={item.icon || "sparkles"}
                       onChange={(e) => {
-                        const current = Array.isArray(bookingRulesForm.feature_highlights)
+                        const current = Array.isArray(
+                          bookingRulesForm.feature_highlights,
+                        )
                           ? bookingRulesForm.feature_highlights
                           : [];
                         const updated = current.map((f, i) =>
@@ -501,15 +520,33 @@ export default function BookingRulesTab({
                       }}
                       disabled={!canEdit}
                     >
-                      <option value="sparkles">✨ {t("sparkles") || "تمييز وسحر"}</option>
-                      <option value="shield">🛡️ {t("shield") || "حماية وخصوصية"}</option>
-                      <option value="clock">⏰ {t("clock") || "وقت وسرعة"}</option>
-                      <option value="users">👥 {t("users") || "فريق عمل"}</option>
-                      <option value="star">⭐ {t("star") || "نجمة وتقييم"}</option>
-                      <option value="phone">📞 {t("phone") || "هاتف وتواصل"}</option>
-                      <option value="map-pin">📍 {t("mapPin") || "موقع جغرافي"}</option>
-                      <option value="briefcase">💼 {t("briefcase") || "حقيبة عمل"}</option>
-                      <option value="check">✅ {t("check") || "تأكيد وصحة"}</option>
+                      <option value="sparkles">
+                        ✨ {t("sparkles") || "تمييز وسحر"}
+                      </option>
+                      <option value="shield">
+                        🛡️ {t("shield") || "حماية وخصوصية"}
+                      </option>
+                      <option value="clock">
+                        ⏰ {t("clock") || "وقت وسرعة"}
+                      </option>
+                      <option value="users">
+                        👥 {t("users") || "فريق عمل"}
+                      </option>
+                      <option value="star">
+                        ⭐ {t("star") || "نجمة وتقييم"}
+                      </option>
+                      <option value="phone">
+                        📞 {t("phone") || "هاتف وتواصل"}
+                      </option>
+                      <option value="map-pin">
+                        📍 {t("mapPin") || "موقع جغرافي"}
+                      </option>
+                      <option value="briefcase">
+                        💼 {t("briefcase") || "حقيبة عمل"}
+                      </option>
+                      <option value="check">
+                        ✅ {t("check") || "تأكيد وصحة"}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -523,7 +560,9 @@ export default function BookingRulesTab({
                     className="form-input"
                     value={item.description || ""}
                     onChange={(e) => {
-                      const current = Array.isArray(bookingRulesForm.feature_highlights)
+                      const current = Array.isArray(
+                        bookingRulesForm.feature_highlights,
+                      )
                         ? bookingRulesForm.feature_highlights
                         : [];
                       const updated = current.map((f, i) =>
@@ -559,7 +598,13 @@ export default function BookingRulesTab({
       </div>
 
       {/* SECTION: Client Testimonials */}
-      <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-light)" }}>
+      <div
+        style={{
+          marginTop: 24,
+          paddingTop: 20,
+          borderTop: "1px solid var(--border-light)",
+        }}
+      >
         <div
           style={{
             display: "flex",
@@ -581,7 +626,8 @@ export default function BookingRulesTab({
           >
             <Icon name="star" size={18} style={{ color: "var(--primary)" }} />
             <span>
-              {t("clientTestimonials") || "آراء وانطباعات العملاء (Testimonials)"}
+              {t("clientTestimonials") ||
+                "آراء وانطباعات العملاء (Testimonials)"}
             </span>
           </h3>
 
@@ -648,7 +694,9 @@ export default function BookingRulesTab({
                   <button
                     type="button"
                     onClick={() => {
-                      const current = Array.isArray(bookingRulesForm.testimonials)
+                      const current = Array.isArray(
+                        bookingRulesForm.testimonials,
+                      )
                         ? bookingRulesForm.testimonials
                         : [];
                       setBookingRulesForm({
@@ -667,12 +715,12 @@ export default function BookingRulesTab({
                   </button>
                 </div>
 
-                <div
-                  className="grid grid-2"
-                  style={{ gap: 14 }}
-                >
+                <div className="grid grid-2" style={{ gap: 14 }}>
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("clientName") || "اسم العميل (Client Name)"}
                     </label>
                     <input
@@ -680,7 +728,9 @@ export default function BookingRulesTab({
                       className="form-input"
                       value={item.client_name || ""}
                       onChange={(e) => {
-                        const current = Array.isArray(bookingRulesForm.testimonials)
+                        const current = Array.isArray(
+                          bookingRulesForm.testimonials,
+                        )
                           ? bookingRulesForm.testimonials
                           : [];
                         const updated = current.map((t, i) =>
@@ -692,12 +742,17 @@ export default function BookingRulesTab({
                         });
                       }}
                       disabled={!canEdit}
-                      placeholder={isRTL ? "مثال: د. أحمد علي" : "Example: Dr. Ahmed Ali"}
+                      placeholder={
+                        isRTL ? "مثال: د. أحمد علي" : "Example: Dr. Ahmed Ali"
+                      }
                     />
                   </div>
 
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("clientRole") || "الصفة / الوظيفة (Role / Company)"}
                     </label>
                     <input
@@ -705,7 +760,9 @@ export default function BookingRulesTab({
                       className="form-input"
                       value={item.client_role || ""}
                       onChange={(e) => {
-                        const current = Array.isArray(bookingRulesForm.testimonials)
+                        const current = Array.isArray(
+                          bookingRulesForm.testimonials,
+                        )
                           ? bookingRulesForm.testimonials
                           : [];
                         const updated = current.map((t, i) =>
@@ -718,7 +775,9 @@ export default function BookingRulesTab({
                       }}
                       disabled={!canEdit}
                       placeholder={
-                        isRTL ? "مثال: مدير شركة التقنية" : "Example: Tech Company Director"
+                        isRTL
+                          ? "مثال: مدير شركة التقنية"
+                          : "Example: Tech Company Director"
                       }
                     />
                   </div>
@@ -733,7 +792,9 @@ export default function BookingRulesTab({
                     className="form-input"
                     value={item.quote || ""}
                     onChange={(e) => {
-                      const current = Array.isArray(bookingRulesForm.testimonials)
+                      const current = Array.isArray(
+                        bookingRulesForm.testimonials,
+                      )
                         ? bookingRulesForm.testimonials
                         : [];
                       const updated = current.map((t, i) =>
@@ -763,7 +824,9 @@ export default function BookingRulesTab({
                         key={star}
                         type="button"
                         onClick={() => {
-                          const current = Array.isArray(bookingRulesForm.testimonials)
+                          const current = Array.isArray(
+                            bookingRulesForm.testimonials,
+                          )
                             ? bookingRulesForm.testimonials
                             : [];
                           const updated = current.map((t, i) =>

@@ -720,8 +720,8 @@ export default function RolesTab({
                       display: "flex",
                       flexDirection: "column",
                       gap: 12,
-                      maxHeight: 280,
-                      overflowY: "auto",
+                      width: "100%",
+                      boxSizing: "border-box",
                       padding: 12,
                       border: "1px solid var(--border)",
                       borderRadius: "var(--radius-md)",
@@ -789,10 +789,10 @@ export default function RolesTab({
 
                           <div
                             style={{
-                              display: "grid",
-                              gridTemplateColumns:
-                                "repeat(auto-fit, minmax(200px, 1fr))",
-                              gap: 10,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                              width: "100%",
                             }}
                           >
                             {group.permissions.map((perm) => {

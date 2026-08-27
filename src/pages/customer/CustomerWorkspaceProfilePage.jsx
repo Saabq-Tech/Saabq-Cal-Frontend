@@ -31,28 +31,17 @@ export default function WorkspaceProfilePage() {
 
   const getTranslatableText = useCallback(
     (val) => {
-      if (!val) return "";
-      if (typeof val === "string") return val;
+      if (val === null || val === undefined) return "";
+      if (typeof val === "string" || typeof val === "number")
+        return String(val);
       if (typeof val === "object") {
         const text = isRTL
-          ? val.ar ||
-            val.ar_EG ||
-            val.en ||
-            Object.values(val).find(
-              (v) => typeof v === "string" && v.trim() !== "",
-            ) ||
-            ""
-          : val.en ||
-            val.ar ||
-            val.ar_EG ||
-            Object.values(val).find(
-              (v) => typeof v === "string" && v.trim() !== "",
-            ) ||
-            "";
-        if (typeof text === "string") return text;
-        if (text && typeof text === "object") return getTranslatableText(text);
+          ? val.ar || val.ar_EG || val.en || val.name || val.title || ""
+          : val.en || val.ar || val.ar_EG || val.name || val.title || "";
+        if (typeof text === "string" || typeof text === "number")
+          return String(text);
       }
-      return String(val);
+      return "";
     },
     [isRTL],
   );
@@ -510,7 +499,7 @@ export default function WorkspaceProfilePage() {
               </div>
 
               {/* Title, Bio & Contact Chips */}
-              <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ flex: 1, minWidth: 0, width: "100%" }}>
                 <div
                   className="workspace-hero-title-box"
                   style={{
@@ -891,7 +880,14 @@ export default function WorkspaceProfilePage() {
             </div>
 
             {services.length > 3 && (
-              <div style={{ position: "relative", minWidth: 260 }}>
+              <div
+                style={{
+                  position: "relative",
+                  minWidth: 0,
+                  width: "100%",
+                  maxWidth: 360,
+                }}
+              >
                 <input
                   type="text"
                   className="form-input"
@@ -951,7 +947,8 @@ export default function WorkspaceProfilePage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
                 gap: 24,
               }}
             >
@@ -1286,177 +1283,177 @@ export default function WorkspaceProfilePage() {
                       style={{
                         display: "grid",
                         gridTemplateColumns:
-                          "repeat(auto-fill, minmax(220px, 1fr))",
+                          "repeat(auto-fill, minmax(min(100%, 220px), 1fr))",
                         gap: 22,
                       }}
                     >
                       {displayedSpecialists.map((member) => (
-                    <Link
-                      key={member.id}
-                      to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
-                      className="specialist-profile-card animate-tab-card"
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        textAlign: "center",
-                        padding: "26px 20px 20px",
-                        borderRadius: 22,
-                        textDecoration: "none",
-                        color: "var(--text)",
-                        background: "var(--surface)",
-                        border: "1px solid var(--border)",
-                        boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
-                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {/* Top Accent Gradient Line */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          height: 4,
-                          background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
-                        }}
-                      />
-
-                      {/* Avatar Ring */}
-                      <div
-                        style={{
-                          position: "relative",
-                          marginBottom: 14,
-                        }}
-                      >
-                        <div
+                        <Link
+                          key={member.id}
+                          to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
+                          className="specialist-profile-card animate-tab-card"
                           style={{
-                            width: 84,
-                            height: 84,
-                            borderRadius: "50%",
-                            padding: 3,
-                            background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
-                            boxShadow: `0 8px 20px ${primaryColor}22`,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            textAlign: "center",
+                            padding: "26px 20px 20px",
+                            borderRadius: 22,
+                            textDecoration: "none",
+                            color: "var(--text)",
+                            background: "var(--surface)",
+                            border: "1px solid var(--border)",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
                         >
+                          {/* Top Accent Gradient Line */}
                           <div
                             style={{
-                              width: "100%",
-                              height: "100%",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              background: "var(--surface)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: 800,
-                              fontSize: "1.7rem",
-                              color: primaryColor,
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: 4,
+                              background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
+                            }}
+                          />
+
+                          {/* Avatar Ring */}
+                          <div
+                            style={{
+                              position: "relative",
+                              marginBottom: 14,
                             }}
                           >
-                            {member.avatar_url ? (
-                              <LazyImage
-                                src={member.avatar_url}
-                                alt={member.name}
+                            <div
+                              style={{
+                                width: 84,
+                                height: 84,
+                                borderRadius: "50%",
+                                padding: 3,
+                                background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                                boxShadow: `0 8px 20px ${primaryColor}22`,
+                              }}
+                            >
+                              <div
                                 style={{
                                   width: "100%",
                                   height: "100%",
-                                  objectFit: "cover",
+                                  borderRadius: "50%",
+                                  overflow: "hidden",
+                                  background: "var(--surface)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontWeight: 800,
+                                  fontSize: "1.7rem",
+                                  color: primaryColor,
                                 }}
-                              />
-                            ) : (
-                              member.name.charAt(0).toUpperCase()
-                            )}
+                              >
+                                {member.avatar_url ? (
+                                  <LazyImage
+                                    src={member.avatar_url}
+                                    alt={member.name}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                ) : (
+                                  member.name.charAt(0).toUpperCase()
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Member Info */}
-                      <div
-                        style={{
-                          width: "100%",
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontWeight: 800,
-                            fontSize: "1.08rem",
-                            color: "var(--heading)",
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {member.name}
-                        </div>
-
-                        {/* Category Specialty Pill */}
-                        {member.roleName && (
-                          <span
-                            style={{
-                              marginTop: 6,
-                              fontSize: "0.76rem",
-                              fontWeight: 700,
-                              padding: "3px 12px",
-                              borderRadius: 20,
-                              background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}10)`,
-                              color: primaryColor,
-                              border: `1px solid ${primaryColor}25`,
-                              display: "inline-block",
-                            }}
-                          >
-                            {member.roleName}
-                          </span>
-                        )}
-
-                        {member.title && (
+                          {/* Member Info */}
                           <div
                             style={{
-                              fontSize: "0.83rem",
-                              color: "var(--text-secondary)",
-                              marginTop: 4,
-                              fontWeight: 500,
+                              width: "100%",
+                              flex: 1,
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}
                           >
-                            {member.title}
-                          </div>
-                        )}
-                      </div>
+                            <div
+                              style={{
+                                fontWeight: 800,
+                                fontSize: "1.08rem",
+                                color: "var(--heading)",
+                                lineHeight: 1.3,
+                              }}
+                            >
+                              {member.name}
+                            </div>
 
-                      {/* View Profile Action Link Button */}
-                      <div
-                        style={{
-                          marginTop: 18,
-                          width: "100%",
-                          padding: "9px 16px",
-                          borderRadius: 14,
-                          background: `linear-gradient(135deg, ${primaryColor}12, ${secondaryColor}08)`,
-                          border: `1px solid ${primaryColor}25`,
-                          color: primaryColor,
-                          fontWeight: 700,
-                          fontSize: "0.83rem",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 6,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <span>
-                          {isRTL ? "عرض الملف الشخصي" : "View Profile"}
-                        </span>
-                        <Icon
-                          name={isRTL ? "chevron-left" : "chevron-right"}
-                          size={14}
-                        />
-                      </div>
-                    </Link>
-                  ))}
+                            {/* Category Specialty Pill */}
+                            {member.roleName && (
+                              <span
+                                style={{
+                                  marginTop: 6,
+                                  fontSize: "0.76rem",
+                                  fontWeight: 700,
+                                  padding: "3px 12px",
+                                  borderRadius: 20,
+                                  background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}10)`,
+                                  color: primaryColor,
+                                  border: `1px solid ${primaryColor}25`,
+                                  display: "inline-block",
+                                }}
+                              >
+                                {member.roleName}
+                              </span>
+                            )}
+
+                            {member.title && (
+                              <div
+                                style={{
+                                  fontSize: "0.83rem",
+                                  color: "var(--text-secondary)",
+                                  marginTop: 4,
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {member.title}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* View Profile Action Link Button */}
+                          <div
+                            style={{
+                              marginTop: 18,
+                              width: "100%",
+                              padding: "9px 16px",
+                              borderRadius: 14,
+                              background: `linear-gradient(135deg, ${primaryColor}12, ${secondaryColor}08)`,
+                              border: `1px solid ${primaryColor}25`,
+                              color: primaryColor,
+                              fontWeight: 700,
+                              fontSize: "0.83rem",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 6,
+                              transition: "all 0.2s ease",
+                            }}
+                          >
+                            <span>
+                              {isRTL ? "عرض الملف الشخصي" : "View Profile"}
+                            </span>
+                            <Icon
+                              name={isRTL ? "chevron-left" : "chevron-right"}
+                              size={14}
+                            />
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   ) : (
                     <p

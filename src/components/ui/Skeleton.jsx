@@ -100,8 +100,10 @@ export function WorkspaceCardSkeleton({ count = 6 }) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
         gap: 28,
+        width: "100%",
+        maxWidth: "100%",
       }}
     >
       {Array.from({ length: count }, (_, i) => (
@@ -116,12 +118,18 @@ export function ServiceCardSkeleton({ count = 3 }) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
         gap: 24,
+        width: "100%",
+        maxWidth: "100%",
       }}
     >
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="card" style={{ padding: 24 }}>
+        <div
+          key={i}
+          className="card"
+          style={{ padding: 24, maxWidth: "100%", boxSizing: "border-box" }}
+        >
           <div
             style={{
               display: "flex",
@@ -289,8 +297,11 @@ export function HomeSkeleton() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
               gap: 24,
+              width: "100%",
+              maxWidth: "100%",
             }}
           >
             {[1, 2, 3].map((i) => (
@@ -338,6 +349,96 @@ export function PageSkeleton() {
         <SkeletonCircle size={48} />
         <SkeletonLine width={180} height={16} />
         <SkeletonLine width={120} height={12} />
+      </div>
+    </div>
+  );
+}
+
+export function TabSettingsSkeleton() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        width: "100%",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
+        <SkeletonLine width="35%" height={24} />
+        <SkeletonRect width={120} height={36} radius="var(--radius-md)" />
+      </div>
+      <SkeletonRect height={52} radius="var(--radius-md)" />
+      <SkeletonRect height={52} radius="var(--radius-md)" />
+      <SkeletonRect height={52} radius="var(--radius-md)" />
+      <SkeletonRect height={52} radius="var(--radius-md)" />
+    </div>
+  );
+}
+
+export function TableSkeleton({ rows = 4 }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        width: "100%",
+      }}
+    >
+      <SkeletonRect height={44} radius="var(--radius-md)" />
+      {Array.from({ length: rows }, (_, i) => (
+        <SkeletonRect key={i} height={56} radius="var(--radius-md)" />
+      ))}
+    </div>
+  );
+}
+
+export function ChatSidebarSkeleton() {
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 12, padding: 12 }}
+    >
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <SkeletonCircle size={42} />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
+            <SkeletonLine width="60%" height={14} />
+            <SkeletonLine width="80%" height={10} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function ChatFeedSkeleton() {
+  return (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 14, padding: 16 }}
+    >
+      <div style={{ alignSelf: "flex-start", width: "60%" }}>
+        <SkeletonRect height={48} radius="16px" />
+      </div>
+      <div style={{ alignSelf: "flex-end", width: "50%" }}>
+        <SkeletonRect height={40} radius="16px" />
+      </div>
+      <div style={{ alignSelf: "flex-start", width: "70%" }}>
+        <SkeletonRect height={56} radius="16px" />
       </div>
     </div>
   );

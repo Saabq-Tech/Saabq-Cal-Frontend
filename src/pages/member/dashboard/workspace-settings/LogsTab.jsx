@@ -224,7 +224,10 @@ export default function LogsTab({
                   key={log.id}
                   style={{ borderTop: "1px solid var(--border-light)" }}
                 >
-                  <td style={{ padding: "12px 16px", fontSize: "0.9rem" }}>
+                  <td
+                    data-label={t("actor") || (isRTL ? "المنفذ" : "Actor")}
+                    style={{ padding: "12px 16px", fontSize: "0.9rem" }}
+                  >
                     <div style={{ fontWeight: 600, color: "var(--heading)" }}>
                       {log.actor_name || (isRTL ? "نظام" : "System")}
                     </div>
@@ -232,7 +235,10 @@ export default function LogsTab({
                       {log.actor_type}
                     </div>
                   </td>
-                  <td style={{ padding: "12px 16px", fontSize: "0.9rem" }}>
+                  <td
+                    data-label={t("action") || (isRTL ? "الإجراء" : "Action")}
+                    style={{ padding: "12px 16px", fontSize: "0.9rem" }}
+                  >
                     <span
                       style={{
                         padding: "2px 8px",
@@ -256,7 +262,10 @@ export default function LogsTab({
                       {log.action}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px", fontSize: "0.9rem" }}>
+                  <td
+                    data-label={t("target") || (isRTL ? "الهدف" : "Target")}
+                    style={{ padding: "12px 16px", fontSize: "0.9rem" }}
+                  >
                     <div style={{ fontWeight: 600, color: "var(--heading)" }}>
                       {log.auditable_type.split("\\").pop()}
                     </div>
@@ -265,6 +274,9 @@ export default function LogsTab({
                     </div>
                   </td>
                   <td
+                    data-label={
+                      t("ipAddress") || (isRTL ? "عنوان IP" : "IP Address")
+                    }
                     style={{
                       padding: "12px 16px",
                       fontSize: "0.85rem",
@@ -274,6 +286,7 @@ export default function LogsTab({
                     {log.ip_address || "-"}
                   </td>
                   <td
+                    data-label={t("date") || (isRTL ? "التاريخ" : "Date")}
                     style={{
                       padding: "12px 16px",
                       fontSize: "0.85rem",

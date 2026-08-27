@@ -6,6 +6,7 @@ import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import { applyWorkspaceBranding } from "../../../utils/theme";
 import SEO from "../../../components/ui/SEO";
+import { TabSettingsSkeleton } from "../../../components/ui/Skeleton";
 
 import CapabilityGate from "../../../components/common/CapabilityGate";
 
@@ -75,6 +76,20 @@ export default function WorkspaceSettingsPage() {
       scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
     }
   };
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const activeEl = scrollRef.current.querySelector(
+      ".workspace-subnav-item.active, .btn-primary, [aria-selected='true']",
+    );
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }
+  }, [subSettingsTab]);
 
   // Permissions
   const isOwner = user?.is_owner === true;
@@ -208,7 +223,10 @@ export default function WorkspaceSettingsPage() {
             data.hover_color,
           );
           setBasicForm({
-            name: data.name || "",
+            name:
+              typeof data.name === "object" && data.name !== null
+                ? data.name?.ar || data.name?.en || ""
+                : data.name || "",
             email: data.email || "",
             phone: data.phone || "",
             description:
@@ -220,7 +238,9 @@ export default function WorkspaceSettingsPage() {
                 : { ar: data.description || "", en: "" },
             booking_short_intro:
               typeof data.booking_short_intro === "object"
-                ? data.booking_short_intro?.ar || data.booking_short_intro?.en || ""
+                ? data.booking_short_intro?.ar ||
+                  data.booking_short_intro?.en ||
+                  ""
                 : data.booking_short_intro || "",
             customer_label_singular:
               typeof data.customer_label_singular === "object"
@@ -663,15 +683,7 @@ export default function WorkspaceSettingsPage() {
         style={{ padding: 24 }}
       >
         {loading ? (
-          <div style={{ padding: 40, textAlign: "center" }}>
-            <span
-              className="spinner spinner-md"
-              style={{ margin: "0 auto 12px" }}
-            />
-            <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
-              {t("loading")}
-            </p>
-          </div>
+          <TabSettingsSkeleton />
         ) : (
           <>
             {subSettingsTab === "basic" && (

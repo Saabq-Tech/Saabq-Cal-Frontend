@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
@@ -16,9 +16,23 @@ export default function DashboardSidebar() {
 
   // Mouse drag-to-scroll & wheel scrolling
   const sidebarRef = useRef(null);
+  const navRef = useRef(null);
   const isMouseDownRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
+
+  useEffect(() => {
+    const container = navRef.current || sidebarRef.current;
+    if (!container) return;
+    const activeEl = container.querySelector(".profile-sidebar-link.active");
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }
+  }, [activeTab, location.pathname]);
 
   const handleMouseDown = (e) => {
     if (!sidebarRef.current) return;
@@ -65,7 +79,7 @@ export default function DashboardSidebar() {
         {t("profileInfo") || "الحساب الشخصي"}
       </div>
 
-      <nav aria-label={t("profileInfo") || "قائمة الحساب"}>
+      <nav ref={navRef} aria-label={t("profileInfo") || "قائمة الحساب"}>
         {/* 1. Profile Info */}
         <Link
           to={`${prefix}/profile?tab=info`}

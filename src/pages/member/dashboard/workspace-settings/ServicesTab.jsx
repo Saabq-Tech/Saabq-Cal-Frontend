@@ -367,7 +367,14 @@ export default function ServicesTab({
             const isFeatured = s.is_featured ?? false;
             const duration = s.duration_minutes || s.duration || 30;
             const price = s.price ?? 0;
-            const currency = s.currency || "SAR";
+            const rawCurr = s.currency;
+            const currencySymbol =
+              typeof rawCurr === "object" && rawCurr !== null
+                ? rawCurr.symbol_native ||
+                  rawCurr.symbol ||
+                  rawCurr.code ||
+                  "SAR"
+                : rawCurr || "SAR";
 
             const nameDisplay =
               typeof s.name === "object"
@@ -641,23 +648,27 @@ export default function ServicesTab({
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 8,
+                          gap: 10,
                           marginTop: 12,
-                          padding: "6px 10px",
+                          padding: "8px 12px",
                           background: "var(--surface-alt)",
                           borderRadius: "var(--radius-md)",
                           border: "1px solid var(--border-light)",
+                          width: "100%",
+                          boxSizing: "border-box",
                         }}
                       >
                         <UserAvatar
                           name={providerName}
                           avatarUrl={providerAvatar}
-                          size={24}
+                          size={28}
                         />
                         <div
                           style={{
                             display: "flex",
                             flexDirection: "column",
+                            flex: 1,
+                            minWidth: 0,
                             overflow: "hidden",
                           }}
                         >
@@ -677,10 +688,10 @@ export default function ServicesTab({
                               fontSize: "0.82rem",
                               fontWeight: 700,
                               color: "var(--heading)",
-                              lineHeight: 1.2,
-                              whiteSpace: "nowrap",
+                              lineHeight: 1.3,
                               overflow: "hidden",
                               textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
                             }}
                           >
                             {providerName}{" "}
@@ -704,33 +715,63 @@ export default function ServicesTab({
 
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
                     paddingTop: 12,
                     borderTop: "1px solid var(--border-light)",
-                    flexWrap: "wrap",
-                    gap: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
                   }}
                 >
                   <div
                     style={{
-                      fontWeight: 800,
-                      color: "var(--primary)",
-                      fontSize: "1.1rem",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    {price > 0
-                      ? `${price} ${currency?.symbol || currency}`
-                      : t("freeService") || (isRTL ? "مجاناً" : "Free")}
+                    <div
+                      style={{
+                        fontWeight: 800,
+                        color: "var(--primary)",
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      {price > 0
+                        ? `${price} ${currencySymbol}`
+                        : t("freeService") || (isRTL ? "مجاناً" : "Free")}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={(e) => handleCopyBookingLink(e, s)}
+                      style={{
+                        fontSize: "0.78rem",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                        padding: "4px 8px",
+                        background: "var(--surface-alt)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "var(--radius-md)",
+                        color: "var(--text-secondary)",
+                      }}
+                      title={t("copyBookingLink") || "نسخ رابط الحجز المباشر"}
+                    >
+                      <Icon name="copy" size={13} />
+                      <span style={{ fontSize: "0.75rem" }}>
+                        {t("copy") || "نسخ الرابط"}
+                      </span>
+                    </button>
                   </div>
 
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 6,
-                      flexWrap: "wrap",
+                      gap: 8,
+                      width: "100%",
                     }}
                   >
                     {s.booking_enabled ? (
@@ -740,14 +781,17 @@ export default function ServicesTab({
                         rel="noopener noreferrer"
                         className="btn btn-secondary btn-sm"
                         style={{
+                          flex: 1,
+                          justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 4,
-                          padding: "5px 10px",
+                          padding: "7px 10px",
                           textDecoration: "none",
                           borderRadius: "var(--radius-md)",
+                          whiteSpace: "nowrap",
                         }}
                         title={
                           t("openCustomerBookingPage") ||
@@ -761,6 +805,8 @@ export default function ServicesTab({
                       <span
                         className="btn btn-ghost btn-sm"
                         style={{
+                          flex: 1,
+                          justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
                           opacity: 0.65,
@@ -768,10 +814,11 @@ export default function ServicesTab({
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 4,
-                          padding: "5px 10px",
+                          padding: "7px 10px",
                           background: "var(--surface-alt)",
                           border: "1px solid var(--border-light)",
                           color: "var(--muted)",
+                          borderRadius: "var(--radius-md)",
                         }}
                         title={
                           t("bookingDisabledNotice") ||
@@ -783,36 +830,25 @@ export default function ServicesTab({
                       </span>
                     )}
 
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={(e) => handleCopyBookingLink(e, s)}
-                      style={{
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                        padding: "5px 8px",
-                        color: "var(--text-secondary)",
-                      }}
-                      title={t("copyBookingLink") || "نسخ رابط الحجز المباشر"}
-                    >
-                      <Icon name="copy" size={13} />
-                    </button>
-
                     {canEdit && (
                       <button
                         type="button"
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-primary btn-sm"
                         onClick={() => handleOpenEdit(s)}
                         style={{
-                          color: "var(--primary)",
-                          fontWeight: 600,
+                          flex: 1,
+                          justifyContent: "center",
+                          fontWeight: 700,
                           fontSize: "0.78rem",
-                          padding: "5px 8px",
+                          padding: "7px 10px",
+                          borderRadius: "var(--radius-md)",
+                          whiteSpace: "nowrap",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
                         }}
                       >
+                        <Icon name="edit" size={13} />
                         {t("editService") || "تعديل الخدمة"}
                       </button>
                     )}
@@ -828,16 +864,7 @@ export default function ServicesTab({
       {isModalOpen &&
         createPortal(
           <div className="modal-backdrop">
-            <div
-              className="modal-card animate-fade-in-up"
-              style={{
-                maxWidth: 720,
-                width: "100%",
-                maxHeight: "90vh",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+            <div className="modal-card modal-lg animate-fade-in-up">
               <div
                 className="modal-header"
                 style={{
@@ -870,6 +897,8 @@ export default function ServicesTab({
                   padding: 20,
                   display: "flex",
                   flexDirection: "column",
+                  alignItems: "stretch",
+                  width: "100%",
                   gap: 20,
                 }}
               >
@@ -880,6 +909,8 @@ export default function ServicesTab({
                     padding: 14,
                     borderRadius: "var(--radius-md)",
                     border: "1px solid var(--border-light)",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
                   <h4
@@ -906,9 +937,10 @@ export default function ServicesTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(240px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
                       gap: 12,
                       marginBottom: 12,
+                      width: "100%",
                     }}
                   >
                     <div className="form-group">
@@ -1000,9 +1032,10 @@ export default function ServicesTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(240px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
                       gap: 12,
                       marginBottom: 12,
+                      width: "100%",
                     }}
                   >
                     <div className="form-group">
@@ -1056,8 +1089,9 @@ export default function ServicesTab({
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(240px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
                       gap: 12,
+                      width: "100%",
                     }}
                   >
                     <div className="form-group">
@@ -1108,6 +1142,8 @@ export default function ServicesTab({
                     padding: 14,
                     borderRadius: "var(--radius-md)",
                     border: "1px solid var(--border-light)",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
                   <h4
@@ -1262,6 +1298,8 @@ export default function ServicesTab({
                     padding: 14,
                     borderRadius: "var(--radius-md)",
                     border: "1px solid var(--border-light)",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
                   <h4
@@ -1340,33 +1378,90 @@ export default function ServicesTab({
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 10,
+                      justifyContent: "space-between",
+                      gap: 12,
                       cursor: "pointer",
                       fontSize: "0.84rem",
                       fontWeight: 700,
-                      color: "var(--heading)",
+                      padding: "12px 14px",
+                      marginTop: 4,
+                      background: form.requires_meeting
+                        ? "rgba(14, 165, 233, 0.06)"
+                        : "var(--surface)",
+                      border: form.requires_meeting
+                        ? "1.5px solid rgba(14, 165, 233, 0.3)"
+                        : "1px solid var(--border-light)",
+                      borderRadius: "var(--radius-md)",
+                      transition: "all 0.2s ease",
                     }}
                   >
-                    <input
-                      type="checkbox"
-                      checked={form.requires_meeting}
-                      onChange={(e) =>
-                        setForm({ ...form, requires_meeting: e.target.checked })
-                      }
+                    <span
                       style={{
-                        accentColor: "var(--primary)",
-                        width: 17,
-                        height: 17,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        color: form.requires_meeting
+                          ? "var(--heading)"
+                          : "var(--text-secondary)",
                       }}
-                    />
-                    <Icon
-                      name="video"
-                      size={16}
-                      style={{ color: "var(--primary)", flexShrink: 0 }}
-                    />
-                    <span>
+                    >
+                      <Icon
+                        name="video"
+                        size={16}
+                        style={{
+                          color: form.requires_meeting
+                            ? "var(--primary)"
+                            : "var(--muted)",
+                          flexShrink: 0,
+                        }}
+                      />
                       {t("requiresMeetingLabel") ||
                         "يتطلب إنشاء رابط اجتماع أونلاين تلقائياً (Video Meeting)"}
+                    </span>
+                    <span
+                      dir="ltr"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: form.requires_meeting
+                          ? "flex-end"
+                          : "flex-start",
+                        width: 40,
+                        height: 22,
+                        minWidth: 40,
+                        borderRadius: 99,
+                        background: form.requires_meeting
+                          ? "var(--primary)"
+                          : "#cbd5e1",
+                        padding: 2,
+                        boxSizing: "border-box",
+                        transition: "background 0.25s ease",
+                        flexShrink: 0,
+                        direction: "ltr",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        className="toggle-checkbox"
+                        checked={form.requires_meeting}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            requires_meeting: e.target.checked,
+                          })
+                        }
+                        style={{ display: "none" }}
+                      />
+                      <span
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          background: "#ffffff",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+                          flexShrink: 0,
+                        }}
+                      />
                     </span>
                   </label>
                 </div>
@@ -1582,70 +1677,131 @@ export default function ServicesTab({
                     {t("statusAndBadges") || "حالة الخدمة والتفعيل"}
                   </h4>
 
+                  {/* Status Dropdown */}
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem", fontWeight: 700 }}
+                    >
+                      {t("statusLabel") || "حالة الخدمة"}
+                    </label>
+                    <select
+                      className="form-input"
+                      value={form.status}
+                      onChange={(e) =>
+                        setForm({ ...form, status: e.target.value })
+                      }
+                      style={{ width: "100%" }}
+                    >
+                      <option value="active">
+                        {t("statusActive") || "نشطة (Active)"}
+                      </option>
+                      <option value="draft">
+                        {t("statusDraft") || "مسودة (Draft)"}
+                      </option>
+                      <option value="archived">
+                        {t("statusArchived") || "مؤرشفة (Archived)"}
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* Toggle Cards Row */}
                   <div
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(180px, 1fr))",
+                        "repeat(auto-fit, minmax(240px, 1fr))",
                       gap: 12,
-                      alignItems: "center",
                     }}
                   >
-                    <div className="form-group">
-                      <label
-                        className="form-label"
-                        style={{ fontSize: "0.82rem", fontWeight: 700 }}
-                      >
-                        {t("statusLabel") || "حالة الخدمة"}
-                      </label>
-                      <select
-                        className="form-input"
-                        value={form.status}
-                        onChange={(e) =>
-                          setForm({ ...form, status: e.target.value })
-                        }
-                      >
-                        <option value="active">
-                          {t("statusActive") || "نشطة (Active)"}
-                        </option>
-                        <option value="draft">
-                          {t("statusDraft") || "مسودة (Draft)"}
-                        </option>
-                        <option value="archived">
-                          {t("statusArchived") || "مؤرشفة (Archived)"}
-                        </option>
-                      </select>
-                    </div>
-
                     <label
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
+                        justifyContent: "space-between",
+                        gap: 12,
                         cursor: "pointer",
                         fontSize: "0.84rem",
                         fontWeight: 700,
-                        paddingTop: 18,
+                        padding: "12px 14px",
+                        boxSizing: "border-box",
+                        background: form.booking_enabled
+                          ? "rgba(16, 185, 129, 0.06)"
+                          : "var(--surface)",
+                        border: form.booking_enabled
+                          ? "1.5px solid rgba(16, 185, 129, 0.3)"
+                          : "1px solid var(--border-light)",
+                        borderRadius: "var(--radius-md)",
+                        transition: "all 0.2s ease",
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={form.booking_enabled}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            booking_enabled: e.target.checked,
-                          })
-                        }
+                      <span
                         style={{
-                          accentColor: "var(--primary)",
-                          width: 17,
-                          height: 17,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          color: form.booking_enabled
+                            ? "var(--heading)"
+                            : "var(--text-secondary)",
                         }}
-                      />
-                      <span>
+                      >
+                        <Icon
+                          name="globe"
+                          size={16}
+                          style={{
+                            color: form.booking_enabled
+                              ? "#10b981"
+                              : "var(--muted)",
+                            flexShrink: 0,
+                          }}
+                        />
                         {t("enableBookingToggle") ||
                           "تفعيل إمكانية الحجز أونلاين"}
+                      </span>
+                      <span
+                        dir="ltr"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: form.booking_enabled
+                            ? "flex-end"
+                            : "flex-start",
+                          width: 40,
+                          height: 22,
+                          minWidth: 40,
+                          borderRadius: 99,
+                          background: form.booking_enabled
+                            ? "#10b981"
+                            : "#cbd5e1",
+                          padding: 2,
+                          boxSizing: "border-box",
+                          transition: "background 0.25s ease",
+                          flexShrink: 0,
+                          direction: "ltr",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="toggle-checkbox"
+                          checked={form.booking_enabled}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              booking_enabled: e.target.checked,
+                            })
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span
+                          style={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: "50%",
+                            background: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+                            flexShrink: 0,
+                          }}
+                        />
                       </span>
                     </label>
 
@@ -1653,32 +1809,84 @@ export default function ServicesTab({
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 8,
+                        justifyContent: "space-between",
+                        gap: 12,
                         cursor: "pointer",
                         fontSize: "0.84rem",
                         fontWeight: 700,
-                        paddingTop: 18,
+                        padding: "12px 14px",
+                        boxSizing: "border-box",
+                        background: form.is_featured
+                          ? "rgba(180, 83, 9, 0.05)"
+                          : "var(--surface)",
+                        border: form.is_featured
+                          ? "1.5px solid rgba(180, 83, 9, 0.25)"
+                          : "1px solid var(--border-light)",
+                        borderRadius: "var(--radius-md)",
+                        transition: "all 0.2s ease",
                       }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={form.is_featured}
-                        onChange={(e) =>
-                          setForm({ ...form, is_featured: e.target.checked })
-                        }
+                      <span
                         style={{
-                          accentColor: "var(--primary)",
-                          width: 17,
-                          height: 17,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          color: form.is_featured
+                            ? "var(--heading)"
+                            : "var(--text-secondary)",
                         }}
-                      />
-                      <Icon
-                        name="custom-5768860f"
-                        size={14}
-                        style={{ color: "#b45309" }}
-                      />
-                      <span>
+                      >
+                        <Icon
+                          name="custom-5768860f"
+                          size={16}
+                          style={{
+                            color: form.is_featured
+                              ? "#b45309"
+                              : "var(--muted)",
+                            flexShrink: 0,
+                          }}
+                        />
                         {t("featureServiceToggle") || "تميز الخدمة (Featured)"}
+                      </span>
+                      <span
+                        dir="ltr"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: form.is_featured
+                            ? "flex-end"
+                            : "flex-start",
+                          width: 40,
+                          height: 22,
+                          minWidth: 40,
+                          borderRadius: 99,
+                          background: form.is_featured ? "#b45309" : "#cbd5e1",
+                          padding: 2,
+                          boxSizing: "border-box",
+                          transition: "background 0.25s ease",
+                          flexShrink: 0,
+                          direction: "ltr",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="toggle-checkbox"
+                          checked={form.is_featured}
+                          onChange={(e) =>
+                            setForm({ ...form, is_featured: e.target.checked })
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span
+                          style={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: "50%",
+                            background: "#ffffff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.25)",
+                            flexShrink: 0,
+                          }}
+                        />
                       </span>
                     </label>
                   </div>

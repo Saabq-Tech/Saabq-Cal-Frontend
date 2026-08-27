@@ -263,71 +263,127 @@ export default function WorkspacesPage() {
               )}
             </div>
 
-            {/* Category Filter Pills */}
+            {/* Category Filter — Mobile Dropdown Select & Desktop Pills */}
             {types.length > 0 && (
-              <div
-                className="workspace-types-filter"
-                role="tablist"
-                aria-label={isRTL ? "تصفية حسب التصنيف" : "Filter by category"}
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                  padding: "4px 0 12px",
-                  justifyContent: "center",
-                  maxWidth: 840,
-                  margin: "0 auto",
-                }}
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={selectedType === "all"}
-                  className={`btn ${selectedType === "all" ? "btn-primary" : "btn-ghost"}`}
-                  onClick={() => {
-                    setSelectedType("all");
-                    setPage(1);
-                  }}
+              <>
+                {/* Mobile Dropdown Select */}
+                <div
+                  className="mobile-category-select-wrapper"
                   style={{
-                    borderRadius: "var(--radius-full, 9999px)",
-                    padding: "8px 20px",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
+                    marginTop: 16,
+                    width: "100%",
                   }}
                 >
-                  {t("allCategories") || "الكل"}
-                </button>
-                {types.map((type) => {
-                  const isAct = selectedType === String(type.id);
-                  return (
-                    <button
-                      key={type.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={isAct}
-                      className={`btn ${isAct ? "btn-primary" : "btn-ghost"}`}
-                      onClick={() => {
-                        setSelectedType(String(type.id));
-                        setPage(1);
-                      }}
-                      style={{
-                        borderRadius: "var(--radius-full, 9999px)",
-                        padding: "8px 20px",
-                        fontSize: "0.9rem",
-                        fontWeight: 600,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {typeof type.name === "object" && type.name !== null
-                        ? isRTL
-                          ? type.name?.ar || type.name?.en
-                          : type.name?.en || type.name?.ar
-                        : type.name || type.title}
-                    </button>
-                  );
-                })}
-              </div>
+                  <select
+                    className="form-select mobile-category-select"
+                    value={selectedType}
+                    onChange={(e) => {
+                      setSelectedType(e.target.value);
+                      setPage(1);
+                    }}
+                    aria-label={
+                      isRTL ? "تصفية حسب التصنيف" : "Filter by category"
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "10px 16px",
+                      borderRadius: "var(--radius-lg, 12px)",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      color: "var(--heading)",
+                      fontSize: "0.92rem",
+                      fontWeight: 700,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <option value="all">
+                      {t("allCategories") ||
+                        (isRTL ? "جميع التصنيفات" : "All Categories")}
+                    </option>
+                    {types.map((type) => {
+                      const typeName =
+                        typeof type.name === "object" && type.name !== null
+                          ? isRTL
+                            ? type.name?.ar || type.name?.en
+                            : type.name?.en || type.name?.ar
+                          : type.name || type.title;
+                      return (
+                        <option key={type.id} value={String(type.id)}>
+                          {typeName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Desktop Category Filter Pills */}
+                <div
+                  className="workspace-types-filter desktop-category-pills"
+                  role="tablist"
+                  aria-label={
+                    isRTL ? "تصفية حسب التصنيف" : "Filter by category"
+                  }
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 8,
+                    padding: "4px 0 12px",
+                    justifyContent: "center",
+                    maxWidth: 840,
+                    margin: "0 auto",
+                  }}
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={selectedType === "all"}
+                    className={`btn ${selectedType === "all" ? "btn-primary" : "btn-ghost"}`}
+                    onClick={() => {
+                      setSelectedType("all");
+                      setPage(1);
+                    }}
+                    style={{
+                      borderRadius: "var(--radius-full, 9999px)",
+                      padding: "8px 20px",
+                      fontSize: "0.9rem",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t("allCategories") || "الكل"}
+                  </button>
+                  {types.map((type) => {
+                    const isAct = selectedType === String(type.id);
+                    return (
+                      <button
+                        key={type.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={isAct}
+                        className={`btn ${isAct ? "btn-primary" : "btn-ghost"}`}
+                        onClick={() => {
+                          setSelectedType(String(type.id));
+                          setPage(1);
+                        }}
+                        style={{
+                          borderRadius: "var(--radius-full, 9999px)",
+                          padding: "8px 20px",
+                          fontSize: "0.9rem",
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {typeof type.name === "object" && type.name !== null
+                          ? isRTL
+                            ? type.name?.ar || type.name?.en
+                            : type.name?.en || type.name?.ar
+                          : type.name || type.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -373,7 +429,8 @@ export default function WorkspacesPage() {
                 className="workspaces-grid"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+                  gridTemplateColumns:
+                    "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
                   gap: 28,
                 }}
               >

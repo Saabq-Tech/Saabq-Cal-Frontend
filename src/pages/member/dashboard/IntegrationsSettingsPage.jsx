@@ -10,19 +10,22 @@ import PermissionCheck from "../../../components/PermissionCheck";
 import TelegramActionBuilder from "../../../components/dashboard/TelegramActionBuilder";
 
 // Helper function to safely render strings or localized objects
-function getLocalizedText(textObj, currentLang = "ar") {
-  if (!textObj) return "";
-  if (typeof textObj === "string") return textObj;
+function _getTranslatableText(textObj, currentLang = "ar") {
+  if (textObj === null || textObj === undefined) return "";
+  if (typeof textObj === "string" || typeof textObj === "number")
+    return String(textObj);
   if (typeof textObj === "object") {
-    return (
+    const res =
       textObj[currentLang] ||
       textObj.ar ||
       textObj.en ||
-      Object.values(textObj)[0] ||
-      ""
-    );
+      textObj.name ||
+      textObj.title;
+    return typeof res === "string" || typeof res === "number"
+      ? String(res)
+      : "";
   }
-  return String(textObj);
+  return "";
 }
 
 // Custom iOS-style Toggle Switch Component

@@ -301,13 +301,12 @@ export default function MemberRegisterPage() {
         </div>
 
         <div
-          className="form-group"
+          className="form-group turnstile-container"
           style={{
             display: "flex",
             justifyContent: "center",
             marginBottom: 16,
             width: "100%",
-            overflow: "hidden",
           }}
         >
           <Turnstile

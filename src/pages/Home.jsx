@@ -35,14 +35,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const formatTranslatable = (val) => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
-      return lang === "ar"
-        ? val.ar || val.en || Object.values(val)[0] || ""
-        : val.en || val.ar || Object.values(val)[0] || "";
+      const res =
+        val[isRTL ? "ar" : "en"] ||
+        val.ar ||
+        val.en ||
+        val.name ||
+        val.title ||
+        val.code ||
+        val.symbol;
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
     }
-    return String(val);
+    return "";
   };
 
   useEffect(() => {

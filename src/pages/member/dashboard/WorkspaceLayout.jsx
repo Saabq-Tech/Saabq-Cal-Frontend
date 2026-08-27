@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -32,6 +32,22 @@ export default function WorkspaceLayout() {
       setPendingBookingsCount(0);
     }
   }, [user?.workspace?.id, location.pathname]);
+
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    if (!sidebarRef.current) return;
+    const activeEl = sidebarRef.current.querySelector(
+      ".profile-sidebar-link.active",
+    );
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+    }
+  }, [location.pathname]);
 
   const isOwner = user?.is_owner === true;
   const userPermissions = Array.isArray(user?.permissions)
@@ -303,13 +319,6 @@ export default function WorkspaceLayout() {
                   {t("inactiveSubscription") || "اشتراك غير نشط"}
                 </span>
               )}
-              <span
-                className="profile-badge member"
-                style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-              >
-                <Icon name="custom-b8c34186" size={12} />
-                {t("workspace") || "مساحة العمل"}
-              </span>
               {isOwner && (
                 <span
                   className="profile-badge verified"
@@ -339,77 +348,83 @@ export default function WorkspaceLayout() {
         </div>
 
         <div className="profile-grid">
-          <aside className="profile-sidebar">
+          <aside ref={sidebarRef} className="profile-sidebar">
             <div className="profile-sidebar-header">
               {t("workspaceDetails") || "إدارة مساحة العمل"}
             </div>
 
-            {availableTabs.map((wsTab) => {
-              const isCapAllowed =
-                isWorkspaceActive &&
-                checkWorkspaceCapability(user, wsTab.capability);
+            <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
+              {availableTabs.map((wsTab) => {
+                const isCapAllowed =
+                  isWorkspaceActive &&
+                  checkWorkspaceCapability(user, wsTab.capability);
 
-              if (!isWorkspaceActive) {
+                if (!isWorkspaceActive) {
+                  return (
+                    <div
+                      key={wsTab.path}
+                      className="profile-sidebar-link"
+                      style={{
+                        opacity: 0.5,
+                        cursor: "not-allowed",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 14px",
+                      }}
+                      title={
+                        t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
+                      }
+                    >
+                      <Icon name={wsTab.icon} />
+                      <span style={{ flex: 1 }}>{wsTab.label}</span>
+                      <Icon
+                        name="lock"
+                        size={14}
+                        style={{ color: "#ef4444" }}
+                      />
+                    </div>
+                  );
+                }
+
                 return (
-                  <div
+                  <NavLink
                     key={wsTab.path}
-                    className="profile-sidebar-link"
-                    style={{
-                      opacity: 0.5,
-                      cursor: "not-allowed",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: "10px 14px",
-                    }}
-                    title={
-                      t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
+                    to={wsTab.path}
+                    className={({ isActive }) =>
+                      `profile-sidebar-link${isActive ? " active" : ""}`
                     }
+                    style={{ opacity: isCapAllowed ? 1 : 0.7 }}
                   >
                     <Icon name={wsTab.icon} />
                     <span style={{ flex: 1 }}>{wsTab.label}</span>
-                    <Icon name="lock" size={14} style={{ color: "#ef4444" }} />
-                  </div>
+                    {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
+                      <span
+                        style={{
+                          marginInlineStart: "auto",
+                          padding: "2px 8px",
+                          borderRadius: 10,
+                          fontSize: "0.75rem",
+                          fontWeight: 800,
+                          background: "#f59e0b",
+                          color: "#ffffff",
+                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
+                        }}
+                      >
+                        {pendingBookingsCount}
+                      </span>
+                    )}
+                    {!isCapAllowed && (
+                      <Icon
+                        name="lock"
+                        size={14}
+                        style={{ color: "var(--muted)", marginInlineStart: 6 }}
+                      />
+                    )}
+                  </NavLink>
                 );
-              }
-
-              return (
-                <NavLink
-                  key={wsTab.path}
-                  to={wsTab.path}
-                  className={({ isActive }) =>
-                    `profile-sidebar-link${isActive ? " active" : ""}`
-                  }
-                  style={{ opacity: isCapAllowed ? 1 : 0.7 }}
-                >
-                  <Icon name={wsTab.icon} />
-                  <span style={{ flex: 1 }}>{wsTab.label}</span>
-                  {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
-                    <span
-                      style={{
-                        marginInlineStart: "auto",
-                        padding: "2px 8px",
-                        borderRadius: 10,
-                        fontSize: "0.75rem",
-                        fontWeight: 800,
-                        background: "#f59e0b",
-                        color: "#ffffff",
-                        boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
-                      }}
-                    >
-                      {pendingBookingsCount}
-                    </span>
-                  )}
-                  {!isCapAllowed && (
-                    <Icon
-                      name="lock"
-                      size={14}
-                      style={{ color: "var(--muted)", marginInlineStart: 6 }}
-                    />
-                  )}
-                </NavLink>
-              );
-            })}
+              })}
+            </nav>
           </aside>
 
           <main

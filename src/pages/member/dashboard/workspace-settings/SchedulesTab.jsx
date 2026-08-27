@@ -555,13 +555,14 @@ export default function SchedulesTab({
           borderBottom: "1px solid var(--border-light)",
         }}
       >
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 10,
               marginBottom: 4,
+              flexWrap: "wrap",
             }}
           >
             <div
@@ -671,20 +672,16 @@ export default function SchedulesTab({
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 12,
-              background: "var(--surface-alt)",
-              padding: 12,
-              borderRadius: "var(--radius-lg)",
-            }}
-          >
+          <div className="schedule-top-bar">
             <div
-              style={{ display: "flex", gap: 8, overflowX: "auto", flex: 1 }}
+              className="no-scrollbar"
+              style={{
+                display: "flex",
+                gap: 8,
+                overflowX: "auto",
+                flex: 1,
+                minWidth: 0,
+              }}
             >
               {schedulesList.map((sch) => {
                 const isSelected = sch.id === selectedScheduleId;
@@ -712,6 +709,7 @@ export default function SchedulesTab({
                       alignItems: "center",
                       gap: 8,
                       whiteSpace: "nowrap",
+                      flexShrink: 0,
                       transition: "all 0.15s ease",
                     }}
                   >
@@ -736,7 +734,7 @@ export default function SchedulesTab({
             </div>
 
             {activeSchedule && canEdit && (
-              <div style={{ display: "flex", gap: 6 }}>
+              <div className="schedule-top-bar-actions">
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
@@ -799,6 +797,7 @@ export default function SchedulesTab({
                   return (
                     <div
                       key={d.key}
+                      className="schedule-day-card"
                       style={{
                         padding: "14px 20px",
                         background: "var(--surface-alt)",
@@ -816,6 +815,7 @@ export default function SchedulesTab({
                     >
                       {/* Day Checkbox & Title */}
                       <div
+                        className="schedule-day-header"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -856,22 +856,16 @@ export default function SchedulesTab({
                           display: "flex",
                           flexDirection: "column",
                           gap: 8,
+                          minWidth: 0,
+                          width: "100%",
                         }}
                       >
                         {isDayEnabled ? (
                           slots.map((slot, sIdx) => (
-                            <div
-                              key={sIdx}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 8,
-                                flexWrap: "wrap",
-                              }}
-                            >
+                            <div key={sIdx} className="schedule-slot-row">
                               <input
                                 type="time"
-                                className="form-input"
+                                className="form-input schedule-time-input"
                                 value={slot.from}
                                 onChange={(e) =>
                                   handleSlotChange(
@@ -882,24 +876,19 @@ export default function SchedulesTab({
                                   )
                                 }
                                 disabled={!canEdit}
-                                style={{
-                                  width: 120,
-                                  height: 36,
-                                  fontSize: "0.84rem",
-                                  padding: "0 8px",
-                                }}
                               />
                               <span
                                 style={{
                                   fontSize: "0.82rem",
                                   color: "var(--muted)",
+                                  flexShrink: 0,
                                 }}
                               >
                                 إلى
                               </span>
                               <input
                                 type="time"
-                                className="form-input"
+                                className="form-input schedule-time-input"
                                 value={slot.to}
                                 onChange={(e) =>
                                   handleSlotChange(
@@ -910,12 +899,6 @@ export default function SchedulesTab({
                                   )
                                 }
                                 disabled={!canEdit}
-                                style={{
-                                  width: 120,
-                                  height: 36,
-                                  fontSize: "0.84rem",
-                                  padding: "0 8px",
-                                }}
                               />
 
                               {canEdit && (
@@ -928,6 +911,10 @@ export default function SchedulesTab({
                                     color: "#ef4444",
                                     cursor: "pointer",
                                     padding: 4,
+                                    flexShrink: 0,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                   }}
                                   title={t("deleteSlotTooltip") || "حذف الفترة"}
                                 >

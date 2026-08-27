@@ -8,6 +8,7 @@ import { subscribeToChatMessages } from "../../utils/firebaseChat";
 import UserAvatar from "../ui/UserAvatar";
 import Icon from "../common/Icon";
 import PermissionCheck from "../PermissionCheck";
+import { ChatSidebarSkeleton, ChatFeedSkeleton } from "../ui/Skeleton";
 
 function relativeTime(isoString, t) {
   if (!isoString) return "";
@@ -203,7 +204,7 @@ export default function ChatsPage() {
     last_page: 1,
     has_more: false,
   });
-  const [loadingChats, setLoadingChats] = useState(true);
+  const [_loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [sending, setSending] = useState(false);
@@ -822,21 +823,8 @@ export default function ChatsPage() {
           </div>
 
           <div className="chat-list" role="list">
-            {loadingChats ? (
-              <div
-                style={{
-                  padding: 24,
-                  textAlign: "center",
-                  color: "var(--text-secondary)",
-                }}
-              >
-                <span
-                  className="spinner spinner-sm"
-                  style={{ marginBottom: 8 }}
-                  aria-hidden="true"
-                />
-                <p style={{ fontSize: "0.85rem" }}>{t("loadingChats")}</p>
-              </div>
+            {loadingConversations ? (
+              <ChatSidebarSkeleton />
             ) : filteredConversations.length === 0 ? (
               <div className="chat-empty-sidebar">
                 <div
@@ -972,21 +960,40 @@ export default function ChatsPage() {
                   avatarUrl={recipient.avatarUrl}
                   size={40}
                 />
-                <div style={{ marginLeft: 10, marginRight: 10, flex: 1 }}>
-                  <h3
+                <div
+                  style={{
+                    marginInlineStart: 10,
+                    marginInlineEnd: 10,
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <div
                     style={{
-                      fontSize: "0.95rem",
-                      fontWeight: 700,
-                      margin: 0,
-                      color: "var(--text)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      flexWrap: "wrap",
                     }}
                   >
-                    {recipient.name}
-                  </h3>
-                  <span className="chat-status-badge">
-                    <span className="chat-status-dot" />
-                    {recipient.roleLabel}
-                  </span>
+                    <h3
+                      style={{
+                        fontSize: "0.92rem",
+                        fontWeight: 700,
+                        margin: 0,
+                        color: "var(--heading)",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {recipient.name}
+                    </h3>
+                    <span className="chat-status-badge">
+                      <span className="chat-status-dot" />
+                      {recipient.roleLabel}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -997,9 +1004,7 @@ export default function ChatsPage() {
                 onScroll={handleFeedScroll}
               >
                 {loadingMessages ? (
-                  <div style={{ padding: 40, textAlign: "center" }}>
-                    <span className="spinner spinner-md" />
-                  </div>
+                  <ChatFeedSkeleton />
                 ) : messages.length === 0 ? (
                   <div className="chat-feed-empty">
                     <Icon name="message-square" size={40} />

@@ -17,44 +17,62 @@ export function ToastProvider({ children }) {
   const timersRef = useRef({});
 
   const removeToast = useCallback((id) => {
+    if (timersRef.current[id]) {
+      clearTimeout(timersRef.current[id]);
+      delete timersRef.current[id];
+    }
+
     setToasts((prev) =>
       prev.map((t) => (t.id === id ? { ...t, exiting: true } : t)),
     );
-    clearTimeout(timersRef.current[id]);
+
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-      delete timersRef.current[id];
     }, 200);
   }, []);
 
   const addToast = useCallback(
-    (message, type = "info", duration = 5000) => {
+    (message, type = "info", duration = 4000) => {
       if (!message) return null;
-      let newId = null;
+
+      // Prevent duplicate active toasts with the exact same message
+      let isDuplicate = false;
       setToasts((prev) => {
         if (prev.some((t) => t.message === message && !t.exiting)) {
-          return prev;
+          isDuplicate = true;
         }
-        newId = ++idCounter;
-        timersRef.current[newId] = setTimeout(
-          () => removeToast(newId),
-          duration,
-        );
-        return [...prev, { id: newId, message, type, exiting: false }];
+        return prev;
       });
-      return newId;
+
+      if (isDuplicate) return null;
+
+      const id = ++idCounter;
+
+      setToasts((prev) => [
+        ...prev,
+        { id, message, type, exiting: false, duration },
+      ]);
+
+      if (duration > 0) {
+        timersRef.current[id] = setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
+
+      return id;
     },
     [removeToast],
   );
 
   const toast = useMemo(
     () => ({
-      success: (msg) => addToast(msg, "success"),
-      error: (msg) => addToast(msg, "error"),
-      warning: (msg) => addToast(msg, "warning"),
-      info: (msg) => addToast(msg, "info"),
+      success: (msg, duration = 4000) => addToast(msg, "success", duration),
+      error: (msg, duration = 5000) => addToast(msg, "error", duration),
+      warning: (msg, duration = 4500) => addToast(msg, "warning", duration),
+      info: (msg, duration = 4000) => addToast(msg, "info", duration),
+      remove: removeToast,
     }),
-    [addToast],
+    [addToast, removeToast],
   );
 
   return (
@@ -66,6 +84,18 @@ export function ToastProvider({ children }) {
             key={t.id}
             role={t.type === "error" ? "alert" : "status"}
             className={`toast toast-${t.type}${t.exiting ? " toast-exit" : ""}`}
+            onMouseEnter={() => {
+              if (timersRef.current[t.id]) {
+                clearTimeout(timersRef.current[t.id]);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!t.exiting && t.duration > 0) {
+                timersRef.current[t.id] = setTimeout(() => {
+                  removeToast(t.id);
+                }, 2000);
+              }
+            }}
           >
             <span className="toast-icon">
               {t.type === "success" && <Icon name="check" />}

@@ -5,6 +5,7 @@ import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import LogsTab from "./workspace-settings/LogsTab";
 import SEO from "../../../components/ui/SEO";
+import { TableSkeleton } from "../../../components/ui/Skeleton";
 
 export default function WorkspaceLogsPage() {
   const { user } = useAuth();
@@ -73,7 +74,7 @@ export default function WorkspaceLogsPage() {
     <div className="card" style={{ padding: 24 }}>
       <SEO title={t("auditLogs") || "سجل النشاطات"} noindex />
       {loading && logs.length === 0 ? (
-        <div style={{ padding: 20 }}>جاري التحميل...</div>
+        <TableSkeleton rows={4} />
       ) : (
         <LogsTab
           logs={logs}

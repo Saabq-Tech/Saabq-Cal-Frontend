@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import client, { endpoints } from "../api/client";
 import { useLanguage } from "../context/LanguageContext";
+import { PageSkeleton } from "../components/ui/Skeleton";
 
 export default function About() {
   const { t } = useLanguage();
@@ -18,20 +19,13 @@ export default function About() {
       .get(endpoints.about)
       .then((res) => {
         setAbout(res.data.data);
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
-    return (
-      <div className="main-content">
-        <div className="page-loading">
-          <div className="spinner spinner-lg" />
-          <p>{t("loading")}</p>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

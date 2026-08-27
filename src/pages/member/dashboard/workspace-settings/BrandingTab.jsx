@@ -571,7 +571,13 @@ export default function BrandingTab({
       </div>
 
       {/* SECTION: Photo Gallery Media */}
-      <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-light)" }}>
+      <div
+        style={{
+          marginTop: 24,
+          paddingTop: 20,
+          borderTop: "1px solid var(--border-light)",
+        }}
+      >
         {/* Hidden File Input for Adding Gallery Images */}
         <input
           type="file"
@@ -604,9 +610,7 @@ export default function BrandingTab({
             }}
           >
             <Icon name="image" size={18} style={{ color: "var(--primary)" }} />
-            <span>
-              {t("photoGalleryMedia") || "معرض الصور"}
-            </span>
+            <span>{t("photoGalleryMedia") || "معرض الصور"}</span>
           </h3>
 
           <button
@@ -796,7 +800,8 @@ export default function BrandingTab({
               style={{ color: "var(--primary)" }}
             />
             <span>
-              {t("featureHighlightsCards") || "لماذا تختار خدماتنا؟ (بطاقات المزايا)"}
+              {t("featureHighlightsCards") ||
+                "لماذا تختار خدماتنا؟ (بطاقات المزايا)"}
             </span>
           </h3>
 
@@ -810,7 +815,12 @@ export default function BrandingTab({
                 ...brandingForm,
                 feature_highlights: [
                   ...current,
-                  { title: "", icon: "sparkles", description: "", image_url: "" },
+                  {
+                    title: "",
+                    icon: "sparkles",
+                    description: "",
+                    image_url: "",
+                  },
                 ],
               });
             }}
@@ -857,7 +867,9 @@ export default function BrandingTab({
                   <button
                     type="button"
                     onClick={() => {
-                      const current = Array.isArray(brandingForm.feature_highlights)
+                      const current = Array.isArray(
+                        brandingForm.feature_highlights,
+                      )
                         ? brandingForm.feature_highlights
                         : [];
                       setBrandingForm({
@@ -928,7 +940,9 @@ export default function BrandingTab({
                           reader.onload = (ev) => {
                             const url = ev.target?.result;
                             if (url) {
-                              const current = Array.isArray(brandingForm.feature_highlights)
+                              const current = Array.isArray(
+                                brandingForm.feature_highlights,
+                              )
                                 ? brandingForm.feature_highlights
                                 : [];
                               const updated = current.map((f, i) =>
@@ -952,7 +966,10 @@ export default function BrandingTab({
 
                 <div className="grid grid-2" style={{ gap: 14 }}>
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("featureTitle") || "عنوان الميزة"}
                     </label>
                     <input
@@ -960,7 +977,9 @@ export default function BrandingTab({
                       className="form-input"
                       value={item.title || ""}
                       onChange={(e) => {
-                        const current = Array.isArray(brandingForm.feature_highlights)
+                        const current = Array.isArray(
+                          brandingForm.feature_highlights,
+                        )
                           ? brandingForm.feature_highlights
                           : [];
                         const updated = current.map((f, i) =>
@@ -973,20 +992,27 @@ export default function BrandingTab({
                       }}
                       disabled={!canEdit}
                       placeholder={
-                        isRTL ? "مثال: تجربة حجز متميزة" : "Example: Exceptional Booking Experience"
+                        isRTL
+                          ? "مثال: تجربة حجز متميزة"
+                          : "Example: Exceptional Booking Experience"
                       }
                     />
                   </div>
 
                   <div className="form-group mb-0">
-                    <label className="form-label" style={{ fontSize: "0.82rem" }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem" }}
+                    >
                       {t("cardIcon") || "رمز الأيقونة"}
                     </label>
                     <select
                       className="form-select"
                       value={item.icon || "sparkles"}
                       onChange={(e) => {
-                        const current = Array.isArray(brandingForm.feature_highlights)
+                        const current = Array.isArray(
+                          brandingForm.feature_highlights,
+                        )
                           ? brandingForm.feature_highlights
                           : [];
                         const updated = current.map((f, i) =>
@@ -999,15 +1025,33 @@ export default function BrandingTab({
                       }}
                       disabled={!canEdit}
                     >
-                      <option value="sparkles">✨ {t("sparkles") || "تمييز وسحر"}</option>
-                      <option value="shield">🛡️ {t("shield") || "حماية وخصوصية"}</option>
-                      <option value="clock">⏰ {t("clock") || "وقت وسرعة"}</option>
-                      <option value="users">👥 {t("users") || "فريق عمل"}</option>
-                      <option value="star">⭐ {t("star") || "نجمة وتقييم"}</option>
-                      <option value="phone">📞 {t("phone") || "هاتف وتواصل"}</option>
-                      <option value="map-pin">📍 {t("mapPin") || "موقع جغرافي"}</option>
-                      <option value="briefcase">💼 {t("briefcase") || "حقيبة عمل"}</option>
-                      <option value="check">✅ {t("check") || "تأكيد وصحة"}</option>
+                      <option value="sparkles">
+                        ✨ {t("sparkles") || "تمييز وسحر"}
+                      </option>
+                      <option value="shield">
+                        🛡️ {t("shield") || "حماية وخصوصية"}
+                      </option>
+                      <option value="clock">
+                        ⏰ {t("clock") || "وقت وسرعة"}
+                      </option>
+                      <option value="users">
+                        👥 {t("users") || "فريق عمل"}
+                      </option>
+                      <option value="star">
+                        ⭐ {t("star") || "نجمة وتقييم"}
+                      </option>
+                      <option value="phone">
+                        📞 {t("phone") || "هاتف وتواصل"}
+                      </option>
+                      <option value="map-pin">
+                        📍 {t("mapPin") || "موقع جغرافي"}
+                      </option>
+                      <option value="briefcase">
+                        💼 {t("briefcase") || "حقيبة عمل"}
+                      </option>
+                      <option value="check">
+                        ✅ {t("check") || "تأكيد وصحة"}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -1021,7 +1065,9 @@ export default function BrandingTab({
                     className="form-input"
                     value={item.description || ""}
                     onChange={(e) => {
-                      const current = Array.isArray(brandingForm.feature_highlights)
+                      const current = Array.isArray(
+                        brandingForm.feature_highlights,
+                      )
                         ? brandingForm.feature_highlights
                         : [];
                       const updated = current.map((f, i) =>

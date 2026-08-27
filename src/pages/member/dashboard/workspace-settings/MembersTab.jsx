@@ -193,6 +193,7 @@ export default function MembersTab({
                 style={{ borderBottom: "1px solid var(--border-light)" }}
               >
                 <td
+                  data-label={t("memberHeader") || "العضو"}
                   style={{
                     padding: "14px 16px",
                     display: "flex",
@@ -215,6 +216,7 @@ export default function MembersTab({
                   </div>
                 </td>
                 <td
+                  data-label={t("roleHeader") || "الدور"}
                   style={{
                     padding: "14px 16px",
                     fontWeight: 600,
@@ -246,7 +248,10 @@ export default function MembersTab({
                     </span>
                   )}
                 </td>
-                <td style={{ padding: "14px 16px" }}>
+                <td
+                  data-label={t("statusHeader") || "الحالة"}
+                  style={{ padding: "14px 16px" }}
+                >
                   <span
                     className={`profile-badge ${m.status === "active" ? "verified" : "unverified"}`}
                   >
@@ -256,7 +261,10 @@ export default function MembersTab({
                   </span>
                 </td>
                 {canEdit && (
-                  <td style={{ padding: "14px 16px", textAlign: "end" }}>
+                  <td
+                    data-label={t("actionsHeader") || "الإجراءات"}
+                    style={{ padding: "14px 16px", textAlign: "end" }}
+                  >
                     {!m.is_owner && (
                       <div
                         style={{

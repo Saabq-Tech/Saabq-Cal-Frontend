@@ -12,20 +12,28 @@ export default function BookingsTab({
   canEdit,
   _onReloadBookings,
 }) {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, lang } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const formatTranslatable = (val) => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
-      return isRTL
-        ? val.ar || val.en || Object.values(val)[0] || ""
-        : val.en || val.ar || Object.values(val)[0] || "";
+      const res =
+        val[lang] ||
+        val.ar ||
+        val.en ||
+        val.name ||
+        val.title ||
+        val.code ||
+        val.symbol;
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
     }
-    return String(val);
+    return "";
   };
 
   const renderStatusBadge = (status) => {
@@ -426,7 +434,10 @@ export default function BookingsTab({
                     }}
                     onClick={() => onSelectBooking && onSelectBooking(b.id)}
                   >
-                    <td style={{ padding: "14px 16px" }}>
+                    <td
+                      data-label={t("customerHeader") || "العميل"}
+                      style={{ padding: "14px 16px" }}
+                    >
                       <div
                         style={{
                           display: "flex",
@@ -457,6 +468,7 @@ export default function BookingsTab({
                       </div>
                     </td>
                     <td
+                      data-label={t("serviceHeader") || "الخدمة"}
                       style={{
                         padding: "14px 16px",
                         fontWeight: 600,
@@ -482,6 +494,7 @@ export default function BookingsTab({
                       )}
                     </td>
                     <td
+                      data-label={t("bookingDateHeader") || "الموعد"}
                       style={{
                         padding: "14px 16px",
                         fontSize: "0.86rem",
@@ -490,10 +503,16 @@ export default function BookingsTab({
                     >
                       {whenTime}
                     </td>
-                    <td style={{ padding: "14px 16px" }}>
+                    <td
+                      data-label={t("statusHeader") || "الحالة"}
+                      style={{ padding: "14px 16px" }}
+                    >
                       {renderStatusBadge(b.status)}
                     </td>
-                    <td style={{ padding: "14px 16px", textAlign: "end" }}>
+                    <td
+                      data-label={t("actionsHeader") || "الإجراءات"}
+                      style={{ padding: "14px 16px", textAlign: "end" }}
+                    >
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"

@@ -74,15 +74,23 @@ export default function CustomerBookAppointmentPage() {
   const [disabledNotice, setDisabledNotice] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const getTranslatableText = (val) => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
+  const _formatTranslatable = (val) => {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
-      return isRTL
-        ? val.ar || val.en || Object.values(val)[0] || ""
-        : val.en || val.ar || Object.values(val)[0] || "";
+      const res =
+        val[isRTL ? "ar" : "en"] ||
+        val.ar ||
+        val.en ||
+        val.name ||
+        val.title ||
+        val.code ||
+        val.symbol;
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
     }
-    return String(val);
+    return "";
   };
 
   // Calendar State
@@ -1861,12 +1869,12 @@ export default function CustomerBookAppointmentPage() {
 
                   {currentStep === 3 && (
                     <div
+                      className="turnstile-container"
                       style={{
                         display: "flex",
                         justifyContent: "center",
                         margin: "20px 0",
                         width: "100%",
-                        overflow: "hidden",
                       }}
                     >
                       <Turnstile

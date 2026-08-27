@@ -549,7 +549,13 @@ export default function RichTextEditor({
               boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
             }}
           >
-            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem", color: "var(--heading)" }}>
+            <h4
+              style={{
+                margin: "0 0 16px 0",
+                fontSize: "1.1rem",
+                color: "var(--heading)",
+              }}
+            >
               {t("insertTable") || "إدراج جدول"}
             </h4>
             <div style={{ marginBottom: 12 }}>
@@ -637,7 +643,13 @@ export default function RichTextEditor({
               boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
             }}
           >
-            <h4 style={{ margin: "0 0 16px 0", fontSize: "1.1rem", color: "var(--heading)" }}>
+            <h4
+              style={{
+                margin: "0 0 16px 0",
+                fontSize: "1.1rem",
+                color: "var(--heading)",
+              }}
+            >
               {t("insertLink") || "إدراج رابط"}
             </h4>
             <div style={{ marginBottom: 20 }}>

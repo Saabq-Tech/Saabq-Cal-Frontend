@@ -4,6 +4,7 @@ import client, { endpoints } from "../../../../api/client";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
 import Icon from "../../../../components/common/Icon";
 import RichTextEditor from "../../../../components/common/RichTextEditor";
+import Flag from "../../../../components/common/Flag";
 
 export default function BasicInfoTab({
   basicForm,
@@ -23,10 +24,15 @@ export default function BasicInfoTab({
 
   // Helper to safely extract string from string or localized object
   const getLabelValue = (val) => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
-    if (typeof val === "object") return val.ar || val.en || "";
-    return String(val);
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") return String(val);
+    if (typeof val === "object") {
+      const res = val[lang] || val.ar || val.en || val.name || val.title || "";
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
+    }
+    return "";
   };
 
   // Fetch states when country_id changes
@@ -214,7 +220,9 @@ export default function BasicInfoTab({
             className="form-input"
             value={
               basicForm.slug ||
-              basicForm.name?.toLowerCase().replace(/\s+/g, "-") ||
+              (typeof basicForm.name === "string"
+                ? basicForm.name.toLowerCase().replace(/\s+/g, "-")
+                : "") ||
               "ag"
             }
             onChange={(e) =>
@@ -269,9 +277,7 @@ export default function BasicInfoTab({
             }
             disabled={!canEdit}
           >
-            <option value="active">
-              {t("statusActiveLabel") || "نشط"}
-            </option>
+            <option value="active">{t("statusActiveLabel") || "نشط"}</option>
             <option value="inactive">
               {t("statusInactiveLabel") || "غير نشط"}
             </option>
@@ -343,10 +349,10 @@ export default function BasicInfoTab({
                 transition: "all 0.15s ease",
               }}
             >
-              <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
-                <rect width="24" height="16" fill="#007A3D" rx="2" />
-                <path d="M4 8.5L20 8.5M6 5.5H18" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
+              <Flag
+                country="eg"
+                style={{ width: 18, height: 12, borderRadius: 2 }}
+              />
               <span>{t("arabic") || "بالعربية"}</span>
             </button>
             <button
@@ -371,13 +377,10 @@ export default function BasicInfoTab({
                 transition: "all 0.15s ease",
               }}
             >
-              <svg width="18" height="12" viewBox="0 0 24 16" style={{ borderRadius: 2, flexShrink: 0 }}>
-                <rect width="24" height="16" fill="#00247D" rx="2" />
-                <path d="M0 0L24 16M24 0L0 16" stroke="#FFFFFF" strokeWidth="2.2" />
-                <path d="M0 0L24 16M24 0L0 16" stroke="#CF142B" strokeWidth="1.2" />
-                <path d="M12 0V16M0 8H24" stroke="#FFFFFF" strokeWidth="4.2" />
-                <path d="M12 0V16M0 8H24" stroke="#CF142B" strokeWidth="2.2" />
-              </svg>
+              <Flag
+                country="us"
+                style={{ width: 18, height: 12, borderRadius: 2 }}
+              />
               <span>{t("english") || "بالإنجليزية"}</span>
             </button>
           </div>
@@ -640,7 +643,6 @@ export default function BasicInfoTab({
           marginBottom: 24,
         }}
       >
-
         <div className="form-group">
           <label className="form-label">{t("countryLabel") || "الدولة"}</label>
           <SearchableSelect

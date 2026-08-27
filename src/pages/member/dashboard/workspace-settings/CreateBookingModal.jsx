@@ -7,7 +7,7 @@ import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
 
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
-  const { t, isRTL } = useLanguage();
+  const { t, lang } = useLanguage();
   const toast = useToast();
 
   const [customerMode, setCustomerMode] = useState("existing"); // 'existing' or 'new'
@@ -35,14 +35,22 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const [fieldErrors, setFieldErrors] = useState({});
 
   const formatTranslatable = (val) => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
-      return isRTL
-        ? val.ar || val.en || Object.values(val)[0] || ""
-        : val.en || val.ar || Object.values(val)[0] || "";
+      const res =
+        val[lang] ||
+        val.ar ||
+        val.en ||
+        val.name ||
+        val.title ||
+        val.code ||
+        val.symbol;
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
     }
-    return String(val);
+    return "";
   };
 
   const renderFieldError = (fieldName) => {
@@ -215,32 +223,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   };
 
   return createPortal(
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 999999,
-        background: "rgba(0, 0, 0, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
-      onClick={onClose}
-    >
+    <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="card"
-        style={{
-          width: "100%",
-          maxWidth: 620,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          padding: 24,
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-xl)",
-          position: "relative",
-        }}
+        className="modal-card modal-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -358,7 +343,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(min(100%, 140px), 1fr))",
                 gap: 8,
                 padding: 4,
                 background: "var(--surface-alt)",
@@ -495,7 +481,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
                     gap: 10,
                   }}
                 >
@@ -560,7 +547,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
 
           {/* Member & Datetime Grid */}
           <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+              gap: 12,
+            }}
           >
             <div className="form-group">
               <label
@@ -623,7 +615,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
               gap: 12,
               alignItems: "center",
             }}
@@ -656,7 +649,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               </select>
             </div>
 
-            <div className="form-group" style={{ paddingTop: 18 }}>
+            <div className="form-group">
               <label
                 style={{
                   display: "inline-flex",
@@ -705,16 +698,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {/* Action Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 10,
-              marginTop: 12,
-              paddingTop: 16,
-              borderTop: "1px solid var(--border-light)",
-            }}
-          >
+          <div className="modal-actions">
             <button
               type="button"
               className="btn btn-secondary"

@@ -87,7 +87,15 @@ export default function WorkspaceServicesPage() {
 
   return (
     <CapabilityGate capabilityCode="BOOKING">
-      <div className="card" style={{ padding: 24 }}>
+      <div
+        className="card"
+        style={{
+          padding: 24,
+          maxWidth: "100%",
+          overflow: "hidden",
+          boxSizing: "border-box",
+        }}
+      >
         <SEO title={t("services") || "الخدمات"} noindex />
         {loading ? (
           <ServiceCardSkeleton count={3} />
