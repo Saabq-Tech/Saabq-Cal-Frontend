@@ -10,6 +10,7 @@ import SEO from "../../../components/ui/SEO";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 
 // Sub-tabs
+import ProfileTab from "./workspace-settings/ProfileTab";
 import BasicInfoTab from "./workspace-settings/BasicInfoTab";
 import BrandingTab from "./workspace-settings/BrandingTab";
 import TimezoneTab from "./workspace-settings/TimezoneTab";
@@ -26,7 +27,7 @@ export default function WorkspaceSettingsPage() {
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const subSettingsTab = searchParams.get("sub") || "basic";
+  const subSettingsTab = searchParams.get("sub") || "profile";
 
   const setSubSettingsTab = (subId) => {
     setSearchParams({ sub: subId }, { replace: true });
@@ -84,6 +85,28 @@ export default function WorkspaceSettingsPage() {
   const canEdit = isOwner || userPermissions.includes("settings_write");
 
   // Forms
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    slug: "",
+    workspace_type_id: "",
+    booking_short_intro: "",
+    description: { ar: "", en: "" },
+    logo_url: "",
+    cover_url: "",
+    primary_color: "#0a9099",
+    secondary_color: "#166992",
+    hover_color: "#44f2fe",
+    email: "",
+    phone: "",
+    website: "",
+    country_id: "",
+    state_id: "",
+    city_id: "",
+    address: "",
+    social_links: [],
+    gallery_urls: [],
+    feature_highlights: [],
+  });
   const [basicForm, setBasicForm] = useState({
     name: "",
     email: "",
@@ -207,6 +230,41 @@ export default function WorkspaceSettingsPage() {
             data.secondary_color,
             data.hover_color,
           );
+          setProfileForm({
+            name: data.name || "",
+            slug: data.slug || "",
+            workspace_type_id:
+              data.workspace_type_id || data.workspace_type?.id || "",
+            booking_short_intro: data.booking_short_intro || "",
+            description:
+              typeof data.description === "object"
+                ? {
+                    ar: data.description?.ar || "",
+                    en: data.description?.en || "",
+                  }
+                : { ar: data.description || "", en: "" },
+            logo_url: data.logo_url || data.logo || "",
+            cover_url: data.cover_url || data.cover || "",
+            primary_color: data.primary_color || "#0a9099",
+            secondary_color: data.secondary_color || "#166992",
+            hover_color: data.hover_color || "#44f2fe",
+            email: data.email || "",
+            phone: data.phone || "",
+            website: data.website || "",
+            country_id: data.country_id || data.country?.id || "",
+            state_id: data.state_id || data.state?.id || "",
+            city_id: data.city_id || data.city?.id || "",
+            address: data.address || "",
+            social_links: Array.isArray(data.social_links)
+              ? data.social_links
+              : [],
+            gallery_urls: Array.isArray(data.gallery_urls)
+              ? data.gallery_urls
+              : [],
+            feature_highlights: Array.isArray(data.feature_highlights)
+              ? data.feature_highlights
+              : [],
+          });
           setBasicForm({
             name: data.name || "",
             email: data.email || "",
@@ -403,6 +461,11 @@ export default function WorkspaceSettingsPage() {
 
   const settingsSubTabs = [
     {
+      id: "profile",
+      label: t("workspaceProfileSettings") || "الملف التعريفي والصفحة العامة",
+      icon: <Icon name="user" size={15} />,
+    },
+    {
       id: "basic",
       label: t("workspaceBasicInfo") || "المعلومات الأساسية",
       icon: <Icon name="custom-34f286e2" size={15} />,
@@ -591,6 +654,19 @@ export default function WorkspaceSettingsPage() {
           </div>
         ) : (
           <>
+            {subSettingsTab === "profile" && (
+              <ProfileTab
+                profileForm={profileForm}
+                setProfileForm={setProfileForm}
+                workspaceTypes={workspaceTypes}
+                countries={countries}
+                onSave={(data) =>
+                  handleSaveSection(data, endpoints.workspaceSettingsProfile)
+                }
+                saving={saving}
+                canEdit={canEdit}
+              />
+            )}
             {subSettingsTab === "basic" && (
               <BasicInfoTab
                 basicForm={basicForm}

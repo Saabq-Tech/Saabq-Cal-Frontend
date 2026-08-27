@@ -20,6 +20,16 @@ export const translations = {
     home: "الرئيسية",
     about: "عن المنصة",
     workspaceSettings: "إعدادات مساحة العمل",
+    workspaceProfileSettings: "الملف التعريفي والصفحة العامة",
+    workspaceLogoUrl: "رابط صورة الشعار (Logo URL)",
+    workspaceCoverUrl: "رابط صورة الغلاف العلوي (Cover Banner URL)",
+    website: "الموقع الإلكتروني",
+    country: "الدولة",
+    state: "المنطقة / المحافظة",
+    city: "المدينة",
+    address: "العنوان بالتفصيل",
+    workspaceDescriptionPlaceholder:
+      "اكتب وصفاً شاملاً ومؤثراً عن خدمات مساحة العمل...",
     exploreWorkspaces: "استكشاف مساحات العمل",
     exploreWorkspacesSubtitle:
       "تصفح مساحات العمل المتاحة، والخدمات، واستكشف الملف الكامل لكل مساحة عمل مع إمكانية الحجز المباشر.",
@@ -1516,6 +1526,16 @@ export const translations = {
     home: "Home",
     about: "About Us",
     workspaceSettings: "Workspace Settings",
+    workspaceProfileSettings: "Profile & Public Page",
+    workspaceLogoUrl: "Workspace Logo URL",
+    workspaceCoverUrl: "Cover Banner URL",
+    website: "Website",
+    country: "Country",
+    state: "State / Region",
+    city: "City",
+    address: "Full Address",
+    workspaceDescriptionPlaceholder:
+      "Write a comprehensive overview of your workspace services...",
     exploreWorkspaces: "Explore Workspaces",
     exploreWorkspacesSubtitle:
       "Browse available workspaces, discover services, view complete workspace profiles and check available slots.",

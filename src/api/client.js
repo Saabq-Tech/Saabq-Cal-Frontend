@@ -121,6 +121,7 @@ export const endpoints = {
 
   // Workspace Settings (Member only)
   workspaceSettings: "/workspace-members/workspace/settings",
+  workspaceSettingsProfile: "/workspace-members/workspace/settings/profile",
   workspaceSettingsBasic: "/workspace-members/workspace/settings/basic-info",
   workspaceSettingsBranding: "/workspace-members/workspace/settings/branding",
   workspaceSettingsTimezone:
