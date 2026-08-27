@@ -813,7 +813,7 @@ export default function BookingDetailsPage({
                   marginBottom: 6,
                 }}
               >
-                المستشار / مقدم الخدمة المعين:
+                المتخصص / مقدم الخدمة المعين:
               </span>
               <div
                 style={{

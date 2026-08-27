@@ -15,7 +15,6 @@ import BasicInfoTab from "./workspace-settings/BasicInfoTab";
 import BrandingTab from "./workspace-settings/BrandingTab";
 import TimezoneTab from "./workspace-settings/TimezoneTab";
 import SocialLinksTab from "./workspace-settings/SocialLinksTab";
-import BookingRulesTab from "./workspace-settings/BookingRulesTab";
 import BookingFormFieldsTab from "./workspace-settings/BookingFormFieldsTab";
 import PaymentReceiptsTab from "./workspace-settings/PaymentReceiptsTab";
 import NotificationTemplatesTab from "./workspace-settings/NotificationTemplatesTab";
@@ -135,13 +134,6 @@ export default function WorkspaceSettingsPage() {
     instagram_url: "",
     linkedin_url: "",
     youtube_url: "",
-  });
-  const [bookingRulesForm, setBookingRulesForm] = useState({
-    min_advance_notice_hours: 2,
-    max_advance_booking_days: 30,
-    default_slot_duration: 30,
-    buffer_before_minutes: 0,
-    buffer_after_minutes: 0,
   });
   const [formFieldsForm, setFormFieldsForm] = useState({
     collect_phone: true,
@@ -307,25 +299,6 @@ export default function WorkspaceSettingsPage() {
             twitter_url: data.twitter_url || "",
             instagram_url: data.instagram_url || "",
             linkedin_url: data.linkedin_url || "",
-            youtube_url: data.youtube_url || "",
-          });
-          setBookingRulesForm({
-            booking_short_intro: data.booking_short_intro || "",
-            booking_enabled: data.booking_enabled !== false,
-            auto_confirm_appointments: !!data.auto_confirm_appointments,
-            default_buffer_before_minutes:
-              data.default_buffer_before_minutes ?? 0,
-            default_buffer_after_minutes:
-              data.default_buffer_after_minutes ?? 0,
-            minimum_booking_notice_minutes:
-              data.minimum_booking_notice_minutes ?? 0,
-            maximum_booking_days: data.maximum_booking_days ?? 30,
-            feature_highlights: Array.isArray(data.feature_highlights)
-              ? data.feature_highlights
-              : [],
-            testimonials: Array.isArray(data.testimonials)
-              ? data.testimonials
-              : [],
           });
           setFormFieldsForm({
             field_statuses: data.field_statuses || {},
@@ -491,11 +464,6 @@ export default function WorkspaceSettingsPage() {
       id: "social",
       label: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والرابط",
       icon: <Icon name="link" size={15} />,
-    },
-    {
-      id: "booking_rules",
-      label: t("workspaceBookingRules") || "صفحة وقواعد الحجز",
-      icon: <Icon name="custom-3f7c7395" size={15} />,
     },
     {
       id: "form_fields",
@@ -715,20 +683,6 @@ export default function WorkspaceSettingsPage() {
                 setSocialForm={setSocialForm}
                 onSave={(data) =>
                   handleSaveSection(data, endpoints.workspaceSettingsSocial)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "booking_rules" && (
-              <BookingRulesTab
-                bookingRulesForm={bookingRulesForm}
-                setBookingRulesForm={setBookingRulesForm}
-                onSave={(data) =>
-                  handleSaveSection(
-                    data,
-                    endpoints.workspaceSettingsBookingRules,
-                  )
                 }
                 saving={saving}
                 canEdit={canEdit}

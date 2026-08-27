@@ -158,7 +158,7 @@ export default function NotificationTemplatesTab({
       )
       .replace(
         /\{\{rejectedReason\}\}/g,
-        t("mockCancellationReason") || "لعدم توفر المستشار في الموعد المطلوب",
+        t("mockCancellationReason") || "لعدم توفر المتخصص في الموعد المطلوب",
       );
   };
 

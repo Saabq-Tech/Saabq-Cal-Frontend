@@ -7632,3 +7632,23 @@ input[type="checkbox"]:not(.toggle-checkbox):not([style*="opacity: 0"]):not(
   cursor: not-allowed !important;
   background-color: var(--surface-alt, #f1f5f9) !important;
 }
+
+/* Services Grid Layout */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .services-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}

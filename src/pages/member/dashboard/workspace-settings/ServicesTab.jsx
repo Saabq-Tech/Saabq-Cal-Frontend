@@ -6,9 +6,11 @@ import { useAuth } from "../../../../context/AuthContext";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
+import ConfirmationModal from "./ConfirmationModal";
 
 const defaultFormState = {
   id: null,
+  slug: "",
   name_ar: "",
   name_en: "",
   short_description_ar: "",
@@ -30,19 +32,72 @@ const defaultFormState = {
   minimum_booking_notice_minutes: 0,
   maximum_booking_days: 30,
   workspace_member_id: "",
+  schedule_id: "",
 };
 
 export default function ServicesTab({
-  services,
+  services = [],
   members = [],
+  schedules = [],
   canEdit,
   onSaveService,
+  onDeleteService,
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
   const toast = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    isDanger: true,
+    confirmText: "",
+    cancelText: "",
+    onConfirm: null,
+  });
+
+  const isOwner = user?.is_owner === true;
+
+  const canDeleteService = (s) => {
+    if (!canEdit || !s) return false;
+    if (isOwner) return true;
+    if (
+      s.workspace_member_id &&
+      Number(s.workspace_member_id) === Number(user?.id)
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const handleDeleteClick = (s) => {
+    const serviceName =
+      (typeof s.name === "object"
+        ? isRTL
+          ? s.name?.ar || s.name?.en
+          : s.name?.en || s.name?.ar
+        : s.name) || (isRTL ? "هذه الخدمة" : "this service");
+
+    setConfirmModal({
+      isOpen: true,
+      isDanger: true,
+      title: t("deleteService") || (isRTL ? "حذف الخدمة" : "Delete Service"),
+      message:
+        t("confirmDeleteService") ||
+        (isRTL
+          ? `هل أنت تأكد من رغبتك في حذف "${serviceName}"؟ لا يمكن التراجع عن هذا الإجراء.`
+          : `Are you sure you want to delete "${serviceName}"? This action cannot be undone.`),
+      confirmText: t("delete") || (isRTL ? "حذف" : "Delete"),
+      cancelText: t("cancel") || (isRTL ? "إلغاء" : "Cancel"),
+      onConfirm: () => {
+        if (onDeleteService) {
+          onDeleteService(s.id);
+        }
+      },
+    });
+  };
   const [availableCurrencies, setAvailableCurrencies] = useState(() => [
     {
       id: 1,
@@ -133,6 +188,8 @@ export default function ServicesTab({
 
     setForm({
       id: service.id,
+      slug: service.slug || "",
+      schedule_id: service.schedule_id || service.schedule?.id || "",
       name_ar: nameAr,
       name_en: nameEn,
       short_description_ar: shortDescAr,
@@ -207,6 +264,8 @@ export default function ServicesTab({
           ? parseInt(form.maximum_booking_days, 10)
           : 30,
         currency_id: selectedCurr?.id || form.currency_id || null,
+        slug: form.slug ? form.slug.trim() : undefined,
+        schedule_id: form.schedule_id ? parseInt(form.schedule_id, 10) : null,
         workspace_member_id: form.workspace_member_id
           ? parseInt(form.workspace_member_id, 10)
           : null,
@@ -354,14 +413,7 @@ export default function ServicesTab({
           )}
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fill, minmax(min(100%, 250px), 1fr))",
-            gap: 18,
-          }}
-        >
+        <div className="services-grid">
           {servicesList.map((s) => {
             const _isEnabled = s.booking_enabled ?? true;
             const isFeatured = s.is_featured ?? false;
@@ -413,20 +465,40 @@ export default function ServicesTab({
                     ? "0 4px 14px rgba(17, 100, 106, 0.08)"
                     : "0 2px 10px rgba(0,0,0,0.02)",
                   position: "relative",
+                  width: "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  overflow: "hidden",
                 }}
                 className="hover-card"
               >
-                <div>
+                <div
+                  style={{
+                    width: "100%",
+                    minWidth: 0,
+                    boxSizing: "border-box",
+                  }}
+                >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "flex-start",
+                      flexWrap: "wrap",
                       gap: 8,
                       marginBottom: 10,
+                      width: "100%",
+                      boxSizing: "border-box",
                     }}
                   >
-                    <div>
+                    <div
+                      style={{
+                        flex: "1 1 100%",
+                        minWidth: 0,
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    >
                       <div
                         style={{
                           display: "flex",
@@ -459,12 +531,10 @@ export default function ServicesTab({
                               gap: 4,
                             }}
                           >
-                            <Icon name="custom-5768860f" size={12} />
+                            <Icon name="star" size={12} />
                             {t("featured") || (isRTL ? "مميزة" : "Featured")}
                           </span>
                         )}
-
-                        {/* 1. Service Status Badge (active / draft / archived) */}
                         <span
                           style={{
                             fontSize: "0.7rem",
@@ -492,8 +562,6 @@ export default function ServicesTab({
                               : t("statusArchived") ||
                                 (isRTL ? "مؤرشفة" : "Archived")}
                         </span>
-
-                        {/* 2. Online Booking Status Badge (enabled / disabled) */}
                         <span
                           style={{
                             fontSize: "0.7rem",
@@ -542,7 +610,7 @@ export default function ServicesTab({
                         flexShrink: 0,
                       }}
                     >
-                      <Icon name="custom-56f3550d" size={12} />
+                      <Icon name="clock" size={12} />
                       {duration} {t("minUnit") || (isRTL ? "دقيقة" : "min")}
                     </span>
                   </div>
@@ -604,6 +672,24 @@ export default function ServicesTab({
                         <Icon name="custom-0c2e06fd" size={12} />
                         {s.capacity}{" "}
                         {t("persons") || (isRTL ? "أشخاص" : "persons")}
+                      </span>
+                    )}
+                    {s.schedule && (
+                      <span
+                        style={{
+                          fontSize: "0.76rem",
+                          background: "#f0fdf4",
+                          color: "#166534",
+                          padding: "3px 9px",
+                          borderRadius: 6,
+                          fontWeight: 600,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="calendar" size={12} />
+                        {s.schedule.name}
                       </span>
                     )}
                     {s.booking_mode === "confirmation" && (
@@ -770,7 +856,8 @@ export default function ServicesTab({
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 8,
+                      flexWrap: "wrap",
+                      gap: 6,
                       width: "100%",
                     }}
                   >
@@ -781,14 +868,14 @@ export default function ServicesTab({
                         rel="noopener noreferrer"
                         className="btn btn-secondary btn-sm"
                         style={{
-                          flex: 1,
+                          flex: "1 1 min(100%, 120px)",
                           justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 4,
-                          padding: "7px 10px",
+                          padding: "7px 8px",
                           textDecoration: "none",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
@@ -805,7 +892,7 @@ export default function ServicesTab({
                       <span
                         className="btn btn-ghost btn-sm"
                         style={{
-                          flex: 1,
+                          flex: "1 1 min(100%, 120px)",
                           justifyContent: "center",
                           fontSize: "0.78rem",
                           fontWeight: 600,
@@ -814,11 +901,12 @@ export default function ServicesTab({
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 4,
-                          padding: "7px 10px",
+                          padding: "7px 8px",
                           background: "var(--surface-alt)",
                           border: "1px solid var(--border-light)",
                           color: "var(--muted)",
                           borderRadius: "var(--radius-md)",
+                          whiteSpace: "nowrap",
                         }}
                         title={
                           t("bookingDisabledNotice") ||
@@ -836,11 +924,11 @@ export default function ServicesTab({
                         className="btn btn-primary btn-sm"
                         onClick={() => handleOpenEdit(s)}
                         style={{
-                          flex: 1,
+                          flex: "1 1 min(100%, 110px)",
                           justifyContent: "center",
                           fontWeight: 700,
                           fontSize: "0.78rem",
-                          padding: "7px 10px",
+                          padding: "7px 8px",
                           borderRadius: "var(--radius-md)",
                           whiteSpace: "nowrap",
                           display: "inline-flex",
@@ -850,6 +938,33 @@ export default function ServicesTab({
                       >
                         <Icon name="edit" size={13} />
                         {t("editService") || "تعديل الخدمة"}
+                      </button>
+                    )}
+
+                    {canDeleteService(s) && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteClick(s)}
+                        style={{
+                          flex: "1 1 min(100%, 70px)",
+                          justifyContent: "center",
+                          fontWeight: 700,
+                          fontSize: "0.78rem",
+                          padding: "7px 8px",
+                          borderRadius: "var(--radius-md)",
+                          whiteSpace: "nowrap",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                        title={
+                          t("deleteService") ||
+                          (isRTL ? "حذف الخدمة" : "Delete Service")
+                        }
+                      >
+                        <Icon name="trash-2" size={13} />
+                        {t("delete") || (isRTL ? "حذف" : "Delete")}
                       </button>
                     )}
                   </div>
@@ -993,6 +1108,84 @@ export default function ServicesTab({
                     </div>
                   </div>
 
+                  {/* Service Slug Input */}
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 8,
+                        marginBottom: 6,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <label
+                        className="form-label"
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          margin: 0,
+                        }}
+                      >
+                        {t("serviceSlugLabel") ||
+                          (isRTL
+                            ? "رابط الخدمة المخصص (Slug)"
+                            : "Service Custom Slug")}
+                      </label>
+                      <span
+                        style={{
+                          fontSize: "0.74rem",
+                          color: "var(--muted)",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {isRTL
+                          ? "(أحرف إنجليزية وأرقام وواصلات)"
+                          : "(Lowercase letters, numbers & dashes)"}
+                      </span>
+                    </div>
+
+                    <div style={{ position: "relative", width: "100%" }}>
+                      <input
+                        type="text"
+                        dir="ltr"
+                        className="form-input"
+                        value={form.slug || ""}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            slug: e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9-_]/g, "-"),
+                          })
+                        }
+                        placeholder="e.g. follow-up-visit"
+                        style={{
+                          width: "100%",
+                          fontSize: "0.88rem",
+                          fontFamily: "monospace",
+                          paddingLeft: 36,
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: 12,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "var(--primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Icon name="link" size={15} />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Service Provider Selection Dropdown */}
                   <div className="form-group" style={{ marginBottom: 12 }}>
                     <label
@@ -1000,7 +1193,7 @@ export default function ServicesTab({
                       style={{ fontSize: "0.82rem", fontWeight: 700 }}
                     >
                       {t("serviceProviderField") ||
-                        "مقدم الخدمة (المستشار / العضو)"}
+                        "مقدم الخدمة (المتخصص / العضو)"}
                     </label>
                     <select
                       className="form-select"
@@ -1022,6 +1215,46 @@ export default function ServicesTab({
                           <option key={m.id} value={m.id}>
                             {m.name} {m.title ? `(${m.title})` : ""}{" "}
                             {m.is_owner ? `— ${t("owner") || "مالك"}` : ""}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  {/* Service Schedule Selection Dropdown */}
+                  <div className="form-group" style={{ marginBottom: 12 }}>
+                    <label
+                      className="form-label"
+                      style={{ fontSize: "0.82rem", fontWeight: 700 }}
+                    >
+                      {t("serviceScheduleField") ||
+                        (isRTL
+                          ? "جدول المواعيد المخصص للخدمة"
+                          : "Service Schedule")}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={form.schedule_id || ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          schedule_id: e.target.value,
+                        })
+                      }
+                      style={{ width: "100%" }}
+                    >
+                      <option value="">
+                        {t("defaultWorkspaceSchedule") ||
+                          (isRTL
+                            ? "الجدول الافتراضي لمساحة العمل"
+                            : "Default Workspace Schedule")}
+                      </option>
+                      {Array.isArray(schedules) &&
+                        schedules.map((sch) => (
+                          <option key={sch.id} value={sch.id}>
+                            {sch.name}{" "}
+                            {sch.is_default
+                              ? `— (${t("defaultScheduleTag") || (isRTL ? "افتراضي" : "Default")})`
+                              : ""}
                           </option>
                         ))}
                     </select>
@@ -1348,7 +1581,7 @@ export default function ServicesTab({
                           {t("instantBooking") || "حجز فوري مباشر"}
                         </option>
                         <option value="confirmation">
-                          {t("confirmationBooking") || "يتطلب موافقة المستشار"}
+                          {t("confirmationBooking") || "يتطلب موافقة المتخصص"}
                         </option>
                       </select>
                     </div>
@@ -1863,9 +2096,6 @@ export default function ServicesTab({
                           background: form.is_featured ? "#b45309" : "#cbd5e1",
                           padding: 2,
                           boxSizing: "border-box",
-                          transition: "background 0.25s ease",
-                          flexShrink: 0,
-                          direction: "ltr",
                         }}
                       >
                         <input
@@ -1901,6 +2131,24 @@ export default function ServicesTab({
                     marginTop: 4,
                   }}
                 >
+                  {form.id && canDeleteService(form) && (
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-md"
+                      style={{
+                        marginRight: isRTL ? 0 : "auto",
+                        marginLeft: isRTL ? "auto" : 0,
+                      }}
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        handleDeleteClick(form);
+                      }}
+                    >
+                      <Icon name="trash-2" size={14} />
+                      {t("deleteService") ||
+                        (isRTL ? "حذف الخدمة" : "Delete Service")}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="btn btn-secondary btn-md"
@@ -1923,6 +2171,12 @@ export default function ServicesTab({
           </div>,
           document.body,
         )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        modalState={confirmModal}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

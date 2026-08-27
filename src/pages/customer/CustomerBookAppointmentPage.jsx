@@ -209,6 +209,7 @@ export default function CustomerBookAppointmentPage() {
           if (match) {
             setSelectedService(match);
             setDisabledNotice("");
+            setCurrentStep(2);
           } else {
             setSelectedService(null);
             setDisabledNotice(

@@ -16,6 +16,7 @@ export default function WorkspaceServicesPage() {
 
   const [services, setServices] = useState([]);
   const [members, setMembers] = useState([]);
+  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const isOwner = user?.is_owner === true;
@@ -43,14 +44,18 @@ export default function WorkspaceServicesPage() {
     loadingRef.current = true;
     try {
       setLoading(true);
-      const [srvRes, memRes] = await Promise.all([
+      const [srvRes, memRes, schRes] = await Promise.all([
         client.get(endpoints.workspaceServices),
         client
           .get(endpoints.workspaceMembers)
           .catch(() => ({ data: { data: [] } })),
+        client
+          .get(endpoints.workspaceSchedules)
+          .catch(() => ({ data: { data: [] } })),
       ]);
       setServices(srvRes.data?.data || []);
       setMembers(memRes.data?.data || []);
+      setSchedules(schRes.data?.data || []);
     } catch (err) {
       if (err.response?.status !== 403) {
         toast.error(t("servicesLoadFailed") || "فشل تحميل خدمات مساحة العمل");
@@ -85,12 +90,23 @@ export default function WorkspaceServicesPage() {
     }
   };
 
+  const handleDeleteService = async (serviceId) => {
+    try {
+      await client.delete(endpoints.workspaceServiceItem(serviceId));
+      toast.success(t("serviceDeletedSuccess") || "تم حذف الخدمة بنجاح");
+      loadServices();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف الخدمة");
+    }
+  };
+
   return (
     <CapabilityGate capabilityCode="BOOKING">
       <div
         className="card"
         style={{
-          padding: 24,
+          padding: "16px 14px",
+          width: "100%",
           maxWidth: "100%",
           overflow: "hidden",
           boxSizing: "border-box",
@@ -103,8 +119,10 @@ export default function WorkspaceServicesPage() {
           <ServicesTab
             services={services}
             members={members}
+            schedules={schedules}
             canEdit={canEdit}
             onSaveService={handleSaveService}
+            onDeleteService={handleDeleteService}
           />
         )}
       </div>
