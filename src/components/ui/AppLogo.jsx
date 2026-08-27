@@ -22,9 +22,12 @@ export default function AppLogo({
           setSiteName(data.site_name);
         }
         if (data?.logo) {
-          setLogoUrl(data.logo);
+          setLogoUrl(getPublicAssetUrl(data.logo));
         }
-        const faviconUrl = data?.favicon || data?.logo || DEFAULT_LOGO;
+        const rawFavicon = data?.favicon || data?.logo;
+        const faviconUrl = rawFavicon
+          ? getPublicAssetUrl(rawFavicon)
+          : DEFAULT_LOGO;
         const faviconEl = document.getElementById("app-favicon");
         if (faviconEl) {
           faviconEl.setAttribute("href", faviconUrl);
