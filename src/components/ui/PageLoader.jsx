@@ -226,8 +226,8 @@ export default function PageLoader({
               gap: 8,
               padding: "5px 16px",
               borderRadius: "var(--radius-full, 9999px)",
-              background: "var(--primary-subtle, rgba(17, 100, 106, 0.08))",
-              border: "1px solid var(--border-light, rgba(17, 100, 106, 0.15))",
+              background: "var(--primary-subtle, rgba(2, 105, 130, 0.08))",
+              border: "1px solid var(--border-light, rgba(2, 105, 130, 0.15))",
             }}
           >
             <span

@@ -18,37 +18,41 @@
 /* ── Design Tokens (Light) ── */
 :root {
   /* Primary Palette */
-  --primary: #21868d;
-  --primary-color: #21868d;
-  --primary-hover: #28767c;
-  --primary-light: #44f2fe;
-  --primary-subtle: #e6f7f8;
+  --primary: #026982;
+  --primary-color: #026982;
+  --primary-hover: #034D60;
+  --primary-light: #03C4E1;
+  --primary-subtle: #EDF2F3;
   --primary-foreground: #ffffff;
 
   /* Secondary Palette */
-  --secondary: #0d384e;
-  --secondary-color: #166992;
-  --secondary-hover: #3186b0;
-  --secondary-light: #44f2fe;
-  --secondary-subtle: #e8f4f9;
+  --secondary: #033D4B;
+  --secondary-color: #022A35;
+  --secondary-hover: #034D60;
+  --secondary-light: #04AECA;
+  --secondary-subtle: #EDF2F3;
   --secondary-foreground: #ffffff;
-  --secondary-50: #0d384e6a;
+  --secondary-50: rgba(3, 61, 75, 0.4);
+
+  /* Accent Token */
+  --accent: #2DE2F2;
+  --accent-hover: #04AECA;
 
   /* Hover Token */
-  --hover: #28767c;
-  --hover-color: #28767c;
+  --hover: #034D60;
+  --hover-color: #034D60;
 
   /* Layout (Enhanced Light Mode) */
   --background: #f8fafc;
-  --background-subtle: #f8fafc;
+  --background-subtle: #EDF2F3;
   --surface: #ffffff;
-  --surface-alt: #f1f5f9;
-  --border: #b2bdc0;
-  --border-light: #f1f5f9;
-  --heading: #0f172a;
-  --text: #334155;
-  --text-secondary: #64748b;
-  --muted: #94a3b8;
+  --surface-alt: #EDF2F3;
+  --border: #C1D9DD;
+  --border-light: #EDF2F3;
+  --heading: #022A35;
+  --text: #033D4B;
+  --text-secondary: #034D60;
+  --muted: #AAC0C6;
 
   /* Status */
   --success: #16a34a;
@@ -57,17 +61,17 @@
   --info: #0ea5e9;
 
   /* Shadows (Layered Light Mode Elevation) */
-  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-xs: 0 1px 2px 0 rgba(2, 42, 53, 0.05);
   --shadow-sm:
-    0 1px 3px 0 rgba(15, 23, 42, 0.07), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+    0 1px 3px 0 rgba(2, 42, 53, 0.07), 0 1px 2px -1px rgba(2, 42, 53, 0.05);
   --shadow-md:
-    0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+    0 4px 6px -1px rgba(2, 42, 53, 0.07), 0 2px 4px -2px rgba(2, 42, 53, 0.05);
   --shadow-lg:
-    0 10px 15px -3px rgba(15, 23, 42, 0.08),
-    0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    0 10px 15px -3px rgba(2, 42, 53, 0.08),
+    0 4px 6px -4px rgba(2, 42, 53, 0.04);
   --shadow-xl:
-    0 20px 25px -5px rgba(15, 23, 42, 0.09),
-    0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    0 20px 25px -5px rgba(2, 42, 53, 0.09),
+    0 8px 10px -6px rgba(2, 42, 53, 0.04);
 
   /* Radius */
   --radius-sm: 6px;
@@ -103,33 +107,36 @@ html[dir="ltr"] {
 
 /* ── Dark Mode Tokens ── */
 html.dark {
-  --primary: #0a9099;
-  --primary-color: #0a9099;
-  --primary-hover: #41a9b0;
-  --primary-light: #44f2fe;
-  --primary-subtle: #0a2e30;
+  --primary: #039AB7;
+  --primary-color: #039AB7;
+  --primary-hover: #05D5F0;
+  --primary-light: #05D5F0;
+  --primary-subtle: #022A35;
   --primary-foreground: #ffffff;
 
-  --secondary: #166992;
-  --secondary-color: #166992;
-  --secondary-hover: #3186b0;
-  --secondary-light: #44f2fe;
-  --secondary-subtle: #123040;
+  --secondary: #034D60;
+  --secondary-color: #034D60;
+  --secondary-hover: #025B71;
+  --secondary-light: #04AECA;
+  --secondary-subtle: #033D4B;
   --secondary-foreground: #ffffff;
 
-  --hover: #41a9b0;
-  --hover-color: #41a9b0;
+  --accent: #2DE2F2;
+  --accent-hover: #04AECA;
 
-  --background: #0b1324;
-  --background-subtle: #0f1829;
-  --surface: #141f36;
-  --surface-alt: #0f1829;
-  --border: #24334f;
-  --border-light: #1c2a44;
-  --heading: #f8fafc;
-  --text: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --muted: #64748b;
+  --hover: #05D5F0;
+  --hover-color: #05D5F0;
+
+  --background: #022A35;
+  --background-subtle: #033D4B;
+  --surface: #033D4B;
+  --surface-alt: #022A35;
+  --border: #034D60;
+  --border-light: #025B71;
+  --heading: #ffffff;
+  --text: #EDF2F3;
+  --text-secondary: #AAC0C6;
+  --muted: #AAC0C6;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md:
@@ -139,8 +146,8 @@ html.dark {
   --shadow-xl:
     0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
 
-  background-color: #0b1324;
-  color: #e2e8f0;
+  background-color: #022A35;
+  color: #EDF2F3;
 }
 
 /* ── Base Styles ── */

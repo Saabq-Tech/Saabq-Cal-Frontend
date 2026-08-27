@@ -1,5 +1,5 @@
 export function hexToRgba(hex, alpha = 0.12) {
-  if (!hex || typeof hex !== "string") return `rgba(17, 100, 106, ${alpha})`;
+  if (!hex || typeof hex !== "string") return `rgba(2, 105, 130, ${alpha})`;
   let c = hex.replace("#", "");
   if (c.length === 3) {
     c = c
@@ -8,7 +8,7 @@ export function hexToRgba(hex, alpha = 0.12) {
       .join("");
   }
   const num = parseInt(c, 16);
-  if (isNaN(num)) return `rgba(17, 100, 106, ${alpha})`;
+  if (isNaN(num)) return `rgba(2, 105, 130, ${alpha})`;
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
