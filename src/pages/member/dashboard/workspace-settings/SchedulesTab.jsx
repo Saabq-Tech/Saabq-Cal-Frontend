@@ -22,6 +22,7 @@ export default function SchedulesTab({
   }, [startOfWeek]);
 
   const [timezones, setTimezones] = useState([]);
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
     client
@@ -29,6 +30,15 @@ export default function SchedulesTab({
       .then((res) => {
         if (res.data?.data) {
           setTimezones(res.data.data);
+        }
+      })
+      .catch(() => {});
+
+    client
+      .get(endpoints.workspaceMembers)
+      .then((res) => {
+        if (res.data?.data) {
+          setMembers(res.data.data);
         }
       })
       .catch(() => {});
@@ -125,10 +135,14 @@ export default function SchedulesTab({
         }))
       : sch.exceptions || [];
 
+    const workspace_member_id =
+      sch.workspace_member_id || sch.workspace_member?.id || null;
+
     return {
       ...sch,
       name: sch.name || "",
-      scope: sch.scope || "workspace",
+      workspace_member_id,
+      scope: workspace_member_id ? "member" : sch.scope || "workspace",
       timezone: sch.timezone?.name || sch.timezone || "Asia/Riyadh",
       timezone_id: sch.timezone_id || sch.timezone?.id || null,
       is_default: !!sch.is_default,
@@ -244,6 +258,7 @@ export default function SchedulesTab({
       editing_id: null,
       name: "",
       scope: "workspace",
+      workspace_member_id: "",
       timezone: "Asia/Riyadh",
       timezone_id: timezones.find((t) => t.name === "Asia/Riyadh")?.id || null,
       is_default: false,
@@ -253,10 +268,13 @@ export default function SchedulesTab({
 
   const handleOpenEditModal = () => {
     if (!activeSchedule) return;
+    const isMemberScope =
+      !!activeSchedule.workspace_member_id || activeSchedule.scope === "member";
     setModalForm({
       editing_id: activeSchedule.id,
       name: activeSchedule.name || "",
-      scope: activeSchedule.scope || "workspace",
+      scope: isMemberScope ? "member" : "workspace",
+      workspace_member_id: activeSchedule.workspace_member_id || "",
       timezone: activeSchedule.timezone || "Asia/Riyadh",
       timezone_id: activeSchedule.timezone_id || null,
       is_default: !!activeSchedule.is_default,
@@ -277,6 +295,10 @@ export default function SchedulesTab({
         name: modalForm.name.trim(),
         timezone_id: timezoneId,
         is_default: modalForm.is_default,
+        workspace_member_id:
+          modalForm.scope === "member" && modalForm.workspace_member_id
+            ? Number(modalForm.workspace_member_id)
+            : null,
       };
 
       if (modalForm.editing_id) {
@@ -714,6 +736,32 @@ export default function SchedulesTab({
                     }}
                   >
                     <span>{sch.name}</span>
+                    {sch.workspace_member_id && (
+                      <span
+                        style={{
+                          fontSize: "0.72rem",
+                          background: "var(--surface-alt)",
+                          color: "var(--primary)",
+                          border: "1px solid var(--border)",
+                          padding: "2px 8px",
+                          borderRadius: 10,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {members.find(
+                          (m) =>
+                            String(m.id) === String(sch.workspace_member_id),
+                        )?.name ||
+                          members.find(
+                            (m) =>
+                              String(m.id) === String(sch.workspace_member_id),
+                          )?.user?.name ||
+                          sch.workspace_member?.name ||
+                          sch.workspace_member?.user?.name ||
+                          t("memberSchedule") ||
+                          "عضو"}
+                      </span>
+                    )}
                     {sch.is_default && (
                       <span
                         style={{
@@ -1419,23 +1467,68 @@ export default function SchedulesTab({
 
                 <div className="form-group" style={{ marginBottom: 14 }}>
                   <label className="form-label" style={{ fontWeight: 700 }}>
-                    {t("memberScopeLabel") || "جدول العضو (السبب (اختياري))"}
+                    {t("memberScopeLabel") ||
+                      "نطاق الجدول (العضو / مساحة العمل)"}
                   </label>
                   <select
                     className="form-select"
                     value={modalForm.scope}
-                    onChange={(e) =>
-                      setModalForm({ ...modalForm, scope: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const newScope = e.target.value;
+                      setModalForm({
+                        ...modalForm,
+                        scope: newScope,
+                        workspace_member_id:
+                          newScope === "member"
+                            ? modalForm.workspace_member_id ||
+                              (members[0]?.id ? String(members[0].id) : "")
+                            : "",
+                      });
+                    }}
                   >
                     <option value="workspace">
-                      {t("workspaceLevelScope") || "مستوى مساحة العمل"}
+                      {t("workspaceLevelScope") || "مستوى مساحة العمل (عام)"}
                     </option>
                     <option value="member">
                       {t("specificMemberScope") || "عضو محدد في مساحة العمل"}
                     </option>
                   </select>
                 </div>
+
+                {modalForm.scope === "member" && (
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("selectWorkspaceMember") || "العضو المحدد *"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={modalForm.workspace_member_id || ""}
+                      onChange={(e) =>
+                        setModalForm({
+                          ...modalForm,
+                          workspace_member_id: e.target.value,
+                        })
+                      }
+                      required={modalForm.scope === "member"}
+                    >
+                      <option value="">
+                        {t("selectMemberPlaceholder") || "-- اختر العضو --"}
+                      </option>
+                      {members.map((mem) => {
+                        const memberName =
+                          mem.name ||
+                          mem.user?.name ||
+                          mem.email ||
+                          `Member #${mem.id}`;
+                        return (
+                          <option key={mem.id} value={mem.id}>
+                            {memberName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
 
                 <div className="form-group" style={{ marginBottom: 14 }}>
                   <label className="form-label" style={{ fontWeight: 700 }}>

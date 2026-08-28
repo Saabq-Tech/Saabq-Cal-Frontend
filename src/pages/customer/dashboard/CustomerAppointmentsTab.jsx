@@ -8,11 +8,17 @@ import Icon from "../../../components/common/Icon";
 import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import UserAvatar from "../../../components/ui/UserAvatar";
+import { extractTranslatableText } from "../../../utils/text";
 
 export default function CustomerAppointmentsTab() {
   const { t, isRTL, lang } = useLanguage();
   const toast = useToast();
   const navigate = useNavigate();
+
+  const getTransText = useCallback(
+    (val, fallback = "") => extractTranslatableText(val, lang, fallback),
+    [lang],
+  );
 
   const [appointments, setAppointments] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -452,8 +458,11 @@ export default function CustomerAppointmentsTab() {
 
   const handleCopySummary = (b) => {
     if (!b) return;
-    const service = b.snapshot?.service_name || b.service?.name || "Service";
-    const workspaceName = b.workspace?.name || "Workspace";
+    const service = getTransText(
+      b.snapshot?.service_name || b.service?.name,
+      "Service",
+    );
+    const workspaceName = getTransText(b.workspace?.name, "Workspace");
     const when = `${formatDate(b.starts_at)} ${formatTime(b.starts_at)}`;
     const summary = `Appointment #${b.id}\nWorkspace: ${workspaceName}\nService: ${service}\nTime: ${when}\nStatus: ${b.status}`;
 
@@ -728,10 +737,10 @@ export default function CustomerAppointmentsTab() {
                       {wsSlugOrId ? (
                         <Link
                           to={`/workspaces/${wsSlugOrId}`}
-                          title={
-                            appt.workspace?.name ||
-                            (isRTL ? "عرض مساحة العمل" : "View Workspace")
-                          }
+                          title={getTransText(
+                            appt.workspace?.name,
+                            isRTL ? "عرض مساحة العمل" : "View Workspace",
+                          )}
                           style={{
                             textDecoration: "none",
                             color: "inherit",
@@ -740,22 +749,21 @@ export default function CustomerAppointmentsTab() {
                           }}
                         >
                           <UserAvatar
-                            name={
+                            name={getTransText(
                               appt.workspace?.name ||
-                              appt.snapshot?.service_name ||
-                              "WS"
-                            }
+                                appt.snapshot?.service_name,
+                              "WS",
+                            )}
                             avatarUrl={appt.workspace?.logo_url}
                             size={46}
                           />
                         </Link>
                       ) : (
                         <UserAvatar
-                          name={
-                            appt.workspace?.name ||
-                            appt.snapshot?.service_name ||
-                            "WS"
-                          }
+                          name={getTransText(
+                            appt.workspace?.name || appt.snapshot?.service_name,
+                            "WS",
+                          )}
                           avatarUrl={appt.workspace?.logo_url}
                           size={46}
                         />
@@ -776,9 +784,10 @@ export default function CustomerAppointmentsTab() {
                               color: "var(--heading)",
                             }}
                           >
-                            {appt.snapshot?.service_name ||
-                              appt.service?.name ||
-                              (isRTL ? "خدمة حجز" : "Booking Service")}
+                            {getTransText(
+                              appt.snapshot?.service_name || appt.service?.name,
+                              isRTL ? "خدمة حجز" : "Booking Service",
+                            )}
                           </h4>
                           {appt.follow_up_to_id && (
                             <span
@@ -816,13 +825,17 @@ export default function CustomerAppointmentsTab() {
                               }}
                               className="hover-underline"
                             >
-                              {appt.workspace?.name ||
-                                (isRTL ? "مساحة العمل" : "Workspace")}
+                              {getTransText(
+                                appt.workspace?.name,
+                                isRTL ? "مساحة العمل" : "Workspace",
+                              )}
                             </Link>
                           ) : (
                             <span style={{ fontWeight: 600 }}>
-                              {appt.workspace?.name ||
-                                (isRTL ? "مساحة العمل" : "Workspace")}
+                              {getTransText(
+                                appt.workspace?.name,
+                                isRTL ? "مساحة العمل" : "Workspace",
+                              )}
                             </span>
                           )}
                         </div>
@@ -1352,7 +1365,9 @@ export default function CustomerAppointmentsTab() {
                           {modalWsSlugOrId ? (
                             <Link
                               to={`/workspaces/${modalWsSlugOrId}`}
-                              title={selectedAppointment.workspace?.name}
+                              title={getTransText(
+                                selectedAppointment.workspace?.name,
+                              )}
                               style={{
                                 textDecoration: "none",
                                 color: "inherit",
@@ -1361,9 +1376,10 @@ export default function CustomerAppointmentsTab() {
                               }}
                             >
                               <UserAvatar
-                                name={
-                                  selectedAppointment.workspace?.name || "WS"
-                                }
+                                name={getTransText(
+                                  selectedAppointment.workspace?.name,
+                                  "WS",
+                                )}
                                 avatarUrl={
                                   selectedAppointment.workspace?.logo_url
                                 }
@@ -1372,7 +1388,10 @@ export default function CustomerAppointmentsTab() {
                             </Link>
                           ) : (
                             <UserAvatar
-                              name={selectedAppointment.workspace?.name || "WS"}
+                              name={getTransText(
+                                selectedAppointment.workspace?.name,
+                                "WS",
+                              )}
                               avatarUrl={
                                 selectedAppointment.workspace?.logo_url
                               }
@@ -1397,10 +1416,16 @@ export default function CustomerAppointmentsTab() {
                                   }}
                                   className="hover-underline"
                                 >
-                                  {selectedAppointment.workspace?.name || "—"}
+                                  {getTransText(
+                                    selectedAppointment.workspace?.name,
+                                    "—",
+                                  )}
                                 </Link>
                               ) : (
-                                selectedAppointment.workspace?.name || "—"
+                                getTransText(
+                                  selectedAppointment.workspace?.name,
+                                  "—",
+                                )
                               )}
                             </h5>
                             {selectedAppointment.workspace?.description && (
@@ -1411,7 +1436,9 @@ export default function CustomerAppointmentsTab() {
                                   color: "var(--text-secondary)",
                                 }}
                               >
-                                {selectedAppointment.workspace.description}
+                                {getTransText(
+                                  selectedAppointment.workspace.description,
+                                )}
                               </p>
                             )}
                             <div
@@ -1425,17 +1452,26 @@ export default function CustomerAppointmentsTab() {
                             >
                               {selectedAppointment.workspace?.phone && (
                                 <span>
-                                  📞 {selectedAppointment.workspace.phone}
+                                  📞{" "}
+                                  {getTransText(
+                                    selectedAppointment.workspace.phone,
+                                  )}
                                 </span>
                               )}
                               {selectedAppointment.workspace?.email && (
                                 <span>
-                                  ✉️ {selectedAppointment.workspace.email}
+                                  ✉️{" "}
+                                  {getTransText(
+                                    selectedAppointment.workspace.email,
+                                  )}
                                 </span>
                               )}
                               {selectedAppointment.workspace?.address && (
                                 <span>
-                                  📍 {selectedAppointment.workspace.address}
+                                  📍{" "}
+                                  {getTransText(
+                                    selectedAppointment.workspace.address,
+                                  )}
                                 </span>
                               )}
                             </div>
@@ -1496,9 +1532,11 @@ export default function CustomerAppointmentsTab() {
                           marginBottom: 6,
                         }}
                       >
-                        {selectedAppointment.snapshot?.service_name ||
-                          selectedAppointment.service?.name ||
-                          "—"}
+                        {getTransText(
+                          selectedAppointment.snapshot?.service_name ||
+                            selectedAppointment.service?.name,
+                          "—",
+                        )}
                       </span>
                       <div
                         style={{
@@ -1657,7 +1695,9 @@ export default function CustomerAppointmentsTab() {
                         }}
                       >
                         <UserAvatar
-                          name={selectedAppointment.workspace_member.name}
+                          name={getTransText(
+                            selectedAppointment.workspace_member.name,
+                          )}
                           avatarUrl={
                             selectedAppointment.workspace_member.avatar_url
                           }
@@ -1672,7 +1712,9 @@ export default function CustomerAppointmentsTab() {
                               display: "block",
                             }}
                           >
-                            {selectedAppointment.workspace_member.name}
+                            {getTransText(
+                              selectedAppointment.workspace_member.name,
+                            )}
                           </span>
                           {selectedAppointment.workspace_member.title && (
                             <span
@@ -1681,7 +1723,9 @@ export default function CustomerAppointmentsTab() {
                                 color: "var(--text-secondary)",
                               }}
                             >
-                              {selectedAppointment.workspace_member.title}
+                              {getTransText(
+                                selectedAppointment.workspace_member.title,
+                              )}
                             </span>
                           )}
                         </div>
@@ -1727,19 +1771,24 @@ export default function CustomerAppointmentsTab() {
                     </div>
                     <DetailRow
                       label={isRTL ? "الاسم" : "Name"}
-                      value={selectedAppointment.snapshot?.customer_name || "—"}
+                      value={getTransText(
+                        selectedAppointment.snapshot?.customer_name,
+                        "—",
+                      )}
                     />
                     <DetailRow
                       label={isRTL ? "البريد الإلكتروني" : "Email"}
-                      value={
-                        selectedAppointment.snapshot?.customer_email || "—"
-                      }
+                      value={getTransText(
+                        selectedAppointment.snapshot?.customer_email,
+                        "—",
+                      )}
                     />
                     <DetailRow
                       label={isRTL ? "رقم الهاتف" : "Phone"}
-                      value={
-                        selectedAppointment.snapshot?.customer_phone || "—"
-                      }
+                      value={getTransText(
+                        selectedAppointment.snapshot?.customer_phone,
+                        "—",
+                      )}
                     />
                   </div>
 
@@ -1774,7 +1823,7 @@ export default function CustomerAppointmentsTab() {
                           whiteSpace: "pre-wrap",
                         }}
                       >
-                        {selectedAppointment.notes}
+                        {getTransText(selectedAppointment.notes)}
                       </p>
                     </div>
                   )}
@@ -1842,7 +1891,11 @@ export default function CustomerAppointmentsTab() {
                                   marginBottom: 3,
                                 }}
                               >
-                                {ans.question_label || `سؤال ${idx + 1}`}:
+                                {getTransText(
+                                  ans.question_label || ans.question,
+                                  `${t("questionLabel") || "Question"} ${idx + 1}`,
+                                )}
+                                :
                               </strong>
                               <span
                                 style={{
@@ -1851,7 +1904,10 @@ export default function CustomerAppointmentsTab() {
                                   whiteSpace: "pre-wrap",
                                 }}
                               >
-                                {ans.answer || "-"}
+                                {getTransText(
+                                  ans.answer || ans.value || ans.val,
+                                  "-",
+                                )}
                               </span>
                             </div>
                           ))}
@@ -2102,7 +2158,7 @@ export default function CustomerAppointmentsTab() {
                         {isRTL ? "سبب إلغاء الموعد:" : "Cancellation Reason:"}
                       </span>
                       <span className="cancellation-reason-text">
-                        {selectedAppointment.cancellation_reason}
+                        {getTransText(selectedAppointment.cancellation_reason)}
                       </span>
                     </div>
                   )}
