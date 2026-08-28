@@ -374,18 +374,17 @@ export function AuthProvider({ children }) {
   // Upload Avatar
   const uploadAvatar = useCallback(
     async (file) => {
-      if (userType !== "customer")
-        return {
-          success: false,
-          message: "Avatar upload is only available for customers",
-        };
       setLoading(true);
       try {
         const formData = new FormData();
         formData.append("avatar", file);
-        const response = await client.post(endpoints.uploadAvatar, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await client.post(
+          endpoints.uploadAvatar(userType),
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
+        );
         setUser(response.data.data);
         return {
           success: true,

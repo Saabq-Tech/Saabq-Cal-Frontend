@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -11,17 +11,43 @@ import ChatsPage from "../../../components/dashboard/ChatsPage";
 import SEO from "../../../components/ui/SEO";
 import { ProfileSkeleton } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
+import UserAvatar from "../../../components/ui/UserAvatar";
 
 export default function MemberProfilePage() {
-  const { user, updateProfile, loading } = useAuth();
+  const { user, updateProfile, uploadAvatar, loading } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
   const currentTab = searchParams.get("tab") || "info";
 
+  const fileInputRef = useRef(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    const result = await uploadAvatar(file);
+    setUploadingAvatar(false);
+
+    if (result.success) {
+      toast.success(
+        result.message || t("avatarUpdated") || "تم تحديث الصورة بنجاح",
+      );
+    } else {
+      toast.error(
+        result.message || t("avatarUpdateFailed") || "فشل تحديث الصورة",
+      );
+    }
+  };
 
   useEffect(() => {
     document.title = t("pageTitleProfile");
@@ -288,6 +314,48 @@ export default function MemberProfilePage() {
         </form>
       ) : (
         <div className="card-body">
+          <div
+            style={{
+              marginBottom: 20,
+              paddingBottom: 20,
+              borderBottom: "1px solid var(--border-light)",
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <UserAvatar
+                name={user.name}
+                avatarUrl={user.avatar_url}
+                size={72}
+              />
+            </div>
+            <div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleAvatarClick}
+                disabled={uploadingAvatar}
+                style={{ gap: 6 }}
+              >
+                {uploadingAvatar ? (
+                  <span className="spinner spinner-sm" />
+                ) : (
+                  <Icon name="custom-430c9a54" size={14} />
+                )}
+                {t("changeAvatar") || "تغيير الصورة"}
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarChange}
+                accept="image/jpeg,image/png,image/jpg,image/webp"
+                style={{ display: "none" }}
+              />
+            </div>
+          </div>
+
           <InfoRow label={t("fullName")} value={user.name} />
           <InfoRow label={t("emailAddress")} value={user.email} />
           <InfoRow label={t("phoneNumber")} value={user.phone || "—"} />

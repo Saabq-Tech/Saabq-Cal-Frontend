@@ -334,17 +334,6 @@ export default function WorkspaceLayout() {
               )}
             </div>
           </div>
-
-          <div className="profile-header-action">
-            <Link
-              to="/member/profile"
-              className="btn btn-primary btn-sm"
-              style={{ gap: 6 }}
-            >
-              <Icon name="user" size={14} />
-              {t("profileInfo") || "الحساب الشخصي"}
-            </Link>
-          </div>
         </div>
 
         <div className="profile-grid">

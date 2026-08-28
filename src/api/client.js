@@ -91,7 +91,7 @@ export const endpoints = {
   // Profile & Password
   profile: (type) => `${getAuthPrefix(type)}/profile`,
   updatePassword: (type) => `${getAuthPrefix(type)}/password`,
-  uploadAvatar: "/customers/profile/avatar",
+  uploadAvatar: (type) => `${getAuthPrefix(type)}/profile/avatar`,
 
   // Integrations
   googleIntegration: (type) => `${getAuthPrefix(type)}/integrations/google`,
