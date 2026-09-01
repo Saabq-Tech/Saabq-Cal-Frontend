@@ -92,15 +92,6 @@ export default function DashboardSidebar() {
           <span>{t("home")}</span>
         </Link>
 
-        {/* Browse the public workspace directory. Not a profile tab, so it
-            never carries the active state the tab links share. */}
-        <Link to="/workspaces" className="profile-sidebar-link">
-          <span className="profile-sidebar-icon">
-            <Icon name="monitor" />
-          </span>
-          <span>{t("exploreWorkspaces")}</span>
-        </Link>
-
         {/* 1. Profile Info */}
         <Link
           to={`${prefix}/profile?tab=info`}
