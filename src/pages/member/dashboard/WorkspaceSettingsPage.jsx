@@ -18,77 +18,18 @@ import SocialLinksTab from "./workspace-settings/SocialLinksTab";
 import BookingFormFieldsTab from "./workspace-settings/BookingFormFieldsTab";
 import PaymentReceiptsTab from "./workspace-settings/PaymentReceiptsTab";
 import NotificationTemplatesTab from "./workspace-settings/NotificationTemplatesTab";
-import Icon from "../../../components/common/Icon";
 
 export default function WorkspaceSettingsPage() {
   const { user, fetchProfile, updateWorkspaceState } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const subSettingsTab = searchParams.get("sub") || "basic";
-
-  const setSubSettingsTab = (subId) => {
-    setSearchParams({ sub: subId }, { replace: true });
-  };
 
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // Mouse Drag to Scroll State & Ref
-  const scrollRef = useRef(null);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeftState, setScrollLeftState] = useState(0);
-  const [dragged, setDragged] = useState(false);
-
-  const handleMouseDown = (e) => {
-    if (!scrollRef.current) return;
-    setIsMouseDown(true);
-    setDragged(false);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeftState(scrollRef.current.scrollLeft);
-  };
-
-  const handleMouseLeave = () => {
-    setIsMouseDown(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsMouseDown(false);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isMouseDown || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    if (Math.abs(walk) > 5) {
-      setDragged(true);
-    }
-    scrollRef.current.scrollLeft = scrollLeftState - walk;
-  };
-
-  const scrollByAmount = (amount) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
-    }
-  };
-
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const activeEl = scrollRef.current.querySelector(
-      ".workspace-subnav-item.active, .btn-primary, [aria-selected='true']",
-    );
-    if (activeEl) {
-      activeEl.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      });
-    }
-  }, [subSettingsTab]);
 
   // Permissions
   const isOwner = user?.is_owner === true;
@@ -444,194 +385,9 @@ export default function WorkspaceSettingsPage() {
     }
   };
 
-  const settingsSubTabs = [
-    {
-      id: "basic",
-      label: t("workspaceBasicInfo") || "المعلومات الأساسية",
-      icon: <Icon name="custom-34f286e2" size={15} />,
-    },
-    {
-      id: "branding",
-      label: t("workspaceBranding") || "الهوية والعلامة التجارية",
-      icon: <Icon name="custom-ecd73178" size={15} />,
-    },
-    {
-      id: "timezone",
-      label: t("workspaceTimezone") || "المنطقة الزمنية وتنسيق الوقت",
-      icon: <Icon name="clock" size={15} />,
-    },
-    {
-      id: "social",
-      label: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والرابط",
-      icon: <Icon name="link" size={15} />,
-    },
-    {
-      id: "form_fields",
-      label: t("workspaceFormFields") || "منشئ نموذج الحجز",
-      icon: <Icon name="edit" size={15} />,
-    },
-    {
-      id: "payment",
-      label: t("workspacePaymentReceipts") || "إيصالات الدفع",
-      icon: <Icon name="credit-card" size={15} />,
-    },
-    {
-      id: "notifications",
-      label: t("workspaceNotificationTemplates") || "قوالب الإشعارات",
-      icon: <Icon name="mail" size={15} />,
-    },
-  ];
-
   return (
     <div>
       <SEO title={t("settings")} noindex />
-      {/* Draggable & Arrow-Controlled Horizontal Pill Sub-Tabs Navigation Slider */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "nowrap",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 16,
-          position: "relative",
-          width: "100%",
-          maxWidth: "100%",
-          minWidth: 0,
-        }}
-      >
-        {/* Scroll Right / Back Arrow Button */}
-        <button
-          type="button"
-          onClick={() => scrollByAmount(180)}
-          title={t("scrollRightTooltip") || "التمرير لليمين"}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            border: "1px solid var(--border)",
-            background: "var(--surface)",
-            color: "var(--text-secondary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            flexShrink: 0,
-            transition: "all 0.2s ease",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
-        >
-          <Icon name="chevron-right" size={16} />
-        </button>
-
-        {/* Scrollable Container Track */}
-        <div
-          ref={scrollRef}
-          className="no-scrollbar"
-          onMouseDown={handleMouseDown}
-          onMouseLeave={handleMouseLeave}
-          onMouseUp={handleMouseUp}
-          onMouseMove={handleMouseMove}
-          style={{
-            flex: "1 1 0%",
-            minWidth: 0,
-            maxWidth: "100%",
-            overflowX: "auto",
-            overflowY: "hidden",
-            paddingTop: 4,
-            paddingBottom: 6,
-            userSelect: "none",
-            cursor: isMouseDown ? "grabbing" : "grab",
-            WebkitOverflowScrolling: "touch",
-            touchAction: "pan-x",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "nowrap",
-              alignItems: "center",
-              gap: 8,
-              width: "max-content",
-              minWidth: "max-content",
-            }}
-          >
-            {settingsSubTabs.map((sub) => {
-              const isSubActive = subSettingsTab === sub.id;
-              return (
-                <button
-                  key={sub.id}
-                  type="button"
-                  onClick={() => {
-                    if (!dragged) {
-                      setSubSettingsTab(sub.id);
-                    }
-                  }}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "8px 16px",
-                    borderRadius: 20,
-                    border: isSubActive
-                      ? "1.5px solid var(--primary)"
-                      : "1px solid var(--border)",
-                    background: isSubActive
-                      ? "var(--primary)"
-                      : "var(--surface)",
-                    color: isSubActive ? "#ffffff" : "var(--text-secondary)",
-                    fontWeight: isSubActive ? 700 : 500,
-                    fontSize: "0.84rem",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                    transition: "all 0.2s ease",
-                    boxShadow: isSubActive
-                      ? "0 2px 8px rgba(17,100,106,0.22)"
-                      : "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      color: "currentColor",
-                    }}
-                  >
-                    {sub.icon}
-                  </span>
-                  <span>{sub.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Scroll Left / Forward Arrow Button */}
-        <button
-          type="button"
-          onClick={() => scrollByAmount(-180)}
-          title={t("scrollLeftTooltip") || "التمرير لليسار"}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            border: "1px solid var(--border)",
-            background: "var(--surface)",
-            color: "var(--text-secondary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            flexShrink: 0,
-            transition: "all 0.2s ease",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
-        >
-          <Icon name="chevron-left" size={16} />
-        </button>
-      </div>
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
       <div

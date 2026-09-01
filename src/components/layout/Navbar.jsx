@@ -591,6 +591,31 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
+            {/* Direct routes to the two places a signed-in user actually
+                works in; the account and workspace dropdowns beside them
+                stay for switching and for the sub-pages. */}
+            {isAuthenticated && (
+              <Link
+                to={
+                  userType === "member"
+                    ? "/member/profile"
+                    : "/customer/profile"
+                }
+                className={`nav-explore desktop-only${location.pathname.endsWith("/profile") ? " active" : ""}`}
+              >
+                <Icon name="user" size={15} />
+                <span>{t("myAccount")}</span>
+              </Link>
+            )}
+            {isAuthenticated && userType === "member" && (
+              <Link
+                to="/member/workspace"
+                className={`nav-explore desktop-only${location.pathname.startsWith("/member/workspace") ? " active" : ""}`}
+              >
+                <Icon name="briefcase" size={15} />
+                <span>{t("myWorkspace")}</span>
+              </Link>
+            )}
             <Link
               to="/workspaces"
               className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
@@ -935,6 +960,20 @@ export default function Navbar() {
                       <Icon name="custom-7e599ac1" />
                       <span>{t("profile")}</span>
                     </Link>
+
+                    {userType === "member" && (
+                      <NavLink
+                        to="/member/workspace"
+                        end
+                        className={({ isActive }) =>
+                          `mobile-drawer-link${isActive ? " active" : ""}`
+                        }
+                        onClick={closeMobileDrawer}
+                      >
+                        <Icon name="briefcase" />
+                        <span>{t("myWorkspace")}</span>
+                      </NavLink>
+                    )}
 
                     {userType === "member" && (
                       <NavLink
