@@ -4152,6 +4152,7 @@ html.dark .footer {
   transform: translateY(-2px);
 }
 
+.footer-col h2,
 .footer-col h4 {
   font-size: 0.88rem;
   font-weight: 700;
@@ -4178,6 +4179,27 @@ html.dark .footer {
   color: var(--primary);
 }
 
+.footer-note {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+/* The email field and its button share a row, but `min-width: auto` on a
+   flex item let the input keep its full intrinsic width and pushed the
+   button outside the footer on narrow screens. Let the pair wrap instead. */
+.footer-newsletter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.footer-newsletter-form .form-input {
+  flex: 1 1 170px;
+  min-width: 0;
+}
+
 .footer-bottom {
   padding-top: 20px;
   border-top: 1px solid var(--border);
@@ -4187,9 +4209,21 @@ html.dark .footer {
 }
 
 @media (max-width: 768px) {
+  /* Four full-width blocks made the footer a ~930px scroll on a phone. The
+     two link lists are short enough to sit side by side; the brand and the
+     newsletter keep the full row because their text needs it. */
   .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 20px;
+  }
+
+  .footer-col-brand,
+  .footer-col-newsletter {
+    grid-column: 1 / -1;
+  }
+
+  .footer-desc {
+    max-width: none;
   }
 }
 
@@ -8895,5 +8929,26 @@ html.dark {
   .about-points {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px 16px;
+  }
+}
+
+/* The day strip is a horizontally scrolling row, so it must opt out of the
+   global mobile rule that wraps every .no-scrollbar (pill bars, tab bars)
+   onto multiple lines. Declared last so it wins against that rule's
+   !important; without it the strip is a 688px-tall wrapped grid on a phone —
+   the one viewport it was designed for. */
+.booking-day-strip {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+/* Footer column headings are labels above a link list, not page headings, so
+   they must opt out of the global mobile type scale (h2 { font-size: 1.5rem
+   !important }), which otherwise renders them larger than the brand name. */
+@media (max-width: 768px) {
+  .footer-col h2,
+  .footer-col h4 {
+    font-size: 0.88rem !important;
   }
 }

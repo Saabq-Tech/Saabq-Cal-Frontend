@@ -977,12 +977,8 @@ export default function CustomerBookAppointmentPage() {
                         {
                           [
                             isRTL ? "اختر الخدمة" : "Select Service",
-                            isRTL
-                              ? "اختر اليوم والوقت"
-                              : "Select Date & Time",
-                            isRTL
-                              ? "تفاصيل الحجز"
-                              : "Booking Details",
+                            isRTL ? "اختر اليوم والوقت" : "Select Date & Time",
+                            isRTL ? "تفاصيل الحجز" : "Booking Details",
                           ][currentStep - 1]
                         }
                       </span>
@@ -1102,66 +1098,52 @@ export default function CustomerBookAppointmentPage() {
                                   {active && <Icon name="check" size={13} />}
                                 </span>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-start",
-                                    gap: 10,
-                                    flexWrap: "wrap",
-                                    marginBottom: 8,
-                                  }}
-                                >
-                                  <strong
+                                  <div
                                     style={{
-                                      fontSize: "0.96rem",
-                                      color: "var(--text)",
-                                      flex: 1,
-                                      minWidth: 120,
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "flex-start",
+                                      gap: 10,
+                                      flexWrap: "wrap",
+                                      marginBottom: 8,
                                     }}
                                   >
-                                    {getTranslatableText(srv.name)}
-                                  </strong>
-                                  <span
-                                    style={{
-                                      fontSize: "0.92rem",
-                                      fontWeight: 800,
-                                      color: primaryColor,
-                                      whiteSpace: "nowrap",
-                                      flexShrink: 0,
-                                    }}
-                                  >
-                                    {formatCurrency(
-                                      srv.price,
-                                      srv.currency_detail || srv.currency,
-                                      isRTL,
-                                      t("freeService"),
-                                    )}
-                                  </span>
-                                </div>
-                                <div
-                                  style={{
-                                    fontSize: "0.84rem",
-                                    color: "var(--text-secondary)",
-                                    display: "flex",
-                                    gap: 14,
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      gap: 4,
-                                    }}
-                                  >
-                                    <Icon name="clock" size={14} />
-                                    <span>
-                                      {srv.duration_minutes}{" "}
-                                      {t("durationMinutes")}
+                                    <strong
+                                      style={{
+                                        fontSize: "0.96rem",
+                                        color: "var(--text)",
+                                        flex: 1,
+                                        minWidth: 120,
+                                      }}
+                                    >
+                                      {getTranslatableText(srv.name)}
+                                    </strong>
+                                    <span
+                                      style={{
+                                        fontSize: "0.92rem",
+                                        fontWeight: 800,
+                                        color: primaryColor,
+                                        whiteSpace: "nowrap",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {formatCurrency(
+                                        srv.price,
+                                        srv.currency_detail || srv.currency,
+                                        isRTL,
+                                        t("freeService"),
+                                      )}
                                     </span>
-                                  </span>
-                                  {srv.location && (
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "0.84rem",
+                                      color: "var(--text-secondary)",
+                                      display: "flex",
+                                      gap: 14,
+                                      alignItems: "center",
+                                    }}
+                                  >
                                     <span
                                       style={{
                                         display: "inline-flex",
@@ -1169,11 +1151,25 @@ export default function CustomerBookAppointmentPage() {
                                         gap: 4,
                                       }}
                                     >
-                                      <Icon name="map-pin" size={14} />
-                                      <span>{srv.location}</span>
+                                      <Icon name="clock" size={14} />
+                                      <span>
+                                        {srv.duration_minutes}{" "}
+                                        {t("durationMinutes")}
+                                      </span>
                                     </span>
-                                  )}
-                                </div>
+                                    {srv.location && (
+                                      <span
+                                        style={{
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          gap: 4,
+                                        }}
+                                      >
+                                        <Icon name="map-pin" size={14} />
+                                        <span>{srv.location}</span>
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -1292,7 +1288,7 @@ export default function CustomerBookAppointmentPage() {
                         </div>
 
                         <div
-                          className="no-scrollbar"
+                          className="no-scrollbar booking-day-strip"
                           style={{
                             display: "flex",
                             gap: 8,
@@ -1700,7 +1696,6 @@ export default function CustomerBookAppointmentPage() {
                   {/* Step 3 Panel: Booking Form & Workspace Custom Questions */}
                   {currentStep === 3 && selectedService && selectedSlot && (
                     <div style={{ marginBottom: 24 }}>
-
                       <div
                         style={{
                           display: "flex",
