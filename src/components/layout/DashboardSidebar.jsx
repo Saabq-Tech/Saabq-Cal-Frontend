@@ -86,14 +86,18 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "overview" ? " active" : ""}`}
           aria-current={activeTab === "overview" ? "page" : undefined}
         >
-          <Icon name="home" />
+          <span className="profile-sidebar-icon">
+            <Icon name="home" />
+          </span>
           <span>{t("home")}</span>
         </Link>
 
         {/* Browse the public workspace directory. Not a profile tab, so it
             never carries the active state the tab links share. */}
         <Link to="/workspaces" className="profile-sidebar-link">
-          <Icon name="monitor" />
+          <span className="profile-sidebar-icon">
+            <Icon name="monitor" />
+          </span>
           <span>{t("exploreWorkspaces")}</span>
         </Link>
 
@@ -103,7 +107,9 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "info" ? " active" : ""}`}
           aria-current={activeTab === "info" ? "page" : undefined}
         >
-          <Icon name="custom-7e599ac1" />
+          <span className="profile-sidebar-icon">
+            <Icon name="custom-7e599ac1" />
+          </span>
           {t("profileInfo")}
         </Link>
 
@@ -114,7 +120,9 @@ export default function DashboardSidebar() {
             className={`profile-sidebar-link${activeTab === "appointments" ? " active" : ""}`}
             aria-current={activeTab === "appointments" ? "page" : undefined}
           >
-            <Icon name="calendar" />
+            <span className="profile-sidebar-icon">
+              <Icon name="calendar" />
+            </span>
             <span>{t("myAppointments") || "مواعيدي"}</span>
           </Link>
         )}
@@ -125,7 +133,9 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "password" ? " active" : ""}`}
           aria-current={activeTab === "password" ? "page" : undefined}
         >
-          <Icon name="lock" />
+          <span className="profile-sidebar-icon">
+            <Icon name="lock" />
+          </span>
           {t("changePassword")}
         </Link>
 
@@ -135,7 +145,9 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "security" ? " active" : ""}`}
           aria-current={activeTab === "security" ? "page" : undefined}
         >
-          <Icon name="shield" />
+          <span className="profile-sidebar-icon">
+            <Icon name="shield" />
+          </span>
           {t("securityTitle")}
         </Link>
 
@@ -146,7 +158,9 @@ export default function DashboardSidebar() {
             className={`profile-sidebar-link${activeTab === "integrations" ? " active" : ""}`}
             aria-current={activeTab === "integrations" ? "page" : undefined}
           >
-            <Icon name="custom-f362b7da" />
+            <span className="profile-sidebar-icon">
+              <Icon name="custom-f362b7da" />
+            </span>
             {t("applicationsTitle") || "التطبيقات"}
           </Link>
         )}
@@ -157,7 +171,9 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "notifications" ? " active" : ""}`}
           aria-current={activeTab === "notifications" ? "page" : undefined}
         >
-          <Icon name="bell" />
+          <span className="profile-sidebar-icon">
+            <Icon name="bell" />
+          </span>
           <span>{t("notificationsTab")}</span>
           {unreadCount > 0 && (
             <span className="notif-sidebar-badge">
@@ -172,7 +188,9 @@ export default function DashboardSidebar() {
           className={`profile-sidebar-link${activeTab === "chats" ? " active" : ""}`}
           aria-current={activeTab === "chats" ? "page" : undefined}
         >
-          <Icon name="message-square" />
+          <span className="profile-sidebar-icon">
+            <Icon name="message-square" />
+          </span>
           <span>{t("chatsTab")}</span>
           {unreadChatCount > 0 && (
             <span

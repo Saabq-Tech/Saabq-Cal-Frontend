@@ -365,7 +365,9 @@ export default function WorkspaceLayout() {
                         t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
                       }
                     >
-                      <Icon name={wsTab.icon} />
+                      <span className="profile-sidebar-icon">
+                        <Icon name={wsTab.icon} />
+                      </span>
                       <span style={{ flex: 1 }}>{wsTab.label}</span>
                       <Icon
                         name="lock"
@@ -385,7 +387,9 @@ export default function WorkspaceLayout() {
                     }
                     style={{ opacity: isCapAllowed ? 1 : 0.7 }}
                   >
-                    <Icon name={wsTab.icon} />
+                    <span className="profile-sidebar-icon">
+                      <Icon name={wsTab.icon} />
+                    </span>
                     <span style={{ flex: 1 }}>{wsTab.label}</span>
                     {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
                       <span
