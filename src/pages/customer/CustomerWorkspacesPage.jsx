@@ -105,7 +105,7 @@ export default function WorkspacesPage() {
         title={isRTL ? "استكشاف مساحات العمل" : "Explore Workspaces"}
         description={
           isRTL
-            ? "تصفح واستكشف مساحات العمل المتاحة لحجز المواعيد والخدمات على منصة سابق كول."
+            ? "تصفح واستكشف مساحات العمل المتاحة لحجز المواعيد والخدمات على منصة تقويم سابق."
             : "Browse and explore available workspaces for booking appointments and services on Saabq Cal."
         }
         canonical="/workspaces"

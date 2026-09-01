@@ -15,6 +15,7 @@ import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 
 // Lazy-loaded Pages
 const Home = lazy(() => import("./pages/Home"));
+const Blog = lazy(() => import("./pages/Blog"));
 
 // Customer Workspace Suite Pages
 const CustomerWorkspacesPage = lazy(
@@ -176,6 +177,14 @@ export default function App() {
                   <Route
                     path="/about"
                     element={<Navigate to="/#about" replace />}
+                  />
+                  <Route
+                    path="/blog"
+                    element={
+                      <MainLayout>
+                        <Blog />
+                      </MainLayout>
+                    }
                   />
                   <Route
                     path="/workspaces"

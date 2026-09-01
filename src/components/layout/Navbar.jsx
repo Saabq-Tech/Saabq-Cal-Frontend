@@ -84,7 +84,14 @@ export default function Navbar() {
       return;
     }
 
-    const sections = ["home", "about", "features", "how-it-works", "pricing"];
+    const sections = [
+      "home",
+      "sectors",
+      "about",
+      "features",
+      "how-it-works",
+      "pricing",
+    ];
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -254,20 +261,6 @@ export default function Navbar() {
               <>
                 <li>
                   <a
-                    href="/#about"
-                    className={
-                      location.pathname === "/" && activeSection === "about"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("about", e)}
-                  >
-                    {t("about")}
-                  </a>
-                </li>
-
-                <li>
-                  <a
                     href="/#features"
                     className={
                       location.pathname === "/" && activeSection === "features"
@@ -305,8 +298,31 @@ export default function Navbar() {
                     }
                     onClick={(e) => handleSectionClick("pricing", e)}
                   >
-                    {t("navPricing")}
+                    {t("navPricingShort")}
                   </a>
+                </li>
+
+                <li>
+                  <a
+                    href="/#sectors"
+                    className={
+                      location.pathname === "/" && activeSection === "sectors"
+                        ? "active"
+                        : ""
+                    }
+                    onClick={(e) => handleSectionClick("sectors", e)}
+                  >
+                    {t("navSectors")}
+                  </a>
+                </li>
+
+                <li>
+                  <Link
+                    to="/blog"
+                    className={location.pathname === "/blog" ? "active" : ""}
+                  >
+                    {t("navBlog")}
+                  </Link>
                 </li>
               </>
             )}
@@ -575,6 +591,13 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
+            <Link
+              to="/workspaces"
+              className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
+            >
+              <Icon name="monitor" size={15} />
+              <span>{t("exploreWorkspaces")}</span>
+            </Link>
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}
@@ -878,6 +901,28 @@ export default function Navbar() {
                       <Icon name="credit-card" />
                       <span>{t("navPricing")}</span>
                     </a>
+                    <a
+                      href="/#sectors"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("sectors", e)}
+                    >
+                      <Icon name="briefcase" />
+                      <span>{t("navSectors")}</span>
+                    </a>
+                    <Link
+                      to="/blog"
+                      className={`mobile-drawer-link${location.pathname === "/blog" ? " active" : ""}`}
+                    >
+                      <Icon name="book-open" />
+                      <span>{t("navBlog")}</span>
+                    </Link>
+                    <Link
+                      to="/workspaces"
+                      className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                    >
+                      <Icon name="monitor" />
+                      <span>{t("exploreWorkspaces")}</span>
+                    </Link>
                   </>
                 )}
 

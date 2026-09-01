@@ -100,7 +100,7 @@ export default function AuthCardLayout({
             "
             {quote ||
               (lang === "ar"
-                ? "إدارة المواعيد أصبحت أسهل وأكثر احترافية مع سابق كول."
+                ? "إدارة المواعيد أصبحت أسهل وأكثر احترافية مع تقويم سابق."
                 : "Scheduling made simple and professional with Saabq Cal.")}
             "
           </blockquote>

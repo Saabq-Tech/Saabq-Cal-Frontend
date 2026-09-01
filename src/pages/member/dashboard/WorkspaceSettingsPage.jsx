@@ -179,7 +179,7 @@ export default function WorkspaceSettingsPage() {
   const loadingRef = useRef(false);
 
   useEffect(() => {
-    document.title = `${t("settings") || "الإعدادات العامة"} | ${t("appName") || "سابق كول"}`;
+    document.title = `${t("settings") || "الإعدادات العامة"} | ${t("appName") || "تقويم سابق"}`;
     const loadSettings = async () => {
       if (loadingRef.current) return;
       loadingRef.current = true;
