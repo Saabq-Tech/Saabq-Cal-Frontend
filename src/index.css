@@ -858,6 +858,14 @@ html.dark .navbar {
   }
 }
 
+/* Dashboard overview (customer + member "home" tab) — upcoming list next
+   to the activity chart, stacking to one column on narrow screens. */
+@media (max-width: 900px) {
+  .dashboard-overview-split {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ── Clean Number Inputs (Hide WebKit/Firefox Native Spin Buttons) ── */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

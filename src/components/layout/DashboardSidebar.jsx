@@ -12,7 +12,7 @@ export default function DashboardSidebar() {
 
   const isProfilePath = location.pathname === `${prefix}/profile`;
   const queryParams = new URLSearchParams(location.search);
-  const activeTab = isProfilePath ? queryParams.get("tab") || "info" : null;
+  const activeTab = isProfilePath ? queryParams.get("tab") || "overview" : null;
 
   // Mouse drag-to-scroll & wheel scrolling
   const sidebarRef = useRef(null);
@@ -80,6 +80,16 @@ export default function DashboardSidebar() {
       </div>
 
       <nav ref={navRef} aria-label={t("profileInfo") || "قائمة الحساب"}>
+        {/* 0. Home / Overview */}
+        <Link
+          to={`${prefix}/profile?tab=overview`}
+          className={`profile-sidebar-link${activeTab === "overview" ? " active" : ""}`}
+          aria-current={activeTab === "overview" ? "page" : undefined}
+        >
+          <Icon name="home" />
+          <span>{t("home")}</span>
+        </Link>
+
         {/* 1. Profile Info */}
         <Link
           to={`${prefix}/profile?tab=info`}
