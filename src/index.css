@@ -8994,3 +8994,25 @@ html.dark {
     font-size: 0.88rem !important;
   }
 }
+
+/* The settings sub-nav is nested inside .profile-sidebar, which is a solid
+   dark panel — its own colours were written for a light card and land at
+   about 2:1 against that background. Restated for the dark panel here. */
+.profile-sidebar .workspace-subnav {
+  border-inline-start-color: rgba(255, 255, 255, 0.18);
+}
+
+.profile-sidebar .workspace-subnav-item {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.profile-sidebar .workspace-subnav-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-sidebar .workspace-subnav-item.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 700;
+}
