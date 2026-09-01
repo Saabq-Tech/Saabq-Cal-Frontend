@@ -12,11 +12,35 @@ import {
 } from "../components/ui/Skeleton";
 import Icon from "../components/common/Icon";
 import HeroDashboardMockup from "../components/marketing/HeroDashboardMockup";
+import AboutIllustration from "../components/marketing/AboutIllustration";
 
 // The eight sectors shown in the trust strip and the "built for any activity"
 // grid. There is no /sectors endpoint, so this list lives here and is
 // translated through translations.js; the shape mirrors what an API resource
 // would return so swapping the source later stays a local change.
+const ABOUT_POINTS = [
+  {
+    icon: "shield",
+    titleKey: "aboutPointSecurityTitle",
+    descKey: "aboutPointSecurityDesc",
+  },
+  {
+    icon: "clock",
+    titleKey: "aboutPointTimeTitle",
+    descKey: "aboutPointTimeDesc",
+  },
+  {
+    icon: "users",
+    titleKey: "aboutPointSectorsTitle",
+    descKey: "aboutPointSectorsDesc",
+  },
+  {
+    icon: "bar-chart",
+    titleKey: "aboutPointGrowthTitle",
+    descKey: "aboutPointGrowthDesc",
+  },
+];
+
 const SECTORS = [
   {
     icon: "activity",
@@ -157,6 +181,8 @@ export default function Home() {
       })),
     };
   }, [faqs]);
+
+  const aboutBody = about?.body || about?.content || "";
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -360,54 +386,53 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section */}
+      {/* About */}
       <section id="about" className="section-sm">
-        <div className="container about-content">
-          <div className="section-header">
-            <h2>{about?.title || t("aboutTitle")}</h2>
-            <div
-              style={{
-                width: 44,
-                height: 4,
-                background: "var(--primary)",
-                margin: "12px auto 0",
-                borderRadius: "var(--radius-full)",
-              }}
-            />
-          </div>
-          {loading ? (
-            <div
-              style={{
-                maxWidth: 840,
-                margin: "0 auto",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                alignItems: "center",
-              }}
-            >
-              <SkeletonLine width="80%" height={16} />
-              <SkeletonLine width="60%" height={16} />
-              <SkeletonLine width="70%" height={16} />
+        <div className="container">
+          <div className="about-panel">
+            <div className="about-copy">
+              <span className="about-eyebrow">{t("aboutEyebrow")}</span>
+              <h2>{about?.title || t("aboutTitle")}</h2>
+              <p className="about-subtitle">{t("aboutSubtitle")}</p>
+
+              {loading ? (
+                <div className="about-skeleton">
+                  <SkeletonLine width="95%" height={14} />
+                  <SkeletonLine width="88%" height={14} />
+                  <SkeletonLine width="70%" height={14} />
+                </div>
+              ) : aboutBody ? (
+                /* The editorial copy is admin-managed; the surrounding
+                   layout is not. Falls back to the shipped text when the
+                   endpoint has nothing yet. */
+                <div
+                  className="about-body"
+                  dangerouslySetInnerHTML={{ __html: aboutBody }}
+                />
+              ) : (
+                <div className="about-body">
+                  <p>{t("aboutParagraph1")}</p>
+                  <p>{t("aboutParagraph2")}</p>
+                </div>
+              )}
+
+              <ul className="about-points">
+                {ABOUT_POINTS.map((point) => (
+                  <li key={point.titleKey}>
+                    <span className="about-point-icon">
+                      <Icon name={point.icon} size={18} />
+                    </span>
+                    <strong>{t(point.titleKey)}</strong>
+                    <span>{t(point.descKey)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ) : (
-            about && (
-              <article
-                className="about-body"
-                style={{
-                  maxWidth: 840,
-                  margin: "0 auto",
-                  textAlign: "center",
-                  color: "var(--text-secondary)",
-                  fontSize: "1.05rem",
-                  lineHeight: 1.8,
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: about.body || about.content || "",
-                }}
-              />
-            )
-          )}
+
+            <div className="about-art-wrap">
+              <AboutIllustration />
+            </div>
+          </div>
         </div>
       </section>
 

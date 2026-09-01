@@ -96,6 +96,20 @@ export const translations = {
     avatarUpdateFailed: "فشل تحديث الصورة",
     heroBadge: "منصة الجدولة وحجز المواعيد الذكية",
     heroBadgeNew: "إدارة مواعيدك وحجوزاتك بسهولة",
+    aboutEyebrow: "ABOUT SAABQ CAL",
+    aboutSubtitle: "منصة ذكية لإدارة المواعيد وتنظيم أعمالك",
+    aboutParagraph1:
+      "تقويم سابق هو منصة متكاملة تساعد الأفراد والفرق والشركات على تنظيم مواعيدهم، إدارة الحجوزات، والتواصل مع عملائهم بكفاءة من مكان واحد.",
+    aboutParagraph2:
+      "بنينا تقويم سابق ليكون بسيطاً في الاستخدام، قوياً في الأداء، ومرناً ليناسب مختلف القطاعات والأعمال. هدفنا أن نوفر لك الوقت، نقلل التعقيد، ونمنحك تجربة تنظيم أكثر احترافية تساعدك على التركيز فيما يهمك حقاً: عملك ونموك.",
+    aboutPointSecurityTitle: "أمان وموثوقية",
+    aboutPointSecurityDesc: "نحافظ على بياناتك بأعلى معايير الأمان",
+    aboutPointTimeTitle: "توفير الوقت",
+    aboutPointTimeDesc: "أتمتة المهام المتكررة لتنجز أكثر في وقت أقل",
+    aboutPointSectorsTitle: "لكل القطاعات",
+    aboutPointSectorsDesc: "مرونة كاملة لتناسب طبيعة عملك",
+    aboutPointGrowthTitle: "نمو مستمر",
+    aboutPointGrowthDesc: "نستمع لك ونتطور لنقدم الأفضل دائماً",
     navPricingShort: "الأسعار",
     navSettings: "الإعدادات",
     mockWorkspaceName: "عيادة النخبة",
@@ -1812,6 +1826,23 @@ export const translations = {
     avatarUpdateFailed: "Failed to update profile picture",
     heroBadge: "Smart Scheduling Platform",
     heroBadgeNew: "Manage your appointments and bookings with ease",
+    aboutEyebrow: "ABOUT SAABQ CAL",
+    aboutSubtitle:
+      "A smart platform for managing appointments and organising your business",
+    aboutParagraph1:
+      "Saabq Cal is a complete platform that helps individuals, teams, and companies organise their appointments, manage bookings, and stay in touch with their customers efficiently, all from one place.",
+    aboutParagraph2:
+      "We built Saabq Cal to be simple to use, strong in performance, and flexible enough to suit different sectors and businesses. Our aim is to save you time, reduce complexity, and give you a more professional way to stay organised so you can focus on what really matters: your work and your growth.",
+    aboutPointSecurityTitle: "Secure and reliable",
+    aboutPointSecurityDesc:
+      "We keep your data to the highest security standards",
+    aboutPointTimeTitle: "Saves you time",
+    aboutPointTimeDesc:
+      "Repetitive work is automated so you get more done in less time",
+    aboutPointSectorsTitle: "For every sector",
+    aboutPointSectorsDesc: "Flexible enough to match how your business works",
+    aboutPointGrowthTitle: "Always improving",
+    aboutPointGrowthDesc: "We listen to you and keep making it better",
     navPricingShort: "Pricing",
     navSettings: "Settings",
     mockWorkspaceName: "Elite Clinic",
