@@ -11,6 +11,7 @@ import {
   SkeletonCircle,
 } from "../components/ui/Skeleton";
 import Icon from "../components/common/Icon";
+import HeroDashboardMockup from "../components/marketing/HeroDashboardMockup";
 
 // The eight sectors shown in the trust strip and the "built for any activity"
 // grid. There is no /sectors endpoint, so this list lives here and is
@@ -234,7 +235,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <HeroDashboardMockup t={t} isRTL={isRTL} />
+          <HeroDashboardMockup />
         </div>
       </section>
 
@@ -877,6 +878,10 @@ export default function Home() {
                     />
                   </Link>
                 )}
+                <Link to="/workspaces" className="btn btn-lg final-cta-ghost">
+                  <Icon name="monitor" size={17} />
+                  {t("exploreWorkspaces")}
+                </Link>
               </div>
               <p className="final-cta-note">
                 <Icon name="check-circle" size={14} />
@@ -895,104 +900,5 @@ export default function Home() {
         </div>
       </section>
     </main>
-  );
-}
-
-/* A CSS/DOM rendering of the product rather than a screenshot: it stays sharp
-   at any size, follows the active theme, flips with the writing direction, and
-   translates. Every label comes from translations.js; the calendar shows the
-   current week and carries no invented figures. */
-function HeroDashboardMockup({ t, isRTL }) {
-  const nav = [
-    { icon: "home", key: "home" },
-    { icon: "calendar", key: "appointments" },
-    { icon: "clock", key: "schedules" },
-    { icon: "users", key: "customers" },
-    { icon: "briefcase", key: "services" },
-    { icon: "user-check", key: "navTeam" },
-    { icon: "bar-chart", key: "navReports" },
-    { icon: "settings", key: "settings" },
-  ];
-
-  const weekDays = useMemo(() => {
-    const today = new Date();
-    const start = new Date(today);
-    start.setDate(today.getDate() - today.getDay());
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return {
-        day: d.getDate(),
-        isToday: d.toDateString() === today.toDateString(),
-      };
-    });
-  }, []);
-
-  const slots = ["09:00", "10:00", "11:00", "12:00", "01:00", "02:00"];
-
-  return (
-    <div className="hero-mockup" aria-hidden="true">
-      <div className="hero-mockup-window">
-        <aside className="hero-mockup-sidebar">
-          {nav.map((item, i) => (
-            <span
-              key={item.key}
-              className={`hero-mockup-navitem${i === 0 ? " active" : ""}`}
-            >
-              <Icon name={item.icon} size={13} />
-              <em>{t(item.key)}</em>
-            </span>
-          ))}
-        </aside>
-
-        <div className="hero-mockup-main">
-          <div className="hero-mockup-toolbar">
-            <span className="hero-mockup-dot" />
-            <span className="hero-mockup-dot" />
-            <span className="hero-mockup-dot" />
-          </div>
-
-          <div className="hero-mockup-body">
-            <div className="hero-mockup-agenda">
-              {slots.map((time, i) => (
-                <div className="hero-mockup-row" key={time}>
-                  <span className="hero-mockup-time">{time}</span>
-                  <span className="hero-mockup-line" />
-                  {i % 2 === 0 && (
-                    <span className={`hero-mockup-event tone-${i % 3}`} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="hero-mockup-cal">
-              <div className="hero-mockup-calhead">
-                <Icon name="chevron-right" size={11} />
-                <Icon name="chevron-left" size={11} />
-              </div>
-              <div className="hero-mockup-calgrid">
-                {weekDays.map((d) => (
-                  <span
-                    key={d.day}
-                    className={`hero-mockup-day${d.isToday ? " today" : ""}`}
-                  >
-                    {d.day}
-                  </span>
-                ))}
-              </div>
-              <div className="hero-mockup-upcoming">
-                <span className="hero-mockup-bar" />
-                <span className="hero-mockup-bar short" />
-                <span className="hero-mockup-bar" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <span
-        className="hero-mockup-glow"
-        style={{ insetInlineStart: isRTL ? "auto" : 0 }}
-      />
-    </div>
   );
 }

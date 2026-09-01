@@ -338,6 +338,16 @@ export default function Navbar() {
                     {t("navBlog")}
                   </Link>
                 </li>
+
+                <li>
+                  <Link
+                    to="/workspaces"
+                    className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
+                  >
+                    <Icon name="monitor" size={15} />
+                    {t("exploreWorkspaces")}
+                  </Link>
+                </li>
               </>
             )}
 
@@ -922,6 +932,13 @@ export default function Navbar() {
                     >
                       <Icon name="book-open" />
                       <span>{t("navBlog")}</span>
+                    </Link>
+                    <Link
+                      to="/workspaces"
+                      className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                    >
+                      <Icon name="monitor" />
+                      <span>{t("exploreWorkspaces")}</span>
                     </Link>
                   </>
                 )}
