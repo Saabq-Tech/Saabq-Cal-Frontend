@@ -5320,6 +5320,9 @@ html.dark .footer {
   min-width: 0;
 }
 
+/* Notification text comes straight from the API, so it can carry a long
+   unbroken token — a link, a slug, an untranslated key. Without a break
+   rule that overflows the card and gets clipped instead of wrapping. */
 .notif-title {
   font-size: 0.95rem;
   font-weight: 700;
@@ -5327,6 +5330,7 @@ html.dark .footer {
   margin-bottom: 4px;
   line-height: 1.35;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .notif-body {
@@ -5334,6 +5338,7 @@ html.dark .footer {
   color: var(--text-secondary);
   line-height: 1.55;
   margin-bottom: 8px;
+  overflow-wrap: anywhere;
 }
 
 .notif-meta {
@@ -5828,6 +5833,9 @@ html[dir="ltr"] .chat-search-input {
   position: relative;
   box-shadow: var(--shadow-sm);
   line-height: 1.5;
+  /* Messages are user-written: a pasted link with no spaces would push
+     past the bubble and clip rather than wrap. */
+  overflow-wrap: anywhere;
 }
 
 .chat-bubble-wrap.me .chat-bubble {
