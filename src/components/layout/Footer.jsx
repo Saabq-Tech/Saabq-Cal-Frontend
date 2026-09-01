@@ -32,7 +32,7 @@ export default function Footer() {
     <footer className="footer" role="contentinfo">
       <div className="container">
         <div className="footer-grid">
-          <div>
+          <div className="footer-col-brand">
             <Link to="/" className="footer-brand" aria-label={siteName}>
               <AppLogo height={28} />
             </Link>
@@ -120,17 +120,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div className="footer-col">
+          <div className="footer-col footer-col-newsletter">
             <h2>{t("newsletterTitle")}</h2>
-            <p
-              style={{
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                marginBottom: 14,
-              }}
-            >
-              {t("newsletterDesc")}
-            </p>
+            <p className="footer-note">{t("newsletterDesc")}</p>
             {subscribed ? (
               <div
                 role="status"
@@ -149,7 +141,7 @@ export default function Footer() {
             ) : (
               <form
                 onSubmit={handleSubscribe}
-                style={{ display: "flex", gap: 6 }}
+                className="footer-newsletter-form"
               >
                 <label htmlFor="footer-newsletter-email" className="sr-only">
                   {t("newsletterTitle") || "الاشتراك بالنشرة البريدية"}
