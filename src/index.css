@@ -1814,6 +1814,36 @@ html.dark .auth-panel-right {
   margin-top: 12px;
 }
 
+.auth-mobile-brand {
+  display: none;
+}
+
+.auth-mobile-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #ffffff;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 900px) {
+  .auth-mobile-brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Centred under the brand mark once it's the only identity on screen. */
+  .auth-form-wrapper h1,
+  .auth-form-wrapper > p:first-of-type {
+    text-align: center;
+  }
+}
+
 .auth-form-wrapper {
   width: 100%;
   max-width: 420px;
@@ -1833,14 +1863,25 @@ html.dark .auth-panel-right {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
+.auth-form .form-input {
+  min-height: 52px;
+  padding: 14px 16px;
+}
+
+.auth-form .btn-block.btn-lg {
+  min-height: 54px;
+}
+
+/* A segmented pill rather than a boxed tab pair, matching the reviewed
+   design (2b): fully rounded track, fully rounded buttons, 44px targets. */
 .auth-toggle {
   display: flex;
-  background: var(--surface);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   padding: 4px;
   gap: 4px;
   margin-bottom: 8px;
@@ -1848,9 +1889,10 @@ html.dark .auth-panel-right {
 
 .auth-toggle button {
   flex: 1;
+  min-height: 44px;
   padding: 10px 16px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sans);
