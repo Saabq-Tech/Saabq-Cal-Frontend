@@ -8625,6 +8625,7 @@ html.dark {
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
+  flex-shrink: 0;
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
   color: var(--primary);
@@ -8664,6 +8665,54 @@ html.dark {
   }
 
   .hero-mockup-sidebar {
+    display: none;
+  }
+}
+
+/* ── Header fit ──
+   The public nav grew to seven section links plus a brand, a language
+   toggle, a theme toggle and two auth buttons. Nothing may wrap, and the
+   desktop list must give way to the drawer while there is still room for
+   it rather than overflowing the bar. */
+.app-logo-text,
+.navbar-nav a,
+.nav-explore {
+  white-space: nowrap;
+}
+
+.navbar-inner {
+  flex-wrap: nowrap;
+  /* The bar carries more than an article column can hold, and a header may
+     run wider than body text; 1240px is what forced the overflow. */
+  max-width: 1400px;
+}
+
+@media (max-width: 1200px) {
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .navbar-toggle {
+    display: flex;
+  }
+}
+
+/* Between 1200px and 1400px the bar is tight: the workspaces action keeps
+   its icon and drops its label, which the drawer still spells out. */
+@media (max-width: 1400px) and (min-width: 1201px) {
+  .nav-explore span {
+    display: none;
+  }
+
+  .nav-explore {
+    padding: 7px 10px;
+  }
+}
+
+/* Below the drawer breakpoint the bar is brand + toggles + auth only; the
+   workspaces action lives in the drawer, where it is spelled out in full. */
+@media (max-width: 768px) {
+  .nav-explore {
     display: none;
   }
 }

@@ -261,20 +261,6 @@ export default function Navbar() {
               <>
                 <li>
                   <a
-                    href="/#about"
-                    className={
-                      location.pathname === "/" && activeSection === "about"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("about", e)}
-                  >
-                    {t("about")}
-                  </a>
-                </li>
-
-                <li>
-                  <a
                     href="/#features"
                     className={
                       location.pathname === "/" && activeSection === "features"
@@ -312,7 +298,7 @@ export default function Navbar() {
                     }
                     onClick={(e) => handleSectionClick("pricing", e)}
                   >
-                    {t("navPricing")}
+                    {t("navPricingShort")}
                   </a>
                 </li>
 
@@ -336,16 +322,6 @@ export default function Navbar() {
                     className={location.pathname === "/blog" ? "active" : ""}
                   >
                     {t("navBlog")}
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    to="/workspaces"
-                    className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
-                  >
-                    <Icon name="monitor" size={15} />
-                    {t("exploreWorkspaces")}
                   </Link>
                 </li>
               </>
@@ -615,6 +591,13 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
+            <Link
+              to="/workspaces"
+              className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
+            >
+              <Icon name="monitor" size={15} />
+              <span>{t("exploreWorkspaces")}</span>
+            </Link>
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}
