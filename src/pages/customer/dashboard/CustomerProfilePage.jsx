@@ -6,6 +6,7 @@ import { useLanguage } from "../../../context/LanguageContext";
 import CustomerSecurityPage from "./CustomerSecurityPage";
 import CustomerChangePasswordPage from "./CustomerChangePasswordPage";
 import CustomerAppointmentsTab from "./CustomerAppointmentsTab";
+import CustomerOverviewTab from "./CustomerOverviewTab";
 import NotificationsPage from "../../../components/dashboard/NotificationsPage";
 import ChatsPage from "../../../components/dashboard/ChatsPage";
 import SEO from "../../../components/ui/SEO";
@@ -18,7 +19,7 @@ export default function CustomerProfilePage() {
   const toast = useToast();
   const fileInputRef = useRef(null);
   const [searchParams] = useSearchParams();
-  const currentTab = searchParams.get("tab") || "info";
+  const currentTab = searchParams.get("tab") || "overview";
 
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
@@ -89,6 +90,10 @@ export default function CustomerProfilePage() {
   }
 
   if (!user) return null;
+
+  if (currentTab === "overview") {
+    return <CustomerOverviewTab />;
+  }
 
   if (
     currentTab === "appointments" ||
