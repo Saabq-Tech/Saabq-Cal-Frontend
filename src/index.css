@@ -817,9 +817,44 @@ html.dark .navbar {
   border-top: 1px solid var(--border);
 }
 
+.booking-sticky-footer-summary {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .booking-action-controls {
     gap: 8px;
+  }
+}
+
+/* Mobile booking flow: compact hero + sticky bottom summary bar (single
+   task per screen, price + primary action always in reach). */
+@media (max-width: 992px) {
+  .booking-hero-banner {
+    padding: 22px 0 34px !important;
+  }
+
+  .booking-hero-banner h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .booking-hero-intro {
+    display: none;
+  }
+
+  .booking-sticky-footer-summary {
+    display: flex;
+  }
+
+  .booking-action-controls {
+    position: sticky;
+    bottom: 0;
+    margin: 0 -14px -16px;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 24px rgba(2, 42, 53, 0.08);
+    z-index: 5;
   }
 }
 
