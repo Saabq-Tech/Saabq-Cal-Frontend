@@ -90,13 +90,6 @@ export default function DashboardSidebar() {
           <span>{t("home")}</span>
         </Link>
 
-        {/* Browse the public workspace directory. Not a profile tab, so it
-            never carries the active state the tab links share. */}
-        <Link to="/workspaces" className="profile-sidebar-link">
-          <Icon name="monitor" />
-          <span>{t("exploreWorkspaces")}</span>
-        </Link>
-
         {/* 1. Profile Info */}
         <Link
           to={`${prefix}/profile?tab=info`}
@@ -116,6 +109,17 @@ export default function DashboardSidebar() {
           >
             <Icon name="calendar" />
             <span>{t("myAppointments") || "مواعيدي"}</span>
+          </Link>
+        )}
+
+        {/* Browsing the public directory is a customer action — a workspace
+            owner has no use for it — so it is gated like the appointments
+            link above. Not a profile tab, so it never carries the active
+            state the tab links share. */}
+        {userType === "customer" && (
+          <Link to="/workspaces" className="profile-sidebar-link">
+            <Icon name="search" />
+            <span>{t("exploreWorkspaces")}</span>
           </Link>
         )}
 
