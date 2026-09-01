@@ -12,6 +12,66 @@ import {
 } from "../components/ui/Skeleton";
 import Icon from "../components/common/Icon";
 
+// The eight sectors shown in the trust strip and the "built for any activity"
+// grid. There is no /sectors endpoint, so this list lives here and is
+// translated through translations.js; the shape mirrors what an API resource
+// would return so swapping the source later stays a local change.
+const SECTORS = [
+  {
+    icon: "activity",
+    titleKey: "sectorClinicsTitle",
+    descKey: "sectorClinicsDesc",
+  },
+  {
+    icon: "user-check",
+    titleKey: "sectorConsultantsTitle",
+    descKey: "sectorConsultantsDesc",
+  },
+  {
+    icon: "briefcase",
+    titleKey: "sectorCompaniesTitle",
+    descKey: "sectorCompaniesDesc",
+  },
+  {
+    icon: "scissors",
+    titleKey: "sectorSalonsTitle",
+    descKey: "sectorSalonsDesc",
+  },
+  {
+    icon: "award",
+    titleKey: "sectorFitnessTitle",
+    descKey: "sectorFitnessDesc",
+  },
+  {
+    icon: "book-open",
+    titleKey: "sectorTrainingTitle",
+    descKey: "sectorTrainingDesc",
+  },
+  {
+    icon: "tool",
+    titleKey: "sectorServicesTitle",
+    descKey: "sectorServicesDesc",
+  },
+  { icon: "users", titleKey: "sectorTeamsTitle", descKey: "sectorTeamsDesc" },
+];
+
+const CHANNELS = [
+  { icon: "whatsapp", labelKey: "channelWhatsapp", tone: "whatsapp" },
+  { icon: "facebook", labelKey: "channelMessenger", tone: "messenger" },
+  { icon: "instagram", labelKey: "channelInstagram", tone: "instagram" },
+  { icon: "message-square", labelKey: "channelSms", tone: "sms" },
+  { icon: "plus", labelKey: "channelOthers", tone: "more" },
+];
+
+const HERO_TRUST = ["heroTrustSetup", "heroTrustDevices", "heroTrustNoCard"];
+
+const WHY_CHOOSE = [
+  "whyChoosePoint1",
+  "whyChoosePoint2",
+  "whyChoosePoint3",
+  "whyChoosePoint4",
+];
+
 const FEATURE_ICONS = [
   <Icon key="calendar" name="calendar" size={24} />,
   <Icon key="zap" name="zap" size={24} />,
@@ -104,7 +164,7 @@ export default function Home() {
     url: "https://cal.saabq.com",
     description:
       lang === "ar"
-        ? "منصة سابق كول لجدولة وإدارة المواعيد الذكية"
+        ? "منصة تقويم سابق لجدولة وإدارة المواعيد الذكية"
         : "Saabq Cal — Smart scheduling and appointment management platform",
     potentialAction: {
       "@type": "SearchAction",
@@ -121,7 +181,7 @@ export default function Home() {
         title={t("pageTitleHome")}
         description={
           lang === "ar"
-            ? "منصة سابق كول لجدولة وإدارة المواعيد الذكية — احجز، أدِر، وأتمت مواعيد مساحة عملك بسهولة."
+            ? "منصة تقويم سابق لجدولة وإدارة المواعيد الذكية — احجز، أدِر، وأتمت مواعيد مساحة عملك بسهولة."
             : "Saabq Cal — Smart scheduling and appointment management platform. Book, manage, and automate your workspace appointments."
         }
         canonical="/"
@@ -129,20 +189,23 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section id="home" className="hero">
-        <div className="container">
-          <div className="hero-content animate-fade-in-up">
+      <section id="home" className="hero-lp">
+        <div className="container hero-lp-grid">
+          <div className="hero-lp-copy animate-fade-in-up">
             <div className="hero-badge">
               <Icon name="custom-d3d330f2" size={14} />
-              {t("heroBadge")}
+              {t("heroBadgeNew")}
             </div>
-            <h1>
-              {t("heroTitlePrefix")}
-              <span>{t("heroTitleSpan")}</span>
+            <h1 className="hero-lp-title">
+              {t("heroTitleLine1")}{" "}
+              <span className="hero-lp-highlight">
+                {t("heroTitleHighlight")}
+              </span>{" "}
+              {t("heroTitleLine2")}
             </h1>
-            <p>{t("heroDescription")}</p>
+            <p className="hero-lp-desc">{t("heroDescriptionNew")}</p>
 
-            <div className="hero-actions" style={{ marginBottom: 40 }}>
+            <div className="hero-lp-actions">
               {!isAuthenticated && (
                 <Link to="/register" className="btn btn-primary btn-lg">
                   {t("getStartedFree")}
@@ -150,21 +213,28 @@ export default function Home() {
                     name="arrow-right"
                     size={16}
                     style={{
-                      transform: lang === "ar" ? "rotate(180deg)" : "none",
+                      transform: isRTL ? "rotate(180deg)" : "none",
                     }}
                   />
                 </Link>
               )}
-              <Link
-                to="/workspaces"
-                className="btn btn-accent btn-lg"
-                style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
-              >
-                <Icon name="monitor" size={18} />
-                {t("exploreWorkspaces")}
-              </Link>
+              <a href="#how-it-works" className="btn btn-outline btn-lg">
+                <Icon name="custom-d3d330f2" size={16} />
+                {t("heroCtaSecondary")}
+              </a>
             </div>
+
+            <ul className="hero-lp-trust">
+              {HERO_TRUST.map((key) => (
+                <li key={key}>
+                  <Icon name="check-circle" size={16} />
+                  <span>{t(key)}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+
+          <HeroDashboardMockup t={t} isRTL={isRTL} />
         </div>
       </section>
 
@@ -250,43 +320,41 @@ export default function Home() {
         )
       )}
 
-      {/* Social Proof & Trust Strip */}
-      <section
-        className="social-proof-strip"
-        aria-label={lang === "ar" ? "إحصائيات الثقة" : "Trust statistics"}
-      >
+      {/* Sector Trust Strip */}
+      <section className="trust-strip" aria-label={t("trustStripTitle")}>
         <div className="container">
-          <div className="social-proof-content">
-            <div className="social-proof-badge">
-              <span className="stat-number">5,000+</span>
-              <span className="stat-label">{t("socialProofStats")}</span>
-            </div>
-            <div className="social-proof-logos">
-              <div className="trust-item">
-                <Icon
-                  name="custom-d3d330f2"
-                  size={20}
-                  style={{ color: "var(--primary)" }}
-                />
-                <span>Google Meet Sync</span>
-              </div>
-              <div className="trust-item">
-                <Icon
-                  name="shield"
-                  size={20}
-                  style={{ color: "var(--secondary)" }}
-                />
-                <span>SSL 256-bit Encrypted</span>
-              </div>
-              <div className="trust-item">
-                <Icon
-                  name="clock"
-                  size={20}
-                  style={{ color: "var(--accent)" }}
-                />
-                <span>99.9% System Uptime</span>
-              </div>
-            </div>
+          <p className="trust-strip-title">{t("trustStripTitle")}</p>
+          <ul className="trust-strip-list">
+            {SECTORS.map((sector) => (
+              <li key={sector.titleKey}>
+                <Icon name={sector.icon} size={22} />
+                <span>{t(sector.titleKey)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Sectors */}
+      <section id="sectors" className="section-sm">
+        <div className="container">
+          <div className="section-header">
+            <h2>{t("sectorsTitle")}</h2>
+            <p>{t("sectorsSubtitle")}</p>
+          </div>
+          <div className="sectors-grid">
+            {SECTORS.map((sector) => (
+              <article
+                key={sector.titleKey}
+                className="card card-hover sector-card"
+              >
+                <div className="card-icon">
+                  <Icon name={sector.icon} size={24} />
+                </div>
+                <h3>{t(sector.titleKey)}</h3>
+                <p>{t(sector.descKey)}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -355,8 +423,7 @@ export default function Home() {
       >
         <div className="container">
           <div className="section-header">
-            <h2>{t("whyChooseUs")}</h2>
-            <p>{t("whyChooseUsDesc")}</p>
+            <h2>{t("featuresTitleNew")}</h2>
           </div>
           {loading ? (
             <div className="features-grid">
@@ -542,154 +609,199 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Omni-channel messaging (announced, not yet released) */}
+      <section className="section-sm">
+        <div className="container">
+          <div className="channels-panel">
+            <div className="channels-copy">
+              <span className="channels-badge">{t("channelsBadge")}</span>
+              <h2>{t("channelsTitle")}</h2>
+              <p>{t("channelsDesc")}</p>
+              <p className="channels-footer">{t("channelsFooter")}</p>
+            </div>
+            <ul className="channels-list">
+              {CHANNELS.map((channel) => (
+                <li key={channel.labelKey}>
+                  <span className={`channel-bubble tone-${channel.tone}`}>
+                    <Icon name={channel.icon} size={22} />
+                  </span>
+                  <span className="channel-label">{t(channel.labelKey)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section id="pricing" className="section-sm">
         <div className="container">
           <div className="section-header">
-            <h2>{t("pricingTitle")}</h2>
-            <p>{t("pricingSubtitle")}</p>
+            <h2>{t("pricingTitleNew")}</h2>
+            <p>{t("pricingSubtitleNew")}</p>
           </div>
-          <div className="pricing-grid">
-            {loading ? (
-              [1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="card pricing-card"
-                  style={{ padding: 24 }}
-                >
-                  <SkeletonLine width="40%" height={24} />
-                  <SkeletonLine
-                    width="70%"
-                    height={14}
-                    style={{ marginTop: 12 }}
-                  />
-                  <SkeletonLine
-                    width="50%"
-                    height={32}
-                    style={{ marginTop: 20 }}
-                  />
+          <div className="pricing-layout">
+            <aside className="why-panel">
+              <div className="why-panel-art" aria-hidden="true">
+                <Icon name="calendar" size={64} />
+                <span className="why-panel-clock">
+                  <Icon name="clock" size={26} />
+                </span>
+              </div>
+              <div>
+                <h2>{t("whyChooseTitle")}</h2>
+                <ul className="why-panel-list">
+                  {WHY_CHOOSE.map((key) => (
+                    <li key={key}>
+                      <Icon name="check-circle" size={18} />
+                      <span>{t(key)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+            <div className="pricing-grid">
+              {loading ? (
+                [1, 2, 3].map((i) => (
                   <div
-                    style={{
-                      marginTop: 24,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 10,
-                    }}
+                    key={i}
+                    className="card pricing-card"
+                    style={{ padding: 24 }}
                   >
-                    <SkeletonLine width="85%" height={14} />
-                    <SkeletonLine width="90%" height={14} />
-                    <SkeletonLine width="75%" height={14} />
-                  </div>
-                </div>
-              ))
-            ) : plans.length > 0 ? (
-              plans.map((plan, index) => {
-                const planNameStr = formatTranslatable(plan.name);
-                const isPopular =
-                  index === 1 ||
-                  planNameStr.toLowerCase().includes("pro") ||
-                  (plan.type?.value || plan.type) === "FLAT";
-                const planDesc = formatTranslatable(plan.description);
-                const currencySymbol =
-                  plan.currency_detail?.symbol_native ||
-                  plan.currency_detail?.symbol ||
-                  formatTranslatable(plan.currency_detail?.name) ||
-                  plan.currency ||
-                  (lang === "ar" ? "ر.س" : "SAR");
-
-                return (
-                  <article
-                    key={plan.id}
-                    className={`pricing-card ${isPopular ? "popular" : ""}`}
-                  >
-                    {isPopular && (
-                      <span className="popular-badge">
-                        {t("popularTag") || "الأكثر طلباً"}
-                      </span>
-                    )}
-                    <h3>{planNameStr}</h3>
-                    {planDesc && <p className="plan-desc">{planDesc}</p>}
-                    <div className="plan-price">
-                      <span className="amount">
-                        {Number(plan.price) === 0 ? 0 : plan.price}
-                      </span>
-                      <span className="currency">{currencySymbol}</span>
-                      <span className="period">
-                        {plan.billing_interval === "yearly"
-                          ? t("yearly") ||
-                            (lang === "ar" ? "/ سنوياً" : "/ year")
-                          : t("monthly") ||
-                            (lang === "ar" ? "/ شهرياً" : "/ month")}
-                      </span>
+                    <SkeletonLine width="40%" height={24} />
+                    <SkeletonLine
+                      width="70%"
+                      height={14}
+                      style={{ marginTop: 12 }}
+                    />
+                    <SkeletonLine
+                      width="50%"
+                      height={32}
+                      style={{ marginTop: 20 }}
+                    />
+                    <div
+                      style={{
+                        marginTop: 24,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 10,
+                      }}
+                    >
+                      <SkeletonLine width="85%" height={14} />
+                      <SkeletonLine width="90%" height={14} />
+                      <SkeletonLine width="75%" height={14} />
                     </div>
-                    <ul className="plan-features">
-                      <li>
-                        ✓{" "}
-                        {plan.max_members
-                          ? `${t("members") || (lang === "ar" ? "أعضاء الفريق" : "Workspace Members")}: ${plan.max_members}`
-                          : t("unlimitedTeamMembers") ||
-                            (lang === "ar"
-                              ? "أعضاء فريق غير محدودين"
-                              : "Unlimited Team Members")}
-                      </li>
-                      <li>
-                        ✓{" "}
-                        {plan.max_services
-                          ? `${t("services") || (lang === "ar" ? "الخدمات" : "Offered Services")}: ${plan.max_services}`
-                          : t("unlimitedServices") ||
-                            (lang === "ar"
-                              ? "خدمات وجداول غير محدودة"
-                              : "Unlimited Services & Schedules")}
-                      </li>
-                      <li>
-                        ✓{" "}
-                        {plan.max_appointments
-                          ? `${t("appointments") || (lang === "ar" ? "الحجوزات" : "Bookings")}: ${plan.max_appointments}`
-                          : t("unlimitedAppointments") ||
-                            (lang === "ar"
-                              ? "حجوزات عملاء غير محدودة"
-                              : "Unlimited Bookings")}
-                      </li>
-                      {plan.max_customers && (
+                  </div>
+                ))
+              ) : plans.length > 0 ? (
+                plans.map((plan, index) => {
+                  const planNameStr = formatTranslatable(plan.name);
+                  const isPopular =
+                    index === 1 ||
+                    planNameStr.toLowerCase().includes("pro") ||
+                    (plan.type?.value || plan.type) === "FLAT";
+                  const planDesc = formatTranslatable(plan.description);
+                  const currencySymbol =
+                    plan.currency_detail?.symbol_native ||
+                    plan.currency_detail?.symbol ||
+                    formatTranslatable(plan.currency_detail?.name) ||
+                    plan.currency ||
+                    (lang === "ar" ? "ر.س" : "SAR");
+
+                  return (
+                    <article
+                      key={plan.id}
+                      className={`pricing-card ${isPopular ? "popular" : ""}`}
+                    >
+                      {isPopular && (
+                        <span className="popular-badge">
+                          {t("popularTag") || "الأكثر طلباً"}
+                        </span>
+                      )}
+                      <h3>{planNameStr}</h3>
+                      {planDesc && <p className="plan-desc">{planDesc}</p>}
+                      <div className="plan-price">
+                        <span className="amount">
+                          {Number(plan.price) === 0 ? 0 : plan.price}
+                        </span>
+                        <span className="currency">{currencySymbol}</span>
+                        <span className="period">
+                          {plan.billing_interval === "yearly"
+                            ? t("yearly") ||
+                              (lang === "ar" ? "/ سنوياً" : "/ year")
+                            : t("monthly") ||
+                              (lang === "ar" ? "/ شهرياً" : "/ month")}
+                        </span>
+                      </div>
+                      <ul className="plan-features">
                         <li>
                           ✓{" "}
-                          {t("customers") ||
-                            (lang === "ar" ? "العملاء" : "Customers")}
-                          : {plan.max_customers}
+                          {plan.max_members
+                            ? `${t("members") || (lang === "ar" ? "أعضاء الفريق" : "Workspace Members")}: ${plan.max_members}`
+                            : t("unlimitedTeamMembers") ||
+                              (lang === "ar"
+                                ? "أعضاء فريق غير محدودين"
+                                : "Unlimited Team Members")}
                         </li>
-                      )}
-                      {plan.capabilities &&
-                        plan.capabilities.map((cap) => (
-                          <li key={cap.id || cap.code}>
-                            ✓ {formatTranslatable(cap.name) || cap.code}
+                        <li>
+                          ✓{" "}
+                          {plan.max_services
+                            ? `${t("services") || (lang === "ar" ? "الخدمات" : "Offered Services")}: ${plan.max_services}`
+                            : t("unlimitedServices") ||
+                              (lang === "ar"
+                                ? "خدمات وجداول غير محدودة"
+                                : "Unlimited Services & Schedules")}
+                        </li>
+                        <li>
+                          ✓{" "}
+                          {plan.max_appointments
+                            ? `${t("appointments") || (lang === "ar" ? "الحجوزات" : "Bookings")}: ${plan.max_appointments}`
+                            : t("unlimitedAppointments") ||
+                              (lang === "ar"
+                                ? "حجوزات عملاء غير محدودة"
+                                : "Unlimited Bookings")}
+                        </li>
+                        {plan.max_customers && (
+                          <li>
+                            ✓{" "}
+                            {t("customers") ||
+                              (lang === "ar" ? "العملاء" : "Customers")}
+                            : {plan.max_customers}
                           </li>
-                        ))}
-                    </ul>
-                    <Link
-                      to="/register"
-                      className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-block`}
-                    >
-                      {Number(plan.price) === 0
-                        ? t("getStartedFree") ||
-                          (lang === "ar" ? "ابدأ مجاناً" : "Get Started Free")
-                        : t("getStarted") ||
-                          (lang === "ar" ? "ابدأ الآن" : "Get Started")}
-                    </Link>
-                  </article>
-                );
-              })
-            ) : (
-              <div
-                style={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  padding: 40,
-                  color: "var(--muted)",
-                }}
-              >
-                {t("noPlansAvailable") || "لا توجد باقات متاحة حالياً"}
-              </div>
-            )}
+                        )}
+                        {plan.capabilities &&
+                          plan.capabilities.map((cap) => (
+                            <li key={cap.id || cap.code}>
+                              ✓ {formatTranslatable(cap.name) || cap.code}
+                            </li>
+                          ))}
+                      </ul>
+                      <Link
+                        to="/register"
+                        className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-block`}
+                      >
+                        {Number(plan.price) === 0
+                          ? t("getStartedFree") ||
+                            (lang === "ar" ? "ابدأ مجاناً" : "Get Started Free")
+                          : t("getStarted") ||
+                            (lang === "ar" ? "ابدأ الآن" : "Get Started")}
+                      </Link>
+                    </article>
+                  );
+                })
+              ) : (
+                <div
+                  style={{
+                    gridColumn: "1 / -1",
+                    textAlign: "center",
+                    padding: 40,
+                    color: "var(--muted)",
+                  }}
+                >
+                  {t("noPlansAvailable") || "لا توجد باقات متاحة حالياً"}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -747,39 +859,140 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Closing CTA band */}
       <section className="section-sm">
-        <div className="container" style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "2rem", marginBottom: 12 }}>
-            {t("readyToStart")}
-          </h2>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "1.1rem",
-              maxWidth: 500,
-              margin: "0 auto 28px",
-            }}
-          >
-            {t("readyToStartDesc")}
-          </p>
-          <div className="hero-actions">
-            {!isAuthenticated && (
-              <Link to="/register" className="btn btn-primary btn-lg">
-                {t("createFreeAccount")}
-              </Link>
-            )}
-            <Link
-              to="/workspaces"
-              className="btn btn-accent btn-lg"
-              style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
-            >
-              <Icon name="monitor" size={18} />
-              {t("exploreWorkspaces")}
-            </Link>
+        <div className="container">
+          <div className="final-cta">
+            <div className="final-cta-copy">
+              <h2>{t("finalCtaTitle")}</h2>
+              <p>{t("finalCtaDesc")}</p>
+              <div className="final-cta-actions">
+                {!isAuthenticated && (
+                  <Link to="/register" className="btn btn-lg final-cta-btn">
+                    {t("getStartedFree")}
+                    <Icon
+                      name="arrow-right"
+                      size={16}
+                      style={{ transform: isRTL ? "rotate(180deg)" : "none" }}
+                    />
+                  </Link>
+                )}
+              </div>
+              <p className="final-cta-note">
+                <Icon name="check-circle" size={14} />
+                {t("finalCtaNote")}
+              </p>
+            </div>
+            <div className="final-cta-art" aria-hidden="true">
+              <span className="final-cta-phone">
+                <span className="final-cta-phone-notch" />
+                <span className="final-cta-phone-bar" />
+                <span className="final-cta-phone-bar short" />
+                <span className="final-cta-phone-bar" />
+              </span>
+            </div>
           </div>
         </div>
       </section>
     </main>
+  );
+}
+
+/* A CSS/DOM rendering of the product rather than a screenshot: it stays sharp
+   at any size, follows the active theme, flips with the writing direction, and
+   translates. Every label comes from translations.js; the calendar shows the
+   current week and carries no invented figures. */
+function HeroDashboardMockup({ t, isRTL }) {
+  const nav = [
+    { icon: "home", key: "home" },
+    { icon: "calendar", key: "appointments" },
+    { icon: "clock", key: "schedules" },
+    { icon: "users", key: "customers" },
+    { icon: "briefcase", key: "services" },
+    { icon: "user-check", key: "navTeam" },
+    { icon: "bar-chart", key: "navReports" },
+    { icon: "settings", key: "settings" },
+  ];
+
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay());
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return {
+        day: d.getDate(),
+        isToday: d.toDateString() === today.toDateString(),
+      };
+    });
+  }, []);
+
+  const slots = ["09:00", "10:00", "11:00", "12:00", "01:00", "02:00"];
+
+  return (
+    <div className="hero-mockup" aria-hidden="true">
+      <div className="hero-mockup-window">
+        <aside className="hero-mockup-sidebar">
+          {nav.map((item, i) => (
+            <span
+              key={item.key}
+              className={`hero-mockup-navitem${i === 0 ? " active" : ""}`}
+            >
+              <Icon name={item.icon} size={13} />
+              <em>{t(item.key)}</em>
+            </span>
+          ))}
+        </aside>
+
+        <div className="hero-mockup-main">
+          <div className="hero-mockup-toolbar">
+            <span className="hero-mockup-dot" />
+            <span className="hero-mockup-dot" />
+            <span className="hero-mockup-dot" />
+          </div>
+
+          <div className="hero-mockup-body">
+            <div className="hero-mockup-agenda">
+              {slots.map((time, i) => (
+                <div className="hero-mockup-row" key={time}>
+                  <span className="hero-mockup-time">{time}</span>
+                  <span className="hero-mockup-line" />
+                  {i % 2 === 0 && (
+                    <span className={`hero-mockup-event tone-${i % 3}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="hero-mockup-cal">
+              <div className="hero-mockup-calhead">
+                <Icon name="chevron-right" size={11} />
+                <Icon name="chevron-left" size={11} />
+              </div>
+              <div className="hero-mockup-calgrid">
+                {weekDays.map((d) => (
+                  <span
+                    key={d.day}
+                    className={`hero-mockup-day${d.isToday ? " today" : ""}`}
+                  >
+                    {d.day}
+                  </span>
+                ))}
+              </div>
+              <div className="hero-mockup-upcoming">
+                <span className="hero-mockup-bar" />
+                <span className="hero-mockup-bar short" />
+                <span className="hero-mockup-bar" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span
+        className="hero-mockup-glow"
+        style={{ insetInlineStart: isRTL ? "auto" : 0 }}
+      />
+    </div>
   );
 }

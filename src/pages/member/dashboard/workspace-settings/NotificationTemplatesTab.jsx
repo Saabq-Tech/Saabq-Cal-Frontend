@@ -716,7 +716,7 @@ export default function NotificationTemplatesTab({
                   {t("fromSenderLabel") || "من:"}{" "}
                   <strong>
                     {t("systemNotificationSender") ||
-                      "سابق كول (إشعارات الخدمة)"}
+                      "تقويم سابق (إشعارات الخدمة)"}
                   </strong>
                 </div>
                 <div

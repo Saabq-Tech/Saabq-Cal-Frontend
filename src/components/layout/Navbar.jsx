@@ -84,7 +84,14 @@ export default function Navbar() {
       return;
     }
 
-    const sections = ["home", "about", "features", "how-it-works", "pricing"];
+    const sections = [
+      "home",
+      "sectors",
+      "about",
+      "features",
+      "how-it-works",
+      "pricing",
+    ];
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -307,6 +314,29 @@ export default function Navbar() {
                   >
                     {t("navPricing")}
                   </a>
+                </li>
+
+                <li>
+                  <a
+                    href="/#sectors"
+                    className={
+                      location.pathname === "/" && activeSection === "sectors"
+                        ? "active"
+                        : ""
+                    }
+                    onClick={(e) => handleSectionClick("sectors", e)}
+                  >
+                    {t("navSectors")}
+                  </a>
+                </li>
+
+                <li>
+                  <Link
+                    to="/blog"
+                    className={location.pathname === "/blog" ? "active" : ""}
+                  >
+                    {t("navBlog")}
+                  </Link>
                 </li>
               </>
             )}
@@ -878,6 +908,21 @@ export default function Navbar() {
                       <Icon name="credit-card" />
                       <span>{t("navPricing")}</span>
                     </a>
+                    <a
+                      href="/#sectors"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("sectors", e)}
+                    >
+                      <Icon name="briefcase" />
+                      <span>{t("navSectors")}</span>
+                    </a>
+                    <Link
+                      to="/blog"
+                      className={`mobile-drawer-link${location.pathname === "/blog" ? " active" : ""}`}
+                    >
+                      <Icon name="book-open" />
+                      <span>{t("navBlog")}</span>
+                    </Link>
                   </>
                 )}
 
