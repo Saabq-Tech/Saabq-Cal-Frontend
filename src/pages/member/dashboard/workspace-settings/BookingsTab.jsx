@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
+import { useToast } from "../../../../context/ToastContext";
+import client, { endpoints } from "../../../../api/client";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 
@@ -10,12 +12,49 @@ export default function BookingsTab({
   onPageChange,
   onSelectBooking,
   canEdit,
-  _onReloadBookings,
+  onReloadBookings,
 }) {
   const { t, isRTL, lang } = useLanguage();
+  const toast = useToast();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [confirmingId, setConfirmingId] = useState(null);
+
+  // The table degrades to a card list on a phone. Rendered from JS rather
+  // than kept in the DOM twice behind CSS media queries, so there is one
+  // live view at a time — jsdom's matchMedia stub always reports
+  // matches:false, so tests exercise the table exactly as before.
+  const [isMobileView, setIsMobileView] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 768px)").matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = (e) => setIsMobileView(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Quick-confirm a pending booking from the card list without opening the
+  // detail page — same status endpoint BookingDetailsPage uses.
+  const handleQuickConfirm = async (id, e) => {
+    e.stopPropagation();
+    if (!canEdit) return;
+    try {
+      setConfirmingId(id);
+      await client.patch(endpoints.workspaceBookingStatus(id), {
+        status: "confirmed",
+      });
+      toast.success(t("statusUpdatedSuccess") || "تم تحديث الحالة بنجاح");
+      if (onReloadBookings) onReloadBookings();
+    } catch (err) {
+      toast.error(err.response?.data?.message || t("failed") || "فشلت العملية");
+    } finally {
+      setConfirmingId(null);
+    }
+  };
 
   const formatTranslatable = (val) => {
     if (val === null || val === undefined) return "";
@@ -217,6 +256,7 @@ export default function BookingsTab({
 
       {/* Search & Filter Bar */}
       <div
+        className="bookings-filter-bar"
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -255,7 +295,7 @@ export default function BookingsTab({
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: 6 }}>
+        <div className="bookings-filter-chips no-scrollbar">
           {[
             { id: "all", label: t("filterAll") || "الكل" },
             { id: "confirmed", label: t("filterConfirmed") || "مؤكدة" },
@@ -268,6 +308,8 @@ export default function BookingsTab({
               type="button"
               onClick={() => setStatusFilter(st.id)}
               style={{
+                flexShrink: 0,
+                minHeight: 36,
                 border: "none",
                 background:
                   statusFilter === st.id ? "var(--primary)" : "var(--surface)",
@@ -328,8 +370,9 @@ export default function BookingsTab({
               "ستظهر المواعيد الحالية والقادمة هنا فور إتمام العملاء للحجوزات."}
           </p>
         </div>
-      ) : (
+      ) : !isMobileView ? (
         <div
+          className="bookings-table-wrap"
           style={{
             overflowX: "auto",
             border: "1px solid var(--border-light)",
@@ -534,6 +577,107 @@ export default function BookingsTab({
               })}
             </tbody>
           </table>
+        </div>
+      ) : null}
+
+      {/* Bookings — mobile cards. The table above degrades to a scrolling
+          grid poorly; on a phone every row instead becomes a card with the
+          same status colours, plus a one-tap confirm for a pending booking
+          so the common case doesn't need the detail page. */}
+      {filteredList.length > 0 && isMobileView && (
+        <div className="bookings-cards-wrap">
+          {filteredList.map((b) => {
+            const customerName =
+              b.customer_name ||
+              b.customer?.name ||
+              b.snapshot?.customer_name ||
+              "عميل";
+            const customerEmail =
+              b.customer_email ||
+              b.customer?.email ||
+              b.snapshot?.customer_email ||
+              "";
+            const serviceTitle =
+              formatTranslatable(b.service?.name) ||
+              b.service_name ||
+              b.service?.title ||
+              b.snapshot?.service_name ||
+              "خدمة";
+            const whenTime =
+              b.when ||
+              b.start_time ||
+              (b.starts_at ? new Date(b.starts_at).toLocaleString() : "-");
+
+            return (
+              <div
+                key={b.id}
+                className="booking-card"
+                onClick={() => onSelectBooking && onSelectBooking(b.id)}
+              >
+                <div className="booking-card-top">
+                  <div className="booking-card-identity">
+                    <UserAvatar
+                      name={customerName}
+                      avatarUrl={b.customer?.avatar_url}
+                      size={40}
+                    />
+                    <div className="booking-card-identity-text">
+                      <div className="booking-card-name">{customerName}</div>
+                      <div className="booking-card-email">{customerEmail}</div>
+                    </div>
+                  </div>
+                  {renderStatusBadge(b.status)}
+                </div>
+
+                <div className="booking-card-meta">
+                  <div>
+                    <Icon name="briefcase" size={15} />
+                    <span>{serviceTitle}</span>
+                  </div>
+                  <div>
+                    <Icon name="clock" size={15} />
+                    <span>{whenTime}</span>
+                  </div>
+                </div>
+
+                {canEdit && b.status === "pending" ? (
+                  <div className="booking-card-actions">
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={confirmingId === b.id}
+                      onClick={(e) => handleQuickConfirm(b.id, e)}
+                    >
+                      {confirmingId === b.id
+                        ? t("loading") || "..."
+                        : t("markConfirmed") || "تأكيد"}
+                    </button>
+                    <button
+                      type="button"
+                      className="booking-card-details-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectBooking) onSelectBooking(b.id);
+                      }}
+                    >
+                      {t("viewDetails") || "التفاصيل"}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="booking-card-details-btn full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onSelectBooking) onSelectBooking(b.id);
+                    }}
+                  >
+                    {t("viewDetails") || "عرض التفاصيل"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
