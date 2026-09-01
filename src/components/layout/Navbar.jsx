@@ -700,7 +700,6 @@ export default function Navbar() {
                     avatarUrl={user?.avatar_url}
                     size={32}
                   />
-                  <span className="navbar-user-name">{user?.name}</span>
                   <Icon
                     name="chevron-down"
                     size={14}
