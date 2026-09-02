@@ -1810,6 +1810,36 @@ html.dark .auth-panel-right {
   margin-top: 12px;
 }
 
+.auth-mobile-brand {
+  display: none;
+}
+
+.auth-mobile-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #ffffff;
+  box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 900px) {
+  .auth-mobile-brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Centred under the brand mark once it's the only identity on screen. */
+  .auth-form-wrapper h1,
+  .auth-form-wrapper > p:first-of-type {
+    text-align: center;
+  }
+}
+
 .auth-form-wrapper {
   width: 100%;
   max-width: 420px;
@@ -1829,14 +1859,25 @@ html.dark .auth-panel-right {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
+.auth-form .form-input {
+  min-height: 52px;
+  padding: 14px 16px;
+}
+
+.auth-form .btn-block.btn-lg {
+  min-height: 54px;
+}
+
+/* A segmented pill rather than a boxed tab pair, matching the reviewed
+   design (2b): fully rounded track, fully rounded buttons, 44px targets. */
 .auth-toggle {
   display: flex;
-  background: var(--surface);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   padding: 4px;
   gap: 4px;
   margin-bottom: 8px;
@@ -1844,9 +1885,10 @@ html.dark .auth-panel-right {
 
 .auth-toggle button {
   flex: 1;
+  min-height: 44px;
   padding: 10px 16px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sans);
@@ -8993,6 +9035,137 @@ html.dark {
   .footer-col h4 {
     font-size: 0.88rem !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKSPACE BOOKINGS — mobile card list
+   The table becomes a card per booking below 768px, with the same status
+   colours and a one-tap confirm for a pending booking. BookingsTab.jsx
+   mounts one or the other from a matchMedia check, so only one of
+   .bookings-table-wrap / .bookings-cards-wrap is ever in the DOM — no
+   display:none toggling needed here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bookings-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookings-filter-chips {
+  display: flex;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .bookings-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bookings-filter-chips {
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+}
+
+.booking-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+}
+
+.booking-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.booking-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.booking-card-identity-text {
+  min-width: 0;
+}
+
+.booking-card-name {
+  font-weight: 700;
+  color: var(--heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-card-email {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+}
+
+.booking-card-meta div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.booking-card-meta div:last-child {
+  color: var(--text-secondary);
+}
+
+.booking-card-meta svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.booking-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.booking-card-actions .btn {
+  flex: 1;
+  min-height: 44px;
+}
+
+.booking-card-details-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid transparent;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.booking-card-details-btn.full {
+  width: 100%;
 }
 
 /* The settings sub-nav is nested inside .profile-sidebar, which is a solid
