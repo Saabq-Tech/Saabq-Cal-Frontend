@@ -585,11 +585,13 @@ html.dark .navbar {
   gap: 8px;
 }
 
+/* Avatar + chevron only — the name repeated the page's own heading right
+   below it on every profile screen, so it was dropped from the trigger. */
 .navbar-user {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
   border-radius: var(--radius-full);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -620,12 +622,6 @@ html.dark .navbar {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.navbar-user-name {
-  font-weight: 500;
-  font-size: 0.85rem;
-  color: var(--text);
 }
 
 /* Mobile nav */
@@ -3072,28 +3068,36 @@ html.dark .feature-check-icon {
   gap: 32px;
 }
 
+/* Solid dark panel — same teal used for the hero mock-up's sidebar
+   (.hero-mockup-sidebar) and shared by both the profile tabs
+   (DashboardSidebar) and the workspace management nav (WorkspaceLayout),
+   which both already render .profile-sidebar / .profile-sidebar-link. */
 .profile-sidebar {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  background: var(--secondary);
+  border-radius: var(--radius-lg);
+  padding: 18px 12px;
+  box-shadow: var(--shadow-md);
 }
 
 .profile-sidebar-header {
-  padding: 4px 12px 12px;
-  font-size: 0.78rem;
+  padding: 4px 12px 14px;
+  font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .profile-sidebar-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
+  gap: 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.78);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -3107,19 +3111,43 @@ html.dark .feature-check-icon {
 }
 
 .profile-sidebar-link:hover {
-  color: var(--primary);
-  background: var(--primary-subtle);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .profile-sidebar-link.active {
   color: #ffffff;
   background: var(--primary);
-  box-shadow: 0 3px 10px rgba(17, 100, 106, 0.25);
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.profile-sidebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  transition: all var(--duration-fast) ease;
+}
+
+.profile-sidebar-link:hover .profile-sidebar-icon {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.profile-sidebar-link.active .profile-sidebar-icon {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 .profile-sidebar-link svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
 }
 
@@ -3265,9 +3293,19 @@ html.dark .feature-check-icon {
     white-space: nowrap !important;
     width: auto !important;
     flex-shrink: 0 !important;
-    padding: 9px 16px !important;
+    padding: 8px 14px 8px 8px !important;
     font-size: 0.86rem !important;
     border-radius: var(--radius-lg, 12px) !important;
+  }
+
+  .profile-sidebar-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .profile-sidebar-link svg {
+    width: 15px !important;
+    height: 15px !important;
   }
 
   .profile-page {
@@ -5088,10 +5126,6 @@ html.dark .footer {
     gap: 6px !important;
   }
 
-  .navbar-user-name {
-    display: none !important;
-  }
-
   .auth-panel-left {
     padding: 24px 16px !important;
   }
@@ -5286,6 +5320,9 @@ html.dark .footer {
   min-width: 0;
 }
 
+/* Notification text comes straight from the API, so it can carry a long
+   unbroken token — a link, a slug, an untranslated key. Without a break
+   rule that overflows the card and gets clipped instead of wrapping. */
 .notif-title {
   font-size: 0.95rem;
   font-weight: 700;
@@ -5293,6 +5330,7 @@ html.dark .footer {
   margin-bottom: 4px;
   line-height: 1.35;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .notif-body {
@@ -5300,6 +5338,7 @@ html.dark .footer {
   color: var(--text-secondary);
   line-height: 1.55;
   margin-bottom: 8px;
+  overflow-wrap: anywhere;
 }
 
 .notif-meta {
@@ -5794,6 +5833,9 @@ html[dir="ltr"] .chat-search-input {
   position: relative;
   box-shadow: var(--shadow-sm);
   line-height: 1.5;
+  /* Messages are user-written: a pasted link with no spaces would push
+     past the bubble and clip rather than wrap. */
+  overflow-wrap: anywhere;
 }
 
 .chat-bubble-wrap.me .chat-bubble {
