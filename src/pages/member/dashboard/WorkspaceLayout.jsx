@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { Fragment } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
-import UserAvatar from "../../../components/ui/UserAvatar";
 import GoogleNotConnectedBanner from "../../../components/common/GoogleNotConnectedBanner";
 import Icon from "../../../components/common/Icon";
 import client, { endpoints } from "../../../api/client";
@@ -58,17 +58,48 @@ export default function WorkspaceLayout() {
     userPermissions.includes(`${module}_read`) ||
     userPermissions.includes(`${module}_write`);
   const hasActiveSub = user?.workspace?.has_active_subscription ?? true;
-  const subStatus =
-    user?.workspace?.subscription?.status ||
-    (hasActiveSub ? "active" : "inactive");
   const isWorkspaceActive = user?.workspace?.status === "active";
   const _workspaceStatus = user?.workspace?.status || "pending";
 
-  const wsName = user?.workspace?.name || "مساحة العمل";
-  const wsEmail = user?.email || "";
-  const wsLogo = user?.workspace?.logo_url || null;
+  // The seven settings screens used to be a horizontal strip inside the
+  // settings page; they are nested under it in this nav instead, addressed
+  // by ?sub= so each one is linkable.
+  const settingsSubTabs = [
+    { id: "basic", label: t("workspaceBasicInfo") || "المعلومات الأساسية" },
+    {
+      id: "branding",
+      label: t("workspaceBranding") || "الهوية والعلامة التجارية",
+    },
+    {
+      id: "timezone",
+      label: t("workspaceTimezone") || "المنطقة الزمنية وتنسيق الوقت",
+    },
+    {
+      id: "social",
+      label: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والرابط",
+    },
+    {
+      id: "form_fields",
+      label: t("workspaceFormFields") || "منشئ نموذج الحجز",
+    },
+    { id: "payment", label: t("workspacePaymentReceipts") || "إيصالات الدفع" },
+    {
+      id: "notifications",
+      label: t("workspaceNotificationTemplates") || "قوالب الإشعارات",
+    },
+  ];
 
   const mainWorkspaceTabs = [
+    {
+      id: "home",
+      path: "/member/workspace",
+      end: true,
+      label: t("home") || "الرئيسية",
+      icon: "home",
+      permissions: [],
+      capability: null,
+      alwaysVisible: true,
+    },
     {
       id: "settings",
       path: "/member/workspace/settings",
@@ -76,6 +107,7 @@ export default function WorkspaceLayout() {
       icon: "monitor",
       permissions: ["settings_read", "settings_write"],
       capability: null,
+      subTabs: settingsSubTabs,
     },
     {
       id: "schedules",
@@ -157,11 +189,16 @@ export default function WorkspaceLayout() {
   ];
 
   const canViewTab = (tab) => {
+    if (tab.alwaysVisible) return true;
     if (isOwner) return true;
     return tab.permissions.some((perm) => userPermissions.includes(perm));
   };
 
   const availableTabs = mainWorkspaceTabs.filter(canViewTab);
+
+  const isSettingsOpen = location.pathname === "/member/workspace/settings";
+  const activeSettingsTab =
+    new URLSearchParams(location.search).get("sub") || "basic";
 
   if (availableTabs.length === 0) {
     return (
@@ -270,71 +307,9 @@ export default function WorkspaceLayout() {
           </div>
         )}
 
-        <div className="profile-header">
-          <div className="profile-avatar">
-            <UserAvatar name={wsName} avatarUrl={wsLogo} size={72} />
-          </div>
-
-          <div className="profile-info">
-            <h1>{wsName}</h1>
-            <p>{wsEmail}</p>
-            <div
-              style={{
-                display: "flex",
-                gap: 6,
-                flexWrap: "wrap",
-                marginTop: 4,
-              }}
-            >
-              {!isWorkspaceActive ? (
-                <span
-                  className="profile-badge inactive"
-                  style={{
-                    background: "#ef4444",
-                    color: "#fff",
-                    fontWeight: 800,
-                    border: "1px solid #dc2626",
-                  }}
-                >
-                  <span
-                    className="badge-dot inactive"
-                    style={{ background: "#fff" }}
-                  />
-                  {t("workspaceInactiveBadge") ||
-                    "غير مفعّلة (بانتظار موافقة الإدارة)"}
-                </span>
-              ) : subStatus === "pending" ? (
-                <span className="profile-badge pending">
-                  <span className="badge-dot pending" />
-                  {t("statusPending") || "طلب اشتراك قيد الانتظار"}
-                </span>
-              ) : hasActiveSub ? (
-                <span className="profile-badge active">
-                  <span className="badge-dot active" />
-                  {t("activeWorkspace") || "مساحة نشطة"}
-                </span>
-              ) : (
-                <span className="profile-badge inactive">
-                  <span className="badge-dot inactive" />
-                  {t("inactiveSubscription") || "اشتراك غير نشط"}
-                </span>
-              )}
-              {isOwner && (
-                <span
-                  className="profile-badge verified"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon name="crown" size={12} />
-                  {t("owner")}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* The workspace name/email/badges card that used to sit here is
+            gone; the home page's welcome banner already names the workspace,
+            and the status badges moved nothing the sidebar doesn't imply. */}
 
         <div className="profile-grid">
           <aside ref={sidebarRef} className="profile-sidebar">
@@ -379,42 +354,65 @@ export default function WorkspaceLayout() {
                 }
 
                 return (
-                  <NavLink
-                    key={wsTab.path}
-                    to={wsTab.path}
-                    className={({ isActive }) =>
-                      `profile-sidebar-link${isActive ? " active" : ""}`
-                    }
-                    style={{ opacity: isCapAllowed ? 1 : 0.7 }}
-                  >
-                    <span className="profile-sidebar-icon">
-                      <Icon name={wsTab.icon} />
-                    </span>
-                    <span style={{ flex: 1 }}>{wsTab.label}</span>
-                    {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
-                      <span
-                        style={{
-                          marginInlineStart: "auto",
-                          padding: "2px 8px",
-                          borderRadius: 10,
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                          background: "#f59e0b",
-                          color: "#ffffff",
-                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
-                        }}
-                      >
-                        {pendingBookingsCount}
+                  <Fragment key={wsTab.path}>
+                    <NavLink
+                      to={wsTab.path}
+                      end={wsTab.end}
+                      className={({ isActive }) =>
+                        `profile-sidebar-link${isActive ? " active" : ""}`
+                      }
+                      style={{ opacity: isCapAllowed ? 1 : 0.7 }}
+                    >
+                      <span className="profile-sidebar-icon">
+                        <Icon name={wsTab.icon} />
                       </span>
+                      <span style={{ flex: 1 }}>{wsTab.label}</span>
+                      {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
+                        <span
+                          style={{
+                            marginInlineStart: "auto",
+                            padding: "2px 8px",
+                            borderRadius: 10,
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                            background: "#f59e0b",
+                            color: "#ffffff",
+                            boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
+                          }}
+                        >
+                          {pendingBookingsCount}
+                        </span>
+                      )}
+                      {!isCapAllowed && (
+                        <Icon
+                          name="lock"
+                          size={14}
+                          style={{
+                            color: "var(--muted)",
+                            marginInlineStart: 6,
+                          }}
+                        />
+                      )}
+                    </NavLink>
+
+                    {/* Settings' seven screens, nested under it and only while
+                      settings is the open section. */}
+                    {wsTab.subTabs && isSettingsOpen && (
+                      <div className="workspace-subnav">
+                        {wsTab.subTabs.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            to={`${wsTab.path}?sub=${sub.id}`}
+                            className={`workspace-subnav-item${
+                              activeSettingsTab === sub.id ? " active" : ""
+                            }`}
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
                     )}
-                    {!isCapAllowed && (
-                      <Icon
-                        name="lock"
-                        size={14}
-                        style={{ color: "var(--muted)", marginInlineStart: 6 }}
-                      />
-                    )}
-                  </NavLink>
+                  </Fragment>
                 );
               })}
             </nav>

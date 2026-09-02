@@ -6,7 +6,6 @@ import { useLanguage } from "../../../context/LanguageContext";
 import MemberSecurityPage from "./MemberSecurityPage";
 import MemberChangePasswordPage from "./MemberChangePasswordPage";
 import IntegrationsSettingsPage from "./IntegrationsSettingsPage";
-import MemberOverviewTab from "./MemberOverviewTab";
 import NotificationsPage from "../../../components/dashboard/NotificationsPage";
 import ChatsPage from "../../../components/dashboard/ChatsPage";
 import SEO from "../../../components/ui/SEO";
@@ -19,7 +18,7 @@ export default function MemberProfilePage() {
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
-  const currentTab = searchParams.get("tab") || "overview";
+  const currentTab = searchParams.get("tab") || "info";
 
   const fileInputRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -99,10 +98,6 @@ export default function MemberProfilePage() {
   }
 
   if (!user) return null;
-
-  if (currentTab === "overview") {
-    return <MemberOverviewTab />;
-  }
 
   if (currentTab === "security") {
     return (

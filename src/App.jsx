@@ -111,6 +111,9 @@ const WorkspaceResourcesPage = lazy(
 const WorkspaceLogsPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceLogsPage"),
 );
+const WorkspaceHomePage = lazy(
+  () => import("./pages/member/dashboard/MemberOverviewTab"),
+);
 
 // Frontend Error Pages
 const NotFoundPage = lazy(() => import("./pages/error/NotFoundPage"));
@@ -372,7 +375,7 @@ export default function App() {
                       </MainLayout>
                     }
                   >
-                    <Route index element={<Navigate to="settings" replace />} />
+                    <Route index element={<WorkspaceHomePage />} />
                     <Route
                       path="settings"
                       element={<WorkspaceSettingsPage />}
