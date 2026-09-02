@@ -1230,6 +1230,7 @@ export const translations = {
     stopRecording: "إيقاف التسجيل",
     imageAttachment: "مرفق صورة",
     myAccount: "حسابي",
+    myWorkspace: "مساحتي",
     toggleTheme: "تبديل المظهر",
     lightMode: "وضع النهار",
     darkMode: "الوضع الداكن",
@@ -2978,6 +2979,7 @@ export const translations = {
     stopRecording: "Stop Recording",
     imageAttachment: "Image attachment",
     myAccount: "My Account",
+    myWorkspace: "My Workspace",
     deleteChat: "Delete Chat",
 
     toggleTheme: "Toggle Theme",
