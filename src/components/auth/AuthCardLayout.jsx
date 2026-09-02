@@ -77,6 +77,15 @@ export default function AuthCardLayout({
           </button>
         </div>
 
+        {/* Visual anchor for the logo mark once the illustration panel is
+            hidden below 900px (see the auth-panel-right media query) — the
+            form would otherwise open with no brand identity at all. */}
+        <div className="auth-mobile-brand">
+          <span className="auth-mobile-brand-icon">
+            <Icon name="calendar" size={26} />
+          </span>
+        </div>
+
         <div className="auth-form-wrapper animate-fade-in-up">{children}</div>
       </div>
 
