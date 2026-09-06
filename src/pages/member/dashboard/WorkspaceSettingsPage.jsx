@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import { applyWorkspaceBranding } from "../../../utils/theme";
 import SEO from "../../../components/ui/SEO";
+import { getWorkspaceSettingsSubTabs } from "../../../config/dashboardNav";
 import { TabSettingsSkeleton } from "../../../components/ui/Skeleton";
 
 import CapabilityGate from "../../../components/common/CapabilityGate";
@@ -388,6 +389,20 @@ export default function WorkspaceSettingsPage() {
   return (
     <div>
       <SEO title={t("settings")} noindex />
+
+      {/* On mobile the sidebar (which carries these seven sub-tabs on desktop)
+          is hidden, so surface them here as a horizontal strip. */}
+      <div className="settings-subtab-strip">
+        {getWorkspaceSettingsSubTabs(t).map((sub) => (
+          <Link
+            key={sub.id}
+            to={`/member/workspace/settings?sub=${sub.id}`}
+            className={`settings-subtab${subSettingsTab === sub.id ? " active" : ""}`}
+          >
+            {sub.label}
+          </Link>
+        ))}
+      </div>
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
       <div

@@ -347,6 +347,8 @@ export default function Navbar() {
                 <button
                   className={`navbar-dropdown-trigger${location.pathname.includes("/profile") ? " active" : ""}`}
                   onClick={() => {
+                    if (!profileDropdownOpen)
+                      navigate(`${profilePrefix}/profile`);
                     setProfileDropdownOpen(!profileDropdownOpen);
                     setWsDropdownOpen(false);
                   }}
@@ -448,14 +450,15 @@ export default function Navbar() {
                 <button
                   className={`navbar-dropdown-trigger${location.pathname.includes("/member/workspace") ? " active" : ""}`}
                   onClick={() => {
+                    if (!wsDropdownOpen) navigate("/member/workspace");
                     setWsDropdownOpen(!wsDropdownOpen);
                     setProfileDropdownOpen(false);
                   }}
                   aria-expanded={wsDropdownOpen}
                   aria-haspopup="true"
-                  aria-label={t("workspace")}
+                  aria-label={t("myWorkspace")}
                 >
-                  <span>{t("workspace")}</span>
+                  <span>{t("myWorkspace")}</span>
                   {pendingBookingsCount > 0 && (
                     <span
                       style={{
@@ -483,6 +486,13 @@ export default function Navbar() {
                 </button>
                 {wsDropdownOpen && (
                   <div className="navbar-dropdown-menu">
+                    <Link
+                      to="/member/workspace"
+                      onClick={() => setWsDropdownOpen(false)}
+                    >
+                      <Icon name="home" size={16} />
+                      {t("home")}
+                    </Link>
                     {canViewPermission(["settings_read", "settings_write"]) && (
                       <Link
                         to="/member/workspace/settings"
@@ -603,31 +613,9 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
-            {/* Direct routes to the two places a signed-in user actually
-                works in; the account and workspace dropdowns beside them
-                stay for switching and for the sub-pages. */}
-            {isAuthenticated && (
-              <Link
-                to={
-                  userType === "member"
-                    ? "/member/profile"
-                    : "/customer/profile"
-                }
-                className={`nav-explore desktop-only${location.pathname.endsWith("/profile") ? " active" : ""}`}
-              >
-                <Icon name="user" size={15} />
-                <span>{t("myAccount")}</span>
-              </Link>
-            )}
-            {isAuthenticated && userType === "member" && (
-              <Link
-                to="/member/workspace"
-                className={`nav-explore desktop-only${location.pathname.startsWith("/member/workspace") ? " active" : ""}`}
-              >
-                <Icon name="briefcase" size={15} />
-                <span>{t("myWorkspace")}</span>
-              </Link>
-            )}
+            {/* Account and workspace now live as the two dropdowns above — each
+                navigates to its home and opens its page list — so no separate
+                direct buttons here. */}
             <Link
               to="/workspaces"
               className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}

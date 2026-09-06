@@ -3430,6 +3430,24 @@ html.dark {
   font-weight: 700;
 }
 
+/* Desktop: the dashboard spans full width so the sidebar rail sits flush to
+   the start edge of the viewport (right in RTL, left in LTR) like an app shell,
+   with the content taking the rest. */
+@media (min-width: 861px) {
+  .profile-page {
+    max-width: none;
+    padding-inline-end: clamp(24px, 3.5vw, 40px);
+  }
+
+  .profile-sidebar {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    border-inline-start: none;
+    top: 84px;
+    max-height: calc(100vh - 100px);
+  }
+}
+
 @media (max-width: 1024px) {
   .profile-grid {
     grid-template-columns: 240px 1fr;
@@ -3443,29 +3461,48 @@ html.dark {
     gap: 20px;
   }
 
-  /* Mobile: the neutral rail becomes a full-width, compact vertical menu so
-     every link and sub-tab is reachable — no fragile horizontal strip. */
+  /* Mobile: the dashboard navigation lives in the hamburger drawer (the
+     "حسابي" / "مساحتي" accordions) and the bottom tab bar, so the inline rail
+     is hidden here — it would only duplicate them and eat the screen. */
   .profile-sidebar {
-    position: static;
-    max-height: none;
-    overflow: visible;
-    margin-bottom: 20px;
-    padding: 12px 10px;
+    display: none !important;
   }
 
-  .profile-sidebar-link {
-    padding: 9px 12px;
-    font-size: 0.9rem;
+  /* The mobile-only settings sub-tab strip becomes a horizontal scroller. */
+  .settings-subtab-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .profile-sidebar-icon {
-    width: 30px;
-    height: 30px;
+  .settings-subtab-strip::-webkit-scrollbar {
+    display: none;
   }
 
-  .profile-sidebar-link svg {
-    width: 16px;
-    height: 16px;
+  .settings-subtab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .settings-subtab.active {
+    background: var(--sb-accent);
+    border-color: var(--sb-accent);
+    color: #ffffff;
+    font-weight: 700;
   }
 
   .profile-page {
@@ -8382,6 +8419,13 @@ html.dark {
 
 .final-cta-phone-bar.short {
   width: 64%;
+}
+
+/* The settings sub-tab strip is a mobile-only fallback for the sidebar. */
+@media (min-width: 861px) {
+  .settings-subtab-strip {
+    display: none;
+  }
 }
 
 /* ── Landing responsive ── */
