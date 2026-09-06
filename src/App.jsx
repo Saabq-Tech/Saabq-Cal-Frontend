@@ -5,6 +5,7 @@ import { ToastProvider } from "./context/ToastContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
 import Navbar from "./components/layout/Navbar";
+import MobileTabBar from "./components/layout/MobileTabBar";
 import Footer from "./components/layout/Footer";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import GuestRoute from "./components/layout/GuestRoute";
@@ -153,6 +154,7 @@ function MainLayout({ children }) {
         {children}
       </main>
       <Footer />
+      <MobileTabBar />
     </div>
   );
 }

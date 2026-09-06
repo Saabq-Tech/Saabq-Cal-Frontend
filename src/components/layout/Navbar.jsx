@@ -8,6 +8,12 @@ import client, { endpoints } from "../../api/client";
 import Icon from "../common/Icon";
 import Flag from "../common/Flag";
 import InstallAppButton from "../common/InstallAppButton";
+import {
+  getAccountTabs,
+  getWorkspaceTabs,
+  canViewWorkspaceTab,
+} from "../../config/dashboardNav";
+import { checkWorkspaceCapability } from "../../utils/capabilities";
 
 export default function Navbar() {
   const {
@@ -26,6 +32,8 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [drawerAccountOpen, setDrawerAccountOpen] = useState(false);
+  const [drawerWorkspaceOpen, setDrawerWorkspaceOpen] = useState(false);
 
   const closeMobileDrawer = useCallback(() => {
     if (isClosing) return;
@@ -154,10 +162,6 @@ export default function Navbar() {
     }
   };
 
-  const currentTab = location.pathname.includes("/profile")
-    ? new URLSearchParams(location.search).get("tab") || "info"
-    : null;
-
   // Apply dark mode class and attribute
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -225,6 +229,14 @@ export default function Navbar() {
 
   const userTypeLabel = userType === "member" ? t("teamMember") : t("customer");
   const profilePrefix = userType === "member" ? "/member" : "/customer";
+
+  // Drawer accordions ("حسابي" / "مساحتي") mirror the dashboard sidebars, built
+  // from the shared nav config so they stay in sync with the real menus.
+  const isWorkspaceActive = user?.workspace?.status === "active";
+  const drawerAccountTabs = getAccountTabs(t, userType);
+  const drawerWorkspaceTabs = getWorkspaceTabs(t).filter((tab) =>
+    canViewWorkspaceTab(tab, isOwner, userPermissions),
+  );
 
   return (
     <>
@@ -952,69 +964,117 @@ export default function Navbar() {
 
                 {isAuthenticated && (
                   <>
-                    <Link
-                      to={`${profilePrefix}/profile?tab=info`}
-                      className={`mobile-drawer-link${currentTab === "info" ? " active" : ""}`}
-                      onClick={closeMobileDrawer}
+                    {/* حسابي — navigates to the profile and reveals its pages */}
+                    <button
+                      type="button"
+                      className={`mobile-drawer-link drawer-accordion-head${
+                        location.pathname.includes("/profile") ? " active" : ""
+                      }${drawerAccountOpen ? " open" : ""}`}
+                      aria-expanded={drawerAccountOpen}
+                      onClick={() => {
+                        if (!drawerAccountOpen) navigate(`${profilePrefix}/profile`);
+                        setDrawerAccountOpen((v) => !v);
+                      }}
                     >
-                      <Icon name="custom-7e599ac1" />
-                      <span>{t("profile")}</span>
-                    </Link>
-
-                    {userType === "member" && (
-                      <NavLink
-                        to="/member/workspace"
-                        end
-                        className={({ isActive }) =>
-                          `mobile-drawer-link${isActive ? " active" : ""}`
-                        }
-                        onClick={closeMobileDrawer}
-                      >
-                        <Icon name="briefcase" />
-                        <span>{t("myWorkspace")}</span>
-                      </NavLink>
+                      <Icon name="user" />
+                      <span>{t("myAccount")}</span>
+                      <Icon
+                        name="chevron-down"
+                        size={16}
+                        className="drawer-accordion-chevron"
+                      />
+                    </button>
+                    {drawerAccountOpen && (
+                      <div className="drawer-subnav">
+                        {drawerAccountTabs.map((tab) => (
+                          <Link
+                            key={tab.id}
+                            to={tab.to}
+                            className="mobile-drawer-link drawer-sublink"
+                            onClick={closeMobileDrawer}
+                          >
+                            <Icon name={tab.icon} />
+                            <span>{tab.label}</span>
+                            {tab.badge === "unread" && unreadCount > 0 && (
+                              <span className="drawer-badge">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                              </span>
+                            )}
+                            {tab.badge === "chat" && unreadChatCount > 0 && (
+                              <span className="drawer-badge primary">
+                                {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
                     )}
 
+                    {/* مساحتي — navigates to the workspace and reveals its pages */}
                     {userType === "member" && (
-                      <NavLink
-                        to="/member/workspace/settings"
-                        className={({ isActive }) =>
-                          `mobile-drawer-link${isActive ? " active" : ""}`
-                        }
-                        onClick={closeMobileDrawer}
-                      >
-                        <Icon name="monitor" />
-                        <span>{t("workspaceSettings")}</span>
-                      </NavLink>
+                      <>
+                        <button
+                          type="button"
+                          className={`mobile-drawer-link drawer-accordion-head${
+                            location.pathname.startsWith("/member/workspace")
+                              ? " active"
+                              : ""
+                          }${drawerWorkspaceOpen ? " open" : ""}`}
+                          aria-expanded={drawerWorkspaceOpen}
+                          onClick={() => {
+                            if (!drawerWorkspaceOpen)
+                              navigate("/member/workspace");
+                            setDrawerWorkspaceOpen((v) => !v);
+                          }}
+                        >
+                          <Icon name="briefcase" />
+                          <span>{t("myWorkspace")}</span>
+                          <Icon
+                            name="chevron-down"
+                            size={16}
+                            className="drawer-accordion-chevron"
+                          />
+                        </button>
+                        {drawerWorkspaceOpen && (
+                          <div className="drawer-subnav">
+                            {drawerWorkspaceTabs.map((tab) => {
+                              const enabled =
+                                isWorkspaceActive &&
+                                checkWorkspaceCapability(user, tab.capability);
+                              if (!enabled) {
+                                return (
+                                  <span
+                                    key={tab.id}
+                                    className="mobile-drawer-link drawer-sublink drawer-sublink-disabled"
+                                    aria-disabled="true"
+                                  >
+                                    <Icon name={tab.icon} />
+                                    <span>{tab.label}</span>
+                                    <Icon name="lock" size={13} />
+                                  </span>
+                                );
+                              }
+                              return (
+                                <NavLink
+                                  key={tab.id}
+                                  to={tab.path}
+                                  end={tab.end}
+                                  className={({ isActive }) =>
+                                    `mobile-drawer-link drawer-sublink${
+                                      isActive ? " active" : ""
+                                    }`
+                                  }
+                                  onClick={closeMobileDrawer}
+                                >
+                                  <Icon name={tab.icon} />
+                                  <span>{tab.label}</span>
+                                </NavLink>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
                     )}
-
-                    <Link
-                      to={`${profilePrefix}/profile?tab=notifications`}
-                      className={`mobile-drawer-link${currentTab === "notifications" ? " active" : ""}`}
-                      onClick={closeMobileDrawer}
-                    >
-                      <Icon name="bell" />
-                      <span>{t("notificationsTab")}</span>
-                      {unreadCount > 0 && (
-                        <span className="drawer-badge">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </span>
-                      )}
-                    </Link>
-
-                    <Link
-                      to={`${profilePrefix}/profile?tab=chats`}
-                      className={`mobile-drawer-link${currentTab === "chats" ? " active" : ""}`}
-                      onClick={closeMobileDrawer}
-                    >
-                      <Icon name="message-square" />
-                      <span>{t("chatsTab")}</span>
-                      {unreadChatCount > 0 && (
-                        <span className="drawer-badge primary">
-                          {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                        </span>
-                      )}
-                    </Link>
                   </>
                 )}
               </nav>
