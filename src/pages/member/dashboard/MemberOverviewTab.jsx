@@ -242,6 +242,7 @@ export default function MemberOverviewTab() {
               fontSize: "clamp(1.3rem, 3vw, 1.9rem)",
               fontWeight: 800,
               marginBottom: 8,
+              color: "#ffffff",
             }}
           >
             {isRTL ? `إدارة ${workspaceName}` : `${workspaceName} management`}

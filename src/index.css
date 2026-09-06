@@ -1159,6 +1159,146 @@ html.dark textarea:-webkit-autofill {
   color: #dc2626 !important;
 }
 
+/* ── Mobile bottom tab bar (signed-in, mobile only) ── */
+.mobile-tabbar {
+  display: none;
+}
+
+body.has-mobile-tabbar {
+  /* Room to scroll content clear of the fixed bar (+ the phone's home area). */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 860px) {
+  .mobile-tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--secondary);
+    border-start-start-radius: 18px;
+    border-start-end-radius: 18px;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  .mobile-tabbar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 4px;
+    border-radius: var(--radius-md);
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.66rem;
+    font-weight: 600;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .mobile-tabbar-item.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .mobile-tabbar-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-tabbar-item svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .mobile-tabbar-label {
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-tabbar-badge {
+    position: absolute;
+    top: -6px;
+    inset-inline-end: -8px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 99px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
+  }
+}
+
+/* Drawer accordions ("حسابي" / "مساحتي") — a tappable header that navigates and
+   reveals the section's pages, plus the nested list itself. */
+.drawer-accordion-head {
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.drawer-accordion-chevron {
+  margin-inline-start: auto;
+  width: 16px !important;
+  height: 16px !important;
+  transition: transform 0.2s ease;
+}
+
+.drawer-accordion-head.open .drawer-accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.drawer-subnav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px;
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid var(--border);
+  margin-inline-start: 18px;
+}
+
+.drawer-sublink {
+  padding: 9px 12px;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.drawer-sublink svg {
+  width: 17px;
+  height: 17px;
+}
+
+.drawer-sublink-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drawer-sublink-disabled:hover {
+  background: none;
+  color: var(--text-secondary);
+}
+
 .mobile-drawer-footer {
   padding: 16px 18px;
   border-top: 1px solid var(--border);
@@ -3292,8 +3432,11 @@ html.dark .feature-check-icon {
     gap: 8px !important;
     padding: 6px !important;
     border-radius: var(--radius-xl, 16px) !important;
-    background: var(--surface) !important;
-    border: 1px solid var(--border) !important;
+    /* The sidebar is a solid dark panel with white link text; the mobile strip
+       must keep that dark background or the inactive links turn white-on-white
+       and vanish, leaving only the active (coloured) pill visible. */
+    background: var(--secondary) !important;
+    border: none !important;
     margin-bottom: 20px !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -3365,6 +3508,31 @@ html.dark .feature-check-icon {
 
   .profile-header-action {
     display: none !important;
+  }
+
+  /* WorkspaceLayout's sidebar carries a nested settings sub-nav. In the shared
+     horizontal mobile strip above, that vertical sub-nav stretched the active
+     link to its full height — a giant coloured block. When the sub-nav is
+     present, drop this sidebar back to a vertical stacked menu (the desktop
+     dark panel) so links stay their natural size and the sub-items read as a
+     proper submenu. Sidebars without a sub-nav keep the horizontal strip. */
+  .profile-sidebar:has(.workspace-subnav) {
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    overflow-x: visible !important;
+    align-items: stretch !important;
+    background: var(--secondary) !important;
+    border: none !important;
+    padding: 14px 10px !important;
+  }
+
+  .profile-sidebar:has(.workspace-subnav) .profile-sidebar-header {
+    display: block !important;
+  }
+
+  .profile-sidebar:has(.workspace-subnav) .profile-sidebar-link {
+    width: 100% !important;
+    white-space: normal !important;
   }
 }
 
@@ -8273,8 +8441,12 @@ html.dark {
     grid-template-columns: 1fr;
   }
 
+  /* Keep the copy first; the mockup follows it as the second element,
+     matching the desktop reading order. */
   .hero-mockup {
-    order: -1;
+    max-width: 460px;
+    margin-inline: auto;
+    width: 100%;
   }
 
   .sectors-grid {
@@ -8319,6 +8491,24 @@ html.dark {
 
   .hero-mockup-cal {
     display: none;
+  }
+
+  /* Cap the mockup so it stays a compact preview, not a full-bleed panel. */
+  .hero-mockup {
+    max-width: 380px;
+  }
+
+  /* On mobile the feature cards get a forced overflow, which clips a badge
+     that sits above the top edge. Tuck it inside the card instead. */
+  .flagship-badge {
+    top: 14px;
+  }
+
+  /* Let the available-time slots flow with the page instead of trapping
+     them in a short nested scroll area — one scroll, not two. */
+  .booking-slots-grid {
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 
   .trust-strip-list {

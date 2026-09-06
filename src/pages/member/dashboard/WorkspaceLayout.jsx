@@ -7,6 +7,10 @@ import GoogleNotConnectedBanner from "../../../components/common/GoogleNotConnec
 import Icon from "../../../components/common/Icon";
 import client, { endpoints } from "../../../api/client";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import {
+  getWorkspaceTabs,
+  canViewWorkspaceTab,
+} from "../../../config/dashboardNav";
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
@@ -64,135 +68,10 @@ export default function WorkspaceLayout() {
   // The seven settings screens used to be a horizontal strip inside the
   // settings page; they are nested under it in this nav instead, addressed
   // by ?sub= so each one is linkable.
-  const settingsSubTabs = [
-    { id: "basic", label: t("workspaceBasicInfo") || "المعلومات الأساسية" },
-    {
-      id: "branding",
-      label: t("workspaceBranding") || "الهوية والعلامة التجارية",
-    },
-    {
-      id: "timezone",
-      label: t("workspaceTimezone") || "المنطقة الزمنية وتنسيق الوقت",
-    },
-    {
-      id: "social",
-      label: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والرابط",
-    },
-    {
-      id: "form_fields",
-      label: t("workspaceFormFields") || "منشئ نموذج الحجز",
-    },
-    { id: "payment", label: t("workspacePaymentReceipts") || "إيصالات الدفع" },
-    {
-      id: "notifications",
-      label: t("workspaceNotificationTemplates") || "قوالب الإشعارات",
-    },
-  ];
+  const mainWorkspaceTabs = getWorkspaceTabs(t);
 
-  const mainWorkspaceTabs = [
-    {
-      id: "home",
-      path: "/member/workspace",
-      end: true,
-      label: t("home") || "الرئيسية",
-      icon: "home",
-      permissions: [],
-      capability: null,
-      alwaysVisible: true,
-    },
-    {
-      id: "settings",
-      path: "/member/workspace/settings",
-      label: t("workspaceSettings") || "الإعدادات العامة",
-      icon: "monitor",
-      permissions: ["settings_read", "settings_write"],
-      capability: null,
-      subTabs: settingsSubTabs,
-    },
-    {
-      id: "schedules",
-      path: "/member/workspace/schedules",
-      label: t("navSchedules") || "جداول العمل",
-      icon: "clock",
-      permissions: ["schedule_read", "schedule_write"],
-      capability: "PER_MEMBER_CALENDAR",
-    },
-    {
-      id: "services",
-      path: "/member/workspace/services",
-      label: t("navServices") || "الخدمات",
-      icon: "custom-bc148024",
-      permissions: ["service_read", "service_write"],
-      capability: "BOOKING",
-    },
-    {
-      id: "members",
-      path: "/member/workspace/members",
-      label: t("navMembers") || "فريق العمل",
-      icon: "custom-cdbb0862",
-      permissions: ["member_read", "member_write"],
-      capability: "TEAM_MEMBERS",
-    },
-    {
-      id: "roles",
-      path: "/member/workspace/roles",
-      label: t("workspaceRoles") || "الأدوار والصلاحيات",
-      icon: "shield",
-      permissions: ["role_read", "role_write"],
-      capability: "TEAM_MEMBERS",
-    },
-    {
-      id: "bookings",
-      path: "/member/workspace/bookings",
-      label: t("navBookings") || "سجل الحجوزات",
-      icon: "calendar",
-      permissions: ["booking_read", "booking_write"],
-      capability: "BOOKING",
-    },
-    {
-      id: "subscriptions",
-      path: "/member/workspace/subscriptions",
-      label: t("navSubscriptions") || "الباقات والاشتراكات",
-      icon: "credit-card",
-      permissions: ["subscription_read", "subscription_write"],
-      capability: "SUBSCRIPTION",
-    },
-    {
-      id: "resources",
-      path: "/member/workspace/resources",
-      label: t("workspaceResources") || "الموارد والقاعات",
-      icon: "briefcase",
-      permissions: ["resource_read", "resource_write"],
-      capability: null,
-    },
-    {
-      id: "logs",
-      path: "/member/workspace/logs",
-      label: t("auditLogs") || "سجل النشاطات",
-      icon: "clipboard-list",
-      permissions: ["settings_read"],
-      capability: null,
-    },
-    {
-      id: "payments",
-      path: "/member/workspace/payments",
-      label: t("paymentsAndFinance") || "المدفوعات والمالية",
-      icon: "credit-card",
-      permissions: [
-        "payment_read",
-        "payment_write",
-        "booking_read",
-        "booking_write",
-      ],
-      capability: null,
-    },
-  ];
-
-  const canViewTab = (tab) => {
-    if (tab.alwaysVisible) return true;
-    if (isOwner) return true;
-    return tab.permissions.some((perm) => userPermissions.includes(perm));
-  };
+  const canViewTab = (tab) =>
+    canViewWorkspaceTab(tab, isOwner, userPermissions);
 
   const availableTabs = mainWorkspaceTabs.filter(canViewTab);
 

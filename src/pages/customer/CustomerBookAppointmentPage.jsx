@@ -135,8 +135,6 @@ export default function CustomerBookAppointmentPage() {
 
   const handlePrevStep = () => {
     if (currentStep > 1) {
-      // Locked-via-link services skip back past step 1 — there's nothing to change there.
-      if (currentStep === 2 && isServiceLockedViaLink) return;
       setCurrentStep(currentStep - 1);
     }
   };
@@ -318,36 +316,6 @@ export default function CustomerBookAppointmentPage() {
       new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
     );
   };
-
-  // Rolling day-strip (horizontal scroll) for quick date picking without
-  // navigating months — the full month grid stays available on demand.
-  const [showFullMonth, setShowFullMonth] = useState(false);
-  const dayStripDays = useMemo(() => {
-    const maxDays = Math.min(workspace?.maximum_booking_days || 60, 30);
-    const days = [];
-    for (let i = 0; i < maxDays; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const dateStr = [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, "0"),
-        String(d.getDate()).padStart(2, "0"),
-      ].join("-");
-      days.push({
-        dateStr,
-        day: d.getDate(),
-        weekday: (isRTL ? WEEK_DAYS_AR : WEEK_DAYS_EN)[d.getDay()],
-        isToday: i === 0,
-      });
-    }
-    return days;
-  }, [workspace, isRTL]);
-
-  // When a service arrives pre-selected via a direct link, it stays locked
-  // (no "change service" affordance) throughout the rest of the flow.
-  const isServiceLockedViaLink = Boolean(
-    preselectedServiceId && selectedService && !disabledNotice,
-  );
 
   const handleQuestionAnswerChange = (qId, label, val) => {
     setQuestionAnswers((prev) => ({
@@ -655,7 +623,6 @@ export default function CustomerBookAppointmentPage() {
       />
       {/* Header Banner */}
       <div
-        className="booking-hero-banner"
         style={{
           background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
           color: "#ffffff",
@@ -739,7 +706,6 @@ export default function CustomerBookAppointmentPage() {
               : `Book Appointment at ${workspace.name}`}
           </h1>
           <p
-            className="booking-hero-intro"
             style={{
               color: "rgba(255, 255, 255, 0.95)",
               marginTop: 8,
@@ -955,59 +921,108 @@ export default function CustomerBookAppointmentPage() {
             <div className="booking-card-wrapper">
               <div className="card booking-card-main">
                 <form onSubmit={handleSubmitBooking}>
-                  {/* Thin Step Progress Bar Header */}
-                  <div style={{ marginBottom: 24 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        justifyContent: "space-between",
-                        gap: 8,
-                        marginBottom: 10,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.95rem",
-                          fontWeight: 700,
-                          color: "var(--heading)",
-                        }}
-                      >
-                        {currentStep}.{" "}
-                        {
-                          [
-                            isRTL ? "اختر الخدمة" : "Select Service",
-                            isRTL ? "اختر اليوم والوقت" : "Select Date & Time",
-                            isRTL ? "تفاصيل الحجز" : "Booking Details",
-                          ][currentStep - 1]
-                        }
-                      </span>
-                      <span
-                        style={{ fontSize: "0.8rem", color: "var(--muted)" }}
-                      >
-                        {currentStep} / 3
-                      </span>
-                    </div>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      {[1, 2, 3].map((s) => (
+                  {/* Visual Step Progress Bar Header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      flexWrap: "wrap",
+                      marginBottom: 24,
+                      borderBottom: "1px solid var(--border)",
+                      paddingBottom: 16,
+                    }}
+                  >
+                    {[
+                      { step: 1, title: isRTL ? "الخدمة" : "Service" },
+                      {
+                        step: 2,
+                        title: isRTL ? "اليوم والوقت" : "Date & Time",
+                      },
+                      {
+                        step: 3,
+                        title: isRTL ? "تفاصيل الحجز" : "Details & Questions",
+                      },
+                    ].map((s, i) => {
+                      const isActive = currentStep === s.step;
+                      const isPassed = currentStep > s.step;
+                      return (
                         <div
-                          key={s}
-                          style={{
-                            flex: 1,
-                            height: 4,
-                            borderRadius: 9999,
-                            background:
-                              s <= currentStep ? primaryColor : "var(--border)",
-                            transition: "background 0.2s ease",
+                          key={s.step}
+                          onClick={() => {
+                            if (isPassed) setCurrentStep(s.step);
                           }}
-                        />
-                      ))}
-                    </div>
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            cursor: isPassed ? "pointer" : "default",
+                            opacity: isActive || isPassed ? 1 : 0.45,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              background:
+                                isActive || isPassed
+                                  ? primaryColor
+                                  : "var(--muted)",
+                              color: "#ffffff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              fontSize: "0.82rem",
+                              flexShrink: 0,
+                              boxShadow: isActive
+                                ? `0 0 0 3px ${primaryColor}22`
+                                : "none",
+                            }}
+                          >
+                            {isPassed ? "✓" : s.step}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: "0.84rem",
+                              fontWeight: isActive ? 700 : 600,
+                              color: isActive ? primaryColor : "var(--text)",
+                            }}
+                          >
+                            {s.title}
+                          </span>
+                          {i < 2 && (
+                            <div
+                              style={{
+                                width: 20,
+                                height: 2,
+                                background: isPassed
+                                  ? primaryColor
+                                  : "var(--border)",
+                                marginInlineStart: 4,
+                              }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Step 1 Panel: Select Service */}
                   {currentStep === 1 && (
                     <div style={{ marginBottom: 24 }}>
+                      <h3
+                        style={{
+                          fontSize: "1.15rem",
+                          fontWeight: 700,
+                          marginBottom: 16,
+                        }}
+                      >
+                        1. {isRTL ? "اختر الخدمة المطلوبة" : "Select Service"}
+                      </h3>
+
                       {disabledNotice && (
                         <div
                           style={{
@@ -1058,14 +1073,10 @@ export default function CustomerBookAppointmentPage() {
                                 key={srv.id}
                                 onClick={() => setSelectedService(srv)}
                                 style={{
-                                  display: "flex",
-                                  gap: 12,
-                                  alignItems: "flex-start",
                                   padding: 14,
-                                  minHeight: 44,
-                                  borderRadius: "var(--radius-lg)",
+                                  borderRadius: "var(--radius-md)",
                                   border: active
-                                    ? `1.5px solid ${primaryColor}`
+                                    ? `2px solid ${primaryColor}`
                                     : "1px solid var(--border)",
                                   background: active
                                     ? "var(--primary-subtle, rgba(232, 141, 34, 0.06))"
@@ -1077,73 +1088,66 @@ export default function CustomerBookAppointmentPage() {
                                     : "none",
                                 }}
                               >
-                                <span
-                                  aria-hidden="true"
+                                <div
                                   style={{
-                                    width: 22,
-                                    height: 22,
-                                    borderRadius: "50%",
-                                    border: `2px solid ${active ? primaryColor : "var(--border)"}`,
-                                    background: active
-                                      ? primaryColor
-                                      : "transparent",
                                     display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "#ffffff",
-                                    flexShrink: 0,
-                                    marginTop: 2,
+                                    justifyContent: "space-between",
+                                    alignItems: "flex-start",
+                                    gap: 10,
+                                    flexWrap: "wrap",
+                                    marginBottom: 8,
                                   }}
                                 >
-                                  {active && <Icon name="check" size={13} />}
-                                </span>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div
+                                  <strong
                                     style={{
-                                      display: "flex",
-                                      justifyContent: "space-between",
-                                      alignItems: "flex-start",
-                                      gap: 10,
-                                      flexWrap: "wrap",
-                                      marginBottom: 8,
+                                      fontSize: "0.96rem",
+                                      color: "var(--text)",
+                                      flex: 1,
+                                      minWidth: 120,
                                     }}
                                   >
-                                    <strong
-                                      style={{
-                                        fontSize: "0.96rem",
-                                        color: "var(--text)",
-                                        flex: 1,
-                                        minWidth: 120,
-                                      }}
-                                    >
-                                      {getTranslatableText(srv.name)}
-                                    </strong>
-                                    <span
-                                      style={{
-                                        fontSize: "0.92rem",
-                                        fontWeight: 800,
-                                        color: primaryColor,
-                                        whiteSpace: "nowrap",
-                                        flexShrink: 0,
-                                      }}
-                                    >
-                                      {formatCurrency(
-                                        srv.price,
-                                        srv.currency_detail || srv.currency,
-                                        isRTL,
-                                        t("freeService"),
-                                      )}
-                                    </span>
-                                  </div>
-                                  <div
+                                    {getTranslatableText(srv.name)}
+                                  </strong>
+                                  <span
                                     style={{
-                                      fontSize: "0.84rem",
-                                      color: "var(--text-secondary)",
-                                      display: "flex",
-                                      gap: 14,
+                                      fontSize: "0.92rem",
+                                      fontWeight: 800,
+                                      color: primaryColor,
+                                      whiteSpace: "nowrap",
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {formatCurrency(
+                                      srv.price,
+                                      srv.currency_detail || srv.currency,
+                                      isRTL,
+                                      t("freeService"),
+                                    )}
+                                  </span>
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: "0.84rem",
+                                    color: "var(--text-secondary)",
+                                    display: "flex",
+                                    gap: 14,
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      display: "inline-flex",
                                       alignItems: "center",
+                                      gap: 4,
                                     }}
                                   >
+                                    <Icon name="clock" size={14} />
+                                    <span>
+                                      {srv.duration_minutes}{" "}
+                                      {t("durationMinutes")}
+                                    </span>
+                                  </span>
+                                  {srv.location && (
                                     <span
                                       style={{
                                         display: "inline-flex",
@@ -1151,25 +1155,10 @@ export default function CustomerBookAppointmentPage() {
                                         gap: 4,
                                       }}
                                     >
-                                      <Icon name="clock" size={14} />
-                                      <span>
-                                        {srv.duration_minutes}{" "}
-                                        {t("durationMinutes")}
-                                      </span>
+                                      <Icon name="map-pin" size={14} />
+                                      <span>{srv.location}</span>
                                     </span>
-                                    {srv.location && (
-                                      <span
-                                        style={{
-                                          display: "inline-flex",
-                                          alignItems: "center",
-                                          gap: 4,
-                                        }}
-                                      >
-                                        <Icon name="map-pin" size={14} />
-                                        <span>{srv.location}</span>
-                                      </span>
-                                    )}
-                                  </div>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1182,513 +1171,276 @@ export default function CustomerBookAppointmentPage() {
                   {/* Step 2 Panel: Date & Available Time Slot Selection */}
                   {currentStep === 2 && selectedService && (
                     <div style={{ marginBottom: 24 }}>
-                      {isServiceLockedViaLink && (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 10,
-                            padding: "14px 16px",
-                            borderRadius: "var(--radius-lg)",
-                            background: "var(--surface-alt)",
-                            border: "1px solid var(--border)",
-                            marginBottom: 20,
-                          }}
-                        >
-                          <div style={{ minWidth: 0 }}>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6,
-                                marginBottom: 4,
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "0.72rem",
-                                  fontWeight: 700,
-                                  letterSpacing: "0.08em",
-                                  color: "var(--muted)",
-                                }}
-                              >
-                                {isRTL ? "الخدمة المختارة" : "SELECTED SERVICE"}
-                              </span>
-                              <span
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 3,
-                                  fontSize: "0.68rem",
-                                  fontWeight: 700,
-                                  color: primaryColor,
-                                  background: "var(--primary-subtle)",
-                                  border: "1px solid var(--border)",
-                                  padding: "2px 7px",
-                                  borderRadius: 9999,
-                                }}
-                              >
-                                <Icon name="check" size={10} />
-                                {isRTL ? "عبر الرابط" : "via link"}
-                              </span>
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "0.95rem",
-                                fontWeight: 700,
-                                color: "var(--heading)",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {getTranslatableText(selectedService.name)} ·{" "}
-                              {selectedService.duration_minutes}{" "}
-                              {isRTL ? "د" : "min"}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {/* Rolling day strip — quick horizontal date picker */}
-                      <div
+                      <h3
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 12,
-                          marginBottom: 24,
+                          fontSize: "1.15rem",
+                          fontWeight: 700,
+                          marginBottom: 16,
                         }}
                       >
+                        2.{" "}
+                        {isRTL
+                          ? "اختر اليوم والوقت المتاح"
+                          : "Select Date & Available Time Slot"}
+                      </h3>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(min(100%, 250px), 1fr))",
+                          gap: 20,
+                        }}
+                      >
+                        {/* Interactive Calendar Widget */}
                         <div
                           style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            justifyContent: "space-between",
-                            gap: 10,
+                            background: "var(--surface-alt)",
+                            padding: "12px 8px",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid var(--border)",
                           }}
                         >
-                          <h3
+                          <div
                             style={{
-                              fontSize: "1.1rem",
-                              fontWeight: 700,
-                              color: "var(--heading)",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: 12,
+                              padding: "0 4px",
                             }}
                           >
-                            {isRTL ? "اختر اليوم" : "Select Date"}
-                          </h3>
-                          <span
+                            <button
+                              type="button"
+                              onClick={handlePrevMonth}
+                              className="btn btn-ghost btn-sm"
+                              style={{ padding: "4px 8px" }}
+                            >
+                              {isRTL ? "▶" : "◀"}
+                            </button>
+                            <strong
+                              style={{
+                                fontSize: "0.95rem",
+                                color: "var(--text)",
+                              }}
+                            >
+                              {currentMonthLabel}
+                            </strong>
+                            <button
+                              type="button"
+                              onClick={handleNextMonth}
+                              className="btn btn-ghost btn-sm"
+                              style={{ padding: "4px 8px" }}
+                            >
+                              {isRTL ? "◀" : "▶"}
+                            </button>
+                          </div>
+
+                          {/* Calendar Header Weekdays */}
+                          <div
                             style={{
-                              fontSize: "0.85rem",
-                              fontWeight: 600,
+                              display: "grid",
+                              gridTemplateColumns: "repeat(7, 1fr)",
+                              gap: 2,
+                              textAlign: "center",
+                              marginBottom: 8,
+                              fontSize: "0.74rem",
+                              fontWeight: 700,
                               color: "var(--text-secondary)",
                             }}
                           >
-                            {currentMonthLabel}
-                          </span>
-                        </div>
+                            {(isRTL ? WEEK_DAYS_AR : WEEK_DAYS_EN).map(
+                              (wd, i) => (
+                                <div key={i}>{wd}</div>
+                              ),
+                            )}
+                          </div>
 
-                        <div
-                          className="no-scrollbar booking-day-strip"
-                          style={{
-                            display: "flex",
-                            gap: 8,
-                            overflowX: "auto",
-                            paddingBottom: 4,
-                          }}
-                        >
-                          {dayStripDays.map((d) => {
-                            const isSelected = selectedDate === d.dateStr;
-                            return (
-                              <button
-                                key={d.dateStr}
-                                type="button"
-                                onClick={() => setSelectedDate(d.dateStr)}
-                                style={{
-                                  flex: "0 0 62px",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  gap: 4,
-                                  padding: "10px 0",
-                                  minHeight: 44,
-                                  borderRadius: "var(--radius-md)",
-                                  border: isSelected
-                                    ? `1.5px solid ${primaryColor}`
-                                    : "1px solid var(--border)",
-                                  background: isSelected
-                                    ? primaryColor
-                                    : "var(--surface)",
-                                  color: isSelected ? "#ffffff" : "var(--text)",
-                                  cursor: "pointer",
-                                  fontFamily: "inherit",
-                                }}
-                              >
-                                <span
+                          {/* Calendar Days Grid */}
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(7, 1fr)",
+                              gap: 3,
+                            }}
+                          >
+                            {calendarDays.map((item, idx) => {
+                              if (!item) return <div key={idx} />;
+                              const isSelected = selectedDate === item.dateStr;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  disabled={!item.isAvailable}
+                                  onClick={() => setSelectedDate(item.dateStr)}
                                   style={{
-                                    fontSize: "0.72rem",
-                                    fontWeight: isSelected ? 700 : 600,
-                                    color: isSelected
-                                      ? "rgba(255,255,255,0.85)"
-                                      : "var(--text-secondary)",
-                                  }}
-                                >
-                                  {d.weekday}
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: "1.05rem",
-                                    fontWeight: isSelected ? 800 : 700,
+                                    height: 34,
+                                    padding: 0,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    border: isSelected
+                                      ? `2px solid ${primaryColor}`
+                                      : "1px solid var(--border)",
+                                    borderRadius: "var(--radius-sm)",
+                                    background: isSelected
+                                      ? primaryColor
+                                      : item.isAvailable
+                                        ? "var(--surface)"
+                                        : "transparent",
                                     color: isSelected
                                       ? "#ffffff"
-                                      : "var(--heading)",
+                                      : item.isAvailable
+                                        ? "var(--text)"
+                                        : "var(--muted)",
+                                    fontWeight: isSelected ? 700 : 500,
+                                    fontSize: "0.82rem",
+                                    cursor: item.isAvailable
+                                      ? "pointer"
+                                      : "not-allowed",
+                                    opacity: item.isAvailable ? 1 : 0.45,
+                                    transition: "all 0.15s ease",
                                   }}
                                 >
-                                  {d.day}
-                                </span>
-                              </button>
-                            );
-                          })}
+                                  {item.day}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => setShowFullMonth((v) => !v)}
-                          style={{
-                            alignSelf: "flex-start",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 6,
-                            minHeight: 44,
-                            border: "none",
-                            background: "none",
-                            color: primaryColor,
-                            fontFamily: "inherit",
-                            fontSize: "0.85rem",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            padding: "0 2px",
-                          }}
-                        >
-                          <Icon name="calendar" size={15} />
-                          {showFullMonth
-                            ? isRTL
-                              ? "إخفاء الشهر كامل"
-                              : "Hide full month"
-                            : isRTL
-                              ? "عرض الشهر كامل"
-                              : "View full month"}
-                        </button>
-
-                        {showFullMonth && (
+                        {/* Slots Selector Panel */}
+                        <div>
                           <div
                             style={{
-                              background: "var(--surface-alt)",
-                              padding: "12px 8px",
-                              borderRadius: "var(--radius-md)",
-                              border: "1px solid var(--border)",
+                              fontSize: "0.9rem",
+                              fontWeight: 700,
+                              marginBottom: 12,
+                              color: "var(--text)",
                             }}
                           >
+                            {isRTL
+                              ? `الأوقات المتاحة ليوم: ${selectedDate}`
+                              : `Available Slots for: ${selectedDate}`}
+                          </div>
+
+                          {slotsLoading ? (
                             <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                marginBottom: 12,
-                                padding: "0 4px",
-                              }}
+                              style={{ padding: "24px 0", textAlign: "center" }}
                             >
-                              <button
-                                type="button"
-                                onClick={handlePrevMonth}
-                                className="btn btn-ghost btn-sm"
-                                style={{ padding: "4px 8px" }}
-                              >
-                                {isRTL ? "▶" : "◀"}
-                              </button>
-                              <strong
+                              <div
+                                className="spinner spinner-sm"
+                                style={{ margin: "0 auto 8px" }}
+                              />
+                              <span
                                 style={{
-                                  fontSize: "0.95rem",
-                                  color: "var(--text)",
+                                  fontSize: "0.82rem",
+                                  color: "var(--muted)",
                                 }}
                               >
-                                {currentMonthLabel}
-                              </strong>
-                              <button
-                                type="button"
-                                onClick={handleNextMonth}
-                                className="btn btn-ghost btn-sm"
-                                style={{ padding: "4px 8px" }}
-                              >
-                                {isRTL ? "◀" : "▶"}
-                              </button>
+                                {t("loading")}
+                              </span>
                             </div>
+                          ) : (
+                            (() => {
+                              const availableSlots = slots.filter((slot) => {
+                                if (
+                                  typeof slot === "object" &&
+                                  slot.is_available === false
+                                )
+                                  return false;
+                                return true;
+                              });
 
-                            {/* Calendar Header Weekdays */}
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(7, 1fr)",
-                                gap: 2,
-                                textAlign: "center",
-                                marginBottom: 8,
-                                fontSize: "0.74rem",
-                                fontWeight: 700,
-                                color: "var(--text-secondary)",
-                              }}
-                            >
-                              {(isRTL ? WEEK_DAYS_AR : WEEK_DAYS_EN).map(
-                                (wd, i) => (
-                                  <div key={i}>{wd}</div>
-                                ),
-                              )}
-                            </div>
-
-                            {/* Calendar Days Grid */}
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(7, 1fr)",
-                                gap: 3,
-                              }}
-                            >
-                              {calendarDays.map((item, idx) => {
-                                if (!item) return <div key={idx} />;
-                                const isSelected =
-                                  selectedDate === item.dateStr;
+                              if (availableSlots.length === 0) {
                                 return (
-                                  <button
-                                    key={idx}
-                                    type="button"
-                                    disabled={!item.isAvailable}
-                                    onClick={() =>
-                                      setSelectedDate(item.dateStr)
-                                    }
-                                    style={{
-                                      height: 34,
-                                      padding: 0,
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      justifyContent: "center",
-                                      border: isSelected
-                                        ? `2px solid ${primaryColor}`
-                                        : "1px solid var(--border)",
-                                      borderRadius: "var(--radius-sm)",
-                                      background: isSelected
-                                        ? primaryColor
-                                        : item.isAvailable
-                                          ? "var(--surface)"
-                                          : "transparent",
-                                      color: isSelected
-                                        ? "#ffffff"
-                                        : item.isAvailable
-                                          ? "var(--text)"
-                                          : "var(--muted)",
-                                      fontWeight: isSelected ? 700 : 500,
-                                      fontSize: "0.82rem",
-                                      cursor: item.isAvailable
-                                        ? "pointer"
-                                        : "not-allowed",
-                                      opacity: item.isAvailable ? 1 : 0.45,
-                                      transition: "all 0.15s ease",
-                                    }}
-                                  >
-                                    {item.day}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Available Time Slots — grouped morning / afternoon */}
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "baseline",
-                            justifyContent: "space-between",
-                            gap: 10,
-                            marginBottom: 12,
-                          }}
-                        >
-                          <h3
-                            style={{
-                              fontSize: "1.1rem",
-                              fontWeight: 700,
-                              color: "var(--heading)",
-                            }}
-                          >
-                            {isRTL ? "الأوقات المتاحة" : "Available Times"}
-                          </h3>
-                        </div>
-
-                        {slotsLoading ? (
-                          <div
-                            style={{ padding: "24px 0", textAlign: "center" }}
-                          >
-                            <div
-                              className="spinner spinner-sm"
-                              style={{ margin: "0 auto 8px" }}
-                            />
-                            <span
-                              style={{
-                                fontSize: "0.82rem",
-                                color: "var(--muted)",
-                              }}
-                            >
-                              {t("loading")}
-                            </span>
-                          </div>
-                        ) : (
-                          (() => {
-                            const availableSlots = slots.filter((slot) => {
-                              if (
-                                typeof slot === "object" &&
-                                slot.is_available === false
-                              )
-                                return false;
-                              return true;
-                            });
-
-                            if (availableSlots.length === 0) {
-                              return (
-                                <div
-                                  style={{
-                                    padding: 20,
-                                    textAlign: "center",
-                                    background: "var(--surface-alt)",
-                                    borderRadius: "var(--radius-md)",
-                                    color: "var(--muted)",
-                                    fontSize: "0.88rem",
-                                  }}
-                                >
-                                  {isRTL
-                                    ? "عذراً، لا تتوفر أوقات متاحة في هذا اليوم."
-                                    : "No slots available on this date."}
-                                </div>
-                              );
-                            }
-
-                            const activeTimeFormat =
-                              selectedService?.time_format ||
-                              workspace?.time_format ||
-                              "12h";
-
-                            const formatSlotTime = (time24) => {
-                              if (!time24) return "";
-                              const [hStr, mStr] = time24.split(":");
-                              let h = parseInt(hStr, 10);
-                              if (isNaN(h)) return time24;
-                              const m = mStr || "00";
-                              if (activeTimeFormat === "24h") {
-                                return `${String(h).padStart(2, "0")}:${m}`;
-                              }
-                              const period = isRTL
-                                ? h >= 12
-                                  ? "م"
-                                  : "ص"
-                                : h >= 12
-                                  ? "PM"
-                                  : "AM";
-                              h = h % 12 || 12;
-                              return `${h}:${m} ${period}`;
-                            };
-
-                            const withHour = availableSlots.map((slot) => {
-                              const rawTime =
-                                typeof slot === "string"
-                                  ? slot
-                                  : slot.start_time || slot.time;
-                              return {
-                                rawTime,
-                                hour: parseInt(rawTime.split(":")[0], 10),
-                              };
-                            });
-                            const morningSlots = withHour.filter(
-                              (s) => s.hour < 12,
-                            );
-                            const eveningSlots = withHour.filter(
-                              (s) => s.hour >= 12,
-                            );
-
-                            const renderSlotGroup = (groupSlots, label) =>
-                              groupSlots.length > 0 && (
-                                <div
-                                  key={label}
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 8,
-                                    marginBottom: 14,
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "0.72rem",
-                                      fontWeight: 700,
-                                      letterSpacing: "0.08em",
-                                      color: "var(--muted)",
-                                    }}
-                                  >
-                                    {label}
-                                  </span>
                                   <div
                                     style={{
-                                      display: "grid",
-                                      gridTemplateColumns:
-                                        "repeat(auto-fill, minmax(90px, 1fr))",
-                                      gap: 8,
+                                      padding: 20,
+                                      textAlign: "center",
+                                      background: "var(--surface-alt)",
+                                      borderRadius: "var(--radius-md)",
+                                      color: "var(--muted)",
+                                      fontSize: "0.88rem",
                                     }}
                                   >
-                                    {groupSlots.map(({ rawTime }, idx) => {
-                                      const isSelected =
-                                        selectedSlot === rawTime;
-                                      return (
-                                        <button
-                                          key={idx}
-                                          type="button"
-                                          onClick={() =>
-                                            setSelectedSlot(rawTime)
-                                          }
-                                          className={`btn ${isSelected ? "btn-primary" : "btn-secondary"}`}
-                                          style={{
-                                            minHeight: 44,
-                                            borderRadius: "var(--radius-md)",
-                                            justifyContent: "center",
-                                            fontWeight: isSelected ? 700 : 600,
-                                            padding: "8px 10px",
-                                            fontSize: "0.88rem",
-                                          }}
-                                        >
-                                          {formatSlotTime(rawTime)}
-                                        </button>
-                                      );
-                                    })}
+                                    {isRTL
+                                      ? "عذراً، لا تتوفر أوقات متاحة في هذا اليوم."
+                                      : "No slots available on this date."}
                                   </div>
+                                );
+                              }
+
+                              const activeTimeFormat =
+                                selectedService?.time_format ||
+                                workspace?.time_format ||
+                                "12h";
+
+                              const formatSlotTime = (time24) => {
+                                if (!time24) return "";
+                                const [hStr, mStr] = time24.split(":");
+                                let h = parseInt(hStr, 10);
+                                if (isNaN(h)) return time24;
+                                const m = mStr || "00";
+                                if (activeTimeFormat === "24h") {
+                                  return `${String(h).padStart(2, "0")}:${m}`;
+                                }
+                                const period = isRTL
+                                  ? h >= 12
+                                    ? "م"
+                                    : "ص"
+                                  : h >= 12
+                                    ? "PM"
+                                    : "AM";
+                                h = h % 12 || 12;
+                                return `${h}:${m} ${period}`;
+                              };
+
+                              return (
+                                <div
+                                  className="booking-slots-grid"
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fill, minmax(110px, 1fr))",
+                                    gap: 10,
+                                    maxHeight: 260,
+                                    overflowY: "auto",
+                                    padding: 2,
+                                  }}
+                                >
+                                  {availableSlots.map((slot, idx) => {
+                                    const rawTime =
+                                      typeof slot === "string"
+                                        ? slot
+                                        : slot.start_time || slot.time;
+                                    const formattedTime =
+                                      formatSlotTime(rawTime);
+                                    const isSelected = selectedSlot === rawTime;
+
+                                    return (
+                                      <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => setSelectedSlot(rawTime)}
+                                        className={`btn ${isSelected ? "btn-primary" : "btn-secondary"} btn-sm`}
+                                        style={{
+                                          borderRadius: "var(--radius-md)",
+                                          justifyContent: "center",
+                                          fontWeight: isSelected ? 700 : 600,
+                                          padding: "8px 12px",
+                                          fontSize: "0.88rem",
+                                        }}
+                                      >
+                                        {formattedTime}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               );
-
-                            return (
-                              <div
-                                style={{
-                                  maxHeight: 340,
-                                  overflowY: "auto",
-                                  padding: 2,
-                                }}
-                              >
-                                {renderSlotGroup(
-                                  morningSlots,
-                                  isRTL ? "صباحاً" : "MORNING",
-                                )}
-                                {renderSlotGroup(
-                                  eveningSlots,
-                                  isRTL ? "مساءً" : "AFTERNOON",
-                                )}
-                              </div>
-                            );
-                          })()
-                        )}
+                            })()
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1696,6 +1448,19 @@ export default function CustomerBookAppointmentPage() {
                   {/* Step 3 Panel: Booking Form & Workspace Custom Questions */}
                   {currentStep === 3 && selectedService && selectedSlot && (
                     <div style={{ marginBottom: 24 }}>
+                      <h3
+                        style={{
+                          fontSize: "1.15rem",
+                          fontWeight: 700,
+                          marginBottom: 16,
+                        }}
+                      >
+                        3.{" "}
+                        {isRTL
+                          ? "بيانات الحجز وأسئلة مساحة العمل"
+                          : "Booking Information & Questions"}
+                      </h3>
+
                       <div
                         style={{
                           display: "flex",
@@ -2251,60 +2016,16 @@ export default function CustomerBookAppointmentPage() {
 
                   {/* Step Action Controls (Previous, Next & Submit) */}
                   <div className="booking-action-controls">
-                    {selectedService && (
-                      <div
-                        className="booking-sticky-footer-summary"
-                        style={{
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: 10,
-                          width: "100%",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.8rem",
-                            color: "var(--text-secondary)",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {getTranslatableText(selectedService.name)}
-                          {selectedSlot &&
-                            ` · ${selectedService.duration_minutes} ${isRTL ? "د" : "min"}`}
-                        </span>
-                        <strong
-                          style={{
-                            fontSize: "1rem",
-                            fontWeight: 800,
-                            color: "var(--heading)",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {formatCurrency(
-                            selectedService.price,
-                            selectedService.currency_detail ||
-                              selectedService.currency ||
-                              workspace?.currency_detail ||
-                              workspace?.currency,
-                            isRTL,
-                            t("freeService"),
-                          )}
-                        </strong>
-                      </div>
-                    )}
                     <div>
-                      {currentStep > 1 &&
-                        !(currentStep === 2 && isServiceLockedViaLink) && (
-                          <button
-                            type="button"
-                            onClick={handlePrevStep}
-                            className="btn btn-secondary btn-md"
-                          >
-                            {isRTL ? "← السابقة" : "← Previous"}
-                          </button>
-                        )}
+                      {currentStep > 1 && (
+                        <button
+                          type="button"
+                          onClick={handlePrevStep}
+                          className="btn btn-secondary btn-md"
+                        >
+                          {isRTL ? "← السابقة" : "← Previous"}
+                        </button>
+                      )}
                     </div>
 
                     <div
