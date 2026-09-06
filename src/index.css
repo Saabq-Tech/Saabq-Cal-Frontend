@@ -3250,18 +3250,37 @@ html.dark .feature-check-icon {
   gap: 32px;
 }
 
-/* Solid dark panel — same teal used for the hero mock-up's sidebar
-   (.hero-mockup-sidebar) and shared by both the profile tabs
-   (DashboardSidebar) and the workspace management nav (WorkspaceLayout),
-   which both already render .profile-sidebar / .profile-sidebar-link. */
+/* Dashboard sidebar (shared by DashboardSidebar and WorkspaceLayout). A clean,
+   neutral rail: it uses --surface/--border/--text tokens plus a FIXED teal
+   accent (--sb-accent) — never --primary/--secondary, which a workspace's
+   branding overrides — so it never takes on the client's colours. */
+:root {
+  --sb-accent: #026982;
+  --sb-accent-subtle: rgba(2, 105, 130, 0.12);
+  --sb-active-shadow: rgba(2, 105, 130, 0.16);
+}
+html.dark {
+  --sb-accent: #3bb6cf;
+  --sb-accent-subtle: rgba(59, 182, 207, 0.16);
+  --sb-active-shadow: rgba(0, 0, 0, 0.35);
+}
+
 .profile-sidebar {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: var(--secondary);
+  background: var(--surface);
+  border: 1px solid var(--border-light, var(--border));
   border-radius: var(--radius-lg);
-  padding: 18px 12px;
-  box-shadow: var(--shadow-md);
+  padding: 16px 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  /* Full-height rail on the start edge (right in RTL, left in LTR), staying in
+     view while the page scrolls. */
+  position: sticky;
+  top: 88px;
+  align-self: start;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
 }
 
 .profile-sidebar-header {
@@ -3270,7 +3289,7 @@ html.dark .feature-check-icon {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
 }
 
 .profile-sidebar-link {
@@ -3279,7 +3298,7 @@ html.dark .feature-check-icon {
   gap: 12px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -3293,15 +3312,15 @@ html.dark .feature-check-icon {
 }
 
 .profile-sidebar-link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--heading);
+  background: var(--sb-accent-subtle);
 }
 
 .profile-sidebar-link.active {
-  color: #ffffff;
-  background: var(--primary);
+  color: var(--sb-accent);
+  background: var(--sb-accent-subtle);
   font-weight: 700;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px var(--sb-active-shadow);
 }
 
 .profile-sidebar-icon {
@@ -3312,18 +3331,18 @@ html.dark .feature-check-icon {
   height: 34px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
+  background: var(--surface-alt, rgba(0, 0, 0, 0.04));
+  color: var(--text-secondary);
   transition: all var(--duration-fast) ease;
 }
 
 .profile-sidebar-link:hover .profile-sidebar-icon {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
+  background: var(--sb-accent-subtle);
+  color: var(--sb-accent);
 }
 
 .profile-sidebar-link.active .profile-sidebar-icon {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--sb-accent);
   color: #ffffff;
 }
 
@@ -3373,8 +3392,8 @@ html.dark .feature-check-icon {
 
 .workspace-nav-item:hover,
 .workspace-nav-item.active {
-  color: var(--primary);
-  background: var(--primary-subtle);
+  color: var(--sb-accent);
+  background: var(--sb-accent-subtle);
 }
 
 .workspace-subnav {
@@ -3406,8 +3425,8 @@ html.dark .feature-check-icon {
 
 .workspace-subnav-item:hover,
 .workspace-subnav-item.active {
-  color: var(--primary);
-  background: var(--primary-subtle);
+  color: var(--sb-accent);
+  background: var(--sb-accent-subtle);
   font-weight: 700;
 }
 
@@ -3424,73 +3443,29 @@ html.dark .feature-check-icon {
     gap: 20px;
   }
 
+  /* Mobile: the neutral rail becomes a full-width, compact vertical menu so
+     every link and sub-tab is reachable — no fragile horizontal strip. */
   .profile-sidebar {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 8px !important;
-    padding: 6px !important;
-    border-radius: var(--radius-xl, 16px) !important;
-    /* The sidebar is a solid dark panel with white link text; the mobile strip
-       must keep that dark background or the inactive links turn white-on-white
-       and vanish, leaving only the active (coloured) pill visible. */
-    background: var(--secondary) !important;
-    border: none !important;
-    margin-bottom: 20px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-    cursor: grab;
-  }
-
-  .profile-sidebar::-webkit-scrollbar,
-  .profile-sidebar nav::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  .profile-sidebar nav {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 8px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  }
-
-  .profile-sidebar:active,
-  .profile-sidebar nav:active {
-    cursor: grabbing;
-  }
-
-  .profile-sidebar-header {
-    display: none !important;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    margin-bottom: 20px;
+    padding: 12px 10px;
   }
 
   .profile-sidebar-link {
-    white-space: nowrap !important;
-    width: auto !important;
-    flex-shrink: 0 !important;
-    padding: 8px 14px 8px 8px !important;
-    font-size: 0.86rem !important;
-    border-radius: var(--radius-lg, 12px) !important;
+    padding: 9px 12px;
+    font-size: 0.9rem;
   }
 
   .profile-sidebar-icon {
-    width: 28px !important;
-    height: 28px !important;
+    width: 30px;
+    height: 30px;
   }
 
   .profile-sidebar-link svg {
-    width: 15px !important;
-    height: 15px !important;
+    width: 16px;
+    height: 16px;
   }
 
   .profile-page {
@@ -3510,30 +3485,7 @@ html.dark .feature-check-icon {
     display: none !important;
   }
 
-  /* WorkspaceLayout's sidebar carries a nested settings sub-nav. In the shared
-     horizontal mobile strip above, that vertical sub-nav stretched the active
-     link to its full height — a giant coloured block. When the sub-nav is
-     present, drop this sidebar back to a vertical stacked menu (the desktop
-     dark panel) so links stay their natural size and the sub-items read as a
-     proper submenu. Sidebars without a sub-nav keep the horizontal strip. */
-  .profile-sidebar:has(.workspace-subnav) {
-    flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    overflow-x: visible !important;
-    align-items: stretch !important;
-    background: var(--secondary) !important;
-    border: none !important;
-    padding: 14px 10px !important;
-  }
-
-  .profile-sidebar:has(.workspace-subnav) .profile-sidebar-header {
-    display: block !important;
-  }
-
-  .profile-sidebar:has(.workspace-subnav) .profile-sidebar-link {
-    width: 100% !important;
-    white-space: normal !important;
-  }
+/* (Mobile sidebar is a plain vertical menu now — no sub-nav special case.) */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -9358,24 +9310,5 @@ html.dark {
   width: 100%;
 }
 
-/* The settings sub-nav is nested inside .profile-sidebar, which is a solid
-   dark panel — its own colours were written for a light card and land at
-   about 2:1 against that background. Restated for the dark panel here. */
-.profile-sidebar .workspace-subnav {
-  border-inline-start-color: rgba(255, 255, 255, 0.18);
-}
-
-.profile-sidebar .workspace-subnav-item {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.profile-sidebar .workspace-subnav-item:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.profile-sidebar .workspace-subnav-item.active {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.16);
-  font-weight: 700;
-}
+/* The settings sub-nav sits inside the neutral .profile-sidebar and inherits
+   the shared .workspace-subnav-item colours — no dark-panel override needed. */
