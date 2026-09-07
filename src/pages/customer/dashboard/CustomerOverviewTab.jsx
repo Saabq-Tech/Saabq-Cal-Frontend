@@ -74,11 +74,7 @@ export default function CustomerOverviewTab() {
         upcomingCount += 1;
       }
 
-      if (
-        status === "completed" &&
-        startsAt &&
-        startsAt >= monthStart
-      ) {
+      if (status === "completed" && startsAt && startsAt >= monthStart) {
         completedThisMonth += 1;
       }
 
@@ -210,7 +206,8 @@ export default function CustomerOverviewTab() {
           position: "relative",
           overflow: "hidden",
           borderRadius: "var(--radius-lg)",
-          background: "linear-gradient(120deg, var(--primary), var(--secondary))",
+          background:
+            "linear-gradient(120deg, var(--primary), var(--secondary))",
           color: "#ffffff",
           padding: "clamp(20px, 4vw, 32px) clamp(20px, 5vw, 36px)",
         }}
@@ -235,6 +232,7 @@ export default function CustomerOverviewTab() {
               fontSize: "clamp(1.3rem, 3vw, 1.9rem)",
               fontWeight: 800,
               marginBottom: 8,
+              color: "#ffffff",
             }}
           >
             {user?.name || (isRTL ? "لوحة مواعيدك" : "Your appointments")}
@@ -305,7 +303,13 @@ export default function CustomerOverviewTab() {
             >
               <Icon name={c.icon} size={20} />
             </div>
-            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--heading)" }}>
+            <div
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+              }}
+            >
               {c.value}
             </div>
             <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
@@ -344,12 +348,20 @@ export default function CustomerOverviewTab() {
                 gap: 8,
               }}
             >
-              <Icon name="calendar" size={17} style={{ color: "var(--primary)" }} />
+              <Icon
+                name="calendar"
+                size={17}
+                style={{ color: "var(--primary)" }}
+              />
               {isRTL ? "المواعيد القادمة" : "Upcoming appointments"}
             </h3>
             <Link
               to="/customer/profile?tab=appointments"
-              style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary)" }}
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                color: "var(--primary)",
+              }}
             >
               {isRTL ? "عرض الكل" : "View all"}
             </Link>
@@ -357,7 +369,9 @@ export default function CustomerOverviewTab() {
 
           {stats.upcomingList.length === 0 ? (
             <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-              {isRTL ? "لا توجد مواعيد قادمة حالياً." : "No upcoming appointments yet."}
+              {isRTL
+                ? "لا توجد مواعيد قادمة حالياً."
+                : "No upcoming appointments yet."}
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -391,12 +405,25 @@ export default function CustomerOverviewTab() {
                     >
                       {getText(appt.workspace?.name)}
                     </div>
-                    <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                      {getText(appt.snapshot?.service_name || appt.service?.name)}
+                    <div
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {getText(
+                        appt.snapshot?.service_name || appt.service?.name,
+                      )}
                     </div>
                   </div>
                   <div style={{ textAlign: "end", flexShrink: 0 }}>
-                    <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary)" }}>
+                    <div
+                      style={{
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        color: "var(--primary)",
+                      }}
+                    >
                       {formatTimeShort(appt.starts_at)}
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>
@@ -429,7 +456,11 @@ export default function CustomerOverviewTab() {
                 gap: 8,
               }}
             >
-              <Icon name="bar-chart" size={17} style={{ color: "var(--primary)" }} />
+              <Icon
+                name="bar-chart"
+                size={17}
+                style={{ color: "var(--primary)" }}
+              />
               {isRTL ? "نشاط الحجوزات" : "Booking activity"}
             </h3>
             <span
@@ -441,7 +472,9 @@ export default function CustomerOverviewTab() {
                 padding: "3px 10px",
               }}
             >
-              {isRTL ? `آخر ${DAYS_IN_TREND} يوم` : `Last ${DAYS_IN_TREND} days`}
+              {isRTL
+                ? `آخر ${DAYS_IN_TREND} يوم`
+                : `Last ${DAYS_IN_TREND} days`}
             </span>
           </div>
           <DashboardTrendChart
@@ -470,7 +503,10 @@ export default function CustomerOverviewTab() {
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {stats.topServices.map(([name, count]) => (
-              <div key={name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                key={name}
+                style={{ display: "flex", alignItems: "center", gap: 10 }}
+              >
                 <span
                   style={{
                     width: 110,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import client, { endpoints } from "../../api/client";
 import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
@@ -12,17 +12,33 @@ import {
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
 import { stripHtml } from "../../utils/htmlUtils";
+import { applyWorkspaceBranding } from "../../utils/theme";
 
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
+  const [searchParams] = useSearchParams();
   const { t, isRTL } = useLanguage();
   const toast = useToast();
+
+  const isBookMode = searchParams.has("book");
 
   const [workspace, setWorkspace] = useState(null);
   const [services, setServices] = useState([]);
   const [specialistRoles, setSpecialistRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
+
+  // Auto-scroll to services if ?book is in URL
+  useEffect(() => {
+    if (isBookMode && !loading && !servicesLoading) {
+      const el = document.getElementById("services");
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 120);
+      }
+    }
+  }, [isBookMode, loading, servicesLoading]);
 
   // Search, Filter & Lightbox states
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,29 +92,25 @@ export default function WorkspaceProfilePage() {
       });
   }, [idOrSlug]);
 
-  // Apply workspace custom colors to CSS variables dynamically
+  // Apply workspace custom colors to CSS variables dynamically & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      if (workspace.primary_color) {
-        document.documentElement.style.setProperty(
-          "--primary",
-          workspace.primary_color,
-        );
-        document.documentElement.style.setProperty(
-          "--primary-hover",
-          workspace.hover_color || workspace.primary_color,
-        );
-      }
-      if (workspace.secondary_color) {
-        document.documentElement.style.setProperty(
-          "--secondary",
-          workspace.secondary_color,
-        );
-      }
+      applyWorkspaceBranding(
+        workspace.primary_color,
+        workspace.secondary_color,
+        workspace.hover_color,
+      );
       return () => {
-        document.documentElement.style.removeProperty("--primary");
-        document.documentElement.style.removeProperty("--primary-hover");
-        document.documentElement.style.removeProperty("--secondary");
+        const storedUser = localStorage.getItem("saabq_user");
+        let prevWs = null;
+        try {
+          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
+        } catch {}
+        applyWorkspaceBranding(
+          prevWs?.primary_color || null,
+          prevWs?.secondary_color || null,
+          prevWs?.hover_color || null,
+        );
       };
     }
   }, [workspace]);
@@ -115,7 +127,7 @@ export default function WorkspaceProfilePage() {
 
   // Copy Workspace URL to clipboard
   const handleShare = useCallback(() => {
-    const url = window.location.href;
+    const url = `${window.location.origin}/${workspace?.slug || idOrSlug}`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
         toast.success(
@@ -127,7 +139,7 @@ export default function WorkspaceProfilePage() {
     } else {
       toast.info(url);
     }
-  }, [toast, isRTL]);
+  }, [workspace, idOrSlug, toast, isRTL]);
 
   // Filtered Services based on search term
   const filteredServices = useMemo(() => {
@@ -272,7 +284,7 @@ export default function WorkspaceProfilePage() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: getTranslatableText(workspace.name),
-    url: `https://cal.saabq.com/workspaces/${workspace.slug}`,
+    url: `https://cal.saabq.com/${workspace.slug}`,
     ...(workspace.booking_short_intro && {
       description: getTranslatableText(workspace.booking_short_intro),
     }),
@@ -306,7 +318,7 @@ export default function WorkspaceProfilePage() {
               ? `احجز أفضل الخدمات والمواعيد لدى ${getTranslatableText(workspace.name)}`
               : `Book top services and appointments at ${getTranslatableText(workspace.name)}`),
         )}
-        canonical={`/workspaces/${workspace.slug}`}
+        canonical={`/${workspace.slug}`}
         ogType="business.business"
         ogImage={workspace.logo_url || workspace.cover_url}
         jsonLd={[jsonLd]}
@@ -1049,7 +1061,7 @@ export default function WorkspaceProfilePage() {
 
                   {srv.booking_enabled !== false ? (
                     <Link
-                      to={`/workspaces/${idOrSlug}/book?service=${srv.slug || srv.id}`}
+                      to={`/${workspace?.slug || idOrSlug}/${srv.slug || srv.id}`}
                       className="btn btn-primary btn-md"
                       style={{
                         width: "100%",
@@ -1290,7 +1302,7 @@ export default function WorkspaceProfilePage() {
                       {displayedSpecialists.map((member) => (
                         <Link
                           key={member.id}
-                          to={`/workspaces/${idOrSlug}/specialist/${member.id}`}
+                          to={`/${workspace?.slug || idOrSlug}/specialist/${member.id}`}
                           className="specialist-profile-card animate-tab-card"
                           style={{
                             display: "flex",

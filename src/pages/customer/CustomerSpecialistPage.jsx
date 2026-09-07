@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import client, { endpoints } from "../../api/client";
 import { useLanguage } from "../../context/LanguageContext";
@@ -10,6 +10,7 @@ import {
 } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
+import { applyWorkspaceBranding } from "../../utils/theme";
 
 export default function CustomerSpecialistPage() {
   const { idOrSlug, specialistId } = useParams();
@@ -21,16 +22,7 @@ export default function CustomerSpecialistPage() {
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
-  // Selected service slot checker state
-  const [activeServiceId, _setActiveServiceId] = useState(null);
-  const [selectedDate, _setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  });
-  const [_slots, setSlots] = useState([]);
-  const [_slotsLoading, setSlotsLoading] = useState(false);
-
-  const _formatTranslatable = (val) => {
+  const getTranslatableText = (val) => {
     if (val === null || val === undefined) return "";
     if (typeof val === "string" || typeof val === "number") return String(val);
     if (typeof val === "object") {
@@ -48,8 +40,6 @@ export default function CustomerSpecialistPage() {
     }
     return "";
   };
-
-  const getTranslatableText = _formatTranslatable;
 
   // Fetch workspace detail & services
   useEffect(() => {
@@ -103,57 +93,25 @@ export default function CustomerSpecialistPage() {
       });
   }, [idOrSlug, specialistId]);
 
-  // Fetch available slots for a service when date or service changes
-  const fetchSlots = useCallback(
-    (serviceId, date) => {
-      if (!serviceId || !date) return;
-      setSlotsLoading(true);
-      client
-        .get(endpoints.publicWorkspaceSlots(idOrSlug, serviceId), {
-          params: { date },
-        })
-        .then((res) => {
-          setSlots(res.data.data || []);
-          setSlotsLoading(false);
-        })
-        .catch(() => {
-          setSlots([]);
-          setSlotsLoading(false);
-        });
-    },
-    [idOrSlug],
-  );
-
-  useEffect(() => {
-    if (activeServiceId && selectedDate) {
-      fetchSlots(activeServiceId, selectedDate);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchSlots]);
-
-  // Apply workspace custom colors to CSS variables
+  // Apply workspace custom colors to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      if (workspace.primary_color) {
-        document.documentElement.style.setProperty(
-          "--primary",
-          workspace.primary_color,
-        );
-        document.documentElement.style.setProperty(
-          "--primary-hover",
-          workspace.hover_color || workspace.primary_color,
-        );
-      }
-      if (workspace.secondary_color) {
-        document.documentElement.style.setProperty(
-          "--secondary",
-          workspace.secondary_color,
-        );
-      }
+      applyWorkspaceBranding(
+        workspace.primary_color,
+        workspace.secondary_color,
+        workspace.hover_color,
+      );
       return () => {
-        document.documentElement.style.removeProperty("--primary");
-        document.documentElement.style.removeProperty("--primary-hover");
-        document.documentElement.style.removeProperty("--secondary");
+        const storedUser = localStorage.getItem("saabq_user");
+        let prevWs = null;
+        try {
+          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
+        } catch {}
+        applyWorkspaceBranding(
+          prevWs?.primary_color || null,
+          prevWs?.secondary_color || null,
+          prevWs?.hover_color || null,
+        );
       };
     }
   }, [workspace]);
@@ -185,7 +143,10 @@ export default function CustomerSpecialistPage() {
                 ? "عذراً، المتخصص غير موجود."
                 : "Sorry, this specialist was not found."}
             </p>
-            <Link to={`/workspaces/${idOrSlug}`} className="btn btn-primary">
+            <Link
+              to={`/${workspace?.slug || idOrSlug}`}
+              className="btn btn-primary"
+            >
               {isRTL ? "العودة لمساحة العمل" : "Back to Workspace"}
             </Link>
           </div>
@@ -203,7 +164,7 @@ export default function CustomerSpecialistPage() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: workspace.name,
-    url: `https://cal.saabq.com/workspaces/${workspace.slug}`,
+    url: `https://cal.saabq.com/${workspace.slug}`,
     ...(workspace.booking_short_intro && {
       description: workspace.booking_short_intro,
     }),
@@ -244,7 +205,7 @@ export default function CustomerSpecialistPage() {
         "@type": "ListItem",
         position: 3,
         name: workspace.name,
-        item: `https://cal.saabq.com/workspaces/${workspace.slug}`,
+        item: `https://cal.saabq.com/${workspace.slug}`,
       },
     ],
   };
@@ -260,7 +221,7 @@ export default function CustomerSpecialistPage() {
             ? "حجز مواعيد وخدمات في مساحة العمل"
             : "Book appointments and services at this workspace")
         }
-        canonical={`/workspaces/${workspace.slug}`}
+        canonical={`/${workspace.slug}/specialist/${specialistId}`}
         ogType="business.business"
         ogImage={workspace.logo_url || workspace.cover_url}
         jsonLd={[jsonLd, breadcrumbJsonLd]}
@@ -812,7 +773,7 @@ export default function CustomerSpecialistPage() {
 
                   {srv.booking_enabled !== false ? (
                     <Link
-                      to={`/workspaces/${idOrSlug}/book?service=${srv.slug || srv.id}&member=${specialistId}`}
+                      to={`/${workspace?.slug || idOrSlug}/${srv.slug || srv.id}?member=${specialistId}`}
                       className="btn btn-primary btn-md"
                       style={{
                         width: "100%",

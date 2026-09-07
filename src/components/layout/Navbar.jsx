@@ -14,6 +14,7 @@ import {
   canViewWorkspaceTab,
 } from "../../config/dashboardNav";
 import { checkWorkspaceCapability } from "../../utils/capabilities";
+import { updateMetaThemeColor } from "../../utils/theme";
 
 export default function Navbar() {
   const {
@@ -170,6 +171,7 @@ export default function Navbar() {
       dark ? "dark" : "light",
     );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
+    updateMetaThemeColor(localStorage.getItem("saabq_primary_color"));
   }, [dark]);
 
   // Lock scroll when mobile drawer is open
@@ -259,7 +261,11 @@ export default function Navbar() {
               <a
                 href="/#home"
                 className={
-                  location.pathname === "/" && activeSection === "home"
+                  location.pathname === "/" &&
+                  (isAuthenticated ||
+                    !activeSection ||
+                    activeSection === "home" ||
+                    activeSection === "about")
                     ? "active"
                     : ""
                 }
@@ -271,6 +277,20 @@ export default function Navbar() {
 
             {!isAuthenticated && (
               <>
+                <li>
+                  <a
+                    href="/#sectors"
+                    className={
+                      location.pathname === "/" && activeSection === "sectors"
+                        ? "active"
+                        : ""
+                    }
+                    onClick={(e) => handleSectionClick("sectors", e)}
+                  >
+                    {t("navSectors")}
+                  </a>
+                </li>
+
                 <li>
                   <a
                     href="/#features"
@@ -314,30 +334,25 @@ export default function Navbar() {
                   </a>
                 </li>
 
-                <li>
-                  <a
-                    href="/#sectors"
-                    className={
-                      location.pathname === "/" && activeSection === "sectors"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("sectors", e)}
-                  >
-                    {t("navSectors")}
-                  </a>
-                </li>
-
-                <li>
+                {/* <li>
                   <Link
                     to="/blog"
                     className={location.pathname === "/blog" ? "active" : ""}
                   >
                     {t("navBlog")}
                   </Link>
-                </li>
+                </li> */}
               </>
             )}
+
+            <li>
+              <Link
+                to="/workspaces"
+                className={location.pathname === "/workspaces" ? "active" : ""}
+              >
+                {t("workspaces", "مساحات العمل")}
+              </Link>
+            </li>
 
             {isAuthenticated && (
               <li
@@ -370,76 +385,36 @@ export default function Navbar() {
                 </button>
                 {profileDropdownOpen && (
                   <div className="navbar-dropdown-menu" role="menu">
-                    <Link
-                      to={`${profilePrefix}/profile?tab=info`}
-                      role="menuitem"
-                      onClick={() => setProfileDropdownOpen(false)}
-                    >
-                      <Icon name="user" size={16} />
-                      {t("profile") || "الملف الشخصي"}
-                    </Link>
-                    <Link
-                      to={`${profilePrefix}/profile?tab=password`}
-                      role="menuitem"
-                      onClick={() => setProfileDropdownOpen(false)}
-                    >
-                      <Icon name="lock" size={16} />
-                      {t("changePassword") || "تغيير كلمة المرور"}
-                    </Link>
-                    <Link
-                      to={`${profilePrefix}/profile?tab=security`}
-                      role="menuitem"
-                      onClick={() => setProfileDropdownOpen(false)}
-                    >
-                      <Icon name="shield" size={16} />
-                      {t("security") || "الأمان والربط"}
-                    </Link>
-                    {userType === "member" && (
+                    {drawerAccountTabs.map((tab) => (
                       <Link
-                        to="/member/profile?tab=integrations"
+                        key={tab.id}
+                        to={tab.to}
                         role="menuitem"
                         onClick={() => setProfileDropdownOpen(false)}
                       >
-                        <Icon name="custom-1ebf3dba" size={16} />
-                        {t("applicationsTitle") || "التطبيقات والربط"}
+                        <Icon name={tab.icon} size={16} />
+                        <span>{tab.label}</span>
+                        {tab.badge === "unread" && unreadCount > 0 && (
+                          <span
+                            className="drawer-badge"
+                            style={{ marginInlineStart: "auto" }}
+                          >
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
+                        {tab.badge === "chat" && unreadChatCount > 0 && (
+                          <span
+                            className="drawer-badge"
+                            style={{
+                              marginInlineStart: "auto",
+                              background: "var(--accent)",
+                            }}
+                          >
+                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                          </span>
+                        )}
                       </Link>
-                    )}
-
-                    <Link
-                      to={`${profilePrefix}/profile?tab=notifications`}
-                      role="menuitem"
-                      onClick={() => setProfileDropdownOpen(false)}
-                    >
-                      <Icon name="bell" size={16} />
-                      {t("notificationsTab") || "الإشعارات"}
-                      {unreadCount > 0 && (
-                        <span
-                          className="drawer-badge"
-                          style={{ marginInlineStart: "auto" }}
-                        >
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </span>
-                      )}
-                    </Link>
-                    <Link
-                      to={`${profilePrefix}/profile?tab=chats`}
-                      role="menuitem"
-                      onClick={() => setProfileDropdownOpen(false)}
-                    >
-                      <Icon name="message-square" size={16} />
-                      {t("supportChat") || "محادثات الدعم"}
-                      {unreadChatCount > 0 && (
-                        <span
-                          className="drawer-badge"
-                          style={{
-                            marginInlineStart: "auto",
-                            background: "var(--accent)",
-                          }}
-                        >
-                          {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                        </span>
-                      )}
-                    </Link>
+                    ))}
                   </div>
                 )}
               </li>
@@ -613,16 +588,6 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar-actions">
-            {/* Account and workspace now live as the two dropdowns above — each
-                navigates to its home and opens its page list — so no separate
-                direct buttons here. */}
-            <Link
-              to="/workspaces"
-              className={`nav-explore${location.pathname === "/workspaces" ? " active" : ""}`}
-            >
-              <Icon name="monitor" size={15} />
-              <span>{t("exploreWorkspaces")}</span>
-            </Link>
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}
@@ -719,12 +684,20 @@ export default function Navbar() {
                 <button
                   className="navbar-user"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-label={user?.name || "User menu"}
                 >
                   <UserAvatar
-                    name={user?.name}
-                    avatarUrl={user?.avatar_url}
-                    size={32}
+                    name={
+                      user?.name ||
+                      `${user?.first_name || ""} ${user?.last_name || ""}`.trim()
+                    }
+                    avatarUrl={user?.avatar_url || user?.avatar}
+                    size={28}
                   />
+                  <span className="navbar-user-name">
+                    {user?.name ||
+                      `${user?.first_name || ""} ${user?.last_name || ""}`.trim()}
+                  </span>
                   <Icon
                     name="chevron-down"
                     size={14}
@@ -750,57 +723,35 @@ export default function Navbar() {
                       </strong>
                     </div>
                     <div className="dropdown-divider" />
-                    <Link
-                      to={
-                        userType === "member"
-                          ? "/member/profile"
-                          : "/customer/profile"
-                      }
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Icon name="custom-7e599ac1" size={16} />
-                      {t("profile")}
-                    </Link>
-                    {userType === "member" && (
+                    {drawerAccountTabs.map((tab) => (
                       <Link
-                        to="/member/workspace/settings"
+                        key={tab.id}
+                        to={tab.to}
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <Icon name="monitor" size={16} />
-                        {t("workspace")}
+                        <Icon name={tab.icon} size={16} />
+                        <span>{tab.label}</span>
+                        {tab.badge === "unread" && unreadCount > 0 && (
+                          <span
+                            className="drawer-badge"
+                            style={{ marginInlineStart: "auto" }}
+                          >
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
+                        {tab.badge === "chat" && unreadChatCount > 0 && (
+                          <span
+                            className="drawer-badge"
+                            style={{
+                              marginInlineStart: "auto",
+                              background: "var(--accent)",
+                            }}
+                          >
+                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                          </span>
+                        )}
                       </Link>
-                    )}
-                    <Link
-                      to={
-                        userType === "member"
-                          ? "/member/profile?tab=security"
-                          : "/customer/profile?tab=security"
-                      }
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Icon name="shield" size={16} />
-                      {t("security")}
-                    </Link>
-                    {userType === "member" && (
-                      <Link
-                        to="/member/profile?tab=applications"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <Icon name="custom-1ebf3dba" size={16} />
-                        {t("applicationsTitle") || "التطبيقات والربط"}
-                      </Link>
-                    )}
-                    <Link
-                      to={
-                        userType === "member"
-                          ? "/member/profile?tab=password"
-                          : "/customer/profile?tab=password"
-                      }
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Icon name="lock" size={16} />
-                      {t("changePassword")}
-                    </Link>
+                    ))}
                     <div className="dropdown-divider" />
                     <button onClick={handleLogout} className="dropdown-danger">
                       <Icon name="custom-0467348d" size={16} />
@@ -881,15 +832,39 @@ export default function Navbar() {
               <nav className="mobile-drawer-nav">
                 <a
                   href="/#home"
-                  className={`mobile-drawer-link${location.pathname === "/" && activeSection === "home" ? " active" : ""}`}
+                  className={`mobile-drawer-link${
+                    location.pathname === "/" &&
+                    (isAuthenticated ||
+                      !activeSection ||
+                      activeSection === "home")
+                      ? " active"
+                      : ""
+                  }`}
                   onClick={(e) => handleSectionClick("home", e)}
                 >
                   <Icon name="custom-5992beed" />
                   <span>{t("home")}</span>
                 </a>
 
+                <Link
+                  to="/workspaces"
+                  className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                >
+                  <Icon name="monitor" />
+                  <span>{t("workspaces", "مساحات العمل")}</span>
+                </Link>
+
                 {!isAuthenticated && (
                   <>
+                    <a
+                      href="/#sectors"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("sectors", e)}
+                    >
+                      <Icon name="briefcase" />
+                      <span>{t("navSectors")}</span>
+                    </a>
+
                     <a
                       href="/#about"
                       className={`mobile-drawer-link${location.pathname === "/" && activeSection === "about" ? " active" : ""}`}
@@ -925,27 +900,13 @@ export default function Navbar() {
                       <Icon name="credit-card" />
                       <span>{t("navPricing")}</span>
                     </a>
-                    <a
-                      href="/#sectors"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("sectors", e)}
-                    >
-                      <Icon name="briefcase" />
-                      <span>{t("navSectors")}</span>
-                    </a>
+
                     <Link
                       to="/blog"
                       className={`mobile-drawer-link${location.pathname === "/blog" ? " active" : ""}`}
                     >
                       <Icon name="book-open" />
                       <span>{t("navBlog")}</span>
-                    </Link>
-                    <Link
-                      to="/workspaces"
-                      className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
-                    >
-                      <Icon name="monitor" />
-                      <span>{t("exploreWorkspaces")}</span>
                     </Link>
                   </>
                 )}
@@ -960,7 +921,8 @@ export default function Navbar() {
                       }${drawerAccountOpen ? " open" : ""}`}
                       aria-expanded={drawerAccountOpen}
                       onClick={() => {
-                        if (!drawerAccountOpen) navigate(`${profilePrefix}/profile`);
+                        if (!drawerAccountOpen)
+                          navigate(`${profilePrefix}/profile`);
                         setDrawerAccountOpen((v) => !v);
                       }}
                     >

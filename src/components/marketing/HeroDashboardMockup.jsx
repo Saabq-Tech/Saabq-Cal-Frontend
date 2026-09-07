@@ -168,6 +168,13 @@ export default function HeroDashboardMockup() {
                     <span className="hero-mockup-line" />
                   </div>
                 ))}
+                <div
+                  className="hero-mockup-now-indicator"
+                  style={{ top: "115px" }}
+                >
+                  <span className="hero-mockup-now-dot" />
+                  <span className="hero-mockup-now-line" />
+                </div>
                 {events.map((event) => (
                   <span
                     key={event.key}

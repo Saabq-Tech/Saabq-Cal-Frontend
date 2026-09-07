@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/layout/ProtectedRoute";
 import GuestRoute from "./components/layout/GuestRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import ScrollReveal from "./components/layout/ScrollReveal";
 import PageLoader from "./components/ui/PageLoader";
 import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 
@@ -164,6 +165,7 @@ export default function App() {
     <BrowserRouter>
       <IconSprite />
       <ScrollToTop />
+      <ScrollReveal />
       <LanguageProvider>
         <AuthProvider>
           <ToastProvider>
@@ -556,6 +558,45 @@ export default function App() {
                     path="/workspace/schedules"
                     element={
                       <Navigate to="/member/workspace/schedules" replace />
+                    }
+                  />
+
+                  {/* Clean Top-Level Workspace & Service URLs:
+                      - baseurl/{workspace} -> Workspace Profile Page (supports ?book)
+                      - baseurl/{workspace}/{service} -> Booking specific service
+                      - baseurl/{workspace}/specialist/{specialistId} -> Specialist Page
+                      - baseurl/{workspace}/book -> Service Selection / Booking
+                  */}
+                  <Route
+                    path="/:idOrSlug/specialist/:specialistId"
+                    element={
+                      <MainLayout>
+                        <CustomerSpecialistPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/:idOrSlug/book"
+                    element={
+                      <MainLayout>
+                        <CustomerBookAppointmentPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/:idOrSlug/:serviceSlug"
+                    element={
+                      <MainLayout>
+                        <CustomerBookAppointmentPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/:idOrSlug"
+                    element={
+                      <MainLayout>
+                        <CustomerWorkspaceProfilePage />
+                      </MainLayout>
                     }
                   />
 

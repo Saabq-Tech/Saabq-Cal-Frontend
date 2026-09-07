@@ -65,9 +65,20 @@ function relativeTime(isoString, t) {
 function SkeletonItem() {
   return (
     <div className="notif-skeleton">
-      <div className="skel-circle" />
-      <div className="skel-lines">
-        <div className="skel-line" style={{ width: "55%" }} />
+      <div
+        className="skel-header"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          width: "100%",
+        }}
+      >
+        <div className="skel-circle" />
+        <div className="skel-line" style={{ width: "45%", height: 16 }} />
+      </div>
+      <div className="skel-lines" style={{ marginTop: 8, width: "100%" }}>
+        <div className="skel-line" style={{ width: "95%" }} />
         <div className="skel-line" style={{ width: "80%" }} />
         <div className="skel-line" style={{ width: "35%" }} />
       </div>
@@ -215,16 +226,14 @@ function NotificationItem({
       onClick={handleCardClick}
       onKeyDown={isUnread ? handleKeyDown : undefined}
     >
-      <div className={`notif-dot-icon${isUnread ? "" : " read"}`}>
-        {isUnread ? (
+      <div className="notif-item-header">
+        <div className={`notif-dot-icon${isUnread ? "" : " read"}`}>
           <Icon name="bell" size={18} />
-        ) : (
-          <Icon name="bell" size={18} />
-        )}
+        </div>
+        {notif.title && <div className="notif-title">{notif.title}</div>}
       </div>
 
       <div className="notif-content">
-        {notif.title && <div className="notif-title">{notif.title}</div>}
         {notif.body && <div className="notif-body">{notif.body}</div>}
         <div className="notif-meta">
           <span className="notif-time">
@@ -457,7 +466,7 @@ export default function NotificationsPage() {
 
       <div className="card animate-fade-in-up">
         <div
-          className="card-header"
+          className="card-header notif-header"
           style={{
             borderBottom: "1px solid var(--border-light)",
             paddingBottom: 16,
@@ -467,39 +476,25 @@ export default function NotificationsPage() {
             <h2 className="card-title">{t("notificationsInboxTitle")}</h2>
             <p className="card-subtitle">{t("notificationsInboxDesc")}</p>
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
+          <div className="notif-header-actions">
             {canMarkAll && (
               <button
-                className="btn btn-secondary btn-sm"
+                type="button"
+                className="btn btn-secondary notif-header-btn"
                 onClick={handleMarkAllRead}
-                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
               >
                 <Icon name="check" size={13} />
-                {t("markAllRead")}
+                <span>{t("markAllRead")}</span>
               </button>
             )}
             {canClear && (
               <button
-                className="btn btn-sm"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  background: "rgba(239,68,68,0.08)",
-                  color: "#ef4444",
-                  border: "1px solid rgba(239,68,68,0.25)",
-                }}
+                type="button"
+                className="btn notif-header-btn notif-clear-all-btn"
                 onClick={() => setShowClearConfirm(true)}
               >
                 <Icon name="trash" size={13} />
-                {t("clearAllNotifs")}
+                <span>{t("clearAllNotifs")}</span>
               </button>
             )}
           </div>

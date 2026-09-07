@@ -17,9 +17,7 @@ export default function DashboardTrendChart({
     .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`)
     .join(" ");
   const areaPath =
-    points.length > 0
-      ? `${linePath} L${width},${height} L0,${height} Z`
-      : "";
+    points.length > 0 ? `${linePath} L${width},${height} L0,${height} Z` : "";
 
   return (
     <svg

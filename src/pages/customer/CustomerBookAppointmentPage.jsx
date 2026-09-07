@@ -14,6 +14,7 @@ import LazyImage from "../../components/ui/LazyImage";
 import { BookingFormSkeleton } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
+import { applyWorkspaceBranding } from "../../utils/theme";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 const MONTH_NAMES_AR = [
@@ -56,7 +57,7 @@ const WEEK_DAYS_AR = [
 const WEEK_DAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function CustomerBookAppointmentPage() {
-  const { idOrSlug } = useParams();
+  const { idOrSlug, serviceSlug } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
@@ -64,7 +65,9 @@ export default function CustomerBookAppointmentPage() {
   const toast = useToast();
 
   const preselectedServiceId =
-    searchParams.get("service") || searchParams.get("service_id");
+    serviceSlug ||
+    searchParams.get("service") ||
+    searchParams.get("service_id");
   const preselectedMemberId =
     searchParams.get("member") || searchParams.get("member_id");
 
@@ -510,29 +513,25 @@ export default function CustomerBookAppointmentPage() {
     }
   };
 
-  // Apply workspace custom colors to CSS variables
+  // Apply workspace custom colors to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      if (workspace.primary_color) {
-        document.documentElement.style.setProperty(
-          "--primary",
-          workspace.primary_color,
-        );
-        document.documentElement.style.setProperty(
-          "--primary-hover",
-          workspace.hover_color || workspace.primary_color,
-        );
-      }
-      if (workspace.secondary_color) {
-        document.documentElement.style.setProperty(
-          "--secondary",
-          workspace.secondary_color,
-        );
-      }
+      applyWorkspaceBranding(
+        workspace.primary_color,
+        workspace.secondary_color,
+        workspace.hover_color,
+      );
       return () => {
-        document.documentElement.style.removeProperty("--primary");
-        document.documentElement.style.removeProperty("--primary-hover");
-        document.documentElement.style.removeProperty("--secondary");
+        const storedUser = localStorage.getItem("saabq_user");
+        let prevWs = null;
+        try {
+          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
+        } catch {}
+        applyWorkspaceBranding(
+          prevWs?.primary_color || null,
+          prevWs?.secondary_color || null,
+          prevWs?.hover_color || null,
+        );
       };
     }
   }, [workspace]);
@@ -619,7 +618,7 @@ export default function CustomerBookAppointmentPage() {
           (isRTL ? "احجز موعدك بسهولة" : "Book your appointment easily")
         }
         noindex
-        canonical={`/workspaces/${workspace.slug}/book`}
+        canonical={`/${workspace.slug}${selectedService?.slug ? `/${selectedService.slug}` : ""}`}
       />
       {/* Header Banner */}
       <div
@@ -655,8 +654,8 @@ export default function CustomerBookAppointmentPage() {
 
               const targetUrl =
                 showMemberProfile && memberId
-                  ? `/workspaces/${workspace.slug}/specialist/${memberId}`
-                  : `/workspaces/${workspace.slug}`;
+                  ? `/${workspace.slug}/specialist/${memberId}`
+                  : `/${workspace.slug}`;
 
               const labelText =
                 showMemberProfile && memberId
@@ -899,7 +898,7 @@ export default function CustomerBookAppointmentPage() {
               </Link>
 
               <Link
-                to={`/workspaces/${workspace.slug}`}
+                to={`/${workspace.slug}`}
                 className="btn btn-secondary"
                 style={{
                   padding: "12px 24px",
@@ -1071,7 +1070,18 @@ export default function CustomerBookAppointmentPage() {
                             return (
                               <div
                                 key={srv.id}
-                                onClick={() => setSelectedService(srv)}
+                                onClick={() => {
+                                  setSelectedService(srv);
+                                  setDisabledNotice("");
+                                  const targetSlug = srv.slug || srv.id;
+                                  const memberParam = preselectedMemberId
+                                    ? `?member=${preselectedMemberId}`
+                                    : "";
+                                  navigate(
+                                    `/${workspace?.slug || idOrSlug}/${targetSlug}${memberParam}`,
+                                    { replace: true },
+                                  );
+                                }}
                                 style={{
                                   padding: 14,
                                   borderRadius: "var(--radius-md)",
@@ -1086,8 +1096,27 @@ export default function CustomerBookAppointmentPage() {
                                   boxShadow: active
                                     ? "0 4px 14px rgba(0,0,0,0.06)"
                                     : "none",
+                                  position: "relative",
                                 }}
                               >
+                                {srv.is_featured && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: -8,
+                                      insetInlineEnd: 10,
+                                      background: "#f59e0b",
+                                      color: "#ffffff",
+                                      fontSize: "0.68rem",
+                                      fontWeight: 700,
+                                      padding: "1px 6px",
+                                      borderRadius: 10,
+                                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                                    }}
+                                  >
+                                    ⭐ {isRTL ? "مميزة" : "Featured"}
+                                  </div>
+                                )}
                                 <div
                                   style={{
                                     display: "flex",
@@ -1095,7 +1124,7 @@ export default function CustomerBookAppointmentPage() {
                                     alignItems: "flex-start",
                                     gap: 10,
                                     flexWrap: "wrap",
-                                    marginBottom: 8,
+                                    marginBottom: 6,
                                   }}
                                 >
                                   <strong
@@ -1125,13 +1154,32 @@ export default function CustomerBookAppointmentPage() {
                                     )}
                                   </span>
                                 </div>
+                                {(srv.short_description || srv.description) && (
+                                  <div
+                                    style={{
+                                      fontSize: "0.82rem",
+                                      color: "var(--text-secondary)",
+                                      marginBottom: 10,
+                                      lineHeight: 1.4,
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 2,
+                                      WebkitBoxOrient: "vertical",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    {getTranslatableText(
+                                      srv.short_description || srv.description,
+                                    )}
+                                  </div>
+                                )}
                                 <div
                                   style={{
-                                    fontSize: "0.84rem",
+                                    fontSize: "0.8rem",
                                     color: "var(--text-secondary)",
                                     display: "flex",
-                                    gap: 14,
+                                    gap: 12,
                                     alignItems: "center",
+                                    flexWrap: "wrap",
                                   }}
                                 >
                                   <span
@@ -1141,13 +1189,13 @@ export default function CustomerBookAppointmentPage() {
                                       gap: 4,
                                     }}
                                   >
-                                    <Icon name="clock" size={14} />
+                                    <Icon name="clock" size={13} />
                                     <span>
                                       {srv.duration_minutes}{" "}
-                                      {t("durationMinutes")}
+                                      {t("durationMinutes") || (isRTL ? "دقيقة" : "min")}
                                     </span>
                                   </span>
-                                  {srv.location && (
+                                  {(srv.location || srv.requires_meeting) && (
                                     <span
                                       style={{
                                         display: "inline-flex",
@@ -1155,8 +1203,42 @@ export default function CustomerBookAppointmentPage() {
                                         gap: 4,
                                       }}
                                     >
-                                      <Icon name="map-pin" size={14} />
-                                      <span>{srv.location}</span>
+                                      <Icon name="map-pin" size={13} />
+                                      <span>
+                                        {srv.requires_meeting
+                                          ? isRTL
+                                            ? "أونلاين"
+                                            : "Online"
+                                          : srv.location}
+                                      </span>
+                                    </span>
+                                  )}
+                                  {srv.workspace_member && (
+                                    <span
+                                      style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 4,
+                                      }}
+                                    >
+                                      <Icon name="user" size={13} />
+                                      <span>{srv.workspace_member.name}</span>
+                                    </span>
+                                  )}
+                                  {srv.booking_mode === "group" && (
+                                    <span
+                                      style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 4,
+                                      }}
+                                    >
+                                      <Icon name="users" size={13} />
+                                      <span>
+                                        {isRTL
+                                          ? `جماعي (${srv.capacity || 1})`
+                                          : `Group (${srv.capacity || 1})`}
+                                      </span>
                                     </span>
                                   )}
                                 </div>
@@ -2037,7 +2119,7 @@ export default function CustomerBookAppointmentPage() {
                       }}
                     >
                       <Link
-                        to={`/workspaces/${workspace.slug}`}
+                        to={`/${workspace.slug}`}
                         className="btn btn-ghost btn-md"
                       >
                         {t("cancel")}
@@ -2147,64 +2229,404 @@ export default function CustomerBookAppointmentPage() {
                       padding: 18,
                       borderRadius: "var(--radius-md)",
                       marginBottom: 20,
+                      border: "1px solid var(--border-light, rgba(0,0,0,0.05))",
                     }}
                   >
+                    {/* Service Name & Featured Badge */}
                     <div
                       style={{
-                        fontWeight: 700,
-                        fontSize: "1rem",
-                        marginBottom: 4,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 8,
+                        marginBottom: 6,
                       }}
                     >
-                      {getTranslatableText(selectedService.name)}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text-secondary)",
-                        marginBottom: 10,
-                      }}
-                    >
-                      {getTranslatableText(
-                        selectedService.short_description ||
-                          selectedService.description,
+                      <div
+                        style={{
+                          fontWeight: 800,
+                          fontSize: "1.05rem",
+                          color: "var(--heading)",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {getTranslatableText(selectedService.name)}
+                      </div>
+                      {selectedService.is_featured && (
+                        <span
+                          style={{
+                            fontSize: "0.72rem",
+                            fontWeight: 700,
+                            background: "rgba(234, 179, 8, 0.15)",
+                            color: "#b45309",
+                            padding: "2px 8px",
+                            borderRadius: 12,
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                          }}
+                        >
+                          ⭐ {isRTL ? "مميزة" : "Featured"}
+                        </span>
                       )}
                     </div>
+
+                    {/* Service Description */}
+                    {(selectedService.short_description ||
+                      selectedService.description) && (
+                      <div
+                        style={{
+                          fontSize: "0.84rem",
+                          color: "var(--text-secondary)",
+                          lineHeight: 1.5,
+                          marginBottom: 12,
+                        }}
+                      >
+                        {getTranslatableText(
+                          selectedService.short_description ||
+                            selectedService.description,
+                        )}
+                      </div>
+                    )}
+
+                    {/* Assigned Specialist / Team Member */}
+                    {selectedService.workspace_member && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          padding: "8px 10px",
+                          background: "var(--surface)",
+                          borderRadius: "var(--radius-sm)",
+                          marginBottom: 12,
+                          border: "1px solid var(--border-light, rgba(0,0,0,0.04))",
+                        }}
+                      >
+                        {selectedService.workspace_member.avatar_url ? (
+                          <LazyImage
+                            src={selectedService.workspace_member.avatar_url}
+                            alt={selectedService.workspace_member.name}
+                            width={32}
+                            height={32}
+                            objectFit="cover"
+                            style={{ borderRadius: "50%" }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: "50%",
+                              background: `${primaryColor}20`,
+                              color: primaryColor,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              fontSize: "0.82rem",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {selectedService.workspace_member.name?.charAt(0) || "U"}
+                          </div>
+                        )}
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div
+                            style={{
+                              fontSize: "0.74rem",
+                              color: "var(--text-muted)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {isRTL ? "مقدم الخدمة:" : "Provider:"}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "0.86rem",
+                              fontWeight: 700,
+                              color: "var(--text)",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {selectedService.workspace_member.name}
+                          </div>
+                          {selectedService.workspace_member.job_title && (
+                            <div
+                              style={{
+                                fontSize: "0.72rem",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              {selectedService.workspace_member.job_title}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Detailed Specifications List */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "0.9rem",
+                        flexDirection: "column",
+                        gap: 8,
                         borderTop: "1px dashed var(--border)",
                         paddingTop: 10,
+                        fontSize: "0.86rem",
                       }}
                     >
-                      <span>{isRTL ? "السعر:" : "Price:"}</span>
-                      <strong style={{ color: primaryColor }}>
-                        {formatCurrency(
-                          selectedService.price,
-                          selectedService.currency_detail ||
-                            selectedService.currency ||
-                            workspace?.currency_detail ||
-                            workspace?.currency,
-                          isRTL,
-                          t("freeService"),
+                      {/* Price */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span style={{ color: "var(--text-secondary)" }}>
+                          {isRTL ? "السعر:" : "Price:"}
+                        </span>
+                        <strong style={{ color: primaryColor, fontSize: "0.98rem" }}>
+                          {formatCurrency(
+                            selectedService.price,
+                            selectedService.currency_detail ||
+                              selectedService.currency ||
+                              workspace?.currency_detail ||
+                              workspace?.currency,
+                            isRTL,
+                            t("freeService"),
+                          )}
+                        </strong>
+                      </div>
+
+                      {/* Duration */}
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span style={{ color: "var(--text-secondary)" }}>
+                          {isRTL ? "المدة الأساسية:" : "Duration:"}
+                        </span>
+                        <span style={{ fontWeight: 600, color: "var(--text)" }}>
+                          {selectedService.duration_minutes}{" "}
+                          {t("durationMinutes") || (isRTL ? "دقيقة" : "min")}
+                        </span>
+                      </div>
+
+                      {/* Location & Meeting Format */}
+                      {(selectedService.location ||
+                        selectedService.requires_meeting) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <span
+                            style={{
+                              color: "var(--text-secondary)",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {isRTL ? "طريقة المقابلة / المكان:" : "Format & Location:"}
+                          </span>
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              color: "var(--text)",
+                              textAlign: isRTL ? "left" : "right",
+                              fontSize: "0.82rem",
+                            }}
+                          >
+                            {selectedService.requires_meeting
+                              ? isRTL
+                                ? "لقاء فيديو أونلاين"
+                                : "Online Video Meeting"
+                              : selectedService.location ||
+                                (isRTL ? "في المقر" : "In-Person")}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Booking Mode & Capacity */}
+                      {selectedService.booking_mode && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            {isRTL ? "نوع الحجز:" : "Booking Mode:"}
+                          </span>
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              color: "var(--text)",
+                              fontSize: "0.82rem",
+                            }}
+                          >
+                            {selectedService.booking_mode === "group"
+                              ? isRTL
+                                ? `حجز جماعي (حتى ${selectedService.capacity || 1} أشخاص)`
+                                : `Group Session (Up to ${selectedService.capacity || 1})`
+                              : isRTL
+                                ? "جلسة فردية (1-on-1)"
+                                : "Individual (1-on-1)"}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Buffer Times (Before / After) */}
+                      {(Boolean(selectedService.buffer_before_minutes) ||
+                        Boolean(selectedService.buffer_after_minutes)) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span>
+                            {isRTL ? "فترات الاستراحة والتجهيز:" : "Buffer Times:"}
+                          </span>
+                          <span style={{ fontWeight: 600 }}>
+                            {[
+                              selectedService.buffer_before_minutes
+                                ? `${selectedService.buffer_before_minutes} ${isRTL ? "د قبل" : "m before"}`
+                                : null,
+                              selectedService.buffer_after_minutes
+                                ? `${selectedService.buffer_after_minutes} ${isRTL ? "د بعد" : "m after"}`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" | ")}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Minimum Booking Notice */}
+                      {Boolean(selectedService.minimum_booking_notice_minutes) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span>{isRTL ? "المهلة الأدنى للحجز:" : "Min Notice:"}</span>
+                          <span style={{ fontWeight: 600 }}>
+                            {selectedService.minimum_booking_notice_minutes >= 60
+                              ? `${Math.round(selectedService.minimum_booking_notice_minutes / 60)} ${isRTL ? "ساعة مسبقاً" : "hours advance"}`
+                              : `${selectedService.minimum_booking_notice_minutes} ${isRTL ? "دقيقة مسبقاً" : "mins advance"}`}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Maximum Booking Days Window */}
+                      {Boolean(selectedService.maximum_booking_days) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span>
+                            {isRTL ? "أفق الحجز المتاح:" : "Booking Window:"}
+                          </span>
+                          <span style={{ fontWeight: 600 }}>
+                            {isRTL
+                              ? `حتى ${selectedService.maximum_booking_days} يوماً مقدماً`
+                              : `Up to ${selectedService.maximum_booking_days} days ahead`}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Timezone */}
+                      {(selectedService.timezone || workspace?.timezone) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span>{isRTL ? "المنطقة الزمنية:" : "Timezone:"}</span>
+                          <span style={{ fontWeight: 600, dir: "ltr" }}>
+                            {selectedService.timezone || workspace?.timezone}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Payment Policy */}
+                      {selectedService.payment_policy && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          <span>{isRTL ? "سياسة الدفع:" : "Payment Policy:"}</span>
+                          <span style={{ fontWeight: 600 }}>
+                            {selectedService.payment_policy === "on_site" ||
+                            selectedService.payment_policy === "in_person"
+                              ? isRTL
+                                ? "الدفع عند الحضور"
+                                : "Pay On-site"
+                              : selectedService.payment_policy === "prepaid"
+                                ? isRTL
+                                ? "دفع إلكتروني مسبق"
+                                : "Prepaid Online"
+                                : selectedService.payment_policy}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Telegram Live Support Option */}
+                      {selectedService.telegram_chat_option &&
+                        selectedService.telegram_chat_option !== "none" && (
+                          <div
+                            style={{
+                              marginTop: 4,
+                              padding: "6px 10px",
+                              background: "rgba(14, 165, 233, 0.08)",
+                              borderRadius: "var(--radius-sm)",
+                              color: "#0284c7",
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                            }}
+                          >
+                            <span>✈️</span>
+                            <span>
+                              {isRTL
+                                ? "متابعة وإشعارات مباشرة عبر تيليجرام"
+                                : "Direct Telegram Live Notifications"}
+                            </span>
+                          </div>
                         )}
-                      </strong>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: "0.88rem",
-                        marginTop: 6,
-                      }}
-                    >
-                      <span>{isRTL ? "المدة:" : "Duration:"}</span>
-                      <span>
-                        {selectedService.duration_minutes}{" "}
-                        {t("durationMinutes")}
-                      </span>
                     </div>
                   </div>
                 ) : (

@@ -15,6 +15,25 @@ export function hexToRgba(hex, alpha = 0.12) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+export function updateMetaThemeColor(color) {
+  try {
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    const isDark = document.documentElement.classList.contains("dark");
+    if (color && /^#[0-9A-Fa-f]{3,8}$/.test(color)) {
+      meta.setAttribute("content", color);
+    } else {
+      meta.setAttribute("content", isDark ? "#022a35" : "#026982");
+    }
+  } catch {
+    // Ignore DOM errors
+  }
+}
+
 export function applyWorkspaceBranding(
   primaryColor,
   secondaryColor,
@@ -24,18 +43,27 @@ export function applyWorkspaceBranding(
 
   if (primaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(primaryColor)) {
     root.style.setProperty("--primary", primaryColor);
+    root.style.setProperty("--primary-color", primaryColor);
     root.style.setProperty("--primary-light", primaryColor);
     root.style.setProperty("--primary-subtle", hexToRgba(primaryColor, 0.14));
+    root.style.setProperty("--sb-accent", primaryColor);
+    root.style.setProperty("--sb-accent-subtle", hexToRgba(primaryColor, 0.14));
+    root.style.setProperty("--sb-active-shadow", hexToRgba(primaryColor, 0.2));
     localStorage.setItem("saabq_primary_color", primaryColor);
   } else {
     root.style.removeProperty("--primary");
+    root.style.removeProperty("--primary-color");
     root.style.removeProperty("--primary-light");
     root.style.removeProperty("--primary-subtle");
+    root.style.removeProperty("--sb-accent");
+    root.style.removeProperty("--sb-accent-subtle");
+    root.style.removeProperty("--sb-active-shadow");
     localStorage.removeItem("saabq_primary_color");
   }
 
   if (secondaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(secondaryColor)) {
     root.style.setProperty("--secondary", secondaryColor);
+    root.style.setProperty("--secondary-color", secondaryColor);
     root.style.setProperty("--accent", secondaryColor);
     root.style.setProperty(
       "--secondary-subtle",
@@ -44,6 +72,7 @@ export function applyWorkspaceBranding(
     localStorage.setItem("saabq_secondary_color", secondaryColor);
   } else {
     root.style.removeProperty("--secondary");
+    root.style.removeProperty("--secondary-color");
     root.style.removeProperty("--accent");
     root.style.removeProperty("--secondary-subtle");
     localStorage.removeItem("saabq_secondary_color");
@@ -64,6 +93,9 @@ export function applyWorkspaceBranding(
     root.style.removeProperty("--tertiary-subtle");
     localStorage.removeItem("saabq_hover_color");
   }
+
+  // Dynamically update upper browser theme color / mobile status bar
+  updateMetaThemeColor(primaryColor);
 }
 
 export function initWorkspaceBranding() {
@@ -86,6 +118,8 @@ export function initWorkspaceBranding() {
 
     if (p || s || h) {
       applyWorkspaceBranding(p, s, h);
+    } else {
+      updateMetaThemeColor(null);
     }
   } catch (e) {
     console.warn("Workspace branding initialization error:", e);

@@ -18,6 +18,7 @@ export const translations = {
     appName: "تقويم سابق",
     appSubtitle: "منصة تنظيم المواعيد والجدولة الذكية",
     home: "الرئيسية",
+    overview: "نظرة عامة",
     about: "عن المنصة",
     workspaceSettings: "إعدادات مساحة العمل",
     workspaceProfileSettings: "الملف التعريفي والصفحة العامة",
@@ -30,6 +31,7 @@ export const translations = {
     address: "العنوان بالتفصيل",
     workspaceDescriptionPlaceholder:
       "اكتب وصفاً شاملاً ومؤثراً عن خدمات مساحة العمل...",
+    workspaces: "مساحات العمل",
     exploreWorkspaces: "استكشاف مساحات العمل",
     exploreWorkspacesSubtitle:
       "تصفح مساحات العمل المتاحة، والخدمات، واستكشف الملف الكامل لكل مساحة عمل مع إمكانية الحجز المباشر.",
@@ -1401,7 +1403,7 @@ export const translations = {
     templateEditingDisabledNotice:
       "تعديل قوالب الإشعارات معطل لمساحة العمل. تم تفعيل وضع العرض والقراءة فقط للمعاينة دون إمكانية التعديل.",
     editingDisabled: "التعديل معطل",
-    myAppointments: "مواعيـدي",
+    myAppointments: "مواعيدي",
     myAppointmentsDesc:
       "استعراض وتتبع جميع مواعيدك مع مساحات العمل بسهولة والتواصل المباشر معهم.",
     chatWithWorkspace: "مراسلة مساحة العمل",
@@ -1424,7 +1426,11 @@ export const translations = {
     saveWeeklyHoursBtn: "حفظ ساعات التوفر الأسبوعية",
     statusTrialing: "تجريبي",
     statusPaused: "موقوف مؤقتاً",
-    statusExpired: "منتهي",
+    statusPastDue: "متأخر السداد",
+    statusUnpaid: "غير مدفوع",
+    statusIncomplete: "غير مكتمل",
+    statusExpired: "منتهي الصلاحية",
+    statusEnded: "منتهي",
     cancelSubscription: "إلغاء الاشتراك",
     resumeSubscription: "استئناف الاشتراك",
     pauseSubscription: "إيقاف مؤقت للاشتراك",
@@ -1749,6 +1755,7 @@ export const translations = {
     appName: "Saabq Cal",
     appSubtitle: "Smart Scheduling & Appointment Platform",
     home: "Home",
+    overview: "Overview",
     about: "About Us",
     workspaceSettings: "Workspace Settings",
     workspaceProfileSettings: "Profile & Public Page",
@@ -1761,6 +1768,7 @@ export const translations = {
     address: "Full Address",
     workspaceDescriptionPlaceholder:
       "Write a comprehensive overview of your workspace services...",
+    workspaces: "Workspaces",
     exploreWorkspaces: "Explore Workspaces",
     exploreWorkspacesSubtitle:
       "Browse available workspaces, discover services, view complete workspace profiles and check available slots.",
@@ -3195,7 +3203,11 @@ export const translations = {
     saveWeeklyHoursBtn: "Save Weekly Availability Hours",
     statusTrialing: "Trialing",
     statusPaused: "Paused",
+    statusPastDue: "Past Due",
+    statusUnpaid: "Unpaid",
+    statusIncomplete: "Incomplete",
     statusExpired: "Expired",
+    statusEnded: "Ended",
     cancelSubscription: "Cancel Subscription",
     resumeSubscription: "Resume Subscription",
     pauseSubscription: "Pause Subscription",

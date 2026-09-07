@@ -908,13 +908,6 @@ export default function ChatsPage() {
                     onClick={() => handleSelectConversation(conv)}
                     aria-selected={isActive}
                     role="listitem"
-                    style={{
-                      width: "100%",
-                      textAlign: "inherit",
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                    }}
                   >
                     <UserAvatar
                       name={info.name}

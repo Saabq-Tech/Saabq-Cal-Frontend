@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import MemberOverviewTab from "./MemberOverviewTab";
 import MemberSecurityPage from "./MemberSecurityPage";
 import MemberChangePasswordPage from "./MemberChangePasswordPage";
 import IntegrationsSettingsPage from "./IntegrationsSettingsPage";
@@ -18,7 +19,7 @@ export default function MemberProfilePage() {
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
-  const currentTab = searchParams.get("tab") || "info";
+  const currentTab = searchParams.get("tab") || "overview";
 
   const fileInputRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -98,6 +99,10 @@ export default function MemberProfilePage() {
   }
 
   if (!user) return null;
+
+  if (currentTab === "overview" || currentTab === "home") {
+    return <MemberOverviewTab />;
+  }
 
   if (currentTab === "security") {
     return (

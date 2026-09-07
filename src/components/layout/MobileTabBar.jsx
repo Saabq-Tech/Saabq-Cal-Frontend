@@ -75,8 +75,7 @@ export default function MobileTabBar() {
             to: `${prefix}/profile?tab=appointments`,
             icon: "calendar",
             label: t("myAppointments") || "مواعيدي",
-            isActive: () =>
-              path.endsWith("/profile") && tab === "appointments",
+            isActive: () => path.endsWith("/profile") && tab === "appointments",
           },
           {
             id: "account",

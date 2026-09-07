@@ -24,7 +24,10 @@ export function getWorkspaceSettingsSubTabs(t) {
       id: "social",
       label: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والرابط",
     },
-    { id: "form_fields", label: t("workspaceFormFields") || "منشئ نموذج الحجز" },
+    {
+      id: "form_fields",
+      label: t("workspaceFormFields") || "منشئ نموذج الحجز",
+    },
     { id: "payment", label: t("workspacePaymentReceipts") || "إيصالات الدفع" },
     {
       id: "notifications",
@@ -150,8 +153,8 @@ export function getAccountTabs(t, userType) {
       id: "overview",
       to: `${prefix}/profile?tab=overview`,
       icon: "home",
-      label: t("home"),
-      show: userType === "customer",
+      label: t("overview") || "نظرة عامة",
+      show: true,
     },
     {
       id: "info",

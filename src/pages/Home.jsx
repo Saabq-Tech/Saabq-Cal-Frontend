@@ -245,10 +245,10 @@ export default function Home() {
                   />
                 </Link>
               )}
-              <a href="#how-it-works" className="btn btn-outline btn-lg">
-                <Icon name="custom-d3d330f2" size={16} />
-                {t("heroCtaSecondary")}
-              </a>
+              <Link to="/workspaces" className="btn btn-outline btn-lg">
+                <Icon name="monitor" size={17} />
+                {t("exploreWorkspaces")}
+              </Link>
             </div>
 
             <ul className="hero-lp-trust">
@@ -292,18 +292,20 @@ export default function Home() {
                       className={`banner-slide${i === activeBanner ? " active" : ""}`}
                     >
                       {imageUrl && (
-                        <LazyImage
-                          src={imageUrl}
-                          alt={banner.title || "Promotional banner"}
-                          width={1200}
-                          height={400}
-                          style={{
-                            width: "100%",
-                            height: "auto",
-                            objectFit: "cover",
-                            borderRadius: "inherit",
-                          }}
-                        />
+                        <div className="banner-slide-image">
+                          <LazyImage
+                            src={imageUrl}
+                            alt={banner.title || "Promotional banner"}
+                            width={1200}
+                            height={400}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              borderRadius: "inherit",
+                            }}
+                          />
+                        </div>
                       )}
                       <div className="banner-slide-content">
                         {banner.title && <h3>{banner.title}</h3>}
@@ -311,8 +313,7 @@ export default function Home() {
                         {banner.button_text && (
                           <a
                             href={banner.link || "#"}
-                            className="btn btn-accent btn-sm"
-                            style={{ width: "fit-content", marginTop: 12 }}
+                            className="banner-slide-btn"
                           >
                             {banner.button_text}
                           </a>
@@ -350,15 +351,17 @@ export default function Home() {
       {/* Sector Trust Strip */}
       <section className="trust-strip" aria-label={t("trustStripTitle")}>
         <div className="container">
-          <p className="trust-strip-title">{t("trustStripTitle")}</p>
-          <ul className="trust-strip-list">
-            {SECTORS.map((sector) => (
-              <li key={sector.titleKey}>
-                <Icon name={sector.icon} size={22} />
-                <span>{t(sector.titleKey)}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="trust-strip-card">
+            <p className="trust-strip-title">{t("trustStripTitle")}</p>
+            <ul className="trust-strip-list">
+              {SECTORS.map((sector) => (
+                <li key={sector.titleKey}>
+                  <Icon name={sector.icon} size={22} />
+                  <span>{t(sector.titleKey)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 

@@ -736,7 +736,7 @@ export default function CustomerAppointmentsTab() {
                     >
                       {wsSlugOrId ? (
                         <Link
-                          to={`/workspaces/${wsSlugOrId}`}
+                          to={`/${wsSlugOrId}`}
                           title={getTransText(
                             appt.workspace?.name,
                             isRTL ? "عرض مساحة العمل" : "View Workspace",
@@ -817,7 +817,7 @@ export default function CustomerAppointmentsTab() {
                           <Icon name="briefcase" size={12} />
                           {wsSlugOrId ? (
                             <Link
-                              to={`/workspaces/${wsSlugOrId}`}
+                              to={`/${wsSlugOrId}`}
                               style={{
                                 fontWeight: 600,
                                 color: "var(--primary)",
@@ -1364,7 +1364,7 @@ export default function CustomerAppointmentsTab() {
                         >
                           {modalWsSlugOrId ? (
                             <Link
-                              to={`/workspaces/${modalWsSlugOrId}`}
+                              to={`/${modalWsSlugOrId}`}
                               title={getTransText(
                                 selectedAppointment.workspace?.name,
                               )}
@@ -1409,7 +1409,7 @@ export default function CustomerAppointmentsTab() {
                             >
                               {modalWsSlugOrId ? (
                                 <Link
-                                  to={`/workspaces/${modalWsSlugOrId}`}
+                                  to={`/${modalWsSlugOrId}`}
                                   style={{
                                     color: "var(--primary)",
                                     textDecoration: "none",

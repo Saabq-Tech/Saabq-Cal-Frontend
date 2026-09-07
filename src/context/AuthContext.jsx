@@ -48,11 +48,15 @@ export function AuthProvider({ children }) {
       localStorage.setItem("saabq_user", JSON.stringify(user));
       const ws = user.workspace;
       if (ws) {
-        applyWorkspaceBranding(ws.primary_color, ws.secondary_color);
+        applyWorkspaceBranding(
+          ws.primary_color,
+          ws.secondary_color,
+          ws.hover_color,
+        );
       }
     } else {
       localStorage.removeItem("saabq_user");
-      applyWorkspaceBranding(null, null);
+      applyWorkspaceBranding(null, null, null);
     }
   }, [user]);
 

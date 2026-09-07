@@ -137,7 +137,7 @@ export default function ServicesTab({
       user?.workspace?.slug || user?.workspace_slug || "default";
     const serviceSlug =
       typeof service === "object" ? service.slug || service.id : service;
-    return `${window.location.origin}/workspaces/${workspaceSlug}/book?service=${serviceSlug}`;
+    return `${window.location.origin}/${workspaceSlug}/${serviceSlug}`;
   };
 
   const handleOpenCreate = () => {

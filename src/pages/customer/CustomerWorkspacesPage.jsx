@@ -91,7 +91,7 @@ export default function WorkspacesPage() {
             item: {
               "@type": "LocalBusiness",
               name: ws.name,
-              url: `https://cal.saabq.com/workspaces/${ws.slug}`,
+              url: `https://cal.saabq.com/${ws.slug}`,
               ...(ws.description && { description: ws.description }),
               ...(ws.logo_url && { image: ws.logo_url }),
             },
@@ -704,7 +704,7 @@ export default function WorkspacesPage() {
 
                         {/* Action Link */}
                         <Link
-                          to={`/workspaces/${ws.slug}`}
+                          to={`/${ws.slug}`}
                           className="btn btn-md"
                           style={{
                             width: "100%",
