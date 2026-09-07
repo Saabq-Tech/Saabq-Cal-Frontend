@@ -160,6 +160,22 @@ function MainLayout({ children }) {
   );
 }
 
+// Workspace dashboard layout — Navbar only, no Footer or MobileTabBar
+function WorkspaceDashboardLayout({ children }) {
+  return (
+    <div className="app-layout workspace-dashboard-layout">
+      <a href="#main-content" className="skip-link">
+        الانتقال إلى المحتوى الرئيسي / Skip to main content
+      </a>
+      <Navbar />
+      <main id="main-content" tabIndex="-1">
+        {children}
+      </main>
+      <MobileTabBar />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -352,11 +368,11 @@ export default function App() {
                   <Route
                     path="/member"
                     element={
-                      <MainLayout>
+                      <WorkspaceDashboardLayout>
                         <ProtectedRoute>
                           <DashboardLayout />
                         </ProtectedRoute>
-                      </MainLayout>
+                      </WorkspaceDashboardLayout>
                     }
                   >
                     <Route index element={<Navigate to="profile" replace />} />
@@ -372,11 +388,11 @@ export default function App() {
                   <Route
                     path="/member/workspace"
                     element={
-                      <MainLayout>
+                      <WorkspaceDashboardLayout>
                         <ProtectedRoute>
                           <WorkspaceLayout />
                         </ProtectedRoute>
-                      </MainLayout>
+                      </WorkspaceDashboardLayout>
                     }
                   >
                     <Route index element={<WorkspaceHomePage />} />
@@ -411,6 +427,15 @@ export default function App() {
                       element={<WorkspaceResourcesPage />}
                     />
                     <Route path="logs" element={<WorkspaceLogsPage />} />
+                    <Route
+                      path="templates"
+                      element={
+                        <Navigate
+                          to="/member/workspace/settings?sub=templates"
+                          replace
+                        />
+                      }
+                    />
                   </Route>
 
                   {/* Explicit Error Pages */}
@@ -558,6 +583,12 @@ export default function App() {
                     path="/workspace/schedules"
                     element={
                       <Navigate to="/member/workspace/schedules" replace />
+                    }
+                  />
+                  <Route
+                    path="/workspace/templates"
+                    element={
+                      <Navigate to="/member/workspace/templates" replace />
                     }
                   />
 

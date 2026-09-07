@@ -160,6 +160,11 @@ export const endpoints = {
     `/workspace-members/workspace/bookings/${id}/cancel`,
   workspaceBookingReschedule: (id) =>
     `/workspace-members/workspace/bookings/${id}/reschedule`,
+  workspaceBookingSummary: (id) =>
+    `/workspace-members/workspace/bookings/${id}/summary`,
+  workspaceTemplates: "/workspace-members/workspace/templates",
+  workspaceTemplateItem: (id) => `/workspace-members/workspace/templates/${id}`,
+  workspaceKeywords: "/workspace-members/workspace/keywords",
   workspaceSubscription: "/workspace-members/workspace/subscription",
   workspaceSubscriptionCancel:
     "/workspace-members/workspace/subscription/cancel",

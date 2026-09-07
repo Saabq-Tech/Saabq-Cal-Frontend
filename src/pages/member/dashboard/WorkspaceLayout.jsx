@@ -10,6 +10,7 @@ import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import {
   getWorkspaceTabs,
   canViewWorkspaceTab,
+  getWorkspaceSettingsSubTabs,
 } from "../../../config/dashboardNav";
 
 export default function WorkspaceLayout() {
@@ -81,278 +82,282 @@ export default function WorkspaceLayout() {
 
   if (availableTabs.length === 0) {
     return (
-      <div className="main-content">
-        <div className="container profile-page animate-page-enter">
+      <div className="workspace-dashboard-shell">
+        <div style={{ padding: "0 28px" }}>
           <GoogleNotConnectedBanner />
-          <div
+        </div>
+        <div
+          style={{
+            padding: "80px 20px",
+            textAlign: "center",
+            background: "var(--surface)",
+            borderRadius: "var(--radius-lg, 16px)",
+            boxShadow: "var(--shadow-sm)",
+            margin: "20px 28px",
+          }}
+        >
+          <Icon
+            name="shield"
+            size={64}
+            style={{ color: "var(--border-strong)", marginBottom: 16 }}
+          />
+          <h2
             style={{
-              padding: "80px 20px",
-              textAlign: "center",
-              background: "var(--surface)",
-              borderRadius: "var(--radius-lg, 16px)",
-              boxShadow: "var(--shadow-sm)",
-              marginTop: 20,
+              color: "var(--heading)",
+              fontSize: "1.5rem",
+              marginBottom: 8,
             }}
           >
-            <Icon
-              name="shield"
-              size={64}
-              style={{ color: "var(--border-strong)", marginBottom: 16 }}
-            />
-            <h2
-              style={{
-                color: "var(--heading)",
-                fontSize: "1.5rem",
-                marginBottom: 8,
-              }}
-            >
-              {t("noPermissionsTitle") || "صلاحيات محدودة"}
-            </h2>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                maxWidth: 400,
-                margin: "0 auto 24px",
-                lineHeight: 1.6,
-              }}
-            >
-              {t("noPermissionsDesc") ||
-                "ليس لديك أي صلاحيات لعرض أو إدارة إعدادات مساحة العمل. يرجى التواصل مع مالك مساحة العمل لمنحك الصلاحيات اللازمة."}
-            </p>
-            <Link
-              to="/member/profile"
-              className="btn btn-primary"
-              style={{ padding: "10px 24px" }}
-            >
-              <Icon name="arrow-right" size={16} />
-              {t("backToProfile") || "العودة للحساب الشخصي"}
-            </Link>
-          </div>
+            {t("noPermissionsTitle") || "صلاحيات محدودة"}
+          </h2>
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              maxWidth: 400,
+              margin: "0 auto 24px",
+              lineHeight: 1.6,
+            }}
+          >
+            {t("noPermissionsDesc") ||
+              "ليس لديك أي صلاحيات لعرض أو إدارة إعدادات مساحة العمل. يرجى التواصل مع مالك مساحة العمل لمنحك الصلاحيات اللازمة."}
+          </p>
+          <Link
+            to="/member/profile"
+            className="btn btn-primary"
+            style={{ padding: "10px 24px" }}
+          >
+            <Icon name="arrow-right" size={16} />
+            {t("backToProfile") || "العودة للحساب الشخصي"}
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="main-content">
-      <div className="container profile-page animate-page-enter">
-        <GoogleNotConnectedBanner />
+    <div className="workspace-dashboard-shell animate-page-enter">
+      {/* Two-column dashboard grid */}
+      <div className="workspace-dashboard-grid">
+        <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
+          <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
+            {availableTabs.map((wsTab) => {
+              const isCapAllowed =
+                isWorkspaceActive &&
+                checkWorkspaceCapability(user, wsTab.capability);
 
-        {!isWorkspaceActive && (
-          <div className="warning-banner warning-banner-inactive">
-            <div className="warning-banner-content">
-              <div className="warning-banner-icon icon-red">
-                <Icon name="alert-triangle" size={24} />
-              </div>
-              <div className="warning-banner-text">
-                <h4>
-                  {t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة!"}
-                </h4>
-                <p>
-                  {t("workspaceInactiveDesc") ||
-                    "مساحة العمل الخاصة بك بانتظار موافقة الإدارة أو غير مفعّلة حالياً. تم تقييد الوصول لصفحات وبيانات مساحة العمل."}
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/member/profile"
-              className="btn btn-secondary btn-sm warning-banner-action"
-            >
-              <Icon name="user" size={14} />
-              {t("profileInfo") || "الملف الشخصي"}
-            </Link>
-          </div>
-        )}
+              if (!isWorkspaceActive) {
+                return (
+                  <div
+                    key={wsTab.path}
+                    className="profile-sidebar-link"
+                    style={{
+                      opacity: 0.5,
+                      cursor: "not-allowed",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 14px",
+                    }}
+                    title={
+                      t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
+                    }
+                  >
+                    <span className="profile-sidebar-icon">
+                      <Icon name={wsTab.icon} />
+                    </span>
+                    <span style={{ flex: 1 }}>{wsTab.label}</span>
+                    <Icon name="lock" size={14} style={{ color: "#ef4444" }} />
+                  </div>
+                );
+              }
 
-        {isWorkspaceActive && !hasActiveSub && (
-          <div className="warning-banner warning-banner-inactive">
-            <div className="warning-banner-content">
-              <div className="warning-banner-icon icon-red">
-                <Icon name="alert-triangle" size={20} />
-              </div>
-              <div className="warning-banner-text">
-                <p style={{ margin: 0, fontWeight: 600 }}>
-                  {t("noActiveSubscriptionBanner") ||
-                    "تنبيه: مساحة العمل لا تمتلك اشتراكاً نشطاً. تم تقييد الميزات المتقدمة لحين تفعيل اشتراكك."}
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/member/workspace/subscriptions"
-              className="btn btn-danger btn-sm warning-banner-action"
-            >
-              {t("subscribeNow") || "اشترك الآن"}
-            </Link>
-          </div>
-        )}
-
-        {/* The workspace name/email/badges card that used to sit here is
-            gone; the home page's welcome banner already names the workspace,
-            and the status badges moved nothing the sidebar doesn't imply. */}
-
-        <div className="profile-grid">
-          <aside ref={sidebarRef} className="profile-sidebar">
-            <div className="profile-sidebar-header">
-              {t("workspaceDetails") || "إدارة مساحة العمل"}
-            </div>
-
-            <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
-              {availableTabs.map((wsTab) => {
-                const isCapAllowed =
-                  isWorkspaceActive &&
-                  checkWorkspaceCapability(user, wsTab.capability);
-
-                if (!isWorkspaceActive) {
-                  return (
-                    <div
-                      key={wsTab.path}
-                      className="profile-sidebar-link"
-                      style={{
-                        opacity: 0.5,
-                        cursor: "not-allowed",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "10px 14px",
-                      }}
-                      title={
-                        t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
-                      }
-                    >
-                      <span className="profile-sidebar-icon">
-                        <Icon name={wsTab.icon} />
+              return (
+                <Fragment key={wsTab.path}>
+                  <NavLink
+                    to={wsTab.path}
+                    end={wsTab.end}
+                    className={({ isActive }) =>
+                      `profile-sidebar-link${isActive ? " active" : ""}`
+                    }
+                    style={{ opacity: isCapAllowed ? 1 : 0.7 }}
+                  >
+                    <span className="profile-sidebar-icon">
+                      <Icon name={wsTab.icon} />
+                    </span>
+                    <span style={{ flex: 1 }}>{wsTab.label}</span>
+                    {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
+                      <span
+                        style={{
+                          marginInlineStart: "auto",
+                          padding: "2px 8px",
+                          borderRadius: 10,
+                          fontSize: "0.75rem",
+                          fontWeight: 800,
+                          background: "#f59e0b",
+                          color: "#ffffff",
+                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
+                        }}
+                      >
+                        {pendingBookingsCount}
                       </span>
-                      <span style={{ flex: 1 }}>{wsTab.label}</span>
+                    )}
+                    {!isCapAllowed && (
                       <Icon
                         name="lock"
                         size={14}
-                        style={{ color: "#ef4444" }}
+                        style={{
+                          color: "var(--muted)",
+                          marginInlineStart: 6,
+                        }}
                       />
-                    </div>
-                  );
-                }
-
-                return (
-                  <Fragment key={wsTab.path}>
-                    <NavLink
-                      to={wsTab.path}
-                      end={wsTab.end}
-                      className={({ isActive }) =>
-                        `profile-sidebar-link${isActive ? " active" : ""}`
-                      }
-                      style={{ opacity: isCapAllowed ? 1 : 0.7 }}
-                    >
-                      <span className="profile-sidebar-icon">
-                        <Icon name={wsTab.icon} />
-                      </span>
-                      <span style={{ flex: 1 }}>{wsTab.label}</span>
-                      {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
-                        <span
-                          style={{
-                            marginInlineStart: "auto",
-                            padding: "2px 8px",
-                            borderRadius: 10,
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                            background: "#f59e0b",
-                            color: "#ffffff",
-                            boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
-                          }}
-                        >
-                          {pendingBookingsCount}
-                        </span>
-                      )}
-                      {!isCapAllowed && (
-                        <Icon
-                          name="lock"
-                          size={14}
-                          style={{
-                            color: "var(--muted)",
-                            marginInlineStart: 6,
-                          }}
-                        />
-                      )}
-                    </NavLink>
-
-                    {/* Settings' seven screens, nested under it and only while
-                      settings is the open section. */}
-                    {wsTab.subTabs && isSettingsOpen && (
-                      <div className="workspace-subnav">
-                        {wsTab.subTabs.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={`${wsTab.path}?sub=${sub.id}`}
-                            className={`workspace-subnav-item${
-                              activeSettingsTab === sub.id ? " active" : ""
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
                     )}
-                  </Fragment>
-                );
-              })}
-            </nav>
-          </aside>
+                  </NavLink>
 
-          <main
-            key={location.pathname}
-            className="dashboard-content animate-fade-in-up"
-            style={{ flex: 1, minWidth: 0 }}
-          >
-            {!isWorkspaceActive ? (
-              <div
-                style={{
-                  padding: "60px 20px",
-                  textAlign: "center",
-                  background: "var(--surface)",
-                  borderRadius: "var(--radius-lg, 16px)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  boxShadow: "var(--shadow-sm)",
-                }}
-              >
-                <Icon
-                  name="lock"
-                  size={56}
-                  style={{ color: "#ef4444", marginBottom: 16 }}
-                />
-                <h2
-                  style={{
-                    color: "var(--heading)",
-                    fontSize: "1.4rem",
-                    fontWeight: 800,
-                    marginBottom: 8,
-                  }}
+                  {/* Settings' seven screens, nested under it and only while
+                    settings is the open section. */}
+                  {wsTab.subTabs && isSettingsOpen && (
+                    <div className="workspace-subnav">
+                      {wsTab.subTabs.map((sub) => (
+                        <Link
+                          key={sub.id}
+                          to={`${wsTab.path}?sub=${sub.id}`}
+                          className={`workspace-subnav-item${
+                            activeSettingsTab === sub.id ? " active" : ""
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </Fragment>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div
+          key={location.pathname}
+          className="workspace-dashboard-content animate-fade-in-up"
+        >
+          {/* Settings sub-tabs on mobile: placed right under the workspace tabs, before banners and anything else */}
+          {isSettingsOpen && (
+            <div className="settings-subtab-strip">
+              {getWorkspaceSettingsSubTabs(t).map((sub) => (
+                <Link
+                  key={sub.id}
+                  to={`/member/workspace/settings?sub=${sub.id}`}
+                  className={`settings-subtab${
+                    activeSettingsTab === sub.id ? " active" : ""
+                  }`}
                 >
-                  {t("workspaceLockedTitle") || "صفحات مساحة العمل مقفلة"}
-                </h2>
-                <p
-                  style={{
-                    color: "var(--text-secondary)",
-                    maxWidth: 460,
-                    margin: "0 auto 24px",
-                    lineHeight: 1.6,
-                    fontSize: "0.92rem",
-                  }}
-                >
-                  {t("workspaceLockedDesc") ||
-                    "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب غير مفعّل بعد أو بانتظار موافقة أدمن المنصة. يمكنك الاستمرار في تعديل ملفك الشخصي واستعراض الدعم الفني."}
-                </p>
-                <div
-                  style={{ display: "flex", justifyContent: "center", gap: 12 }}
-                >
-                  <Link to="/member/profile" className="btn btn-primary">
-                    <Icon name="user" size={16} />
-                    {t("profileInfo") || "الملف الشخصي"}
-                  </Link>
+                  {sub.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Banners inside the content area */}
+          <GoogleNotConnectedBanner />
+
+          {!isWorkspaceActive && (
+            <div className="warning-banner warning-banner-inactive">
+              <div className="warning-banner-content">
+                <div className="warning-banner-icon icon-red">
+                  <Icon name="alert-triangle" size={24} />
+                </div>
+                <div className="warning-banner-text">
+                  <h4>
+                    {t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة!"}
+                  </h4>
+                  <p>
+                    {t("workspaceInactiveDesc") ||
+                      "مساحة العمل الخاصة بك بانتظار موافقة الإدارة أو غير مفعّلة حالياً. تم تقييد الوصول لصفحات وبيانات مساحة العمل."}
+                  </p>
                 </div>
               </div>
-            ) : (
-              <Outlet />
-            )}
-          </main>
+              <Link
+                to="/member/profile"
+                className="btn btn-secondary btn-sm warning-banner-action"
+              >
+                <Icon name="user" size={14} />
+                {t("profileInfo") || "الملف الشخصي"}
+              </Link>
+            </div>
+          )}
+
+          {isWorkspaceActive && !hasActiveSub && (
+            <div className="warning-banner warning-banner-inactive">
+              <div className="warning-banner-content">
+                <div className="warning-banner-icon icon-red">
+                  <Icon name="alert-triangle" size={20} />
+                </div>
+                <div className="warning-banner-text">
+                  <p style={{ margin: 0, fontWeight: 600 }}>
+                    {t("noActiveSubscriptionBanner") ||
+                      "تنبيه: مساحة العمل لا تمتلك اشتراكاً نشطاً. تم تقييد الميزات المتقدمة لحين تفعيل اشتراكك."}
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/member/workspace/subscriptions"
+                className="btn btn-danger btn-sm warning-banner-action"
+              >
+                {t("subscribeNow") || "اشترك الآن"}
+              </Link>
+            </div>
+          )}
+
+          {!isWorkspaceActive ? (
+            <div
+              style={{
+                padding: "60px 20px",
+                textAlign: "center",
+                background: "var(--surface)",
+                borderRadius: "var(--radius-lg, 16px)",
+                border: "1px solid rgba(239, 68, 68, 0.2)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <Icon
+                name="lock"
+                size={56}
+                style={{ color: "#ef4444", marginBottom: 16 }}
+              />
+              <h2
+                style={{
+                  color: "var(--heading)",
+                  fontSize: "1.4rem",
+                  fontWeight: 800,
+                  marginBottom: 8,
+                }}
+              >
+                {t("workspaceLockedTitle") || "صفحات مساحة العمل مقفلة"}
+              </h2>
+              <p
+                style={{
+                  color: "var(--text-secondary)",
+                  maxWidth: 460,
+                  margin: "0 auto 24px",
+                  lineHeight: 1.6,
+                  fontSize: "0.92rem",
+                }}
+              >
+                {t("workspaceLockedDesc") ||
+                  "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب غير مفعّل بعد أو بانتظار موافقة أدمن المنصة. يمكنك الاستمرار في تعديل ملفك الشخصي واستعراض الدعم الفني."}
+              </p>
+              <div
+                style={{ display: "flex", justifyContent: "center", gap: 12 }}
+              >
+                <Link to="/member/profile" className="btn btn-primary">
+                  <Icon name="user" size={16} />
+                  {t("profileInfo") || "الملف الشخصي"}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </div>
       </div>
     </div>

@@ -8,6 +8,8 @@ import { SkeletonRect } from "../../../../components/ui/Skeleton";
 import { createPortal } from "react-dom";
 import Icon from "../../../../components/common/Icon";
 import { formatCurrency } from "../../../../utils/currency";
+import { useAuth } from "../../../../context/AuthContext";
+import RichTextEditor from "../../../../components/common/RichTextEditor";
 
 export default function BookingDetailsPage({
   bookingId,
@@ -44,12 +46,21 @@ export default function BookingDetailsPage({
   const [followUpPaid, setFollowUpPaid] = useState(false);
   const [creatingFollowUp, setCreatingFollowUp] = useState(false);
 
+  // Summary / Prescription State
+  const { user } = useAuth();
+  const [isEditingSummary, setIsEditingSummary] = useState(false);
+  const [summaryDraft, setSummaryDraft] = useState(
+    initialBooking?.summary || "",
+  );
+  const [savingSummary, setSavingSummary] = useState(false);
+
   const fetchDetails = useCallback(async () => {
     try {
       setLoading(true);
       const res = await client.get(endpoints.workspaceBookingItem(bookingId));
       if (res.data?.data) {
         setBooking(res.data.data);
+        setSummaryDraft(res.data.data.summary || "");
       }
     } catch {
       // Keep initial booking if fetch fails
@@ -445,6 +456,94 @@ export default function BookingDetailsPage({
     toast.success(t("copiedToClipboard") || "تم نسخ خلاصة الموعد بنجاح!");
   };
 
+  const handleSaveSummary = async () => {
+    try {
+      setSavingSummary(true);
+      const res = await client.put(
+        endpoints.workspaceBookingSummary(bookingId),
+        {
+          summary: summaryDraft,
+        },
+      );
+      toast.success(
+        isRTL
+          ? "تم حفظ الوصفة والتقرير بنجاح"
+          : "Prescription saved successfully",
+      );
+      if (res.data?.data) {
+        setBooking(res.data.data);
+      } else {
+        setBooking((prev) => ({ ...prev, summary: summaryDraft }));
+      }
+      setIsEditingSummary(false);
+      if (onReloadBookings) onReloadBookings();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message ||
+          (isRTL ? "فشل حفظ الوصفة" : "Failed to save prescription"),
+      );
+    } finally {
+      setSavingSummary(false);
+    }
+  };
+
+  const handleDeleteSummary = async () => {
+    if (
+      !window.confirm(
+        isRTL
+          ? "هل أنت متأكد من رغبتك في حذف الوصفة والتقرير؟"
+          : "Delete prescription and summary?",
+      )
+    ) {
+      return;
+    }
+    try {
+      setSavingSummary(true);
+      await client.delete(endpoints.workspaceBookingSummary(bookingId));
+      toast.success(
+        isRTL ? "تم حذف الوصفة بنجاح" : "Prescription deleted successfully",
+      );
+      setBooking((prev) => ({ ...prev, summary: null }));
+      setSummaryDraft("");
+      setIsEditingSummary(false);
+      if (onReloadBookings) onReloadBookings();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message ||
+          (isRTL ? "فشل حذف الوصفة" : "Failed to delete prescription"),
+      );
+    } finally {
+      setSavingSummary(false);
+    }
+  };
+
+  const handlePrintSummary = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="${isRTL ? "rtl" : "ltr"}" lang="${lang}">
+        <head>
+          <meta charset="utf-8" />
+          <title>${isRTL ? "الوصفة الطبية والتقرير" : "Prescription & Summary"} #${bookingId}</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; padding: 28px; color: #1e293b; }
+            table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px 12px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          ${booking?.summary || ""}
+          <script>
+            window.onload = function() { window.print(); window.close(); };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   if (loading) {
     return (
       <div
@@ -497,6 +596,25 @@ export default function BookingDetailsPage({
 
   const isCompleted = currentStatus === "completed";
   const isCancelled = currentStatus === "cancelled";
+
+  const isOwner = user?.is_owner === true;
+  const userPermissions = Array.isArray(user?.permissions)
+    ? user.permissions
+    : [];
+  const isAssignedProvider =
+    (b.workspace_member_id && b.workspace_member_id === user?.id) ||
+    (b.workspace_member?.id && b.workspace_member?.id === user?.id);
+  const canEditSummary =
+    isOwner ||
+    canEdit ||
+    userPermissions.includes("booking_write") ||
+    userPermissions.includes("bookings_write") ||
+    isAssignedProvider;
+  const workspaceTypeId =
+    user?.workspace?.workspace_type_id ||
+    user?.workspace_type_id ||
+    b?.workspace?.workspace_type_id ||
+    null;
 
   return (
     <div
@@ -582,6 +700,266 @@ export default function BookingDetailsPage({
           <Icon name="copy" size={14} />
           {t("copySummary") || "نسخ ملخص الموعد"}
         </button>
+      </div>
+
+      {/* PRESCRIPTION & CONSULTATION SUMMARY CARD */}
+      <div
+        className="card-body"
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border-light)",
+          borderRadius: "var(--radius-lg)",
+          padding: 24,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: isEditingSummary || b.summary ? 16 : 0,
+            paddingBottom: isEditingSummary || b.summary ? 14 : 0,
+            borderBottom:
+              isEditingSummary || b.summary
+                ? "1px solid var(--border-light)"
+                : "none",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 8,
+                background: "rgba(14, 165, 233, 0.12)",
+                color: "#0284c7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="file-text" size={20} />
+            </div>
+            <div>
+              <h3
+                style={{
+                  fontSize: "1.05rem",
+                  fontWeight: 800,
+                  margin: 0,
+                  color: "var(--heading)",
+                }}
+              >
+                {isRTL
+                  ? "الوصفة الطبية والتقرير الطبي / ملخص الاستشارة"
+                  : "Prescription & Consultation Summary"}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.8rem",
+                  color: "var(--muted)",
+                  margin: 0,
+                }}
+              >
+                {isRTL
+                  ? "وصفة علاجية، ملاحظات الجلسة، وتوصيات مقدم الخدمة المتاحة للعميل"
+                  : "Prescription, session notes, and treatment recommendations available to the customer"}
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            {b.summary && !isEditingSummary && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handlePrintSummary}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
+                <Icon name="printer" size={14} />
+                {isRTL ? "طباعة الوصفة" : "Print"}
+              </button>
+            )}
+
+            {canEditSummary && !isEditingSummary && (
+              <>
+                {b.summary ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setSummaryDraft(b.summary || "");
+                        setIsEditingSummary(true);
+                      }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Icon name="edit" size={14} />
+                      {isRTL ? "تعديل الوصفة" : "Edit"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={handleDeleteSummary}
+                      disabled={savingSummary}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Icon name="trash" size={14} />
+                      {isRTL ? "حذف" : "Delete"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      setSummaryDraft("");
+                      setIsEditingSummary(true);
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Icon name="plus" size={14} />
+                    {isRTL
+                      ? "+ كتابة وصفة / ملخص للموعد"
+                      : "+ Add Prescription / Summary"}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Content Section */}
+        {isEditingSummary ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <RichTextEditor
+              value={summaryDraft}
+              onChange={setSummaryDraft}
+              enableTemplates={true}
+              enableKeywords={true}
+              enablePrint={true}
+              workspaceTypeId={workspaceTypeId}
+              minHeight="260px"
+              placeholder={
+                isRTL
+                  ? "اكتب تفاصيل الوصفة، الأدوية، التشخيص، التوجيهات أو الملاحظات هنا..."
+                  : "Type prescription details, medications, diagnosis, guidance or notes here..."
+              }
+            />
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 10,
+                alignItems: "center",
+              }}
+            >
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setSummaryDraft(b.summary || "");
+                  setIsEditingSummary(false);
+                }}
+                disabled={savingSummary}
+              >
+                {isRTL ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleSaveSummary}
+                disabled={savingSummary}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
+                {savingSummary && (
+                  <span className="spinner-border spinner-border-sm" />
+                )}
+                {isRTL ? "حفظ الوصفة والتقرير" : "Save Summary"}
+              </button>
+            </div>
+          </div>
+        ) : b.summary ? (
+          <div>
+            <div
+              className="prose"
+              dangerouslySetInnerHTML={{ __html: b.summary }}
+              style={{
+                minHeight: 80,
+                padding: 16,
+                background: "var(--surface-alt)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border-light)",
+                lineHeight: 1.7,
+                fontSize: "0.95rem",
+              }}
+            />
+            {b.summary_updated_at && (
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: "0.78rem",
+                  color: "var(--muted)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Icon name="clock" size={13} />
+                <span>
+                  {isRTL ? "آخر تحديث:" : "Last updated:"}{" "}
+                  {new Date(b.summary_updated_at).toLocaleString(
+                    lang === "ar" ? "ar-EG" : "en-US",
+                  )}
+                </span>
+                {b.summary_updated_by && (
+                  <span>
+                    ({isRTL ? "بواسطة عضو معرف:" : "by member #"}
+                    {b.summary_updated_by})
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          !canEditSummary && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "20px",
+                color: "var(--muted)",
+                fontSize: "0.88rem",
+              }}
+            >
+              {isRTL
+                ? "لم يتم تسجيل وصفة طبية أو ملخص استشارة لهذا الموعد حتى الآن."
+                : "No prescription or consultation summary has been recorded for this appointment yet."}
+            </div>
+          )
+        )}
       </div>
 
       {/* TWO-COLUMN REORGANIZED GRID */}

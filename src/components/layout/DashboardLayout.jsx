@@ -5,21 +5,36 @@ import PageLoader from "../ui/PageLoader";
 import GoogleNotConnectedBanner from "../common/GoogleNotConnectedBanner";
 
 export default function DashboardLayout() {
-  const { user } = useAuth();
+  const { user, userType } = useAuth();
   const location = useLocation();
 
   if (!user) return <PageLoader />;
 
+  // Member: full-width dashboard shell (matches workspace layout)
+  if (userType === "member") {
+    return (
+      <div className="workspace-dashboard-shell animate-page-enter">
+        <div className="workspace-dashboard-grid">
+          <DashboardSidebar variant="dashboard" />
+
+          <div
+            key={location.pathname}
+            className="workspace-dashboard-content animate-fade-in-up"
+          >
+            <GoogleNotConnectedBanner />
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Customer: original constrained-width profile layout
   return (
     <div className="main-content">
       <div className="container profile-page animate-page-enter">
         <GoogleNotConnectedBanner />
 
-        {/* The name/email/badges card that used to sit here duplicated the
-            identity every overview tab (Customer/MemberOverviewTab) already
-            shows in its own welcome banner, one screen below. Removed. */}
-
-        {/* Dashboard Grid Shell */}
         <div className="profile-grid">
           <DashboardSidebar />
 

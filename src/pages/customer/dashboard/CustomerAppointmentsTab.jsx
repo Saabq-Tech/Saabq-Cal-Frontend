@@ -101,6 +101,33 @@ export default function CustomerAppointmentsTab() {
     }
   };
 
+  const handlePrintPrescription = (summary, id) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="${isRTL ? "rtl" : "ltr"}" lang="${lang}">
+        <head>
+          <meta charset="utf-8" />
+          <title>${isRTL ? "الوصفة الطبية والتقرير" : "Prescription & Summary"} #${id || ""}</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; padding: 28px; color: #1e293b; }
+            table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+            th, td { border: 1px solid #cbd5e1; padding: 8px 12px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          ${summary || ""}
+          <script>
+            window.onload = function() { window.print(); window.close(); };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const handleStartChatWithWorkspace = async (appt, e) => {
     if (e) e.stopPropagation();
     setStartingChatId(appt.id);
@@ -1730,6 +1757,113 @@ export default function CustomerAppointmentsTab() {
                           )}
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Prescription & Medical Summary Card */}
+                  {selectedAppointment.summary && (
+                    <div
+                      style={{
+                        padding: 18,
+                        borderRadius: 12,
+                        border: "1px solid rgba(14, 165, 233, 0.3)",
+                        background: "rgba(14, 165, 233, 0.04)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 12,
+                          flexWrap: "wrap",
+                          gap: 8,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <Icon
+                            name="file-text"
+                            size={18}
+                            style={{ color: "#0284c7" }}
+                          />
+                          <h4
+                            style={{
+                              margin: 0,
+                              fontSize: "0.95rem",
+                              fontWeight: 800,
+                              color: "var(--heading)",
+                            }}
+                          >
+                            {isRTL
+                              ? "الوصفة الطبية والتقرير الطبي / ملخص الاستشارة"
+                              : "Prescription & Consultation Summary"}
+                          </h4>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() =>
+                            handlePrintPrescription(
+                              selectedAppointment.summary,
+                              selectedAppointment.id,
+                            )
+                          }
+                          style={{
+                            fontSize: "0.82rem",
+                            padding: "6px 12px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <Icon name="printer" size={14} />
+                          {isRTL ? "طباعة الوصفة" : "Print"}
+                        </button>
+                      </div>
+
+                      <div
+                        className="prose"
+                        dangerouslySetInnerHTML={{
+                          __html: selectedAppointment.summary,
+                        }}
+                        style={{
+                          background: "var(--surface)",
+                          padding: 16,
+                          borderRadius: 8,
+                          border: "1px solid var(--border-light)",
+                          lineHeight: 1.7,
+                          fontSize: "0.93rem",
+                        }}
+                      />
+
+                      {selectedAppointment.summary_updated_at && (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: "0.78rem",
+                            color: "var(--muted)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <Icon name="clock" size={13} />
+                          <span>
+                            {isRTL
+                              ? "تاريخ الإصدار / التحديث:"
+                              : "Issued / Updated:"}{" "}
+                            {new Date(
+                              selectedAppointment.summary_updated_at,
+                            ).toLocaleString(lang === "ar" ? "ar-EG" : "en-US")}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 

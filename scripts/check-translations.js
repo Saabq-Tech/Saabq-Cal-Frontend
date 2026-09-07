@@ -192,6 +192,7 @@ async function runCheck() {
         lineText.includes('errorMsg.includes') ||
         lineText.includes('res.message?.includes') ||
         lineText.includes('label.includes') ||
+        lineText.includes('name.includes') ||
         lineText.includes('"يناير"') ||
         lineText.includes('"فبراير"') ||
         lineText.includes('"مارس"') ||

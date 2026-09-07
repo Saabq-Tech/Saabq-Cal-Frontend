@@ -585,6 +585,12 @@ export default function CustomerBookAppointmentPage() {
 
   const primaryColor = workspace.primary_color || "var(--primary)";
   const secondaryColor = workspace.secondary_color || "var(--secondary)";
+  const bannerUrl =
+    workspace.cover_url ||
+    workspace.cover ||
+    workspace.banner_url ||
+    workspace.banner ||
+    null;
 
   const fieldStatuses = workspace.field_statuses || {};
   const activeQuestions = (workspace.booking_questions || []).filter(
@@ -619,16 +625,34 @@ export default function CustomerBookAppointmentPage() {
         }
         noindex
         canonical={`/${workspace.slug}${selectedService?.slug ? `/${selectedService.slug}` : ""}`}
+        ogImage={bannerUrl || workspace.logo_url}
       />
       {/* Header Banner */}
       <div
         style={{
-          background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          position: "relative",
+          background: bannerUrl
+            ? `url("${bannerUrl}") center/cover no-repeat`
+            : `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          backgroundColor: primaryColor,
           color: "#ffffff",
           padding: "40px 0 60px",
+          overflow: "hidden",
         }}
       >
-        <div className="container">
+        {/* Dark overlay for contrast if banner image exists */}
+        {bannerUrl && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.7) 100%)",
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div
             style={{
               display: "flex",
@@ -1192,7 +1216,8 @@ export default function CustomerBookAppointmentPage() {
                                     <Icon name="clock" size={13} />
                                     <span>
                                       {srv.duration_minutes}{" "}
-                                      {t("durationMinutes") || (isRTL ? "دقيقة" : "min")}
+                                      {t("durationMinutes") ||
+                                        (isRTL ? "دقيقة" : "min")}
                                     </span>
                                   </span>
                                   {(srv.location || srv.requires_meeting) && (
@@ -1643,17 +1668,23 @@ export default function CustomerBookAppointmentPage() {
                             terms_and_conditions: {
                               ar: "أوافق على الشروط والأحكام الخاصة بالحجز والتأكيد",
                               en: "I agree to the Terms & Conditions of booking",
+                              descKey: "termsSubtitle",
                               type: "checkbox",
+                              iconType: "terms",
                             },
                             privacy_policy: {
                               ar: "أوافق على سياسة الخصوصية وحماية البيانات",
                               en: "I agree to the Privacy Policy & Data Protection",
+                              descKey: "privacySubtitle",
                               type: "checkbox",
+                              iconType: "privacy",
                             },
                             data_consent: {
                               ar: "أوافق على جمع ومعالجة بياناتي الشخصية لإتمام الطلب",
                               en: "I consent to the collection and processing of my personal data",
+                              descKey: "dataConsentSubtitle",
                               type: "checkbox",
+                              iconType: "data",
                             },
                           };
 
@@ -1701,56 +1732,202 @@ export default function CustomerBookAppointmentPage() {
                                   : "";
 
                               if (meta.type === "checkbox") {
+                                const isChecked = Boolean(val);
+                                const activeColor =
+                                  primaryColor || "var(--primary)";
+
+                                const iconMap = {
+                                  terms: (
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                      <polyline points="14 2 14 8 20 8" />
+                                      <line x1="16" y1="13" x2="8" y2="13" />
+                                      <line x1="16" y1="17" x2="8" y2="17" />
+                                      <polyline points="10 9 9 9 8 9" />
+                                    </svg>
+                                  ),
+                                  privacy: (
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                    </svg>
+                                  ),
+                                  data: (
+                                    <svg
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <rect
+                                        x="3"
+                                        y="11"
+                                        width="18"
+                                        height="11"
+                                        rx="2"
+                                        ry="2"
+                                      />
+                                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                  ),
+                                };
+
+                                const icon = iconMap[meta.iconType] || (
+                                  <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                );
+
+                                const subtitleText = meta.descKey
+                                  ? t(meta.descKey)
+                                  : isRTL
+                                    ? meta.descAr
+                                    : meta.descEn;
+
                                 return (
                                   <div
                                     key={fieldKey}
+                                    className={`consent-card ${isChecked ? "consent-card--checked" : ""}`}
+                                    onClick={() => {
+                                      setFormFields((p) => ({
+                                        ...p,
+                                        [fieldKey]: !isChecked,
+                                      }));
+                                    }}
                                     style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 10,
-                                      padding: "10px 14px",
-                                      borderRadius: "var(--radius-md)",
-                                      background: "var(--surface-alt)",
-                                      border: "1px solid var(--border-light)",
-                                      marginTop: 4,
+                                      borderColor: isChecked
+                                        ? activeColor
+                                        : undefined,
+                                      boxShadow: isChecked
+                                        ? `0 4px 16px -2px ${activeColor}22, 0 0 0 1.5px ${activeColor}`
+                                        : undefined,
                                     }}
                                   >
+                                    {/* Hidden real input for accessibility & HTML5 form validation */}
                                     <input
                                       type="checkbox"
                                       id={`chk_${fieldKey}`}
-                                      checked={!!val}
+                                      checked={isChecked}
                                       onChange={(e) =>
                                         setFormFields((p) => ({
                                           ...p,
                                           [fieldKey]: e.target.checked,
                                         }))
                                       }
+                                      onClick={(e) => e.stopPropagation()}
                                       required={isRequired}
                                       style={{
-                                        width: 18,
-                                        height: 18,
-                                        cursor: "pointer",
-                                        accentColor: "var(--primary)",
+                                        position: "absolute",
+                                        opacity: 0,
+                                        pointerEvents: "none",
+                                        width: 0,
+                                        height: 0,
                                       }}
                                     />
-                                    <label
-                                      htmlFor={`chk_${fieldKey}`}
+
+                                    {/* Leading Icon Badge */}
+                                    <div
+                                      className="consent-icon-badge"
                                       style={{
-                                        margin: 0,
-                                        fontSize: "0.88rem",
-                                        fontWeight: 600,
-                                        color: "var(--text)",
-                                        cursor: "pointer",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 4,
+                                        color: isChecked
+                                          ? activeColor
+                                          : "var(--text-secondary)",
+                                        background: isChecked
+                                          ? `linear-gradient(135deg, ${activeColor}15 0%, ${activeColor}25 100%)`
+                                          : undefined,
                                       }}
                                     >
-                                      <span>{labelText}</span>
-                                      {isRequired && (
-                                        <span style={{ color: "red" }}> *</span>
+                                      {icon}
+                                    </div>
+
+                                    {/* Center Text Column */}
+                                    <div className="consent-content">
+                                      <label
+                                        htmlFor={`chk_${fieldKey}`}
+                                        className="consent-label"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <span>{labelText}</span>
+                                        {isRequired && (
+                                          <span
+                                            className="consent-required-badge"
+                                            title={
+                                              isRTL ? "حقل إلزامي" : "Required"
+                                            }
+                                          >
+                                            *
+                                          </span>
+                                        )}
+                                      </label>
+
+                                      {subtitleText && (
+                                        <p className="consent-desc">
+                                          {subtitleText}
+                                        </p>
                                       )}
-                                    </label>
+                                    </div>
+
+                                    {/* Custom Modern Checkbox Indicator */}
+                                    <div
+                                      className={`consent-checkbox-indicator ${isChecked ? "is-checked" : ""}`}
+                                      style={{
+                                        background: isChecked
+                                          ? activeColor
+                                          : undefined,
+                                        borderColor: isChecked
+                                          ? activeColor
+                                          : undefined,
+                                        boxShadow: isChecked
+                                          ? `0 2px 8px ${activeColor}40`
+                                          : undefined,
+                                      }}
+                                      aria-hidden="true"
+                                    >
+                                      {isChecked && (
+                                        <svg
+                                          width="13"
+                                          height="13"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="#ffffff"
+                                          strokeWidth="3.4"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                      )}
+                                    </div>
                                   </div>
                                 );
                               }
@@ -2299,7 +2476,8 @@ export default function CustomerBookAppointmentPage() {
                           background: "var(--surface)",
                           borderRadius: "var(--radius-sm)",
                           marginBottom: 12,
-                          border: "1px solid var(--border-light, rgba(0,0,0,0.04))",
+                          border:
+                            "1px solid var(--border-light, rgba(0,0,0,0.04))",
                         }}
                       >
                         {selectedService.workspace_member.avatar_url ? (
@@ -2327,7 +2505,8 @@ export default function CustomerBookAppointmentPage() {
                               flexShrink: 0,
                             }}
                           >
-                            {selectedService.workspace_member.name?.charAt(0) || "U"}
+                            {selectedService.workspace_member.name?.charAt(0) ||
+                              "U"}
                           </div>
                         )}
                         <div style={{ minWidth: 0, flex: 1 }}>
@@ -2388,7 +2567,9 @@ export default function CustomerBookAppointmentPage() {
                         <span style={{ color: "var(--text-secondary)" }}>
                           {isRTL ? "السعر:" : "Price:"}
                         </span>
-                        <strong style={{ color: primaryColor, fontSize: "0.98rem" }}>
+                        <strong
+                          style={{ color: primaryColor, fontSize: "0.98rem" }}
+                        >
                           {formatCurrency(
                             selectedService.price,
                             selectedService.currency_detail ||
@@ -2435,7 +2616,9 @@ export default function CustomerBookAppointmentPage() {
                               flexShrink: 0,
                             }}
                           >
-                            {isRTL ? "طريقة المقابلة / المكان:" : "Format & Location:"}
+                            {isRTL
+                              ? "طريقة المقابلة / المكان:"
+                              : "Format & Location:"}
                           </span>
                           <span
                             style={{
@@ -2498,7 +2681,9 @@ export default function CustomerBookAppointmentPage() {
                           }}
                         >
                           <span>
-                            {isRTL ? "فترات الاستراحة والتجهيز:" : "Buffer Times:"}
+                            {isRTL
+                              ? "فترات الاستراحة والتجهيز:"
+                              : "Buffer Times:"}
                           </span>
                           <span style={{ fontWeight: 600 }}>
                             {[
@@ -2516,7 +2701,9 @@ export default function CustomerBookAppointmentPage() {
                       )}
 
                       {/* Minimum Booking Notice */}
-                      {Boolean(selectedService.minimum_booking_notice_minutes) && (
+                      {Boolean(
+                        selectedService.minimum_booking_notice_minutes,
+                      ) && (
                         <div
                           style={{
                             display: "flex",
@@ -2526,9 +2713,12 @@ export default function CustomerBookAppointmentPage() {
                             color: "var(--text-muted)",
                           }}
                         >
-                          <span>{isRTL ? "المهلة الأدنى للحجز:" : "Min Notice:"}</span>
+                          <span>
+                            {isRTL ? "المهلة الأدنى للحجز:" : "Min Notice:"}
+                          </span>
                           <span style={{ fontWeight: 600 }}>
-                            {selectedService.minimum_booking_notice_minutes >= 60
+                            {selectedService.minimum_booking_notice_minutes >=
+                            60
                               ? `${Math.round(selectedService.minimum_booking_notice_minutes / 60)} ${isRTL ? "ساعة مسبقاً" : "hours advance"}`
                               : `${selectedService.minimum_booking_notice_minutes} ${isRTL ? "دقيقة مسبقاً" : "mins advance"}`}
                           </span>
@@ -2568,7 +2758,9 @@ export default function CustomerBookAppointmentPage() {
                             color: "var(--text-muted)",
                           }}
                         >
-                          <span>{isRTL ? "المنطقة الزمنية:" : "Timezone:"}</span>
+                          <span>
+                            {isRTL ? "المنطقة الزمنية:" : "Timezone:"}
+                          </span>
                           <span style={{ fontWeight: 600, dir: "ltr" }}>
                             {selectedService.timezone || workspace?.timezone}
                           </span>
@@ -2586,7 +2778,9 @@ export default function CustomerBookAppointmentPage() {
                             color: "var(--text-muted)",
                           }}
                         >
-                          <span>{isRTL ? "سياسة الدفع:" : "Payment Policy:"}</span>
+                          <span>
+                            {isRTL ? "سياسة الدفع:" : "Payment Policy:"}
+                          </span>
                           <span style={{ fontWeight: 600 }}>
                             {selectedService.payment_policy === "on_site" ||
                             selectedService.payment_policy === "in_person"
@@ -2595,8 +2789,8 @@ export default function CustomerBookAppointmentPage() {
                                 : "Pay On-site"
                               : selectedService.payment_policy === "prepaid"
                                 ? isRTL
-                                ? "دفع إلكتروني مسبق"
-                                : "Prepaid Online"
+                                  ? "دفع إلكتروني مسبق"
+                                  : "Prepaid Online"
                                 : selectedService.payment_policy}
                           </span>
                         </div>

@@ -1735,6 +1735,14 @@ export const translations = {
     applyChatId: "تطبيق معرف المحادثة",
     applyAndSaveChatId: "تطبيق وحفظ معرف المحادثة",
     instructions: "الإرشادات",
+    print: "طباعة",
+    prescriptionTemplates: "قوالب التقارير والملخصات",
+    termsSubtitle:
+      "تشمل سياسات الحجز، الإلغاء، والتأكيد ومواعيد الحضور لمساحة العمل",
+    privacySubtitle:
+      "نلتزم بحماية خصوصيتك وسرية بياناتك الشخصية وعدم مشاركتها إطلاقاً",
+    dataConsentSubtitle:
+      "الموافقة على استخدام البيانات لغرض معالجة الطلب والتواصل معك فقط",
   },
   en: {
     installApp: "Install App",
@@ -3513,5 +3521,13 @@ export const translations = {
     applyChatId: "Apply Chat ID",
     applyAndSaveChatId: "Apply & Save Chat ID",
     instructions: "Instructions",
+    print: "Print",
+    prescriptionTemplates: "Report & Summary Templates",
+    termsSubtitle:
+      "Includes booking, cancellation, confirmation and attendance policies",
+    privacySubtitle:
+      "We strictly protect your privacy and never share your confidential data",
+    dataConsentSubtitle:
+      "Consent to use data solely for processing this booking and communicating with you",
   },
 };

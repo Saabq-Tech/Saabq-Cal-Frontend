@@ -5,7 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { getAccountTabs } from "../../config/dashboardNav";
 import Icon from "../common/Icon";
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar({ variant }) {
   const { userType, unreadCount = 0, unreadChatCount = 0 } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
@@ -16,7 +16,8 @@ export default function DashboardSidebar() {
   const defaultTab = "overview";
   const activeTab = isProfilePath ? queryParams.get("tab") || defaultTab : null;
 
-  const tabs = getAccountTabs(t, userType);
+  const accountTabs = getAccountTabs(t, userType);
+  const isDashboard = variant === "dashboard";
 
   // Mouse drag-to-scroll & wheel scrolling
   const sidebarRef = useRef(null);
@@ -71,7 +72,9 @@ export default function DashboardSidebar() {
   return (
     <aside
       ref={sidebarRef}
-      className="profile-sidebar"
+      className={
+        isDashboard ? "workspace-dashboard-sidebar" : "profile-sidebar"
+      }
       aria-label={t("profileInfo") || "قائمة الحساب الشخصي"}
       onMouseDown={handleMouseDown}
       onMouseLeave={handleMouseLeave}
@@ -79,12 +82,15 @@ export default function DashboardSidebar() {
       onMouseMove={handleMouseMove}
       onWheel={handleWheel}
     >
-      <div className="profile-sidebar-header">
-        {t("profileInfo") || "الحساب الشخصي"}
-      </div>
+      {!isDashboard && (
+        <div className="profile-sidebar-header">
+          {t("profileInfo") || "الحساب الشخصي"}
+        </div>
+      )}
 
+      {/* Account tabs */}
       <nav ref={navRef} aria-label={t("profileInfo") || "قائمة الحساب"}>
-        {tabs.map((tabItem) => {
+        {accountTabs.map((tabItem) => {
           const isActive = activeTab === tabItem.id;
           const badgeCount =
             tabItem.badge === "unread"

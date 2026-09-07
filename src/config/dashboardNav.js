@@ -33,6 +33,10 @@ export function getWorkspaceSettingsSubTabs(t) {
       id: "notifications",
       label: t("workspaceNotificationTemplates") || "قوالب الإشعارات",
     },
+    {
+      id: "templates",
+      label: t("prescriptionTemplates") || "قوالب التقارير والملخصات",
+    },
   ];
 }
 

@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import { applyWorkspaceBranding } from "../../../utils/theme";
 import SEO from "../../../components/ui/SEO";
-import { getWorkspaceSettingsSubTabs } from "../../../config/dashboardNav";
 import { TabSettingsSkeleton } from "../../../components/ui/Skeleton";
 
 import CapabilityGate from "../../../components/common/CapabilityGate";
@@ -19,6 +18,7 @@ import SocialLinksTab from "./workspace-settings/SocialLinksTab";
 import BookingFormFieldsTab from "./workspace-settings/BookingFormFieldsTab";
 import PaymentReceiptsTab from "./workspace-settings/PaymentReceiptsTab";
 import NotificationTemplatesTab from "./workspace-settings/NotificationTemplatesTab";
+import WorkspaceTemplatesPage from "./WorkspaceTemplatesPage";
 
 export default function WorkspaceSettingsPage() {
   const { user, fetchProfile, updateWorkspaceState } = useAuth();
@@ -390,125 +390,117 @@ export default function WorkspaceSettingsPage() {
     <div>
       <SEO title={t("settings")} noindex />
 
-      {/* On mobile the sidebar (which carries these seven sub-tabs on desktop)
-          is hidden, so surface them here as a horizontal strip. */}
-      <div className="settings-subtab-strip">
-        {getWorkspaceSettingsSubTabs(t).map((sub) => (
-          <Link
-            key={sub.id}
-            to={`/member/workspace/settings?sub=${sub.id}`}
-            className={`settings-subtab${subSettingsTab === sub.id ? " active" : ""}`}
-          >
-            {sub.label}
-          </Link>
-        ))}
-      </div>
-
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
-      <div
-        key={subSettingsTab}
-        className="card animate-tab-card"
-        style={{ padding: 24 }}
-      >
-        {loading ? (
-          <TabSettingsSkeleton />
-        ) : (
-          <>
-            {subSettingsTab === "basic" && (
-              <BasicInfoTab
-                basicForm={basicForm}
-                setBasicForm={setBasicForm}
-                workspaceTypes={workspaceTypes}
-                countries={countries}
-                onSave={(data) =>
-                  handleSaveSection(data, endpoints.workspaceSettingsBasic)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "branding" && (
-              <BrandingTab
-                brandingForm={brandingForm}
-                setBrandingForm={setBrandingForm}
-                onSave={(data) =>
-                  handleSaveSection(data, endpoints.workspaceSettingsBranding)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "timezone" && (
-              <TimezoneTab
-                timezoneForm={timezoneForm}
-                setTimezoneForm={setTimezoneForm}
-                timezones={timezones}
-                onSave={handleSaveSection}
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "social" && (
-              <SocialLinksTab
-                socialForm={socialForm}
-                setSocialForm={setSocialForm}
-                onSave={(data) =>
-                  handleSaveSection(data, endpoints.workspaceSettingsSocial)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "form_fields" && (
-              <BookingFormFieldsTab
-                formFieldsForm={formFieldsForm}
-                setFormFieldsForm={setFormFieldsForm}
-                onSave={(data) =>
-                  handleSaveSection(
-                    data,
-                    endpoints.workspaceSettingsBookingForm,
-                  )
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "payment" && (
-              <PaymentReceiptsTab
-                paymentReceiptsForm={paymentReceiptsForm}
-                setPaymentReceiptsForm={setPaymentReceiptsForm}
-                onSave={(data) =>
-                  handleSaveSection(data, endpoints.workspaceSettingsPayment)
-                }
-                saving={saving}
-                canEdit={canEdit}
-              />
-            )}
-            {subSettingsTab === "notifications" && (
-              <CapabilityGate capabilityCode="CUSTOM_TEMPLATES">
-                <NotificationTemplatesTab
-                  templates={notificationTemplates}
-                  selectedTemplateKey={selectedTemplateKey}
-                  selectTemplateItem={selectTemplateItem}
-                  templateLang={templateLang}
-                  setTemplateLang={setTemplateLang}
-                  notificationForm={notificationForm}
-                  setNotificationForm={setNotificationForm}
-                  onSave={handleSaveNotificationTemplate}
+      {subSettingsTab === "templates" ? (
+        <div key={subSettingsTab} className="animate-tab-card">
+          <WorkspaceTemplatesPage embedded />
+        </div>
+      ) : (
+        <div
+          key={subSettingsTab}
+          className="card animate-tab-card"
+          style={{ padding: 24 }}
+        >
+          {loading ? (
+            <TabSettingsSkeleton />
+          ) : (
+            <>
+              {subSettingsTab === "basic" && (
+                <BasicInfoTab
+                  basicForm={basicForm}
+                  setBasicForm={setBasicForm}
+                  workspaceTypes={workspaceTypes}
+                  countries={countries}
+                  onSave={(data) =>
+                    handleSaveSection(data, endpoints.workspaceSettingsBasic)
+                  }
                   saving={saving}
-                  canEdit={
-                    canEdit && settings?.allow_template_editing !== false
-                  }
-                  allowTemplateEditing={
-                    settings?.allow_template_editing !== false
-                  }
-                  getInterpolatedText={(txt) => txt || ""}
+                  canEdit={canEdit}
                 />
-              </CapabilityGate>
-            )}
-          </>
-        )}
-      </div>
+              )}
+              {subSettingsTab === "branding" && (
+                <BrandingTab
+                  brandingForm={brandingForm}
+                  setBrandingForm={setBrandingForm}
+                  onSave={(data) =>
+                    handleSaveSection(data, endpoints.workspaceSettingsBranding)
+                  }
+                  saving={saving}
+                  canEdit={canEdit}
+                />
+              )}
+              {subSettingsTab === "timezone" && (
+                <TimezoneTab
+                  timezoneForm={timezoneForm}
+                  setTimezoneForm={setTimezoneForm}
+                  timezones={timezones}
+                  onSave={handleSaveSection}
+                  saving={saving}
+                  canEdit={canEdit}
+                />
+              )}
+              {subSettingsTab === "social" && (
+                <SocialLinksTab
+                  socialForm={socialForm}
+                  setSocialForm={setSocialForm}
+                  onSave={(data) =>
+                    handleSaveSection(data, endpoints.workspaceSettingsSocial)
+                  }
+                  saving={saving}
+                  canEdit={canEdit}
+                />
+              )}
+              {subSettingsTab === "form_fields" && (
+                <BookingFormFieldsTab
+                  formFieldsForm={formFieldsForm}
+                  setFormFieldsForm={setFormFieldsForm}
+                  onSave={(data) =>
+                    handleSaveSection(
+                      data,
+                      endpoints.workspaceSettingsBookingForm,
+                    )
+                  }
+                  saving={saving}
+                  canEdit={canEdit}
+                />
+              )}
+              {subSettingsTab === "payment" && (
+                <PaymentReceiptsTab
+                  paymentReceiptsForm={paymentReceiptsForm}
+                  setPaymentReceiptsForm={setPaymentReceiptsForm}
+                  onSave={(data) =>
+                    handleSaveSection(data, endpoints.workspaceSettingsPayment)
+                  }
+                  saving={saving}
+                  canEdit={canEdit}
+                />
+              )}
+              {subSettingsTab === "notifications" && (
+                <CapabilityGate capabilityCode="CUSTOM_TEMPLATES">
+                  <NotificationTemplatesTab
+                    templates={notificationTemplates}
+                    selectedTemplateKey={selectedTemplateKey}
+                    selectTemplateItem={selectTemplateItem}
+                    templateLang={templateLang}
+                    setTemplateLang={setTemplateLang}
+                    notificationForm={notificationForm}
+                    setNotificationForm={setNotificationForm}
+                    onSave={handleSaveNotificationTemplate}
+                    saving={saving}
+                    canEdit={
+                      canEdit && settings?.allow_template_editing !== false
+                    }
+                    allowTemplateEditing={
+                      settings?.allow_template_editing !== false
+                    }
+                    getInterpolatedText={(txt) => txt || ""}
+                  />
+                </CapabilityGate>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
