@@ -118,6 +118,8 @@ export default function Home() {
   const [activeBanner, setActiveBanner] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
 
   const formatTranslatable = (val) => {
     if (val === null || val === undefined) return "";
@@ -282,6 +284,37 @@ export default function Home() {
                 aria-label={
                   lang === "ar" ? "شريط الإعلانات" : "Banner slideshow"
                 }
+                onTouchStart={(e) => {
+                  setTouchEndX(null);
+                  setTouchStartX(e.targetTouches[0].clientX);
+                }}
+                onTouchMove={(e) => {
+                  setTouchEndX(e.targetTouches[0].clientX);
+                }}
+                onTouchEnd={() => {
+                  if (touchStartX === null || touchEndX === null) return;
+                  const distance = touchStartX - touchEndX;
+                  const isSwipe = Math.abs(distance) > 40;
+                  if (isSwipe && banners.length > 1) {
+                    if (distance > 0) {
+                      // swipe left
+                      setActiveBanner((prev) =>
+                        isRTL
+                          ? (prev - 1 + banners.length) % banners.length
+                          : (prev + 1) % banners.length,
+                      );
+                    } else {
+                      // swipe right
+                      setActiveBanner((prev) =>
+                        isRTL
+                          ? (prev + 1) % banners.length
+                          : (prev - 1 + banners.length) % banners.length,
+                      );
+                    }
+                  }
+                  setTouchStartX(null);
+                  setTouchEndX(null);
+                }}
               >
                 {banners.map((banner, i) => {
                   const imageUrl = banner.image || banner.image_url;
@@ -485,11 +518,6 @@ export default function Home() {
                     key={feature.id || i}
                     className={`card card-hover feature-card ${isFlagship ? "flagship-card" : ""}`}
                   >
-                    {isFlagship && (
-                      <span className="flagship-badge">
-                        ★ {t("flagshipBadge")}
-                      </span>
-                    )}
                     <div className="card-icon">
                       {feature.icon_url ? (
                         <img

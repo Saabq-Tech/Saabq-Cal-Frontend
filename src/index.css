@@ -2267,17 +2267,19 @@ html.dark .auth-panel-right {
 }
 
 .modal-scroll-area {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--primary, #0ea5e9) transparent;
-  padding-inline-end: 6px;
+  padding-inline-end: 4px;
 }
 
 .modal-card {
   width: 100%;
   max-width: min(560px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
+  max-height: min(92vh, 850px);
   overflow-y: auto;
   overflow-x: hidden;
   margin: auto;
@@ -2407,7 +2409,7 @@ html.dark .auth-panel-right {
   }
 
   .modal-backdrop {
-    padding: 16px 12px !important;
+    padding: 10px 8px !important;
     align-items: center !important;
     justify-content: center !important;
   }
@@ -2418,12 +2420,12 @@ html.dark .auth-panel-right {
   .modal-card.modal-lg,
   .modal-card.modal-xl {
     width: 100% !important;
-    max-width: min(560px, calc(100vw - 24px)) !important;
-    max-height: 88vh !important;
-    padding: 22px 18px !important;
+    max-width: min(600px, calc(100vw - 16px)) !important;
+    max-height: 94vh !important;
+    padding: 16px 14px !important;
     margin: auto !important;
     box-sizing: border-box !important;
-    border-radius: var(--radius-lg, 16px) !important;
+    border-radius: var(--radius-md, 12px) !important;
   }
 
   .modal-header {
@@ -4300,7 +4302,7 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
   width: 100%;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  min-height: 220px;
+  min-height: 280px;
   box-shadow: var(--shadow-md);
 }
 
@@ -4339,9 +4341,9 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
   inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(2, 42, 53, 0.85) 0%,
-    rgba(2, 42, 53, 0.6) 45%,
-    rgba(2, 42, 53, 0.2) 100%
+    rgba(2, 42, 53, 0.88) 0%,
+    rgba(2, 42, 53, 0.65) 50%,
+    rgba(2, 42, 53, 0.3) 100%
   );
   z-index: 2;
   pointer-events: none;
@@ -4352,8 +4354,8 @@ html[dir="rtl"] .banner-slide::after {
   background: linear-gradient(
     -90deg,
     rgba(2, 42, 53, 0.88) 0%,
-    rgba(2, 42, 53, 0.65) 45%,
-    rgba(2, 42, 53, 0.2) 100%
+    rgba(2, 42, 53, 0.65) 50%,
+    rgba(2, 42, 53, 0.3) 100%
   );
 }
 
@@ -4366,8 +4368,9 @@ html[dir="rtl"] .banner-slide::after {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 36px 48px;
+  padding: 32px 48px;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
 html[dir="rtl"] .banner-slide-content {
@@ -4376,7 +4379,7 @@ html[dir="rtl"] .banner-slide-content {
 }
 
 .banner-slide-content h3 {
-  font-size: 1.75rem;
+  font-size: 1.65rem;
   color: #ffffff !important;
   margin-bottom: 8px;
   font-weight: 800;
@@ -4385,10 +4388,11 @@ html[dir="rtl"] .banner-slide-content {
 }
 
 .banner-slide-content p {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: rgba(255, 255, 255, 0.95) !important;
   max-width: 520px;
-  line-height: 1.6;
+  line-height: 1.55;
+  margin-bottom: 0;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -4410,6 +4414,8 @@ html[dir="rtl"] .banner-slide-content {
   text-decoration: none;
   transition: all 0.2s ease;
   z-index: 12;
+  max-width: 100%;
+  text-align: center;
 }
 
 .banner-slide-btn:hover {
@@ -4424,7 +4430,7 @@ html[dir="rtl"] .banner-slide-content {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .banner-dot {
@@ -4441,6 +4447,122 @@ html[dir="rtl"] .banner-slide-content {
 .banner-dot.active {
   width: 24px;
   background: var(--primary);
+}
+
+/* ── Banner Responsive Breakpoints ── */
+@media (max-width: 768px) {
+  .banner-slider {
+    min-height: 250px;
+  }
+
+  .banner-slide-content {
+    padding: 24px 28px;
+  }
+
+  .banner-slide-content h3 {
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+  }
+
+  .banner-slide-content p {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 100%;
+  }
+
+  .banner-slide-btn {
+    margin-top: 12px;
+    padding: 8px 18px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slider {
+    min-height: 230px;
+    border-radius: var(--radius-md, 10px);
+  }
+
+  .banner-slide::after,
+  html[dir="rtl"] .banner-slide::after {
+    background: linear-gradient(
+      180deg,
+      rgba(2, 42, 53, 0.85) 0%,
+      rgba(2, 42, 53, 0.78) 50%,
+      rgba(2, 42, 53, 0.9) 100%
+    );
+  }
+
+  .banner-slide-content {
+    padding: 16px 16px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  html[dir="rtl"] .banner-slide-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .banner-slide-content h3 {
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+    line-height: 1.25;
+  }
+
+  .banner-slide-content p {
+    font-size: 0.8rem;
+    line-height: 1.35;
+    max-width: 100%;
+    margin-bottom: 0;
+  }
+
+  .banner-slide-btn {
+    margin-top: 10px;
+    padding: 7px 16px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .banner-dots {
+    margin-top: 10px;
+    gap: 6px;
+  }
+
+  .banner-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .banner-dot.active {
+    width: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .banner-slider {
+    min-height: 215px;
+  }
+
+  .banner-slide-content {
+    padding: 12px 10px;
+  }
+
+  .banner-slide-content h3 {
+    font-size: 1.05rem;
+  }
+
+  .banner-slide-content p {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .banner-slide-btn {
+    margin-top: 8px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

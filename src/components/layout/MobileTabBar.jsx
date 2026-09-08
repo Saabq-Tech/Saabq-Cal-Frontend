@@ -31,18 +31,20 @@ export default function MobileTabBar() {
     userType === "member"
       ? [
           {
-            id: "home",
-            to: "/",
-            icon: "home",
-            label: t("home"),
-            isActive: () => path === "/",
+            id: "bookings",
+            to: "/member/workspace/bookings",
+            icon: "calendar",
+            label: t("navBookings") || "الحجوزات",
+            isActive: () => path.startsWith("/member/workspace/bookings"),
           },
           {
             id: "workspace",
             to: "/member/workspace",
             icon: "briefcase",
             label: t("myWorkspace"),
-            isActive: () => path.startsWith("/member/workspace"),
+            isActive: () =>
+              path.startsWith("/member/workspace") &&
+              !path.startsWith("/member/workspace/bookings"),
           },
           {
             id: "account",
@@ -64,18 +66,18 @@ export default function MobileTabBar() {
         ]
       : [
           {
-            id: "home",
-            to: "/",
-            icon: "home",
-            label: t("home"),
-            isActive: () => path === "/",
-          },
-          {
             id: "appointments",
             to: `${prefix}/profile?tab=appointments`,
             icon: "calendar",
             label: t("myAppointments") || "مواعيدي",
             isActive: () => path.endsWith("/profile") && tab === "appointments",
+          },
+          {
+            id: "workspaces",
+            to: "/workspaces",
+            icon: "briefcase",
+            label: t("workspaces") || "مساحات العمل",
+            isActive: () => path.startsWith("/workspaces"),
           },
           {
             id: "account",

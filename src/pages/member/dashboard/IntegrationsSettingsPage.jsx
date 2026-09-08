@@ -1676,38 +1676,20 @@ export default function IntegrationsSettingsPage() {
           <div className="modal-backdrop">
             <div
               className="modal-card animate-scale-up"
-              style={{
-                maxWidth: 780,
-                width: "95%",
-                maxHeight: "90vh",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                padding: 0,
-              }}
+              style={{ maxWidth: 780 }}
             >
-              <div
-                className="modal-header"
-                style={{
-                  padding: "20px 24px 16px",
-                  borderBottom: "1px solid var(--border)",
-                  flexShrink: 0,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <div className="modal-header">
                 <h3
                   className="modal-title"
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: 10,
-                    fontSize: "1.2rem",
+                    fontSize: "1.15rem",
                     fontWeight: 800,
                   }}
                 >
-                  <Icon name="telegram" size={26} />
+                  <Icon name="telegram" size={24} />
                   {t("telegramModalTitle") || "إعدادات Telegram"}
                 </h3>
                 <button
@@ -1719,23 +1701,14 @@ export default function IntegrationsSettingsPage() {
                 </button>
               </div>
 
-              <div
-                style={{
-                  padding: "20px 24px",
-                  overflowY: "auto",
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 20,
-                }}
-              >
+              <div className="modal-body" style={{ gap: 16 }}>
                 {/* Question: Which Bot to Use */}
                 <div>
                   <label
                     style={{
                       fontWeight: 700,
-                      fontSize: "0.95rem",
-                      marginBottom: 12,
+                      fontSize: "0.92rem",
+                      marginBottom: 10,
                       display: "block",
                       color: "var(--text)",
                     }}
@@ -1748,8 +1721,8 @@ export default function IntegrationsSettingsPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(240px, 1fr))",
-                      gap: 12,
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: 10,
                     }}
                   >
                     {/* Custom Bot Option */}
@@ -1757,8 +1730,8 @@ export default function IntegrationsSettingsPage() {
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
-                        gap: 12,
-                        padding: 14,
+                        gap: 10,
+                        padding: "10px 12px",
                         borderRadius: "var(--radius-md)",
                         border:
                           telegramBotType === "custom"
@@ -1788,7 +1761,7 @@ export default function IntegrationsSettingsPage() {
                         <div
                           style={{
                             fontWeight: 700,
-                            fontSize: "0.92rem",
+                            fontSize: "0.9rem",
                             color: "var(--text)",
                           }}
                         >
@@ -1796,9 +1769,10 @@ export default function IntegrationsSettingsPage() {
                         </div>
                         <div
                           style={{
-                            fontSize: "0.8rem",
+                            fontSize: "0.78rem",
                             color: "var(--muted)",
                             marginTop: 2,
+                            lineHeight: 1.4,
                           }}
                         >
                           {t("telegramCustomBotDesc") ||
@@ -1812,8 +1786,8 @@ export default function IntegrationsSettingsPage() {
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
-                        gap: 12,
-                        padding: 14,
+                        gap: 10,
+                        padding: "10px 12px",
                         borderRadius: "var(--radius-md)",
                         border:
                           telegramBotType === "default"
@@ -1843,7 +1817,7 @@ export default function IntegrationsSettingsPage() {
                         <div
                           style={{
                             fontWeight: 700,
-                            fontSize: "0.92rem",
+                            fontSize: "0.9rem",
                             color: "var(--text)",
                           }}
                         >
@@ -1852,9 +1826,10 @@ export default function IntegrationsSettingsPage() {
                         </div>
                         <div
                           style={{
-                            fontSize: "0.8rem",
+                            fontSize: "0.78rem",
                             color: "var(--muted)",
                             marginTop: 2,
+                            lineHeight: 1.4,
                           }}
                         >
                           {t("telegramDefaultBotDesc") ||
@@ -1871,7 +1846,7 @@ export default function IntegrationsSettingsPage() {
                     style={{
                       background: "rgba(32, 123, 89, 0.06)",
                       border: "1px solid rgba(32, 123, 89, 0.2)",
-                      padding: 16,
+                      padding: "12px 14px",
                       borderRadius: "var(--radius-md)",
                     }}
                   >
@@ -2343,19 +2318,7 @@ export default function IntegrationsSettingsPage() {
                 )}
               </div>
 
-              <div
-                className="modal-actions"
-                style={{
-                  padding: "16px 24px",
-                  borderTop: "1px solid var(--border)",
-                  marginTop: 0,
-                  flexShrink: 0,
-                  background: "var(--bg-card)",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 10,
-                }}
-              >
+              <div className="modal-actions">
                 {telegramIntegration && telegramIntegration.is_connected && (
                   <button
                     type="button"
