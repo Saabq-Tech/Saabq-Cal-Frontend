@@ -431,65 +431,231 @@ export default function BasicInfoTab({
         )}
       </div>
 
-      {/* Customer Terminology & Explorer Visibility Section */}
+      {/* Customer Terminology & Icon & Explorer Visibility Section */}
       <div
         style={{
           background: "var(--surface-alt)",
           border: "1px solid var(--border)",
           borderRadius: "var(--radius-lg, 12px)",
-          padding: 20,
+          padding: 24,
           marginBottom: 24,
         }}
       >
-        <h4
-          style={{
-            margin: "0 0 4px 0",
-            fontSize: "1.05rem",
-            fontWeight: 800,
-            color: "var(--heading)",
-          }}
-        >
-          {t("customerLabelSectionTitle") ||
-            "مسمى العملاء والظهور في الاستكشاف"}
-        </h4>
-        <p
-          style={{
-            margin: "0 0 16px 0",
-            fontSize: "0.84rem",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {t("customerLabelSectionDesc") ||
-            "تخصيص المسمى الخـاص بالعملاء في هذه مساحة العمل (مثلاً: مرضى، طلاب، عملاء) وإعدادات الظهور في البحث العام."}
-        </p>
-
         <div
-          className="form-row"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 6,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "rgba(2, 105, 130, 0.12)",
+              color: "var(--primary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name={basicForm.customer_icon || "users"} size={20} />
+          </div>
+          <div>
+            <h4
+              style={{
+                margin: 0,
+                fontSize: "1.1rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+              }}
+            >
+              {t("customerLabelSectionTitle") ||
+                "مسمى وأيقونة العملاء في مساحة العمل"}
+            </h4>
+            <p
+              style={{
+                margin: "2px 0 0 0",
+                fontSize: "0.82rem",
+                color: "var(--text-secondary)",
+              }}
+            >
+              {t("customerLabelSectionDesc") ||
+                "تخصيص المسمى والأيقونة الخاصة بالعملاء لتناسب تخصص مساحة العمل (عيادة: مرضى، أكاديمية: طلاب، مكتب: موكلون)."}
+            </p>
+          </div>
+        </div>
+
+        {/* Available Customer Icons Picker */}
+        <div style={{ marginTop: 18, marginBottom: 20 }}>
+          <label
+            className="form-label"
+            style={{ fontWeight: 700, marginBottom: 8 }}
+          >
+            {t("customerIconLabel") || "أيقونة العملاء في القائمة والواجهة"}
+          </label>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(95px, 1fr))",
+              gap: 10,
+            }}
+          >
+            {[
+              {
+                id: "users",
+                label_ar: "عملاء",
+                label_en: "Clients",
+              },
+              {
+                id: "stethoscope",
+                label_ar: "مرضى",
+                label_en: "Patients",
+              },
+              {
+                id: "graduation-cap",
+                label_ar: "طلاب",
+                label_en: "Students",
+              },
+              {
+                id: "briefcase",
+                label_ar: "موكلون",
+                label_en: "Clients",
+              },
+              {
+                id: "heart",
+                label_ar: "صحة",
+                label_en: "Health",
+              },
+              {
+                id: "activity",
+                label_ar: "أبطال",
+                label_en: "Fitness",
+              },
+              {
+                id: "smile",
+                label_ar: "أطفال/أسنان",
+                label_en: "Smile",
+              },
+              {
+                id: "star",
+                label_ar: "VIP / مميز",
+                label_en: "VIP",
+              },
+              {
+                id: "award",
+                label_ar: "متدربون",
+                label_en: "Trainees",
+              },
+              {
+                id: "building",
+                label_ar: "شركات",
+                label_en: "Corporate",
+              },
+              {
+                id: "user-check",
+                label_ar: "مشتركون",
+                label_en: "Members",
+              },
+              {
+                id: "user",
+                label_ar: "فردي",
+                label_en: "Personal",
+              },
+            ].map((ico) => {
+              const isSelected =
+                (basicForm.customer_icon || "users") === ico.id;
+              const icoLabel = lang === "ar" ? ico.label_ar : ico.label_en;
+              return (
+                <button
+                  key={ico.id}
+                  type="button"
+                  onClick={() =>
+                    canEdit &&
+                    setBasicForm({ ...basicForm, customer_icon: ico.id })
+                  }
+                  className={`btn ${isSelected ? "btn-primary" : "btn-secondary"}`}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    padding: "10px 8px",
+                    borderRadius: "var(--radius-md, 10px)",
+                    border: isSelected
+                      ? "2px solid var(--primary)"
+                      : "1px solid var(--border)",
+                    background: isSelected
+                      ? "var(--primary-subtle, rgba(59, 130, 246, 0.1))"
+                      : "var(--surface)",
+                    color: isSelected ? "var(--primary)" : "var(--text-main)",
+                    cursor: canEdit ? "pointer" : "default",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <Icon
+                    name={ico.id}
+                    size={22}
+                    style={{
+                      color: isSelected
+                        ? "var(--primary)"
+                        : "var(--text-muted)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: isSelected ? 700 : 500,
+                    }}
+                  >
+                    {icoLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Dynamic Customer Terminology Labels (AR / EN) */}
+        <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+            gridTemplateColumns: "1fr 1fr",
             gap: 16,
-            marginBottom: 16,
+            marginBottom: 20,
           }}
         >
           <div className="form-group">
             <label className="form-label">
-              {t("customerLabelSingularLabel") || "مسمى العميل (مفرد)"}
+              {t("customerLabelSingularAr") || "مسمى العميل مفرد (عربي)"}
             </label>
             <input
               type="text"
               className="form-input"
-              value={getLabelValue(basicForm.customer_label_singular)}
+              value={
+                typeof basicForm.customer_label_singular === "object"
+                  ? basicForm.customer_label_singular?.ar || ""
+                  : basicForm.customer_label_singular || ""
+              }
               onChange={(e) =>
                 setBasicForm({
                   ...basicForm,
-                  customer_label_singular: e.target.value,
+                  customer_label_singular:
+                    typeof basicForm.customer_label_singular === "object"
+                      ? {
+                          ...basicForm.customer_label_singular,
+                          ar: e.target.value,
+                        }
+                      : { ar: e.target.value, en: "" },
                 })
               }
               placeholder={
-                t("customerLabelSingularPlaceholder") ||
-                "مثال: مريض، طالب، عميل"
+                lang === "ar"
+                  ? "مثال: مريض، طالب، موكل"
+                  : "e.g. Patient, Student, Client"
               }
               disabled={!canEdit}
             />
@@ -497,23 +663,180 @@ export default function BasicInfoTab({
 
           <div className="form-group">
             <label className="form-label">
-              {t("customerLabelPluralLabel") || "مسمى العملاء (جمع)"}
+              {t("customerLabelSingularEn") || "مسمى العميل مفرد (English)"}
             </label>
             <input
               type="text"
               className="form-input"
-              value={getLabelValue(basicForm.customer_label_plural)}
+              value={
+                typeof basicForm.customer_label_singular === "object"
+                  ? basicForm.customer_label_singular?.en || ""
+                  : ""
+              }
               onChange={(e) =>
                 setBasicForm({
                   ...basicForm,
-                  customer_label_plural: e.target.value,
+                  customer_label_singular:
+                    typeof basicForm.customer_label_singular === "object"
+                      ? {
+                          ...basicForm.customer_label_singular,
+                          en: e.target.value,
+                        }
+                      : {
+                          ar: basicForm.customer_label_singular || "",
+                          en: e.target.value,
+                        },
+                })
+              }
+              placeholder="e.g. Patient, Student, Client"
+              disabled={!canEdit}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              {t("customerLabelPluralAr") || "مسمى العملاء جمع (عربي)"}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={
+                typeof basicForm.customer_label_plural === "object"
+                  ? basicForm.customer_label_plural?.ar || ""
+                  : basicForm.customer_label_plural || ""
+              }
+              onChange={(e) =>
+                setBasicForm({
+                  ...basicForm,
+                  customer_label_plural:
+                    typeof basicForm.customer_label_plural === "object"
+                      ? {
+                          ...basicForm.customer_label_plural,
+                          ar: e.target.value,
+                        }
+                      : { ar: e.target.value, en: "" },
                 })
               }
               placeholder={
-                t("customerLabelPluralPlaceholder") || "مثال: مرضى، طلاب، عملاء"
+                lang === "ar"
+                  ? "مثال: مرضى، طلاب، موكلون"
+                  : "e.g. Patients, Students, Clients"
               }
               disabled={!canEdit}
             />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              {t("customerLabelPluralEn") || "مسمى العملاء جمع (English)"}
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={
+                typeof basicForm.customer_label_plural === "object"
+                  ? basicForm.customer_label_plural?.en || ""
+                  : ""
+              }
+              onChange={(e) =>
+                setBasicForm({
+                  ...basicForm,
+                  customer_label_plural:
+                    typeof basicForm.customer_label_plural === "object"
+                      ? {
+                          ...basicForm.customer_label_plural,
+                          en: e.target.value,
+                        }
+                      : {
+                          ar: basicForm.customer_label_plural || "",
+                          en: e.target.value,
+                        },
+                })
+              }
+              placeholder="e.g. Patients, Students, Clients"
+              disabled={!canEdit}
+            />
+          </div>
+        </div>
+
+        {/* Live Preview Box */}
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px dashed var(--primary)",
+            borderRadius: 10,
+            padding: "12px 16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
+            marginBottom: 16,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                color: "var(--text-secondary)",
+                fontWeight: 600,
+              }}
+            >
+              {t("navigationPreview") || "معاينة زر القائمة:"}
+            </span>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 14px",
+                borderRadius: 8,
+                background: "rgba(2, 105, 130, 0.1)",
+                color: "var(--primary)",
+                fontWeight: 700,
+                fontSize: "0.85rem",
+              }}
+            >
+              <Icon name={basicForm.customer_icon || "users"} size={18} />
+              <span>
+                {getLabelValue(basicForm.customer_label_plural) ||
+                  t("navCustomers") ||
+                  "العملاء"}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                color: "var(--text-secondary)",
+                fontWeight: 600,
+              }}
+            >
+              {t("buttonPreview") || "معاينة زر الإضافة:"}
+            </span>
+            <div
+              className="btn btn-primary"
+              style={{
+                padding: "5px 12px",
+                fontSize: "0.8rem",
+                borderRadius: 6,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                pointerEvents: "none",
+              }}
+            >
+              <Icon name="plus" size={14} />
+              <span>
+                {(t("addCustomerPrefix") || "إضافة") +
+                  " " +
+                  (getLabelValue(basicForm.customer_label_singular) ||
+                    t("customerSingle") ||
+                    "عميل")}
+              </span>
+            </div>
           </div>
         </div>
 

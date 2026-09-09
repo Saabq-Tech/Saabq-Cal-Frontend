@@ -731,11 +731,6 @@ export default function Home() {
                       height={14}
                       style={{ marginTop: 12 }}
                     />
-                    <SkeletonLine
-                      width="50%"
-                      height={32}
-                      style={{ marginTop: 20 }}
-                    />
                     <div
                       style={{
                         marginTop: 24,
@@ -758,12 +753,6 @@ export default function Home() {
                     planNameStr.toLowerCase().includes("pro") ||
                     (plan.type?.value || plan.type) === "FLAT";
                   const planDesc = formatTranslatable(plan.description);
-                  const currencySymbol =
-                    plan.currency_detail?.symbol_native ||
-                    plan.currency_detail?.symbol ||
-                    formatTranslatable(plan.currency_detail?.name) ||
-                    plan.currency ||
-                    (lang === "ar" ? "ر.س" : "SAR");
 
                   return (
                     <article
@@ -777,19 +766,6 @@ export default function Home() {
                       )}
                       <h3>{planNameStr}</h3>
                       {planDesc && <p className="plan-desc">{planDesc}</p>}
-                      <div className="plan-price">
-                        <span className="amount">
-                          {Number(plan.price) === 0 ? 0 : plan.price}
-                        </span>
-                        <span className="currency">{currencySymbol}</span>
-                        <span className="period">
-                          {plan.billing_interval === "yearly"
-                            ? t("yearly") ||
-                              (lang === "ar" ? "/ سنوياً" : "/ year")
-                            : t("monthly") ||
-                              (lang === "ar" ? "/ شهرياً" : "/ month")}
-                        </span>
-                      </div>
                       <ul className="plan-features">
                         <li>
                           ✓{" "}
@@ -837,11 +813,8 @@ export default function Home() {
                         to="/register"
                         className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-block`}
                       >
-                        {Number(plan.price) === 0
-                          ? t("getStartedFree") ||
-                            (lang === "ar" ? "ابدأ مجاناً" : "Get Started Free")
-                          : t("getStarted") ||
-                            (lang === "ar" ? "ابدأ الآن" : "Get Started")}
+                        {t("getStarted") ||
+                          (lang === "ar" ? "ابدأ الآن" : "Get Started")}
                       </Link>
                     </article>
                   );

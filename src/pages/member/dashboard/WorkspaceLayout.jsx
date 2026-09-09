@@ -15,7 +15,7 @@ import {
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const location = useLocation();
 
   const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
@@ -69,7 +69,7 @@ export default function WorkspaceLayout() {
   // The seven settings screens used to be a horizontal strip inside the
   // settings page; they are nested under it in this nav instead, addressed
   // by ?sub= so each one is linkable.
-  const mainWorkspaceTabs = getWorkspaceTabs(t);
+  const mainWorkspaceTabs = getWorkspaceTabs(t, user?.workspace, lang);
 
   const canViewTab = (tab) =>
     canViewWorkspaceTab(tab, isOwner, userPermissions);

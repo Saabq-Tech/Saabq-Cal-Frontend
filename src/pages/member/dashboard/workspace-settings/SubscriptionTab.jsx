@@ -24,7 +24,7 @@ export default function SubscriptionTab({
   const [cancelReason, _setCancelReason] = useState("");
   const [_cancelLoading, setCancelLoading] = useState(false);
   const [selectedUpgradePlanId, setSelectedUpgradePlanId] = useState(null);
-  const [billingCycle, setBillingCycle] = useState("monthly");
+  const [billingCycle] = useState("monthly");
 
   // Payment Methods state
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -595,32 +595,6 @@ export default function SubscriptionTab({
                 </button>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 8,
-                  marginBottom: 20,
-                }}
-              >
-                <button
-                  type="button"
-                  className={`btn btn-sm ${billingCycle === "monthly" ? "btn-primary" : "btn-ghost"}`}
-                  onClick={() => setBillingCycle("monthly")}
-                  style={{ borderRadius: 20, padding: "6px 18px" }}
-                >
-                  {t("filterMonthly") || "فلترة شهرية"}
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-sm ${billingCycle === "yearly" ? "btn-primary" : "btn-ghost"}`}
-                  onClick={() => setBillingCycle("yearly")}
-                  style={{ borderRadius: 20, padding: "6px 18px" }}
-                >
-                  {t("filterYearlyDiscount") || "فلترة سنوية (خصم 20%)"}
-                </button>
-              </div>
-
               {plansLoading ? (
                 <div style={{ padding: 40, textAlign: "center" }}>
                   <span
@@ -659,14 +633,6 @@ export default function SubscriptionTab({
                 <div className="plan-cards-grid">
                   {plans.map((p) => {
                     const selected = selectedUpgradePlanId === p.id;
-                    const rawPrice =
-                      billingCycle === "yearly"
-                        ? p.yearly_price || p.price_yearly || p.price * 10
-                        : p.monthly_price || p.price_monthly || p.price;
-                    const unitStr =
-                      billingCycle === "yearly"
-                        ? t("sarPerYear") || "ر.س / سنوياً"
-                        : t("sarPerMonth") || "ر.س / شهرياً";
 
                     const formatCapStr = (cap) => {
                       if (!cap) return "";
@@ -707,13 +673,6 @@ export default function SubscriptionTab({
                             readOnly
                             className="plan-card-radio"
                           />
-                        </div>
-
-                        <div className="plan-card-price">
-                          {rawPrice}{" "}
-                          <span className="plan-card-price-unit">
-                            {unitStr}
-                          </span>
                         </div>
 
                         {p.description && (

@@ -113,6 +113,12 @@ const WorkspaceResourcesPage = lazy(
 const WorkspaceLogsPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceLogsPage"),
 );
+const WorkspaceCustomersPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceCustomersPage"),
+);
+const WorkspaceCustomerProfilePage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceCustomerProfilePage"),
+);
 const WorkspaceHomePage = lazy(
   () => import("./pages/member/dashboard/MemberOverviewTab"),
 );
@@ -396,6 +402,14 @@ export default function App() {
                     }
                   >
                     <Route index element={<WorkspaceHomePage />} />
+                    <Route
+                      path="customers"
+                      element={<WorkspaceCustomersPage />}
+                    />
+                    <Route
+                      path="customers/:customerId"
+                      element={<WorkspaceCustomerProfilePage />}
+                    />
                     <Route
                       path="settings"
                       element={<WorkspaceSettingsPage />}

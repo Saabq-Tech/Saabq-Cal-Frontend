@@ -41,7 +41,25 @@ export function getWorkspaceSettingsSubTabs(t) {
 }
 
 /** All workspace management tabs (before permission/capability gating). */
-export function getWorkspaceTabs(t) {
+export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
+  const getCustomerLabel = () => {
+    if (workspace?.customer_label_plural) {
+      if (typeof workspace.customer_label_plural === "object") {
+        return (
+          workspace.customer_label_plural[lang] ||
+          workspace.customer_label_plural.ar ||
+          workspace.customer_label_plural.en ||
+          t("navCustomers") ||
+          "العملاء"
+        );
+      }
+      return workspace.customer_label_plural;
+    }
+    return t("navCustomers") || "العملاء";
+  };
+
+  const customerIcon = workspace?.customer_icon || "users";
+
   return [
     {
       id: "home",
@@ -61,6 +79,22 @@ export function getWorkspaceTabs(t) {
       permissions: ["settings_read", "settings_write"],
       capability: null,
       subTabs: getWorkspaceSettingsSubTabs(t),
+    },
+    {
+      id: "customers",
+      path: "/member/workspace/customers",
+      label: getCustomerLabel(),
+      icon: customerIcon,
+      permissions: ["customer_read", "customer_write"],
+      capability: null,
+    },
+    {
+      id: "bookings",
+      path: "/member/workspace/bookings",
+      label: t("navBookings") || "سجل الحجوزات",
+      icon: "calendar",
+      permissions: ["booking_read", "booking_write"],
+      capability: "BOOKING",
     },
     {
       id: "schedules",
@@ -93,14 +127,6 @@ export function getWorkspaceTabs(t) {
       icon: "shield",
       permissions: ["role_read", "role_write"],
       capability: "TEAM_MEMBERS",
-    },
-    {
-      id: "bookings",
-      path: "/member/workspace/bookings",
-      label: t("navBookings") || "سجل الحجوزات",
-      icon: "calendar",
-      permissions: ["booking_read", "booking_write"],
-      capability: "BOOKING",
     },
     {
       id: "subscriptions",
