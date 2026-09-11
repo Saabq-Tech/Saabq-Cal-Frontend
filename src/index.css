@@ -2237,6 +2237,7 @@ html.dark .auth-panel-right {
   .auth-mobile-brand {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-bottom: 20px;
   }
 

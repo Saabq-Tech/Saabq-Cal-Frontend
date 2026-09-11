@@ -95,6 +95,10 @@ export const endpoints = {
 
   // Integrations
   googleIntegration: (type) => `${getAuthPrefix(type)}/integrations/google`,
+  googleSheetsTest: (type) =>
+    `${getAuthPrefix(type)}/integrations/google/sheets/test`,
+  googleSheetsCreate: (type) =>
+    `${getAuthPrefix(type)}/integrations/google/sheets/create`,
   webhookIntegration: (type) => `${getAuthPrefix(type)}/integrations/webhook`,
   telegramIntegration: (type) => `${getAuthPrefix(type)}/integrations/telegram`,
   telegramActivateWebhook: (type) =>

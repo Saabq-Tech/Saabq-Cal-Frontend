@@ -81,9 +81,9 @@ export default function AuthCardLayout({
             hidden below 900px (see the auth-panel-right media query) — the
             form would otherwise open with no brand identity at all. */}
         <div className="auth-mobile-brand">
-          <span className="auth-mobile-brand-icon">
-            <Icon name="calendar" size={26} />
-          </span>
+          <Link to="/" className="auth-brand" style={{ textDecoration: "none" }}>
+            <AppLogo height={38} />
+          </Link>
         </div>
 
         <div className="auth-form-wrapper animate-fade-in-up">{children}</div>

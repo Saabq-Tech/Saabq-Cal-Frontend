@@ -704,6 +704,50 @@ export function AuthProvider({ children }) {
     }
   }, [userType, fetchProfile]);
 
+  const testGoogleSheets = useCallback(async () => {
+    if (!userType) return;
+    setLoading(true);
+    try {
+      const response = await client.post(endpoints.googleSheetsTest(userType));
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to test Google Sheets",
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
+  const createGoogleSheet = useCallback(async () => {
+    if (!userType) return;
+    setLoading(true);
+    try {
+      const response = await client.post(
+        endpoints.googleSheetsCreate(userType),
+      );
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to create Google Sheet",
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, [userType]);
+
   // --- Webhook Integration Methods (Workspace Members) ---
   const fetchWebhookIntegration = useCallback(async () => {
     if (userType !== "member") return;
@@ -973,6 +1017,8 @@ export function AuthProvider({ children }) {
     fetchGoogleIntegration,
     connectGoogleIntegration,
     disconnectGoogleIntegration,
+    testGoogleSheets,
+    createGoogleSheet,
     fetchWebhookIntegration,
     saveWebhookIntegration,
     deleteWebhookIntegration,

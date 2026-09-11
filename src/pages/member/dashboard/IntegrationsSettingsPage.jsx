@@ -86,6 +86,8 @@ export default function IntegrationsSettingsPage() {
     fetchGoogleIntegration,
     connectGoogleIntegration,
     disconnectGoogleIntegration,
+    testGoogleSheets,
+    createGoogleSheet,
     fetchWebhookIntegration,
     saveWebhookIntegration,
     deleteWebhookIntegration,
@@ -149,6 +151,9 @@ export default function IntegrationsSettingsPage() {
   const [sheetLanguage, setSheetLanguage] = useState("ar");
   const [spreadsheetId, setSpreadsheetId] = useState("");
   const [showSheetId, setShowSheetId] = useState(false);
+  const [isTestingSheet, setIsTestingSheet] = useState(false);
+  const [isCreatingSheet, setIsCreatingSheet] = useState(false);
+  const [sheetTestSuccess, setSheetTestSuccess] = useState(false);
 
   const [webhookUrl, setWebhookUrl] = useState("");
   const [isWebhookConfigured, setIsWebhookConfigured] = useState(false);
@@ -507,6 +512,68 @@ export default function IntegrationsSettingsPage() {
       setActiveModalId(null);
     } else {
       toast.error(res.message || "Failed to save Google Sheets settings");
+    }
+  };
+
+  const handleTestGoogleSheets = async () => {
+    if (!googleIntegration) {
+      toast.error(
+        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+      );
+      return;
+    }
+    setIsTestingSheet(true);
+    setSheetTestSuccess(false);
+    try {
+      const res = await testGoogleSheets();
+      if (res?.success) {
+        setSheetTestSuccess(true);
+        if (res.data?.spreadsheet_id) {
+          setSpreadsheetId(res.data.spreadsheet_id);
+        }
+        await loadSecurityData();
+        toast.success(
+          res.message ||
+            t("testRowAddedSuccess") ||
+            "تم! أضيف صف تجريبي في الشيت.",
+        );
+      } else {
+        toast.error(res?.message || "Failed to test Google Sheets");
+      }
+    } catch {
+      toast.error("Failed to test Google Sheets");
+    } finally {
+      setIsTestingSheet(false);
+    }
+  };
+
+  const handleCreateGoogleSheet = async () => {
+    if (!googleIntegration) {
+      toast.error(
+        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+      );
+      return;
+    }
+    setIsCreatingSheet(true);
+    try {
+      const res = await createGoogleSheet();
+      if (res?.success) {
+        if (res.data?.spreadsheet_id) {
+          setSpreadsheetId(res.data.spreadsheet_id);
+        }
+        await loadSecurityData();
+        toast.success(
+          res.message ||
+            t("googleSheetsCreatedSuccessfully") ||
+            "تم إنشاء جدول بيانات Google Sheets وتنسيقه بنجاح",
+        );
+      } else {
+        toast.error(res?.message || "Failed to create Google Sheet");
+      }
+    } catch {
+      toast.error("Failed to create Google Sheet");
+    } finally {
+      setIsCreatingSheet(false);
     }
   };
 
@@ -1059,6 +1126,25 @@ export default function IntegrationsSettingsPage() {
                 borderTop: "1px solid var(--border-light)",
               }}
             >
+              {item.id === "google_sheets" && spreadsheetId?.trim() && (
+                <a
+                  href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-sm"
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    textDecoration: "none",
+                  }}
+                >
+                  <Icon name="external-link" size={13} />
+                  {t("openSheet") || "فتح الشيت"}
+                </a>
+              )}
               <PermissionCheck permission="integration_manage">
                 <button
                   type="button"
@@ -1506,7 +1592,7 @@ export default function IntegrationsSettingsPage() {
                   alignItems: "center",
                   padding: "12px 0",
                   borderBottom: "1px solid var(--border-light)",
-                  marginBottom: 14,
+                  marginBottom: 16,
                 }}
               >
                 <div>
@@ -1524,6 +1610,191 @@ export default function IntegrationsSettingsPage() {
                   onChange={(e) => setSheetsSync(e.target.checked)}
                 />
               </div>
+
+              {!spreadsheetId?.trim() ? (
+                <div
+                  style={{
+                    background: "rgba(32, 123, 89, 0.05)",
+                    border: "1px dashed var(--primary)",
+                    borderRadius: "var(--radius-md)",
+                    padding: 16,
+                    marginBottom: 18,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "0.94rem",
+                      color: "var(--heading)",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {t("createSheetAuto") || "إنشاء جدول Google Sheets تلقائياً"}
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "0.82rem",
+                      color: "var(--muted)",
+                      margin: "0 auto 12px",
+                      maxWidth: 420,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {t("createSheetAutoDesc") ||
+                      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بضغطة زر."}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={handleCreateGoogleSheet}
+                    disabled={isCreatingSheet || !googleIntegration}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "8px 18px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {isCreatingSheet ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm"
+                          style={{ width: 14, height: 14 }}
+                        />
+                        <span>{t("creatingSheet") || "جاري إنشاء الشيت..."}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="plus" size={15} />
+                        <span>
+                          {t("createSheetAuto") || "إنشاء جدول جديد تلقائياً"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: 12,
+                    background: "var(--surface-alt)",
+                    border: "1px solid var(--border-light)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "12px 16px",
+                    marginBottom: 18,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={handleTestGoogleSheets}
+                      disabled={isTestingSheet || !googleIntegration}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontWeight: 700,
+                        fontSize: "0.85rem",
+                        padding: "7px 16px",
+                        borderRadius: 8,
+                        background: "var(--bg-card)",
+                        color: "var(--heading)",
+                        borderColor: "var(--border)",
+                      }}
+                    >
+                      {isTestingSheet ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm"
+                            style={{ width: 14, height: 14 }}
+                          />
+                          <span>
+                            {t("testingSheet") || "جاري اختبار الاتصال..."}
+                          </span>
+                        </>
+                      ) : (
+                        <span>
+                          {t("testSheetConnection") || "اختبار الاتصال بالشيت"}
+                        </span>
+                      )}
+                    </button>
+
+                    <a
+                      href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontWeight: 700,
+                        fontSize: "0.88rem",
+                        color: "var(--primary)",
+                        textDecoration: "underline",
+                        textUnderlineOffset: 3,
+                      }}
+                    >
+                      <Icon name="external-link" size={15} />
+                      <span>{t("openSheet") || "فتح الشيت"}</span>
+                    </a>
+
+                    {sheetTestSuccess && (
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: "0.86rem",
+                          color: "var(--primary, #207b59)",
+                          fontWeight: 700,
+                        }}
+                      >
+                        <span>✓</span>
+                        <span>
+                          {t("testRowAddedSuccess") ||
+                            "تم! أضيف صف تجريبي في الشيت."}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCreateGoogleSheet}
+                    disabled={isCreatingSheet}
+                    style={{
+                      border: 0,
+                      background: "transparent",
+                      color: "var(--muted)",
+                      fontSize: "0.78rem",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                    title={
+                      t("recreateSheetAuto") ||
+                      "إعادة إنشاء جدول جديد بتنسيق النظام"
+                    }
+                  >
+                    {isCreatingSheet
+                      ? t("creatingSheet") || "جاري الإنشاء..."
+                      : t("recreateSheetAuto") || "إعادة إنشاء جدول جديد"}
+                  </button>
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: 14 }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
