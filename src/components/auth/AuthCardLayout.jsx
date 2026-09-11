@@ -81,7 +81,11 @@ export default function AuthCardLayout({
             hidden below 900px (see the auth-panel-right media query) — the
             form would otherwise open with no brand identity at all. */}
         <div className="auth-mobile-brand">
-          <Link to="/" className="auth-brand" style={{ textDecoration: "none" }}>
+          <Link
+            to="/"
+            className="auth-brand"
+            style={{ textDecoration: "none" }}
+          >
             <AppLogo height={38} />
           </Link>
         </div>

@@ -6,6 +6,7 @@ import { LanguageProvider } from "../context/LanguageContext";
 // Components to test
 import Home from "../pages/Home";
 import Blog from "../pages/Blog";
+import BlogPostDetailPage from "../pages/BlogPostDetailPage";
 import CustomerWorkspacesPage from "../pages/customer/CustomerWorkspacesPage";
 import MemberLoginPage from "../pages/member/auth/MemberLoginPage";
 import CustomerLoginPage from "../pages/customer/auth/CustomerLoginPage";
@@ -76,6 +77,9 @@ vi.mock("../api/client", () => ({
     banners: "/banners",
     faqs: "/faqs",
     about: "/about",
+    posts: "/posts",
+    postDetail: (slug) => `/posts/${slug}`,
+    postCategories: "/posts/categories",
     publicWorkspaces: "/customers/workspaces",
     workspaceCustomers: "/workspace-members/workspace/customers",
     workspaceCustomerItem: (id) =>
@@ -111,6 +115,11 @@ describe("All Primary Application Routes Visual & Render Integrity", () => {
 
   it("renders Blog page without crash", () => {
     const { container } = renderWithProviders(<Blog />);
+    expect(container).toBeTruthy();
+  });
+
+  it("renders Blog Post Detail page without crash", () => {
+    const { container } = renderWithProviders(<BlogPostDetailPage />);
     expect(container).toBeTruthy();
   });
 

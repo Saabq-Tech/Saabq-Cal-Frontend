@@ -223,6 +223,7 @@ export default function IntegrationsSettingsPage() {
       setSheetsSync(!!gRes.data.sheets_sync_enabled);
       if (gRes.data.spreadsheet_id) setSpreadsheetId(gRes.data.spreadsheet_id);
       if (gRes.data.calendar_id) setCalendarId(gRes.data.calendar_id);
+      if (gRes.data.sheet_language) setSheetLanguage(gRes.data.sheet_language);
     } else {
       setGoogleIntegration(null);
       setCalendarSync(false);
@@ -1630,7 +1631,8 @@ export default function IntegrationsSettingsPage() {
                       marginBottom: 4,
                     }}
                   >
-                    {t("createSheetAuto") || "إنشاء جدول Google Sheets تلقائياً"}
+                    {t("createSheetAuto") ||
+                      "إنشاء جدول Google Sheets تلقائياً"}
                   </div>
                   <p
                     style={{
@@ -1663,7 +1665,9 @@ export default function IntegrationsSettingsPage() {
                           className="spinner-border spinner-border-sm"
                           style={{ width: 14, height: 14 }}
                         />
-                        <span>{t("creatingSheet") || "جاري إنشاء الشيت..."}</span>
+                        <span>
+                          {t("creatingSheet") || "جاري إنشاء الشيت..."}
+                        </span>
                       </>
                     ) : (
                       <>
@@ -1857,16 +1861,16 @@ export default function IntegrationsSettingsPage() {
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginTop: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {spreadsheetId?.trim() && (
+                {spreadsheetId?.trim() && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      marginTop: 12,
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <a
                       href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
                       target="_blank"
@@ -1884,26 +1888,8 @@ export default function IntegrationsSettingsPage() {
                       <Icon name="external-link" size={14} />
                       {t("openSheetInDrive") || "فتح المستند في Google Drive"}
                     </a>
-                  )}
-
-                  <a
-                    href="https://sheets.new"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-outline btn-sm"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      textDecoration: "none",
-                      fontSize: "0.82rem",
-                      padding: "6px 12px",
-                    }}
-                  >
-                    <Icon name="plus" size={14} />
-                    {t("createNewSheet") || "إنشاء مستند جديد"}
-                  </a>
-                </div>
+                  </div>
+                )}
               </div>
 
               <div className="modal-actions">

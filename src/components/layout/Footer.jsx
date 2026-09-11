@@ -94,6 +94,9 @@ export default function Footer() {
                 <a href="/#pricing">{t("navPricing")}</a>
               </li>
               <li>
+                <Link to="/blog">{t("navBlog")}</Link>
+              </li>
+              <li>
                 <Link to="/login">{t("signIn")}</Link>
               </li>
               <li>

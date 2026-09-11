@@ -329,17 +329,19 @@ export default function Navbar() {
                     {t("navPricingShort")}
                   </a>
                 </li>
-
-                {/* <li>
-                  <Link
-                    to="/blog"
-                    className={location.pathname === "/blog" ? "active" : ""}
-                  >
-                    {t("navBlog")}
-                  </Link>
-                </li> */}
               </>
             )}
+
+            <li>
+              <Link
+                to="/blog"
+                className={
+                  location.pathname.startsWith("/blog") ? "active" : ""
+                }
+              >
+                {t("navBlog")}
+              </Link>
+            </li>
 
             <li>
               <Link
@@ -770,8 +772,18 @@ export default function Navbar() {
                 </a>
 
                 <Link
+                  to="/blog"
+                  className={`mobile-drawer-link${location.pathname.startsWith("/blog") ? " active" : ""}`}
+                  onClick={closeMobileDrawer}
+                >
+                  <Icon name="book-open" />
+                  <span>{t("navBlog")}</span>
+                </Link>
+
+                <Link
                   to="/workspaces"
                   className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                  onClick={closeMobileDrawer}
                 >
                   <Icon name="monitor" />
                   <span>{t("workspaces", "مساحات العمل")}</span>
@@ -823,14 +835,6 @@ export default function Navbar() {
                       <Icon name="credit-card" />
                       <span>{t("navPricing")}</span>
                     </a>
-
-                    <Link
-                      to="/blog"
-                      className={`mobile-drawer-link${location.pathname === "/blog" ? " active" : ""}`}
-                    >
-                      <Icon name="book-open" />
-                      <span>{t("navBlog")}</span>
-                    </Link>
                   </>
                 )}
 

@@ -198,6 +198,26 @@ export const translations = {
     blogComingSoon: "المدونة قريباً",
     blogComingSoonDesc:
       "نجهّز لك مقالات ونصائح عملية عن تنظيم المواعيد وإدارة الحجوزات. تابعنا قريباً.",
+    blogSubtitle:
+      "أحدث المقالات والأفكار والنصائح العملية لتنظيم المواعيد وتطوير الأعمال",
+    searchArticlesPlaceholder: "ابحث في المقالات...",
+    minRead: "دقائق للقراءة",
+    readArticle: "قراءة المقال",
+    publishedOn: "نُشر في",
+    authorBy: "بواسطة",
+    shareArticle: "مشاركة المقال",
+    relatedArticles: "مقالات ذات صلة",
+    noArticlesFound: "لم يتم العثور على مقالات تطابق بحثك",
+    clearFilters: "مسح الفلاتر",
+    featuredArticle: "مقال مميز",
+    backToBlog: "العودة إلى المدونة",
+    tableOfContents: "محتويات المقال",
+    readyToStartWorkspace: "جاهز لتنظيم وإدارة مواعيد أعمالك؟",
+    readyToStartWorkspaceDesc:
+      "أنشئ مساحة عملك على تقويم سابق وابدأ باستقبال الحجوزات الذكية خلال دقائق.",
+    createWorkspaceNow: "أنشئ مساحة عملك الآن",
+    viewsCount: "مشاهدة",
+    googleSheetsCreatedSuccessfully: "تم إنشاء وتنسيق جدول Google Sheets بنجاح",
     heroTitlePrefix: "تحكم في جدول ",
     heroTitleSpan: "مواعيدك بكفاءة",
     heroDescription:
@@ -792,7 +812,8 @@ export const translations = {
     openSheet: "فتح الشيت",
     testRowAddedSuccess: "تم! أضيف صف تجريبي في الشيت.",
     createSheetAuto: "إنشاء جدول Google Sheets تلقائياً",
-    createSheetAutoDesc: "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بضغطة زر.",
+    createSheetAutoDesc:
+      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بضغطة زر.",
     creatingSheet: "جاري إنشاء الشيت...",
     testingSheet: "جاري اختبار الاتصال...",
     recreateSheetAuto: "إعادة إنشاء جدول جديد بتنسيق النظام",
@@ -2088,6 +2109,27 @@ export const translations = {
     blogComingSoon: "The blog is coming soon",
     blogComingSoonDesc:
       "We are preparing practical articles and tips on organising appointments and managing bookings. Follow us soon.",
+    blogSubtitle:
+      "Latest articles, insights, and practical tips for smart scheduling and business growth",
+    searchArticlesPlaceholder: "Search articles...",
+    minRead: "min read",
+    readArticle: "Read Article",
+    publishedOn: "Published on",
+    authorBy: "By",
+    shareArticle: "Share Article",
+    relatedArticles: "Related Articles",
+    noArticlesFound: "No articles found matching your criteria",
+    clearFilters: "Clear Filters",
+    featuredArticle: "Featured Article",
+    backToBlog: "Back to Blog",
+    tableOfContents: "Table of Contents",
+    readyToStartWorkspace: "Ready to automate your scheduling?",
+    readyToStartWorkspaceDesc:
+      "Set up your workspace on Saabq Cal and start accepting appointments within minutes.",
+    createWorkspaceNow: "Create Workspace Now",
+    viewsCount: "views",
+    googleSheetsCreatedSuccessfully:
+      "Google Sheets created and formatted successfully",
     heroTitlePrefix: "Take Control of Your ",
     heroTitleSpan: "Schedule",
     heroDescription:
@@ -2670,7 +2712,8 @@ export const translations = {
     openSheet: "Open Sheet",
     testRowAddedSuccess: "Done! Test row added to sheet.",
     createSheetAuto: "Create Google Sheet Automatically",
-    createSheetAutoDesc: "No spreadsheet is currently linked. Create one with all 26 attributes and approved styling in one click.",
+    createSheetAutoDesc:
+      "No spreadsheet is currently linked. Create one with all 26 attributes and approved styling in one click.",
     creatingSheet: "Creating sheet...",
     testingSheet: "Testing connection...",
     recreateSheetAuto: "Recreate New Sheet with System Style",

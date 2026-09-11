@@ -18,6 +18,7 @@ import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 // Lazy-loaded Pages
 const Home = lazy(() => import("./pages/Home"));
 const Blog = lazy(() => import("./pages/Blog"));
+const BlogPostDetailPage = lazy(() => import("./pages/BlogPostDetailPage"));
 
 // Customer Workspace Suite Pages
 const CustomerWorkspacesPage = lazy(
@@ -48,12 +49,6 @@ const CustomerVerifyAccountPage = lazy(
 );
 const CustomerProfilePage = lazy(
   () => import("./pages/customer/dashboard/CustomerProfilePage"),
-);
-const CustomerSecurityPage = lazy(
-  () => import("./pages/customer/dashboard/CustomerSecurityPage"),
-);
-const CustomerChangePasswordPage = lazy(
-  () => import("./pages/customer/dashboard/CustomerChangePasswordPage"),
 );
 
 // Workspace Member Suite Auth & Dashboard Pages
@@ -226,6 +221,14 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/blog/:slug"
+                    element={
+                      <MainLayout>
+                        <BlogPostDetailPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
                     path="/workspaces"
                     element={
                       <MainLayout>
@@ -322,10 +325,41 @@ export default function App() {
                   >
                     <Route index element={<Navigate to="profile" replace />} />
                     <Route path="profile" element={<CustomerProfilePage />} />
-                    <Route path="security" element={<CustomerSecurityPage />} />
+                    <Route
+                      path="security"
+                      element={
+                        <Navigate to="/customer/profile?tab=security" replace />
+                      }
+                    />
                     <Route
                       path="change-password"
-                      element={<CustomerChangePasswordPage />}
+                      element={
+                        <Navigate to="/customer/profile?tab=password" replace />
+                      }
+                    />
+                    <Route
+                      path="notifications"
+                      element={
+                        <Navigate
+                          to="/customer/profile?tab=notifications"
+                          replace
+                        />
+                      }
+                    />
+                    <Route
+                      path="chats"
+                      element={
+                        <Navigate to="/customer/profile?tab=chats" replace />
+                      }
+                    />
+                    <Route
+                      path="appointments"
+                      element={
+                        <Navigate
+                          to="/customer/profile?tab=appointments"
+                          replace
+                        />
+                      }
                     />
                   </Route>
 
@@ -577,13 +611,45 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/customer/notifications"
+                    element={
+                      <Navigate
+                        to="/customer/profile?tab=notifications"
+                        replace
+                      />
+                    }
+                  />
+                  <Route
+                    path="/customer/chats"
+                    element={
+                      <Navigate to="/customer/profile?tab=chats" replace />
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <Navigate
+                        to="/customer/profile?tab=notifications"
+                        replace
+                      />
+                    }
+                  />
+                  <Route
+                    path="/chats"
+                    element={
+                      <Navigate to="/customer/profile?tab=chats" replace />
+                    }
+                  />
+                  <Route
                     path="/security"
-                    element={<Navigate to="/customer/security" replace />}
+                    element={
+                      <Navigate to="/customer/profile?tab=security" replace />
+                    }
                   />
                   <Route
                     path="/change-password"
                     element={
-                      <Navigate to="/customer/change-password" replace />
+                      <Navigate to="/customer/profile?tab=password" replace />
                     }
                   />
                   <Route

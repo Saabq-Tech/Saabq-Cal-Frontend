@@ -223,7 +223,10 @@ export function getAccountTabs(t, userType) {
     },
     {
       id: "notifications",
-      to: `${prefix}/notifications`,
+      to:
+        userType === "member"
+          ? `${prefix}/notifications`
+          : `${prefix}/profile?tab=notifications`,
       icon: "bell",
       label: t("notificationsTab"),
       show: true,
@@ -231,7 +234,10 @@ export function getAccountTabs(t, userType) {
     },
     {
       id: "chats",
-      to: `${prefix}/chats`,
+      to:
+        userType === "member"
+          ? `${prefix}/chats`
+          : `${prefix}/profile?tab=chats`,
       icon: "message-square",
       label: t("chatsTab"),
       show: true,
