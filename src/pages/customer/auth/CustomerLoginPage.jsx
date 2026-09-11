@@ -375,7 +375,7 @@ export default function CustomerLoginPage() {
       </form>
 
       <div className="auth-footer">
-        {t("dontHaveAccount", "ليس لديك حساب؟")}{" "}
+        {t("dontHaveAccount", "معندكش حساب؟")}{" "}
         <Link to="/customer/register">{t("signUp", "إنشاء حساب")}</Link>
       </div>
     </AuthCardLayout>

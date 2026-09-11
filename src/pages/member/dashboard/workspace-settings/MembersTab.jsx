@@ -117,7 +117,7 @@ export default function MembersTab({
             style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
           >
             <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "العرض فقط (بدون تعديل)"}
+            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
           </span>
         )}
       </div>

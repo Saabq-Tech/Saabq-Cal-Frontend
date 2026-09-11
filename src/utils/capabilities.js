@@ -7,6 +7,14 @@
 export function checkWorkspaceCapability(user, capabilityCode) {
   if (!user || !user.workspace) return false;
 
+  // External REST API integration can be disabled by admin for this workspace
+  if (
+    capabilityCode === "REST_API" &&
+    user.workspace.api_integration_enabled === false
+  ) {
+    return false;
+  }
+
   // General settings & subscriptions management pages are always accessible for every workspace
   if (
     !capabilityCode ||
@@ -28,4 +36,15 @@ export function checkWorkspaceCapability(user, capabilityCode) {
     : [];
 
   return activeCaps.includes(capabilityCode);
+}
+
+/**
+ * Checks whether external API integration is enabled for this workspace (both master switch and plan capability).
+ * @param {object} user - The authenticated user object from AuthContext
+ * @returns {boolean}
+ */
+export function isApiIntegrationEnabled(user) {
+  if (!user || !user.workspace) return false;
+  if (user.workspace.api_integration_enabled === false) return false;
+  return checkWorkspaceCapability(user, "REST_API");
 }

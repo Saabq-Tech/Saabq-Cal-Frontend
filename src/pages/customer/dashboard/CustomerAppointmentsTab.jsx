@@ -76,7 +76,7 @@ export default function CustomerAppointmentsTab() {
       } catch (err) {
         toast.error(
           err.response?.data?.message ||
-            (isRTL ? "فشل تحميل المواعيد" : "Failed to load appointments"),
+            (isRTL ? "تحميل المواعيد منجحش" : "Failed to load appointments"),
         );
       } finally {
         setLoading(false);
@@ -474,7 +474,7 @@ export default function CustomerAppointmentsTab() {
             <section class="report-box">
               <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
               <div class="report-content">
-                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
+                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مفيش نص متسجل للتقرير." : "No report content recorded."}</p>`}
               </div>
             </section>
 
@@ -553,7 +553,7 @@ export default function CustomerAppointmentsTab() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل بدء المحادثة" : "Failed to start chat"),
+          (isRTL ? "بدء المحادثة منجحش" : "Failed to start chat"),
       );
     } finally {
       setStartingChatId(null);
@@ -595,7 +595,7 @@ export default function CustomerAppointmentsTab() {
     if (!rescheduleModalAppt || !rescheduleDate || !rescheduleTime) {
       toast.error(
         isRTL
-          ? "يرجى اختيار التاريخ والوقت الجديد"
+          ? "من فضلك اختار التاريخ والوقت الجديد"
           : "Please select a new date and time",
       );
       return;
@@ -661,7 +661,7 @@ export default function CustomerAppointmentsTab() {
     if (!paymentId) {
       toast.error(
         isRTL
-          ? "لم يتم العثور على سجل دفع لهذا الموعد"
+          ? "ملقيناش سجل دفع للميعاد ده"
           : "No payment record found for this appointment",
       );
       return;
@@ -679,7 +679,7 @@ export default function CustomerAppointmentsTab() {
       } else {
         toast.error(
           isRTL
-            ? "يرجى اختيار صورة إيصال السداد"
+            ? "من فضلك اختار صورة إيصال السداد"
             : "Please select a receipt proof file",
         );
         setUploadingProof(false);
@@ -1079,7 +1079,7 @@ export default function CustomerAppointmentsTab() {
                 marginBottom: 6,
               }}
             >
-              {t("noCustomerAppointments") || "لا توجد لديك مواعيد حالياً"}
+              {t("noCustomerAppointments") || "معندكش مواعيد دلوقتي"}
             </h3>
             <p
               style={{
@@ -2629,7 +2629,7 @@ export default function CustomerAppointmentsTab() {
                           }}
                         >
                           {isRTL
-                            ? "لم يتم إرفاق صورة إيصال سداد مع هذا الموعد"
+                            ? "مفيش صورة إيصال سداد مرفقة مع الميعاد ده"
                             : "No receipt image attached with this booking"}
                         </span>
                       </div>
@@ -2884,7 +2884,7 @@ export default function CustomerAppointmentsTab() {
                 }}
               >
                 {isRTL
-                  ? "هل أنت تأكد من رغبتك في إلغاء هذا الموعد؟"
+                  ? "إنت متأكد إنك عايز تلغي الميعاد ده؟"
                   : "Are you sure you want to cancel this appointment?"}
               </p>
 

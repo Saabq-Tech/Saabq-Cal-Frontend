@@ -85,6 +85,9 @@ const ChatsPage = lazy(() => import("./components/dashboard/ChatsPage"));
 const WorkspaceLayout = lazy(
   () => import("./pages/member/dashboard/WorkspaceLayout"),
 );
+const WorkspaceApiIntegrationPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceApiIntegrationPage"),
+);
 const WorkspaceSettingsPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceSettingsPage"),
 );
@@ -440,6 +443,10 @@ export default function App() {
                       element={<IntegrationsSettingsPage />}
                     />
                     <Route
+                      path="api-integration"
+                      element={<WorkspaceApiIntegrationPage />}
+                    />
+                    <Route
                       path="notifications"
                       element={<NotificationsPage />}
                     />
@@ -510,6 +517,10 @@ export default function App() {
                           replace
                         />
                       }
+                    />
+                    <Route
+                      path="api-integration"
+                      element={<WorkspaceApiIntegrationPage />}
                     />
                   </Route>
 

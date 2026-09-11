@@ -26,7 +26,7 @@ export default function GoogleNotConnectedBanner() {
           </h4>
           <p>
             {t("googleNotConnectedBannerDesc") ||
-              "حساب Google الخاص بك غير مرتبط حالياً. لن تتم مزامنة المواعيد أو إنشاء روابط Google Meet تلقائياً حتى تقوم بربط حسابك."}
+              "حساب Google بتاعك مش مربوط دلوقتي. مش هتتم مزامنة المواعيد أو إنشاء لينكات Google Meet تلقائياً لحد ما تربط حسابك."}
           </p>
         </div>
       </div>

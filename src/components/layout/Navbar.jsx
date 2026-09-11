@@ -233,7 +233,7 @@ export default function Navbar() {
   const isWorkspaceActive = user?.workspace?.status === "active";
   const drawerAccountTabs = getAccountTabs(t, userType);
   const drawerWorkspaceTabs = getWorkspaceTabs(t, user?.workspace, lang).filter(
-    (tab) => canViewWorkspaceTab(tab, isOwner, userPermissions),
+    (tab) => canViewWorkspaceTab(tab, isOwner, userPermissions, user),
   );
 
   return (

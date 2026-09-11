@@ -50,7 +50,7 @@ export default function NotificationTemplatesTab({
             color: "var(--heading)",
           }}
         >
-          {t("noNotificationTemplates") || "لا يوجد قوالب إشعارات متاحة"}
+          {t("noNotificationTemplates") || "مفيش قوالب إشعارات متاحة"}
         </h3>
         <p
           style={{
@@ -395,7 +395,7 @@ export default function NotificationTemplatesTab({
                   fontSize: "0.85rem",
                 }}
               >
-                {t("noMatchingTemplates") || "لا يوجد قوالب تطابق البحث"}
+                {t("noMatchingTemplates") || "مفيش قوالب مطابقة للبحث"}
               </div>
             ) : (
               filteredTemplates.map((tmpl) => {

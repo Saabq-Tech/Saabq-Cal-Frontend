@@ -91,7 +91,7 @@ export default function MemberRegisterPage() {
       }
       quote={
         lang === "ar"
-          ? "أنشئ حساب عضو فريق وابدأ في بناء وإدارة مساحة العمل الخاصة بك."
+          ? "اعمل حساب عضو فريق وابدأ ابني ودير مساحة العمل بتاعتك."
           : "Create your workspace member account to get started."
       }
     >

@@ -742,7 +742,7 @@ export default function WorkspaceCustomersPage() {
             }}
           >
             {t("noCustomersFoundDesc") ||
-              `لم تتم إضافة أي ${customerPlural} حتى الآن أو لا توجد نتائج مطابقة للبحث الحالي.`}
+              `لم تتم إضافة أي ${customerPlural} حتى الآن أو مفيش نتائج مطابقة للبحث الحالي.`}
           </p>
           {canWrite && (
             <button

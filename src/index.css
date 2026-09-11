@@ -12446,7 +12446,7 @@ html.dark {
   --lp-announce-bg: #08303a;
   --lp-announce-border: #0a4655;
   --lp-announce-badge: #f2c24b;
-  --lp-announce-ink: #f3dfae;
+  --lp-announce-ink: #4a3708;
 }
 
 /* ── Hero ── */
@@ -12664,7 +12664,7 @@ html.dark .hero-lp-actions .btn-outline:hover:not(:disabled) {
   padding: 8px 16px;
   border-radius: var(--radius-full);
   background: var(--lp-announce-badge);
-  color: var(--lp-announce-ink);
+  color: #4a3708;
   font-size: 0.82rem;
   font-weight: 700;
 }

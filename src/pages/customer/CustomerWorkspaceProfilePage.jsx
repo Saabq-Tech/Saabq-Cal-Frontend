@@ -950,7 +950,7 @@ export default function WorkspaceProfilePage() {
               <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>
                 {searchTerm
                   ? isRTL
-                    ? "لا توجد نتائج مطابقة للبحث."
+                    ? "مفيش نتائج مطابقة للبحث."
                     : "No services matching your search."
                   : t("noServicesFound")}
               </p>
@@ -1195,7 +1195,7 @@ export default function WorkspaceProfilePage() {
                     }}
                   >
                     {isRTL
-                      ? "لا يوجد أعضاء متخصصين حالياً."
+                      ? "مفيش أعضاء متخصصين دلوقتي."
                       : "No specialist members currently."}
                   </p>
                 );
@@ -1477,7 +1477,7 @@ export default function WorkspaceProfilePage() {
                       }}
                     >
                       {isRTL
-                        ? "لا يوجد أعضاء متخصصين بهذا التصنيف حالياً."
+                        ? "مفيش أعضاء متخصصين بالتصنيف ده دلوقتي."
                         : "No specialists found for this category."}
                     </p>
                   )}

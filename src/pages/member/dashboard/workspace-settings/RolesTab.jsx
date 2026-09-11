@@ -347,7 +347,7 @@ export default function RolesTab({
             style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
           >
             <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "العرض فقط (بدون تعديل)"}
+            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
           </span>
         )}
       </div>
@@ -421,7 +421,7 @@ export default function RolesTab({
                     margin: 0,
                   }}
                 >
-                  {roleDescStr || "لا يوجد وصف لهذا الدور."}
+                  {roleDescStr || "مفيش وصف للدور ده."}
                 </p>
                 <div
                   style={{

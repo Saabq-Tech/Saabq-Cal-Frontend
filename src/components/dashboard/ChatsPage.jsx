@@ -1289,7 +1289,7 @@ export default function ChatsPage() {
                         }}
                       >
                         {t("readOnlyChat") ||
-                          "ليس لديك صلاحية للرد على المحادثات."}
+                          "معندكش صلاحية للرد على المحادثات."}
                       </div>
                     }
                   >
@@ -1388,8 +1388,7 @@ export default function ChatsPage() {
                         borderTop: "1px solid var(--border-light)",
                       }}
                     >
-                      {t("readOnlyChat") ||
-                        "ليس لديك صلاحية للرد على المحادثات."}
+                      {t("readOnlyChat") || "معندكش صلاحية للرد على المحادثات."}
                     </div>
                   }
                 >

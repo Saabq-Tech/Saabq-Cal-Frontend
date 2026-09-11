@@ -215,7 +215,7 @@ export default function LogsTab({
                   {loading
                     ? t("loading") || "جاري التحميل..."
                     : t("noLogsFound") ||
-                      (isRTL ? "لا توجد نشاطات مسجلة" : "No logs found")}
+                      (isRTL ? "مفيش نشاطات متسجلة" : "No logs found")}
                 </td>
               </tr>
             ) : (

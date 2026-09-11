@@ -117,7 +117,7 @@ export default function CustomerBookAppointmentPage() {
       if (!selectedService) {
         toast.error(
           isRTL
-            ? "يرجى اختيار الخدمة أولاً للمتابعة"
+            ? "من فضلك اختار الخدمة الأول عشان تكمّل"
             : "Please select a service first to proceed",
         );
         return;
@@ -127,7 +127,7 @@ export default function CustomerBookAppointmentPage() {
       if (!selectedDate || !selectedSlot) {
         toast.error(
           isRTL
-            ? "يرجى تحديد اليوم والوقت المتاح للمتابعة"
+            ? "من فضلك حدد اليوم والوقت المتاح عشان تكمّل"
             : "Please select date and slot to proceed",
         );
         return;
@@ -217,7 +217,7 @@ export default function CustomerBookAppointmentPage() {
             setSelectedService(null);
             setDisabledNotice(
               isRTL
-                ? "عذراً، الخدمة المطلوبة غير متاحة للحجز أونلاين حالياً. يرجى اختيار إحدى الخدمات المتاحة أدناه."
+                ? "عذراً، الخدمة المطلوبة مش متاحة للحجز أونلاين دلوقتي. من فضلك اختار خدمة من الخدمات المتاحة تحت."
                 : "Sorry, the requested service is currently not available for online booking. Please select an available service below.",
             );
           }
@@ -338,7 +338,7 @@ export default function CustomerBookAppointmentPage() {
     if (!selectedService || !selectedDate || !selectedSlot) {
       toast.error(
         isRTL
-          ? "يرجى تحديد الخدمة والتاريخ والوقت"
+          ? "من فضلك حدد الخدمة والتاريخ والوقت"
           : "Please select service, date, and slot",
       );
       return;
@@ -346,7 +346,9 @@ export default function CustomerBookAppointmentPage() {
 
     if (!turnstileToken) {
       toast.error(
-        isRTL ? "يرجى التحقق من اختبار الكابتشا" : "Please verify the CAPTCHA",
+        isRTL
+          ? "من فضلك اتأكد من اختبار الكابتشا"
+          : "Please verify the CAPTCHA",
       );
       return;
     }
@@ -375,7 +377,7 @@ export default function CustomerBookAppointmentPage() {
       ) {
         toast.error(
           isRTL
-            ? `يرجى إجابة السؤال المطلوب: "${q.label}"`
+            ? `من فضلك جاوب السؤال المطلوب: "${q.label}"`
             : `Please answer required question: "${q.label}"`,
         );
         return;
@@ -413,7 +415,7 @@ export default function CustomerBookAppointmentPage() {
       ) {
         toast.error(
           isRTL
-            ? "يرجى رفع إيصال التحويل لإتمام الحجز"
+            ? "من فضلك ارفع إيصال التحويل عشان تكمّل الحجز"
             : "Please upload payment receipt to complete booking",
         );
         setSubmitting(false);
@@ -493,7 +495,7 @@ export default function CustomerBookAppointmentPage() {
       console.error("Booking failed:", err);
       const serverMsg = err.response?.data?.message;
       let userMsg = isRTL
-        ? "فشل حجز الموعد، حاول مرة أخرى"
+        ? "حجز الميعاد منجحش، جرب تاني"
         : "Failed to book appointment";
 
       if (serverMsg) {
@@ -2826,7 +2828,7 @@ export default function CustomerBookAppointmentPage() {
                 ) : (
                   <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
                     {isRTL
-                      ? "يرجى تحديد خدمة لعرض التفاصيل."
+                      ? "من فضلك حدد خدمة عشان تشوف التفاصيل."
                       : "Please select a service."}
                   </p>
                 )}

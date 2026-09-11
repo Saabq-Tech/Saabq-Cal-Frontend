@@ -358,7 +358,7 @@ export default function ServicesTab({
           >
             <Icon name="lock" size={12} />
             {t("readOnlyNotice") ||
-              (isRTL ? "العرض فقط (بدون تعديل)" : "Read-only mode")}
+              (isRTL ? "للعرض بس (من غير تعديل)" : "Read-only mode")}
           </span>
         )}
       </div>
@@ -399,7 +399,7 @@ export default function ServicesTab({
           >
             {t("noServicesFound") ||
               (isRTL
-                ? "لا توجد خدمات مضافة حالياً في مساحة العمل"
+                ? "مفيش خدمات مضافة دلوقتي في مساحة العمل"
                 : "No services found in this workspace")}
           </h4>
           <p
@@ -654,7 +654,7 @@ export default function ServicesTab({
                     {descDisplay ||
                       t("noServiceDescription") ||
                       (isRTL
-                        ? "لا يوجد وصف تفصيلي مضاف لهذه الخدمة."
+                        ? "مفيش وصف تفصيلي مضاف للخدمة دي."
                         : "No detailed description provided for this service.")}
                   </p>
 
@@ -919,7 +919,7 @@ export default function ServicesTab({
                         }}
                         title={
                           t("bookingDisabledNotice") ||
-                          "الحجز أونلاين معطّل لهذه الخدمة"
+                          "الحجز أونلاين متعطل للخدمة دي"
                         }
                       >
                         <Icon name="external-link" size={13} />
@@ -1375,7 +1375,7 @@ export default function ServicesTab({
                         rows={3}
                         placeholder={
                           t("fullDescPlaceholder") ||
-                          "شرح كامل عن تفاصيل وما سيتلقاه العميل خلال هذه الخدمة..."
+                          "شرح كامل لتفاصيل الخدمة واللي العميل هيستفيده منها..."
                         }
                       />
                     </div>
@@ -2206,7 +2206,7 @@ export default function ServicesTab({
                         />
                         {t("showMemberProfileLabel") ||
                           (isRTL
-                            ? "اعرض صفحة الموظف الشخصية بدل صفحة الشركة عند حجز هذه الخدمة"
+                            ? "اعرض صفحة الموظف الشخصية بدل صفحة الشركة وقت حجز الخدمة دي"
                             : "Show employee personal page instead of company page when booking this service")}
                       </span>
                       <span
@@ -2936,7 +2936,7 @@ export default function ServicesTab({
                     }}
                   >
                     {t("telegramDefaultBotNotice") ||
-                      "سُترسل إشعارات حجوزات هذه المساحة عبر بوت Saabq Cal الافتراضي. اضغط الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائيًا من غير أي نسخ أو لصق."}
+                      "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
                   </p>
                   <a
                     href="https://t.me/Saabq_cal_Bot"

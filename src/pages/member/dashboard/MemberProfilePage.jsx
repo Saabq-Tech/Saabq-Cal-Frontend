@@ -41,7 +41,7 @@ export default function MemberProfilePage() {
       );
     } else {
       toast.error(
-        result.message || t("avatarUpdateFailed") || "فشل تحديث الصورة",
+        result.message || t("avatarUpdateFailed") || "تحديث الصورة منجحش",
       );
     }
   };

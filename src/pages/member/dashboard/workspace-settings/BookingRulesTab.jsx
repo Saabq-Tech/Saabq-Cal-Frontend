@@ -183,7 +183,7 @@ export default function BookingRulesTab({
               }}
             >
               {t("autoConfirmAppointmentsDesc") ||
-                "قبول الحجوزات فور إنشائها بدون مراجعة."}
+                "قبول الحجوزات أول ما تتعمل من غير مراجعة."}
             </div>
           </div>
         </div>

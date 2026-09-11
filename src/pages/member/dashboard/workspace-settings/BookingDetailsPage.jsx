@@ -353,7 +353,7 @@ export default function BookingDetailsPage({
     if (!rescheduleDate || !rescheduleTime) {
       toast.error(
         isRTL
-          ? "يرجى اختيار التاريخ والوقت الجديد"
+          ? "من فضلك اختار التاريخ والوقت الجديد"
           : "Please select a new date and time",
       );
       return;
@@ -399,7 +399,9 @@ export default function BookingDetailsPage({
     e.preventDefault();
     if (!followUpDate || !followUpTime) {
       toast.error(
-        isRTL ? "يرجى اختيار التاريخ والوقت" : "Please select a date and time",
+        isRTL
+          ? "من فضلك اختار التاريخ والوقت"
+          : "Please select a date and time",
       );
       return;
     }
@@ -481,7 +483,7 @@ export default function BookingDetailsPage({
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل حفظ التقرير" : "Failed to save report"),
+          (isRTL ? "حفظ التقرير منجحش" : "Failed to save report"),
       );
     } finally {
       setSavingSummary(false);
@@ -491,7 +493,7 @@ export default function BookingDetailsPage({
   const handleDeleteSummary = async () => {
     if (
       !window.confirm(
-        isRTL ? "هل أنت متأكد من رغبتك في حذف التقرير؟" : "Delete report?",
+        isRTL ? "إنت متأكد إنك عايز تحذف التقرير؟" : "Delete report?",
       )
     ) {
       return;
@@ -509,7 +511,7 @@ export default function BookingDetailsPage({
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل حذف التقرير" : "Failed to delete report"),
+          (isRTL ? "حذف التقرير منجحش" : "Failed to delete report"),
       );
     } finally {
       setSavingSummary(false);
@@ -949,7 +951,7 @@ export default function BookingDetailsPage({
             <section class="report-box">
               <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
               <div class="report-content">
-                ${reportContent || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
+                ${reportContent || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مفيش نص متسجل للتقرير." : "No report content recorded."}</p>`}
               </div>
             </section>
 
@@ -1321,7 +1323,7 @@ export default function BookingDetailsPage({
               }}
             >
               {isRTL
-                ? "لم يتم تسجيل وصفة طبية أو ملخص استشارة لهذا الموعد حتى الآن."
+                ? "مفيش روشتة أو ملخص استشارة اتسجل للميعاد ده لحد دلوقتي."
                 : "No prescription or consultation summary has been recorded for this appointment yet."}
             </div>
           )
@@ -2139,8 +2141,8 @@ export default function BookingDetailsPage({
                     color: "#059669",
                   }}
                 >
-                  هذا الموعد مكتمل بنجاح، ولا يمكن إجراء تعديلات أو إلغاء أو
-                  تحويل للانتظار بعد الانتهاء.
+                  الميعاد ده اكتمل بنجاح، ومينفعش تعدل فيه أو تلغيه أو تحويل
+                  للانتظار بعد الانتهاء.
                 </div>
               </div>
               <div
@@ -2191,7 +2193,7 @@ export default function BookingDetailsPage({
                   color: "#dc2626",
                 }}
               >
-                هذا الموعد ملغى حالياً، ولا يمكن إجراء تغييرات إضافية عليه.
+                الميعاد ده ملغي دلوقتي، ومينفعش تعدل فيه.
               </div>
             </div>
           ) : (

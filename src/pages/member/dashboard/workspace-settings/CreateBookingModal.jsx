@@ -174,12 +174,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     setErrorMessage(null);
 
     if (!serviceId) {
-      setErrorMessage(t("selectServicePrompt") || "يرجى اختيار الخدمة");
+      setErrorMessage(t("selectServicePrompt") || "من فضلك اختار الخدمة");
       return;
     }
 
     if (!startsAt) {
-      setErrorMessage(t("selectDatePrompt") || "يرجى تحديد موعد الحجز");
+      setErrorMessage(t("selectDatePrompt") || "من فضلك حدد ميعاد الحجز");
       return;
     }
 

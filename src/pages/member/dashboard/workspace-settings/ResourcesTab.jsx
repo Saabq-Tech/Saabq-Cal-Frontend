@@ -176,7 +176,7 @@ export default function ResourcesTab({
       message:
         t("deleteResourceWarning") ||
         (isRTL
-          ? "هل أنت متأكد من حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء."
+          ? "إنت متأكد إنك عايز تحذف المورد ده؟ العملية دي مينفعش ترجع فيها."
           : "Are you sure you want to delete this resource? This action cannot be undone."),
       isDanger: true,
       onConfirm: async () => {
@@ -660,7 +660,7 @@ export default function ResourcesTab({
             }}
           >
             {t("noResourcesFound") ||
-              (isRTL ? "لا توجد موارد مضافة حالياً" : "No resources found")}
+              (isRTL ? "مفيش موارد مضافة دلوقتي" : "No resources found")}
           </h4>
           <p
             style={{

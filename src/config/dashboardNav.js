@@ -8,6 +8,8 @@
  * its own markup.
  */
 
+import { isApiIntegrationEnabled } from "../utils/capabilities";
+
 /** The seven settings screens, nested under the workspace "settings" tab. */
 export function getWorkspaceSettingsSubTabs(t) {
   return [
@@ -165,11 +167,27 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
       ],
       capability: null,
     },
+    {
+      id: "api_integration",
+      path: "/member/workspace/api-integration",
+      label: t("apiIntegrationTitle") || "الربط البرمجي (API)",
+      icon: "code",
+      permissions: ["integration_manage", "settings_read", "settings_write"],
+      capability: "REST_API",
+    },
   ];
 }
 
 /** Permission gate for a workspace tab — mirrors WorkspaceLayout.canViewTab. */
-export function canViewWorkspaceTab(tab, isOwner, userPermissions) {
+export function canViewWorkspaceTab(
+  tab,
+  isOwner,
+  userPermissions,
+  user = null,
+) {
+  if (tab.id === "api_integration") {
+    if (!user || !isApiIntegrationEnabled(user)) return false;
+  }
   if (tab.alwaysVisible) return true;
   if (isOwner) return true;
   return tab.permissions.some((perm) => userPermissions.includes(perm));

@@ -828,7 +828,7 @@ export default function Home() {
                     color: "var(--muted)",
                   }}
                 >
-                  {t("noPlansAvailable") || "لا توجد باقات متاحة حالياً"}
+                  {t("noPlansAvailable") || "مفيش باقات متاحة دلوقتي"}
                 </div>
               )}
             </div>

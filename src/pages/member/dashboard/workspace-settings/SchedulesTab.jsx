@@ -390,7 +390,7 @@ export default function SchedulesTab({
       toast.error(
         err.response?.data?.message ||
           t("saveScheduleFailed") ||
-          "فشل حفظ الجدول",
+          "حفظ الجدول منجحش",
       );
     } finally {
       setSavingModal(false);
@@ -408,7 +408,7 @@ export default function SchedulesTab({
     }
 
     const confirmMsg =
-      t("confirmDeleteSchedule") || "هل أنت تأكد من رغبتك في حذف هذا الجدول؟";
+      t("confirmDeleteSchedule") || "إنت متأكد إنك عايز تحذف الجدول ده؟";
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -419,7 +419,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to delete schedule:", err);
-      toast.error(err.response?.data?.message || "فشل حذف الجدول");
+      toast.error(err.response?.data?.message || "حذف الجدول منجحش");
     }
   };
 
@@ -541,7 +541,7 @@ export default function SchedulesTab({
     } catch (err) {
       console.error("Failed to save weekly rules:", err);
       toast.error(
-        err.response?.data?.message || "فشل حفظ ساعات العمل الأسبوعية",
+        err.response?.data?.message || "حفظ ساعات العمل الأسبوعية منجحش",
       );
     } finally {
       setSavingWeeklyRules(false);
@@ -564,7 +564,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to save schedule validity:", err);
-      toast.error(err.response?.data?.message || "فشل حفظ فترة الصلاحية");
+      toast.error(err.response?.data?.message || "حفظ فترة الصلاحية منجحش");
     } finally {
       setSavingValidity(false);
     }
@@ -575,7 +575,7 @@ export default function SchedulesTab({
     e.preventDefault();
     if (!activeSchedule) return;
     if (!exceptionForm.date) {
-      toast.error(t("selectDateError") || "يرجى اختيار التاريخ أولاً");
+      toast.error(t("selectDateError") || "من فضلك اختار التاريخ الأول");
       return;
     }
 
@@ -623,7 +623,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to delete exception:", err);
-      toast.error(err.response?.data?.message || "فشل حذف الاستثناء");
+      toast.error(err.response?.data?.message || "حذف الاستثناء منجحش");
     }
   };
 
@@ -738,7 +738,7 @@ export default function SchedulesTab({
             }}
           >
             {t("noSchedulesFound") ||
-              "لا توجد جداول عمل أو ساعات توفر مضافة حالياً"}
+              "مفيش جداول عمل أو ساعات توفر مضافة دلوقتي"}
           </h4>
           <p
             style={{
@@ -1629,7 +1629,7 @@ export default function SchedulesTab({
                     fontSize: "0.86rem",
                   }}
                 >
-                  {t("noExceptionsFound") || "لا توجد استثناءات"}
+                  {t("noExceptionsFound") || "مفيش استثناءات"}
                 </div>
               ) : (
                 activeSchedule.exceptions.map((ex) => (

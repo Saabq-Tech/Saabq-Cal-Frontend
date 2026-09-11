@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -8,6 +9,7 @@ import Icon from "../../../components/common/Icon";
 import client, { endpoints } from "../../../api/client";
 import PermissionCheck from "../../../components/PermissionCheck";
 import TelegramActionBuilder from "../../../components/dashboard/TelegramActionBuilder";
+import { isApiIntegrationEnabled } from "../../../utils/capabilities";
 
 // Helper function to safely render strings or localized objects
 function _getTranslatableText(textObj, currentLang = "ar") {
@@ -82,6 +84,7 @@ function ToggleSwitch({ checked, onChange, disabled = false }) {
 
 export default function IntegrationsSettingsPage() {
   const {
+    user,
     loading,
     fetchGoogleIntegration,
     connectGoogleIntegration,
@@ -102,6 +105,7 @@ export default function IntegrationsSettingsPage() {
 
   const { t } = useLanguage();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const defaultTelegramActionConfig = {
     states: {
@@ -436,8 +440,7 @@ export default function IntegrationsSettingsPage() {
   const handleDisconnectGoogle = () => {
     openConfirm(
       t("googleIntegrationTitle") || "حساب جوجل المترابط",
-      t("googleDisconnectConfirm") ||
-        "هل أنت تأكد من رغبتك في إلغاء ربط حساب جوجل المترابط؟",
+      t("googleDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط حساب جوجل؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await disconnectGoogleIntegration();
@@ -457,7 +460,7 @@ export default function IntegrationsSettingsPage() {
   const handleSaveCalendarSettings = async () => {
     if (!googleIntegration) {
       toast.error(
-        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
       );
       return;
     }
@@ -479,7 +482,7 @@ export default function IntegrationsSettingsPage() {
   const handleSaveMeetSettings = async () => {
     if (!googleIntegration) {
       toast.error(
-        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
       );
       return;
     }
@@ -487,7 +490,7 @@ export default function IntegrationsSettingsPage() {
       auto_create_meet_links: autoMeet,
     });
     if (res.success) {
-      toast.success(t("updatedSuccess") || "تم التحديث بنجاح");
+      toast.success(t("updatedSuccess") || "اتحدث بنجاح");
       await loadSecurityData();
       setActiveModalId(null);
     } else {
@@ -498,7 +501,7 @@ export default function IntegrationsSettingsPage() {
   const handleSaveSheetsSettings = async () => {
     if (!googleIntegration) {
       toast.error(
-        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
       );
       return;
     }
@@ -519,7 +522,7 @@ export default function IntegrationsSettingsPage() {
   const handleTestGoogleSheets = async () => {
     if (!googleIntegration) {
       toast.error(
-        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
       );
       return;
     }
@@ -551,7 +554,7 @@ export default function IntegrationsSettingsPage() {
   const handleCreateGoogleSheet = async () => {
     if (!googleIntegration) {
       toast.error(
-        t("connectGoogleFirst") || "الرجاء ربط حساب Google Workspace أولاً",
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
       );
       return;
     }
@@ -580,7 +583,7 @@ export default function IntegrationsSettingsPage() {
 
   const handleSaveWebhookSettings = async () => {
     if (!webhookUrl) {
-      toast.error(t("enterWebhookUrl") || "يرجى إدخال رابط Webhook أولاً");
+      toast.error(t("enterWebhookUrl") || "من فضلك اكتب رابط Webhook الأول");
       return;
     }
     const selectedEvents = [];
@@ -613,7 +616,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("webhooksTitle") || "Webhooks API",
       t("webhookDisconnectConfirm") ||
-        "هل أنت تأكد من رغبتك في إلغاء رابط الـ Webhook؟",
+        "إنت متأكد إنك عايز تلغي رابط الـ Webhook؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteWebhookIntegration();
@@ -639,7 +642,7 @@ export default function IntegrationsSettingsPage() {
       !telegramBotToken &&
       !telegramIntegration?.has_bot_token
     ) {
-      toast.error(t("botTokenLabel") || "يرجى إدخال Token الخاص بالبوت");
+      toast.error(t("botTokenLabel") || "من فضلك اكتب التوكن بتاع البوت");
       return;
     }
 
@@ -685,8 +688,7 @@ export default function IntegrationsSettingsPage() {
   const handleDeleteTelegramSettings = () => {
     openConfirm(
       t("telegramTitle") || "إعدادات Telegram",
-      t("telegramDisconnectConfirm") ||
-        "هل أنت تأكد من رغبتك في إلغاء ربط Telegram؟",
+      t("telegramDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط Telegram؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteTelegramIntegration();
@@ -771,7 +773,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("emailSettingsTitle") || "إعدادات البريد الإلكتروني",
       t("emailDisconnectConfirm") ||
-        "هل أنت تأكد من رغبتك في إلغاء ربط البريد الإلكتروني؟",
+        "إنت متأكد إنك عايز تلغي ربط البريد الإلكتروني؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteEmailIntegration();
@@ -886,6 +888,23 @@ export default function IntegrationsSettingsPage() {
           ? `${emailIntegration.mail_driver === "resend" ? "Resend" : "SMTP"}: ${emailIntegration.from_address || ""}`
           : t("defaultSystemMail") || "مفعّلة افتراضياً بالنظام",
     },
+    ...(isApiIntegrationEnabled(user)
+      ? [
+          {
+            id: "rest_api",
+            title: t("apiIntegrationTitle") || "الربط البرمجي (REST API)",
+            category: "automation",
+            icon: <Icon name="code" size={26} />,
+            description:
+              t("apiIntegrationCardDesc") ||
+              "ربط أنظمتك وتطبيقاتك الخارجية عبر واجهة برمجية آمنة مع مزامنة لحظية ومستندات تفاعلية.",
+            isConnected: false,
+            subtitle:
+              t("apiIntegrationSubtitle") || "لوحة التحكم والمستندات التفاعلية",
+            link: "/member/workspace/api-integration",
+          },
+        ]
+      : []),
   ];
 
   const filteredIntegrations = integrationsList.filter((item) => {
@@ -1150,7 +1169,9 @@ export default function IntegrationsSettingsPage() {
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  onClick={() => setActiveModalId(item.id)}
+                  onClick={() =>
+                    item.link ? navigate(item.link) : setActiveModalId(item.id)
+                  }
                   style={{
                     fontSize: "0.82rem",
                     fontWeight: 600,
@@ -1268,7 +1289,7 @@ export default function IntegrationsSettingsPage() {
                   >
                     <Icon name="alert-triangle" size={16} />
                     {t("noGoogleConnectedNotice") ||
-                      "لم يتم ربط أي حساب جوجل حتى الآن. اضغط على الزر أدناه للربط الآمن."}
+                      "مفيش أي حساب جوجل اتربط لحد دلوقتي. اضغط على الزرار تحت عشان تربطه بأمان."}
                   </span>
                 </div>
               )}
@@ -1471,7 +1492,7 @@ export default function IntegrationsSettingsPage() {
                   >
                     <Icon name="alert-triangle" size={16} />
                     {t("connectGoogleFirst") ||
-                      "الرجاء ربط حساب Google Workspace أولاً"}
+                      "من فضلك اربط حساب Google Workspace الأول"}
                   </span>
                 </div>
               )}
@@ -1581,7 +1602,7 @@ export default function IntegrationsSettingsPage() {
                   >
                     <Icon name="alert-triangle" size={16} />
                     {t("connectGoogleFirst") ||
-                      "الرجاء ربط حساب Google Workspace أولاً"}
+                      "من فضلك اربط حساب Google Workspace الأول"}
                   </span>
                 </div>
               )}
@@ -1644,7 +1665,7 @@ export default function IntegrationsSettingsPage() {
                     }}
                   >
                     {t("createSheetAutoDesc") ||
-                      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بضغطة زر."}
+                      "مفيش شيت مرتبط دلوقتي. اعمل شيت جديد مجهز بكل الحقول الـ 26 والتنسيق المعتمد بضغطة واحدة."}
                   </p>
                   <button
                     type="button"
@@ -1823,7 +1844,7 @@ export default function IntegrationsSettingsPage() {
               <div className="form-group" style={{ marginBottom: 20 }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
                   {t("spreadsheetIdLabel") ||
-                    "معرّف ملف Google Sheet الخاص بك (مستند مخصص)"}
+                    "معرّف ملف Google Sheet بتاعك (مستند مخصص)"}
                 </label>
                 <input
                   type={showSheetId ? "text" : "password"}
@@ -1971,7 +1992,7 @@ export default function IntegrationsSettingsPage() {
                     }}
                   >
                     {t("telegramBotQuestion") ||
-                      "أي بوت تليجرام يُستخدم لإشعارات هذه المساحة؟"}
+                      "أنهي بوت تليجرام هيستخدم لإشعارات المساحة دي؟"}
                   </label>
 
                   <div
@@ -2090,7 +2111,7 @@ export default function IntegrationsSettingsPage() {
                           }}
                         >
                           {t("telegramDefaultBotDesc") ||
-                            "لا حاجة لإنشاء بوت خاص — تحتاج فقط إلى Chat ID الخاص بك."}
+                            "مش محتاج تعمل بوت مخصوص — هتحتاج بس الـ Chat ID بتاعك."}
                         </div>
                       </div>
                     </label>
@@ -2116,7 +2137,7 @@ export default function IntegrationsSettingsPage() {
                       }}
                     >
                       {t("telegramDefaultBotNotice") ||
-                        "سُترسل إشعارات حجوزات هذه المساحة عبر بوت Saabq Cal الافتراضي. اضغط الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائيًا من غير أي نسخ أو لصق."}
+                        "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
                     </p>
                     <a
                       href="https://t.me/Saabq_cal_Bot"
@@ -2484,7 +2505,7 @@ export default function IntegrationsSettingsPage() {
                             fontStyle: "italic",
                           }}
                         >
-                          {t("noServicesFound") || "لا توجد خدمات متاحة حالياً"}
+                          {t("noServicesFound") || "مفيش خدمات متاحة دلوقتي"}
                         </div>
                       )}
                     </div>

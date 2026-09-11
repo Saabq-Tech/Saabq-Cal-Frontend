@@ -72,7 +72,7 @@ export default function WorkspaceLayout() {
   const mainWorkspaceTabs = getWorkspaceTabs(t, user?.workspace, lang);
 
   const canViewTab = (tab) =>
-    canViewWorkspaceTab(tab, isOwner, userPermissions);
+    canViewWorkspaceTab(tab, isOwner, userPermissions, user);
 
   const availableTabs = mainWorkspaceTabs.filter(canViewTab);
 

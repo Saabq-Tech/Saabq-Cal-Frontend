@@ -109,6 +109,15 @@ export const endpoints = {
   emailIntegration: (type) => `${getAuthPrefix(type)}/integrations/email`,
   emailIntegrationTest: (type) =>
     `${getAuthPrefix(type)}/integrations/email/test`,
+  apiIntegration: (type) => `${getAuthPrefix(type)}/integrations/api`,
+  apiIntegrationRequest: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/request`,
+  apiIntegrationReveal: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/reveal-secret`,
+  apiIntegrationRegenerate: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/regenerate`,
+  apiIntegrationVerify: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/verify`,
 
   // 2FA
   twoFactorEnable: (type) => `${getAuthPrefix(type)}/2fa/enable`,
