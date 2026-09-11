@@ -534,8 +534,9 @@ export default function ServicesTab({
                           <span
                             style={{
                               fontSize: "0.7rem",
-                              background: "#fef3c7",
-                              color: "#b45309",
+                              background: "var(--badge-warning-bg)",
+                              color: "var(--badge-warning-color)",
+                              border: "1px solid var(--badge-warning-border)",
                               padding: "2px 8px",
                               borderRadius: 12,
                               fontWeight: 700,
@@ -556,16 +557,23 @@ export default function ServicesTab({
                             fontWeight: 700,
                             background:
                               s.status === "active"
-                                ? "#dcfce7"
+                                ? "var(--badge-success-bg)"
                                 : s.status === "draft"
-                                  ? "#fef3c7"
-                                  : "#f3f4f6",
+                                  ? "var(--badge-warning-bg)"
+                                  : "var(--badge-neutral-bg)",
                             color:
                               s.status === "active"
-                                ? "#15803d"
+                                ? "var(--badge-success-color)"
                                 : s.status === "draft"
-                                  ? "#b45309"
-                                  : "#4b5563",
+                                  ? "var(--badge-warning-color)"
+                                  : "var(--badge-neutral-color)",
+                            border: `1px solid ${
+                              s.status === "active"
+                                ? "var(--badge-success-border)"
+                                : s.status === "draft"
+                                  ? "var(--badge-warning-border)"
+                                  : "var(--badge-neutral-border)"
+                            }`,
                           }}
                         >
                           {s.status === "active"
@@ -582,9 +590,16 @@ export default function ServicesTab({
                             borderRadius: 12,
                             fontWeight: 700,
                             background: s.booking_enabled
-                              ? "#ccfbf1"
-                              : "#fee2e2",
-                            color: s.booking_enabled ? "#0f766e" : "#991b1b",
+                              ? "var(--badge-teal-bg)"
+                              : "var(--badge-danger-bg)",
+                            color: s.booking_enabled
+                              ? "var(--badge-teal-color)"
+                              : "var(--badge-danger-color)",
+                            border: `1px solid ${
+                              s.booking_enabled
+                                ? "var(--badge-teal-border)"
+                                : "var(--badge-danger-border)"
+                            }`,
                           }}
                         >
                           {s.booking_enabled
@@ -2442,31 +2457,45 @@ export default function ServicesTab({
                                 <span
                                   style={{
                                     fontSize: "0.7rem",
-                                    background: "#dcfce7",
-                                    color: "#15803d",
+                                    background: "var(--badge-success-bg)",
+                                    color: "var(--badge-success-color)",
+                                    border:
+                                      "1px solid var(--badge-success-border)",
                                     padding: "2px 8px",
                                     borderRadius: 10,
                                     fontWeight: 700,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
                                   }}
                                 >
-                                  ✓{" "}
-                                  {t("telegramProviderConnected") ||
-                                    (isRTL ? "مربوط بتلجرام" : "Connected")}
+                                  <Icon name="check" size={12} />
+                                  <span>
+                                    {t("telegramProviderConnected") ||
+                                      (isRTL ? "مربوط بتلجرام" : "Connected")}
+                                  </span>
                                 </span>
                               ) : (
                                 <span
                                   style={{
                                     fontSize: "0.7rem",
-                                    background: "#fef3c7",
-                                    color: "#b45309",
+                                    background: "var(--badge-warning-bg)",
+                                    color: "var(--badge-warning-color)",
+                                    border:
+                                      "1px solid var(--badge-warning-border)",
                                     padding: "2px 8px",
                                     borderRadius: 10,
                                     fontWeight: 700,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
                                   }}
                                 >
-                                  ⚠️{" "}
-                                  {t("telegramProviderNotConnected") ||
-                                    (isRTL ? "غير مربوط" : "Not Connected")}
+                                  <Icon name="alert-triangle" size={12} />
+                                  <span>
+                                    {t("telegramProviderNotConnected") ||
+                                      (isRTL ? "غير مربوط" : "Not Connected")}
+                                  </span>
                                 </span>
                               )}
                             </div>

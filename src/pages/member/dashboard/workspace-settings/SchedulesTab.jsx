@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
@@ -12,7 +12,7 @@ export default function SchedulesTab({
   canEdit,
   onRefresh,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const toast = useToast();
 
   const [effectiveStartOfWeek, setEffectiveStartOfWeek] = useState(startOfWeek);
@@ -186,6 +186,73 @@ export default function SchedulesTab({
 
   const activeSchedule =
     schedulesList.find((s) => s.id === selectedScheduleId) || schedulesList[0];
+
+  // Schedule horizontal tabs scrolling refs and logic
+  const tabsContainerRef = useRef(null);
+  const activeTabRef = useRef(null);
+  const [hasTabsOverflow, setHasTabsOverflow] = useState(false);
+
+  const checkTabsOverflow = useCallback(() => {
+    const el = tabsContainerRef.current;
+    if (!el) return;
+    setHasTabsOverflow(el.scrollWidth > el.clientWidth + 4);
+  }, []);
+
+  useEffect(() => {
+    checkTabsOverflow();
+    window.addEventListener("resize", checkTabsOverflow);
+    return () => window.removeEventListener("resize", checkTabsOverflow);
+  }, [checkTabsOverflow, schedulesList.length]);
+
+  // Auto-scroll active tab into view when selected
+  useEffect(() => {
+    if (activeTabRef.current) {
+      activeTabRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [selectedScheduleId]);
+
+  // Mouse wheel listener on tabs container to scroll horizontally
+  useEffect(() => {
+    const el = tabsContainerRef.current;
+    if (!el) return;
+
+    const onWheel = (e) => {
+      if (
+        Math.abs(e.deltaY) > Math.abs(e.deltaX) &&
+        el.scrollWidth > el.clientWidth
+      ) {
+        e.preventDefault();
+        el.scrollBy({
+          left: lang === "ar" ? -e.deltaY : e.deltaY,
+          behavior: "auto",
+        });
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [lang]);
+
+  const scrollTabs = (dir) => {
+    const el = tabsContainerRef.current;
+    if (!el) return;
+    const scrollAmount = 260;
+    if (lang === "ar") {
+      el.scrollBy({
+        left: dir === "next" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    } else {
+      el.scrollBy({
+        left: dir === "next" ? scrollAmount : -scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   // Schedule Modal State (Create / Edit)
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -695,94 +762,279 @@ export default function SchedulesTab({
       ) : (
         <>
           <div className="schedule-top-bar">
-            <div
-              className="no-scrollbar"
-              style={{
-                display: "flex",
-                gap: 8,
-                overflowX: "auto",
-                flex: 1,
-                minWidth: 0,
-              }}
-            >
-              {schedulesList.map((sch) => {
-                const isSelected = sch.id === selectedScheduleId;
-                return (
-                  <button
-                    key={sch.id}
-                    type="button"
-                    onClick={() => setSelectedScheduleId(sch.id)}
-                    style={{
-                      padding: "8px 16px",
-                      borderRadius: 20,
-                      fontSize: "0.86rem",
-                      fontWeight: isSelected ? 800 : 500,
-                      border: isSelected
-                        ? "1.5px solid var(--primary)"
-                        : "1px solid var(--border-light)",
-                      background: isSelected
-                        ? "var(--primary-subtle)"
-                        : "var(--bg-card)",
-                      color: isSelected
-                        ? "var(--primary)"
-                        : "var(--text-secondary)",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    <span>{sch.name}</span>
-                    {sch.workspace_member_id && (
+            {/* Desktop / Tablet: Horizontal pill tabs with smooth scrolling & navigation arrows (hidden on mobile) */}
+            <div className="schedule-desktop-tabs-wrapper">
+              {hasTabsOverflow && (
+                <button
+                  type="button"
+                  className="schedule-tabs-arrow-btn"
+                  onClick={() => scrollTabs("prev")}
+                  aria-label={lang === "ar" ? "تمرير لليمين" : "Scroll right"}
+                  title={lang === "ar" ? "السابق" : "Previous"}
+                >
+                  <Icon
+                    name={lang === "ar" ? "chevron-right" : "chevron-left"}
+                    size={16}
+                  />
+                </button>
+              )}
+
+              <div
+                ref={tabsContainerRef}
+                className="schedule-desktop-tabs"
+                onScroll={checkTabsOverflow}
+              >
+                {schedulesList.map((sch) => {
+                  const isSelected = sch.id === selectedScheduleId;
+                  const memberName =
+                    members.find(
+                      (m) => String(m.id) === String(sch.workspace_member_id),
+                    )?.name ||
+                    members.find(
+                      (m) => String(m.id) === String(sch.workspace_member_id),
+                    )?.user?.name ||
+                    sch.workspace_member?.name ||
+                    sch.workspace_member?.user?.name ||
+                    (sch.workspace_member_id
+                      ? t("memberSchedule") || "عضو"
+                      : null);
+
+                  return (
+                    <button
+                      key={sch.id}
+                      ref={isSelected ? activeTabRef : null}
+                      type="button"
+                      onClick={() => setSelectedScheduleId(sch.id)}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: 20,
+                        fontSize: "0.86rem",
+                        fontWeight: isSelected ? 800 : 500,
+                        border: isSelected
+                          ? "1.5px solid var(--primary)"
+                          : "1px solid var(--border-light)",
+                        background: isSelected
+                          ? "var(--primary-subtle)"
+                          : "var(--bg-card)",
+                        color: isSelected
+                          ? "var(--primary)"
+                          : "var(--text-secondary)",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
+                        transition: "all 0.15s ease",
+                      }}
+                    >
                       <span
                         style={{
-                          fontSize: "0.72rem",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {sch.name}
+                      </span>
+                      {memberName && (
+                        <span
+                          style={{
+                            fontSize: "0.72rem",
+                            background: "var(--surface-alt)",
+                            color: "var(--primary)",
+                            border: "1px solid var(--border)",
+                            padding: "2px 8px",
+                            borderRadius: 10,
+                            fontWeight: 600,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {memberName}
+                        </span>
+                      )}
+                      {sch.is_default && (
+                        <span
+                          style={{
+                            fontSize: "0.7rem",
+                            background: "var(--primary)",
+                            color: "#ffffff",
+                            padding: "2px 8px",
+                            borderRadius: 10,
+                            fontWeight: 700,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {t("defaultBadge") || "افتراضي"}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {hasTabsOverflow && (
+                <button
+                  type="button"
+                  className="schedule-tabs-arrow-btn"
+                  onClick={() => scrollTabs("next")}
+                  aria-label={lang === "ar" ? "تمرير لليسار" : "Scroll left"}
+                  title={lang === "ar" ? "التالي" : "Next"}
+                >
+                  <Icon
+                    name={lang === "ar" ? "chevron-left" : "chevron-right"}
+                    size={16}
+                  />
+                </button>
+              )}
+            </div>
+
+            {/* Mobile: Clean, touch-friendly select dropdown & metadata row (hidden on desktop) */}
+            <div className="schedule-mobile-picker">
+              <div className="schedule-mobile-select-row">
+                <select
+                  className="form-select schedule-mobile-select"
+                  value={selectedScheduleId || ""}
+                  onChange={(e) =>
+                    setSelectedScheduleId(Number(e.target.value))
+                  }
+                >
+                  {schedulesList.map((sch) => {
+                    const memberName =
+                      members.find(
+                        (m) => String(m.id) === String(sch.workspace_member_id),
+                      )?.name ||
+                      members.find(
+                        (m) => String(m.id) === String(sch.workspace_member_id),
+                      )?.user?.name ||
+                      sch.workspace_member?.name ||
+                      sch.workspace_member?.user?.name ||
+                      (sch.workspace_member_id
+                        ? t("memberSchedule") || "عضو"
+                        : null);
+
+                    const defaultText = sch.is_default
+                      ? ` [${t("defaultBadge") || "افتراضي"}]`
+                      : "";
+                    const memberText = memberName ? ` (${memberName})` : "";
+                    return (
+                      <option key={sch.id} value={sch.id}>
+                        {sch.name}
+                        {defaultText}
+                        {memberText}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="schedule-mobile-meta-row">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {activeSchedule?.is_default && (
+                    <span
+                      style={{
+                        fontSize: "0.74rem",
+                        background: "var(--primary)",
+                        color: "#ffffff",
+                        padding: "3px 10px",
+                        borderRadius: 12,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {t("defaultBadge") || "افتراضي"}
+                    </span>
+                  )}
+                  {(() => {
+                    const activeMemberName =
+                      members.find(
+                        (m) =>
+                          String(m.id) ===
+                          String(activeSchedule?.workspace_member_id),
+                      )?.name ||
+                      members.find(
+                        (m) =>
+                          String(m.id) ===
+                          String(activeSchedule?.workspace_member_id),
+                      )?.user?.name ||
+                      activeSchedule?.workspace_member?.name ||
+                      activeSchedule?.workspace_member?.user?.name;
+                    return activeMemberName ? (
+                      <span
+                        style={{
+                          fontSize: "0.74rem",
                           background: "var(--surface-alt)",
                           color: "var(--primary)",
                           border: "1px solid var(--border)",
-                          padding: "2px 8px",
-                          borderRadius: 10,
+                          padding: "3px 10px",
+                          borderRadius: 12,
                           fontWeight: 600,
                         }}
                       >
-                        {members.find(
-                          (m) =>
-                            String(m.id) === String(sch.workspace_member_id),
-                        )?.name ||
-                          members.find(
-                            (m) =>
-                              String(m.id) === String(sch.workspace_member_id),
-                          )?.user?.name ||
-                          sch.workspace_member?.name ||
-                          sch.workspace_member?.user?.name ||
-                          t("memberSchedule") ||
-                          "عضو"}
+                        {activeMemberName}
                       </span>
-                    )}
-                    {sch.is_default && (
-                      <span
-                        style={{
-                          fontSize: "0.7rem",
-                          background: "var(--primary)",
-                          color: "#ffffff",
-                          padding: "2px 8px",
-                          borderRadius: 10,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {t("defaultBadge") || "افتراضي"}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+                    ) : null;
+                  })()}
+                </div>
+
+                {activeSchedule && canEdit && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={handleOpenEditModal}
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <Icon name="edit" size={13} />
+                      {t("editScheduleNameBtn") || "تعديل"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={handleDeleteSchedule}
+                      disabled={activeSchedule.is_default}
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        color: activeSchedule.is_default
+                          ? "var(--muted)"
+                          : "#ef4444",
+                        opacity: activeSchedule.is_default ? 0.5 : 1,
+                        cursor: activeSchedule.is_default
+                          ? "not-allowed"
+                          : "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <Icon name="trash" size={13} />
+                      {t("deleteScheduleBtn") || "حذف"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
+            {/* Desktop / Tablet Actions */}
             {activeSchedule && canEdit && (
-              <div className="schedule-top-bar-actions">
+              <div className="schedule-top-bar-actions schedule-desktop-actions">
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
@@ -1040,7 +1292,7 @@ export default function SchedulesTab({
 
           {/* 4. CARD 1: Schedule Validity Period Card (Matching Screenshot 1) */}
           <div
-            className="card"
+            className="card schedule-sub-card"
             style={{
               padding: 24,
               border: "1px solid var(--border-light)",
@@ -1080,9 +1332,11 @@ export default function SchedulesTab({
             </p>
 
             <div
+              className="schedule-validity-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
                 gap: 16,
                 marginBottom: 20,
               }}
@@ -1154,7 +1408,7 @@ export default function SchedulesTab({
 
           {/* 5. CARD 2: Exceptions & Overrides Card (Matching Screenshot 1) */}
           <div
-            className="card"
+            className="card schedule-sub-card"
             style={{
               padding: 24,
               border: "1px solid var(--border-light)",
@@ -1269,8 +1523,14 @@ export default function SchedulesTab({
                 </div>
 
                 {exceptionForm.type === "custom" && (
-                  <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
-                    <div className="form-group" style={{ flex: 1 }}>
+                  <div
+                    className="schedule-exception-time-row"
+                    style={{ display: "flex", gap: 12, marginBottom: 14 }}
+                  >
+                    <div
+                      className="form-group"
+                      style={{ flex: 1, minWidth: 0 }}
+                    >
                       <label
                         className="form-label"
                         style={{ fontSize: "0.8rem" }}
@@ -1326,17 +1586,34 @@ export default function SchedulesTab({
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
+                <div
                   style={{
-                    width: "100%",
-                    justifyContent: "center",
-                    fontWeight: 700,
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    marginTop: 8,
                   }}
                 >
-                  {t("addExceptionBtn") || "+ إضافة"}
-                </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "7px 18px",
+                      fontSize: "0.84rem",
+                      fontWeight: 700,
+                      width: "auto",
+                      borderRadius: "var(--radius-md)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Icon name="plus" size={14} />
+                    <span>
+                      {(t("addExceptionBtn") || "إضافة").replace(/^\+\s*/, "")}
+                    </span>
+                  </button>
+                </div>
               </form>
             )}
 
@@ -1379,14 +1656,40 @@ export default function SchedulesTab({
                           gap: 8,
                         }}
                       >
-                        <span>📅 {ex.date}</span>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <Icon
+                            name="calendar"
+                            size={15}
+                            style={{ color: "var(--primary)", flexShrink: 0 }}
+                          />
+                          <span>{ex.date}</span>
+                        </span>
                         <span
                           className={`profile-badge ${ex.type === "closed" ? "unverified" : "verified"}`}
-                          style={{ fontSize: "0.74rem", padding: "2px 8px" }}
+                          style={{
+                            fontSize: "0.74rem",
+                            padding: "2px 8px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
                         >
-                          {ex.type === "closed"
-                            ? t("typeClosedDay") || "يوم مقفول"
-                            : t("typeCustomHours") || "ساعات مخصصة"}
+                          <Icon
+                            name={ex.type === "closed" ? "x-circle" : "clock"}
+                            size={12}
+                            style={{ flexShrink: 0 }}
+                          />
+                          <span>
+                            {ex.type === "closed"
+                              ? t("typeClosedDay") || "يوم مقفول"
+                              : t("typeCustomHours") || "ساعات مخصصة"}
+                          </span>
                         </span>
                       </div>
                       <div
@@ -1394,11 +1697,37 @@ export default function SchedulesTab({
                           fontSize: "0.8rem",
                           color: "var(--text-secondary)",
                           marginTop: 4,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          flexWrap: "wrap",
                         }}
                       >
-                        {ex.reason}{" "}
-                        {ex.type === "custom" &&
-                          `(${ex.from_time} - ${ex.to_time})`}
+                        {ex.reason && <span>{ex.reason}</span>}
+                        {ex.type === "custom" && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              direction: "ltr",
+                              fontSize: "0.76rem",
+                              fontWeight: 600,
+                              padding: "1px 6px",
+                              borderRadius: 4,
+                              background: "rgba(255, 255, 255, 0.06)",
+                            }}
+                          >
+                            <Icon
+                              name="clock"
+                              size={12}
+                              style={{ flexShrink: 0 }}
+                            />
+                            <span>
+                              {ex.from_time} – {ex.to_time}
+                            </span>
+                          </span>
+                        )}
                       </div>
                     </div>
 

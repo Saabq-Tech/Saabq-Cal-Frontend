@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { useToast } from "../../../context/ToastContext";
 import client, { endpoints } from "../../../api/client";
 import BookingsTab from "./workspace-settings/BookingsTab";
 import BookingsCalendar from "./workspace-settings/BookingsCalendar";
@@ -14,6 +15,7 @@ import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import Icon from "../../../components/common/Icon";
 
 export default function WorkspaceBookingsPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
@@ -75,7 +77,7 @@ export default function WorkspaceBookingsPage() {
 
   return (
     <CapabilityGate capabilityCode="BOOKING">
-      <div className="card" style={{ padding: 24 }}>
+      <div className="card workspace-bookings-card">
         <SEO title={t("bookings") || "المواعيد"} noindex />
         {selectedBookingId ? (
           <BookingDetailsPage
@@ -93,22 +95,13 @@ export default function WorkspaceBookingsPage() {
           </div>
         ) : (
           <>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: 12,
-                marginBottom: 20,
-              }}
-            >
-              <div style={{ display: "flex", gap: 10 }}>
+            <div className="workspace-bookings-top-toolbar">
+              <div className="bookings-view-toggle">
                 <button
                   type="button"
                   className={`btn btn-sm ${viewMode === "calendar" ? "btn-primary" : "btn-secondary"}`}
                   onClick={() => setViewMode("calendar")}
-                  style={{ padding: "6px 14px", borderRadius: 20 }}
+                  style={{ borderRadius: 20 }}
                 >
                   {t("calendarView") || "عرض التقويم"}
                 </button>
@@ -116,7 +109,7 @@ export default function WorkspaceBookingsPage() {
                   type="button"
                   className={`btn btn-sm ${viewMode === "list" ? "btn-primary" : "btn-secondary"}`}
                   onClick={() => setViewMode("list")}
-                  style={{ padding: "6px 14px", borderRadius: 20 }}
+                  style={{ borderRadius: 20 }}
                 >
                   {t("listView") || "عرض القائمة"}
                 </button>
@@ -125,16 +118,10 @@ export default function WorkspaceBookingsPage() {
               {canEdit && (
                 <button
                   type="button"
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-primary btn-sm new-booking-trigger-btn"
                   onClick={() => setShowCreateModal(true)}
                   style={{
-                    padding: "8px 18px",
-                    fontWeight: 800,
-                    fontSize: "0.86rem",
                     borderRadius: 20,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
                   }}
                 >
                   <Icon name="plus" size={14} />
@@ -149,13 +136,17 @@ export default function WorkspaceBookingsPage() {
                 meta={meta}
                 page={page}
                 onPageChange={handlePageChange}
-                onSelectBooking={(id) => setSelectedBookingId(id)}
+                onSelectBooking={(id) =>
+                  navigate(`/member/workspace/bookings/${id}`)
+                }
                 canEdit={canEdit}
                 onReloadBookings={() => loadBookings(page)}
               />
             ) : (
               <BookingsCalendar
-                onSelectBooking={(id) => setSelectedBookingId(id)}
+                onSelectBooking={(id) =>
+                  navigate(`/member/workspace/bookings/${id}`)
+                }
               />
             )}
 

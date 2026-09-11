@@ -68,7 +68,7 @@ export default function WorkspaceSchedulesPage() {
 
   return (
     <CapabilityGate capabilityCode="PER_MEMBER_CALENDAR">
-      <div className="card" style={{ padding: 24 }}>
+      <div className="card workspace-schedules-card">
         <SEO title={t("schedules") || "الجداول الزمنية"} noindex />
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

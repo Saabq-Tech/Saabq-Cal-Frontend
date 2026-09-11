@@ -10,9 +10,9 @@ export default function GuestRoute({ children }) {
       ? typeof location.state.from === "string"
         ? location.state.from
         : location.state.from.pathname ||
-          (userType === "member" ? "/member/profile" : "/customer/profile")
+          (userType === "member" ? "/member/workspace" : "/customer/profile")
       : userType === "member"
-        ? "/member/profile"
+        ? "/member/workspace"
         : "/customer/profile";
 
     return <Navigate to={destination} replace />;

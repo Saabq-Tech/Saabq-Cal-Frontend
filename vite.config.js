@@ -9,7 +9,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       devOptions: {
-        enabled: true
+        enabled: false,
+        suppressWarnings: true,
       },
       includeAssets: ['favicon.ico', 'favicon.svg', 'icons.svg', 'logo.png'],
       manifest: {
@@ -35,6 +36,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        disableDevLogs: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },

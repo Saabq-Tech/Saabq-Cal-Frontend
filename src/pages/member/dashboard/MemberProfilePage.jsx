@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
-import MemberOverviewTab from "./MemberOverviewTab";
 import MemberSecurityPage from "./MemberSecurityPage";
 import MemberChangePasswordPage from "./MemberChangePasswordPage";
-import IntegrationsSettingsPage from "./IntegrationsSettingsPage";
-import NotificationsPage from "../../../components/dashboard/NotificationsPage";
-import ChatsPage from "../../../components/dashboard/ChatsPage";
 import SEO from "../../../components/ui/SEO";
 import { ProfileSkeleton } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
@@ -19,7 +15,7 @@ export default function MemberProfilePage() {
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
-  const currentTab = searchParams.get("tab") || "overview";
+  const currentTab = searchParams.get("tab") || "info";
 
   const fileInputRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -100,8 +96,21 @@ export default function MemberProfilePage() {
 
   if (!user) return null;
 
+  // Redirect legacy ?tab= query params to dedicated routes
+  const tabRouteMap = {
+    integrations: "/member/integrations",
+    applications: "/member/integrations",
+    notifications: "/member/notifications",
+    chats: "/member/chats",
+    support: "/member/chats",
+    messages: "/member/chats",
+  };
+  if (tabRouteMap[currentTab]) {
+    return <Navigate to={tabRouteMap[currentTab]} replace />;
+  }
+
   if (currentTab === "overview" || currentTab === "home") {
-    return <MemberOverviewTab />;
+    return <Navigate to="/member/workspace" replace />;
   }
 
   if (currentTab === "security") {
@@ -109,37 +118,6 @@ export default function MemberProfilePage() {
       <>
         <SEO title={t("security")} noindex />
         <MemberSecurityPage />
-      </>
-    );
-  }
-
-  if (currentTab === "integrations" || currentTab === "applications") {
-    return (
-      <>
-        <SEO title={t("integrations")} noindex />
-        <IntegrationsSettingsPage />
-      </>
-    );
-  }
-
-  if (currentTab === "notifications") {
-    return (
-      <>
-        <SEO title={t("notifications")} noindex />
-        <NotificationsPage />
-      </>
-    );
-  }
-
-  if (
-    currentTab === "chats" ||
-    currentTab === "support" ||
-    currentTab === "messages"
-  ) {
-    return (
-      <>
-        <SEO title={t("supportChat")} noindex />
-        <ChatsPage />
       </>
     );
   }

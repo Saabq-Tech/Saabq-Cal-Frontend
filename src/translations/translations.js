@@ -59,6 +59,8 @@ export const translations = {
     navBookings: "الحجوزات",
     navSchedules: "الجداول",
     navMembers: "فريق العمل",
+    reports: "التقارير",
+    search: "بحث",
     profile: "الملف الشخصي",
     supportChat: "محادثات الدعم",
     security: "الأمان والربط",
@@ -1749,6 +1751,7 @@ export const translations = {
       "عرض وإدارة سجلات وملفات العملاء الخاصة بمساحة العمل والمتابعة الشاملة لمواعيدهم.",
     totalCustomers: "إجمالي العملاء",
     activeVipCustomers: "العملاء النشطون والمميزون",
+    activeAndVipSuffix: "النشطون والمميزون",
     totalBookingsCount: "إجمالي الحجوزات",
     newThisMonth: "عملاء جدد هذا الشهر",
     searchCustomersPlaceholder: "بحث بالاسم، البريد، الهاتف، أو رقم الملف...",
@@ -1775,6 +1778,10 @@ export const translations = {
     internalNotes: "ملاحظات سرية لفريق العمل",
     internalNotesPlaceholder:
       "أضف ملاحظات خاصة أو تعليمات داخلية عن هذا العميل...",
+    internalNotesNotice:
+      "هذه الملاحظات خاصة بمساحة العمل فقط ولا تظهر للعميل إطلاقاً.",
+    noCustomerAppointmentsYet:
+      "لم يسجل هذا العميل أي مواعيد في مساحة العمل هذه حتى الآن.",
     viewCustomerProfile: "عرض الملف الكامل",
     bookAppointmentForCustomer: "حجز موعد جديد",
     customerSince: "عميل منذ",
@@ -1918,6 +1925,8 @@ export const translations = {
     navBookings: "Bookings",
     navSchedules: "Schedules",
     navMembers: "Team Members",
+    reports: "Reports",
+    search: "Search",
     profile: "Profile",
     supportChat: "Support Chat",
     security: "Security & Connections",
@@ -3648,6 +3657,7 @@ export const translations = {
       "View and manage workspace customer files, history, and complete appointment records.",
     totalCustomers: "Total Customers",
     activeVipCustomers: "Active & VIP Customers",
+    activeAndVipSuffix: "Active & VIP",
     totalBookingsCount: "Total Bookings",
     newThisMonth: "New This Month",
     searchCustomersPlaceholder:
@@ -3675,6 +3685,10 @@ export const translations = {
     internalNotes: "Internal Staff Notes",
     internalNotesPlaceholder:
       "Add private staff notes or internal handling guidelines for this customer...",
+    internalNotesNotice:
+      "These notes are for workspace staff only and are never visible to the client.",
+    noCustomerAppointmentsYet:
+      "This client has not booked any appointments in this workspace yet.",
     viewCustomerProfile: "View Full Profile",
     bookAppointmentForCustomer: "Book New Appointment",
     customerSince: "Customer since",

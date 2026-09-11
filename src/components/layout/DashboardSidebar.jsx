@@ -13,8 +13,25 @@ export default function DashboardSidebar({ variant }) {
 
   const isProfilePath = location.pathname === `${prefix}/profile`;
   const queryParams = new URLSearchParams(location.search);
-  const defaultTab = "overview";
-  const activeTab = isProfilePath ? queryParams.get("tab") || defaultTab : null;
+  const defaultTab = userType === "member" ? "info" : "overview";
+
+  // Detect active tab from EITHER ?tab= query param OR dedicated route path
+  const getActiveTab = () => {
+    if (isProfilePath) {
+      return queryParams.get("tab") || defaultTab;
+    }
+    // Check if we're on a dedicated route that maps to an account tab
+    const pathSegment = location.pathname.replace(`${prefix}/`, "");
+    const routeTabMap = {
+      integrations: "integrations",
+      notifications: "notifications",
+      chats: "chats",
+      security: "security",
+      "change-password": "password",
+    };
+    return routeTabMap[pathSegment] || null;
+  };
+  const activeTab = getActiveTab();
 
   const accountTabs = getAccountTabs(t, userType);
   const isDashboard = variant === "dashboard";

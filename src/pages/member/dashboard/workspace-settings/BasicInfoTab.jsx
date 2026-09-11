@@ -576,25 +576,7 @@ export default function BasicInfoTab({
                     canEdit &&
                     setBasicForm({ ...basicForm, customer_icon: ico.id })
                   }
-                  className={`btn ${isSelected ? "btn-primary" : "btn-secondary"}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                    padding: "10px 8px",
-                    borderRadius: "var(--radius-md, 10px)",
-                    border: isSelected
-                      ? "2px solid var(--primary)"
-                      : "1px solid var(--border)",
-                    background: isSelected
-                      ? "var(--primary-subtle, rgba(59, 130, 246, 0.1))"
-                      : "var(--surface)",
-                    color: isSelected ? "var(--primary)" : "var(--text-main)",
-                    cursor: canEdit ? "pointer" : "default",
-                    transition: "all 0.2s ease",
-                  }}
+                  className={`customer-icon-option-btn ${isSelected ? "selected" : ""}`}
                 >
                   <Icon
                     name={ico.id}

@@ -32,7 +32,7 @@ export default function GoogleNotConnectedBanner() {
       </div>
 
       <Link
-        to="/member/profile?tab=integrations"
+        to="/member/integrations"
         className="btn btn-warning btn-sm warning-banner-action"
         style={{
           backgroundColor: "#F59E0B",

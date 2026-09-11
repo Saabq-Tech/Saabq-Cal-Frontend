@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
@@ -9,6 +10,29 @@ import SearchableSelect from "../../../../components/common/SearchableSelect";
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const { t, lang } = useLanguage();
   const toast = useToast();
+  const { user } = useAuth();
+  const workspace = user?.workspace;
+
+  // Dynamic workspace customer label
+  const getLabel = (type = "singular") => {
+    const field =
+      type === "singular" ? "customer_label_singular" : "customer_label_plural";
+    if (workspace?.[field]) {
+      if (typeof workspace[field] === "object") {
+        return (
+          workspace[field][lang] ||
+          workspace[field].ar ||
+          workspace[field].en ||
+          (type === "singular" ? "عميل" : "العملاء")
+        );
+      }
+      return workspace[field];
+    }
+    return type === "singular"
+      ? t("customerSingle") || "عميل"
+      : t("navCustomers") || "العملاء";
+  };
+  const custSingular = getLabel("singular");
 
   const [customerMode, setCustomerMode] = useState("existing"); // 'existing' or 'new'
 
@@ -72,10 +96,13 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
           fontSize: "0.78rem",
           fontWeight: 600,
           marginTop: 4,
-          display: "block",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
         }}
       >
-        ⚠️ {text}
+        <Icon name="alert-triangle" size={13} />
+        <span>{text}</span>
       </span>
     );
   };
@@ -157,13 +184,16 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     }
 
     if (customerMode === "existing" && !customerId) {
-      setErrorMessage(t("selectCustomerPrompt") || "يرجى اختيار العميل");
+      setErrorMessage(
+        t("selectCustomerPrompt") || `يرجى اختيار ${custSingular}`,
+      );
       return;
     }
 
     if (customerMode === "new" && (!customerName || !customerEmail)) {
       setErrorMessage(
-        t("enterCustomerDetails") || "يرجى إدخال اسم العميل والبريد الإلكتروني",
+        t("enterCustomerDetails") ||
+          `يرجى إدخال اسم ${custSingular} والبريد الإلكتروني`,
       );
       return;
     }
@@ -253,7 +283,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
             >
               <Icon name="calendar" size={20} />
               <span>
-                {t("createBookingForClient") || "حجز موعد جديد لعميل"}
+                {t("createBookingForClient") ||
+                  `حجز موعد جديد ل${custSingular}`}
               </span>
             </h3>
           </div>
@@ -337,7 +368,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               className="form-label"
               style={{ fontWeight: 700, fontSize: "0.86rem", marginBottom: 6 }}
             >
-              {t("customerHeader") || "العميل"}{" "}
+              {t("customerHeader") || custSingular}{" "}
               <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <div
@@ -385,7 +416,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="user" size={14} />
-                <span>{t("existingCustomerTab") || "عميل مسجل"}</span>
+                <span>
+                  {t("existingCustomerTab") || `${custSingular} مسجل`}
+                </span>
               </button>
               <button
                 type="button"
@@ -420,7 +453,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="plus" size={14} />
-                <span>{t("newCustomerTab") || "عميل جديد (إنشاء سريع)"}</span>
+                <span>
+                  {t("newCustomerTab") || `${custSingular} جديد (إنشاء سريع)`}
+                </span>
               </button>
             </div>
 
@@ -437,9 +472,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                       label: `${cName}${cEmail ? ` (${cEmail})` : ""}`,
                     };
                   })}
-                  placeholder={t("selectCustomerPrompt") || "اختر العميل..."}
+                  placeholder={
+                    t("selectCustomerPrompt") || `اختر ${custSingular}...`
+                  }
                   searchPlaceholder={
-                    t("searchCustomerPrompt") || "بحث باسم العميل أو البريد..."
+                    t("searchCustomerPrompt") ||
+                    `بحث باسم ${custSingular} أو البريد...`
                   }
                   disabled={loadingData}
                   error={Boolean(fieldErrors.customer_id)}
@@ -460,13 +498,13 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                       display: "block",
                     }}
                   >
-                    {t("customerName") || "اسم العميل"}{" "}
+                    {t("customerName") || `اسم ${custSingular}`}{" "}
                     <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder={t("customerName") || "اسم العميل"}
+                    placeholder={t("customerName") || `اسم ${custSingular}`}
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     required={customerMode === "new"}

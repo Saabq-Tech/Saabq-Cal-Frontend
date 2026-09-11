@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
@@ -16,6 +17,19 @@ export default function BookingsTab({
 }) {
   const { t, isRTL, lang } = useLanguage();
   const toast = useToast();
+  const { user } = useAuth();
+  const ws = user?.workspace;
+  const custSingular = (() => {
+    const f = ws?.customer_label_singular;
+    if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
+    return t("customerSingle") || "عميل";
+  })();
+  const custPlural = (() => {
+    const f = ws?.customer_label_plural;
+    if (f)
+      return typeof f === "object" ? f[lang] || f.ar || f.en || "العملاء" : f;
+    return t("navCustomers") || "العملاء";
+  })();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -274,7 +288,8 @@ export default function BookingsTab({
             type="text"
             className="form-input"
             placeholder={
-              t("searchBookingPlaceholder") || "بحث باسم العميل أو البريد..."
+              t("searchBookingPlaceholder") ||
+              `بحث باسم ${custSingular} أو البريد...`
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -367,7 +382,7 @@ export default function BookingsTab({
           </h4>
           <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
             {t("noBookingsDesc") ||
-              "ستظهر المواعيد الحالية والقادمة هنا فور إتمام العملاء للحجوزات."}
+              `ستظهر المواعيد الحالية والقادمة هنا فور إتمام ${custPlural} للحجوزات.`}
           </p>
         </div>
       ) : !isMobileView ? (
@@ -399,7 +414,7 @@ export default function BookingsTab({
                     color: "var(--heading)",
                   }}
                 >
-                  {t("customerHeader") || "العميل"}
+                  {t("customerHeader") || custSingular}
                 </th>
                 <th
                   style={{
@@ -450,7 +465,7 @@ export default function BookingsTab({
                   b.customer_name ||
                   b.customer?.name ||
                   b.snapshot?.customer_name ||
-                  "عميل";
+                  custSingular;
                 const customerEmail =
                   b.customer_email ||
                   b.customer?.email ||
@@ -478,7 +493,7 @@ export default function BookingsTab({
                     onClick={() => onSelectBooking && onSelectBooking(b.id)}
                   >
                     <td
-                      data-label={t("customerHeader") || "العميل"}
+                      data-label={t("customerHeader") || custSingular}
                       style={{ padding: "14px 16px" }}
                     >
                       <div
@@ -591,7 +606,7 @@ export default function BookingsTab({
               b.customer_name ||
               b.customer?.name ||
               b.snapshot?.customer_name ||
-              "عميل";
+              custSingular;
             const customerEmail =
               b.customer_email ||
               b.customer?.email ||

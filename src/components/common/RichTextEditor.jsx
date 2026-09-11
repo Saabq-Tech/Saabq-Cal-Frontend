@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "../../context/LanguageContext";
 import { useToast } from "../../context/ToastContext";
 import client, { endpoints } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
+import { getPublicAssetUrl } from "../../utils/url";
 import Icon from "./Icon";
 
 export default function RichTextEditor({
@@ -17,6 +20,7 @@ export default function RichTextEditor({
   keywords: propKeywords = null,
   onSelectTemplate,
 }) {
+  const { user } = useAuth();
   const { t, language } = useLanguage();
   const toast = useToast();
   const isRTL = language === "ar";
@@ -194,23 +198,232 @@ export default function RichTextEditor({
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+
+    const ws = user?.workspace || {};
+    const wsName = ws.name || "";
+    const wsLogo = ws.logo_url || (ws.logo ? getPublicAssetUrl(ws.logo) : "");
+    const wsPhone = ws.phone || "";
+    const wsEmail = ws.email || "";
+    const wsAddress = ws.address || "";
+    const saabqLogo = getPublicAssetUrl("/logo.png");
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="${isRTL ? "rtl" : "ltr"}" lang="${language}">
         <head>
           <meta charset="utf-8" />
-          <title>${t("print") || "طباعة"}</title>
+          <title>${isRTL ? "تقرير ومستند" : "Document & Report"}</title>
           <style>
-            body { font-family: system-ui, -apple-system, sans-serif; padding: 30px; color: #1e293b; }
-            table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px 12px; }
-            @media print { body { padding: 0; } }
+            @page {
+              size: A4 portrait;
+              margin: 14mm 12mm 16mm 12mm;
+            }
+            *, *::before, *::after {
+              box-sizing: border-box;
+            }
+            body {
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              color: #0f172a;
+              background: #ffffff;
+              font-size: 13px;
+              line-height: 1.6;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-wrapper {
+              width: 100%;
+              max-width: 820px;
+              margin: 0 auto;
+            }
+            .letterhead {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              border-bottom: 2px solid #0284c7;
+              padding-bottom: 14px;
+              margin-bottom: 18px;
+              gap: 16px;
+            }
+            .ws-info {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .ws-logo {
+              width: 54px;
+              height: 54px;
+              border-radius: 10px;
+              object-fit: cover;
+              border: 1px solid #e2e8f0;
+            }
+            .ws-title {
+              font-size: 18px;
+              font-weight: 800;
+              color: #0f172a;
+              margin: 0 0 4px 0;
+            }
+            .ws-contacts {
+              font-size: 11px;
+              color: #64748b;
+              display: flex;
+              gap: 10px;
+              flex-wrap: wrap;
+            }
+            .platform-branding {
+              text-align: ${isRTL ? "left" : "right"};
+              display: flex;
+              flex-direction: column;
+              align-items: ${isRTL ? "flex-start" : "flex-end"};
+              gap: 4px;
+            }
+            .platform-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: #f0fdf4;
+              border: 1px solid #bbf7d0;
+              padding: 4px 10px;
+              border-radius: 6px;
+              font-size: 11px;
+              font-weight: 700;
+              color: #166534;
+            }
+            .platform-logo {
+              height: 18px;
+              width: auto;
+            }
+            .platform-sub {
+              font-size: 10px;
+              color: #94a3b8;
+            }
+            .report-box {
+              background: #ffffff;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 20px;
+              min-height: 240px;
+              margin-bottom: 24px;
+            }
+            .report-content {
+              line-height: 1.8;
+              font-size: 13px;
+              color: #1e293b;
+            }
+            .report-content p { margin: 0 0 10px 0; }
+            .report-content h1, .report-content h2, .report-content h3 {
+              color: #0f172a;
+              margin-top: 14px;
+              margin-bottom: 8px;
+            }
+            .report-content table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 12px 0;
+            }
+            .report-content th, .report-content td {
+              border: 1px solid #cbd5e1;
+              padding: 8px 10px;
+              text-align: ${isRTL ? "right" : "left"};
+            }
+            .report-content th {
+              background: #f1f5f9;
+              font-weight: 700;
+            }
+            .signoff-section {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-top: 36px;
+              padding-top: 16px;
+              page-break-inside: avoid;
+            }
+            .signoff-col {
+              text-align: center;
+              width: 220px;
+            }
+            .signoff-slot {
+              height: 48px;
+              border-bottom: 1px dashed #94a3b8;
+              margin-bottom: 6px;
+            }
+            .signoff-title {
+              font-size: 11px;
+              color: #64748b;
+              font-weight: 600;
+            }
+            .letterhead-footer {
+              margin-top: 24px;
+              padding-top: 12px;
+              border-top: 1px solid #e2e8f0;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 10px;
+              color: #94a3b8;
+              page-break-inside: avoid;
+            }
           </style>
         </head>
         <body>
-          ${htmlContent}
+          <div class="print-wrapper">
+            ${
+              wsName
+                ? `
+              <header class="letterhead">
+                <div class="ws-info">
+                  ${wsLogo ? `<img src="${wsLogo}" class="ws-logo" alt="${wsName}" onerror="this.style.display='none'" />` : ""}
+                  <div>
+                    <h1 class="ws-title">${wsName}</h1>
+                    <div class="ws-contacts">
+                      ${wsPhone ? `<span>📞 ${wsPhone}</span>` : ""}
+                      ${wsEmail ? `<span>✉️ ${wsEmail}</span>` : ""}
+                      ${wsAddress ? `<span>📍 ${wsAddress}</span>` : ""}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="platform-branding">
+                  <div class="platform-badge">
+                    <img src="${saabqLogo}" class="platform-logo" alt="Saabq" onerror="this.style.display='none'" />
+                    <span>${isRTL ? "تقويم سابق | Saabq Cal" : "Saabq Cal Platform"}</span>
+                  </div>
+                  <div class="platform-sub">${isRTL ? "نظام إدارة المواعيد والخدمات المعتمد" : "Verified Booking & Operations System"}</div>
+                </div>
+              </header>
+            `
+                : ""
+            }
+
+            <section class="report-box">
+              <div class="report-content">
+                ${htmlContent || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مستند فارغ" : "Empty document"}</p>`}
+              </div>
+            </section>
+
+            <div class="signoff-section">
+              <div class="signoff-col">
+                <div class="signoff-slot"></div>
+                <div class="signoff-title">${isRTL ? "التوقيع والاعتماد" : "Signature"}</div>
+              </div>
+              <div class="signoff-col">
+                <div class="signoff-slot"></div>
+                <div class="signoff-title">${isRTL ? "الختم الرسمي" : "Official Stamp"}</div>
+              </div>
+            </div>
+
+            <footer class="letterhead-footer">
+              <span>${isRTL ? "تم إصدار وتوثيق هذا المستند إلكترونياً عبر منصة تقويم سابق (Saabq Cal)" : "Issued & verified electronically via Saabq Cal Platform"}</span>
+              <span>${new Date().toLocaleDateString(isRTL ? "ar-SA" : "en-US", { year: "numeric", month: "numeric", day: "numeric" })}</span>
+            </footer>
+          </div>
+
           <script>
-            window.onload = function() { window.print(); window.close(); };
+            window.onload = function() {
+              window.print();
+              window.close();
+            };
           </script>
         </body>
       </html>
@@ -773,640 +986,625 @@ export default function RichTextEditor({
       )}
 
       {/* Insert Table Modal */}
-      {showTableModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <form
-            onSubmit={handleInsertTable}
-            style={{
-              background: "var(--surface)",
-              color: "var(--heading)",
-              border: "1px solid var(--border)",
-              padding: 24,
-              borderRadius: 12,
-              width: 320,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-            }}
-          >
-            <h4
-              style={{
-                margin: "0 0 16px 0",
-                fontSize: "1.1rem",
-                color: "var(--heading)",
-              }}
-            >
-              {t("insertTable") || "إدراج جدول"}
-            </h4>
-            <div style={{ marginBottom: 12 }}>
-              <label
-                style={{
-                  fontSize: "0.84rem",
-                  display: "block",
-                  marginBottom: 4,
-                  color: "var(--text-secondary)",
-                }}
-              >
-                {t("rows") || "عدد الصفوف"}:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                className="form-input"
-                value={tableRows}
-                onChange={(e) => setTableRows(e.target.value)}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label
-                style={{
-                  fontSize: "0.84rem",
-                  display: "block",
-                  marginBottom: 4,
-                  color: "var(--text-secondary)",
-                }}
-              >
-                {t("cols") || "عدد الأعمدة"}:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                className="form-input"
-                value={tableCols}
-                onChange={(e) => setTableCols(e.target.value)}
-                required
-              />
-            </div>
-            <div
-              style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
-            >
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowTableModal(false)}
-              >
-                {t("cancel") || "إلغاء"}
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {t("insert") || "إدراج"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Insert Link Modal */}
-      {showLinkModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <form
-            onSubmit={handleInsertLink}
-            style={{
-              background: "var(--surface)",
-              color: "var(--heading)",
-              border: "1px solid var(--border)",
-              padding: 24,
-              borderRadius: 12,
-              width: 360,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-            }}
-          >
-            <h4
-              style={{
-                margin: "0 0 16px 0",
-                fontSize: "1.1rem",
-                color: "var(--heading)",
-              }}
-            >
-              {t("insertLink") || "إدراج رابط"}
-            </h4>
-            <div style={{ marginBottom: 20 }}>
-              <label
-                style={{
-                  fontSize: "0.84rem",
-                  display: "block",
-                  marginBottom: 4,
-                }}
-              >
-                {t("url") || "الرابط (URL)"}:
-              </label>
-              <input
-                type="text"
-                className="form-input"
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="https://example.com"
-                required
-              />
-            </div>
-            <div
-              style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
-            >
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowLinkModal(false)}
-              >
-                {t("cancel") || "إلغاء"}
-              </button>
-              <button type="submit" className="btn btn-primary">
-                {t("insert") || "إدراج"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Templates Modal */}
-      {showTemplatesModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(4px)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-          }}
-        >
+      {showTableModal &&
+        createPortal(
           <div
             style={{
-              background: "var(--surface)",
-              color: "var(--heading)",
-              border: "1px solid var(--border)",
-              padding: 24,
-              borderRadius: 16,
-              width: "100%",
-              maxWidth: 580,
-              maxHeight: "85vh",
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.7)",
+              backdropFilter: "blur(4px)",
+              zIndex: 9999999,
               display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
+            }}
+          >
+            <form
+              onSubmit={handleInsertTable}
+              style={{
+                background: "var(--surface)",
+                color: "var(--heading)",
+                border: "1px solid var(--border)",
+                padding: 24,
+                borderRadius: 12,
+                width: 320,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+              }}
+            >
+              <h4
+                style={{
+                  margin: "0 0 16px 0",
+                  fontSize: "1.1rem",
+                  color: "var(--heading)",
+                }}
+              >
+                {t("insertTable") || "إدراج جدول"}
+              </h4>
+              <div style={{ marginBottom: 12 }}>
+                <label
+                  style={{
+                    fontSize: "0.84rem",
+                    display: "block",
+                    marginBottom: 4,
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {t("rows") || "عدد الصفوف"}:
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  className="form-input"
+                  value={tableRows}
+                  onChange={(e) => setTableRows(e.target.value)}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label
+                  style={{
+                    fontSize: "0.84rem",
+                    display: "block",
+                    marginBottom: 4,
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {t("cols") || "عدد الأعمدة"}:
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  className="form-input"
+                  value={tableCols}
+                  onChange={(e) => setTableCols(e.target.value)}
+                  required
+                />
+              </div>
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowTableModal(false)}
+                >
+                  {t("cancel") || "إلغاء"}
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {t("insert") || "إدراج"}
+                </button>
+              </div>
+            </form>
+          </div>,
+          document.body,
+        )}
+
+      {/* Insert Link Modal */}
+      {showLinkModal &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.7)",
+              backdropFilter: "blur(4px)",
+              zIndex: 9999999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
+            }}
+          >
+            <form
+              onSubmit={handleInsertLink}
+              style={{
+                background: "var(--surface)",
+                color: "var(--heading)",
+                border: "1px solid var(--border)",
+                padding: 24,
+                borderRadius: 12,
+                width: 360,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+              }}
+            >
+              <h4
+                style={{
+                  margin: "0 0 16px 0",
+                  fontSize: "1.1rem",
+                  color: "var(--heading)",
+                }}
+              >
+                {t("insertLink") || "إدراج رابط"}
+              </h4>
+              <div style={{ marginBottom: 20 }}>
+                <label
+                  style={{
+                    fontSize: "0.84rem",
+                    display: "block",
+                    marginBottom: 4,
+                  }}
+                >
+                  {t("url") || "الرابط (URL)"}:
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowLinkModal(false)}
+                >
+                  {t("cancel") || "إلغاء"}
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  {t("insert") || "إدراج"}
+                </button>
+              </div>
+            </form>
+          </div>,
+          document.body,
+        )}
+
+      {/* Templates Modal */}
+      {showTemplatesModal &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.7)",
+              backdropFilter: "blur(4px)",
+              zIndex: 9999999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
             }}
           >
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-                paddingBottom: 12,
-                borderBottom: "1px solid var(--border-light)",
-              }}
-            >
-              <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>
-                {isRTL ? "📄 اختيار قالب جاهز" : "📄 Choose a Template"}
-              </h4>
-              <button
-                type="button"
-                onClick={() => setShowTemplatesModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "var(--text-secondary)",
-                  fontSize: "1.1rem",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <p
-              style={{
-                margin: "0 0 16px 0",
-                fontSize: "0.84rem",
-                color: "var(--text-secondary)",
-              }}
-            >
-              {isRTL
-                ? "اختر قالباً لبدء كتابة الوصفة أو التقرير، أو يمكنك البدء بمستند فارغ."
-                : "Select a template to start drafting, or choose to start with a blank document."}
-            </p>
-
-            <div
-              style={{
-                overflowY: "auto",
+                background: "var(--surface)",
+                color: "var(--heading)",
+                border: "1px solid var(--border)",
+                padding: 24,
+                borderRadius: 16,
+                width: "100%",
+                maxWidth: 580,
+                maxHeight: "85vh",
                 display: "flex",
                 flexDirection: "column",
-                gap: 12,
-                flex: 1,
-                paddingRight: 4,
-                marginBottom: 16,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
               }}
             >
-              {loadingTemplates ? (
-                <p
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 16,
+                  paddingBottom: 12,
+                  borderBottom: "1px solid var(--border-light)",
+                }}
+              >
+                <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>
+                  {isRTL ? "📄 اختيار قالب جاهز" : "📄 Choose a Template"}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplatesModal(false)}
                   style={{
-                    textAlign: "center",
-                    padding: 20,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
                     color: "var(--text-secondary)",
+                    fontSize: "1.1rem",
                   }}
                 >
-                  {isRTL ? "جاري تحميل القوالب..." : "Loading templates..."}
-                </p>
-              ) : templates.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: 24,
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  <p style={{ margin: 0, fontWeight: 700 }}>
-                    {isRTL
-                      ? "لا توجد قوالب محفوظة بعد"
-                      : "No templates saved yet"}
-                  </p>
-                </div>
-              ) : (
-                templates.map((tmpl) => (
-                  <div
-                    key={tmpl.id}
+                  ✕
+                </button>
+              </div>
+
+              <p
+                style={{
+                  margin: "0 0 16px 0",
+                  fontSize: "0.84rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {isRTL
+                  ? "اختر قالباً لبدء كتابة التقرير أو الملخص، أو يمكنك البدء بمستند فارغ."
+                  : "Select a template to start drafting, or choose to start with a blank document."}
+              </p>
+
+              <div
+                style={{
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  flex: 1,
+                  paddingRight: 4,
+                  marginBottom: 16,
+                }}
+              >
+                {loadingTemplates ? (
+                  <p
                     style={{
-                      border: "1.5px solid var(--border-light)",
-                      borderRadius: 12,
-                      padding: 14,
-                      background: "var(--surface-alt)",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
+                      textAlign: "center",
+                      padding: 20,
+                      color: "var(--text-secondary)",
                     }}
                   >
+                    {isRTL ? "جاري تحميل القوالب..." : "Loading templates..."}
+                  </p>
+                ) : templates.length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: 24,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    <p style={{ margin: 0, fontWeight: 700 }}>
+                      {isRTL
+                        ? "لا توجد قوالب محفوظة بعد"
+                        : "No templates saved yet"}
+                    </p>
+                  </div>
+                ) : (
+                  templates.map((tmpl) => (
                     <div
+                      key={tmpl.id}
                       style={{
+                        border: "1.5px solid var(--border-light)",
+                        borderRadius: 12,
+                        padding: 14,
+                        background: "var(--surface-alt)",
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        flexDirection: "column",
+                        gap: 8,
                       }}
                     >
                       <div
                         style={{
                           display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
-                          gap: 8,
                         }}
                       >
-                        <span
+                        <div
                           style={{
-                            fontWeight: 800,
-                            fontSize: "0.95rem",
-                            color: "var(--heading)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
                           }}
                         >
-                          {tmpl.name}
-                        </span>
-                        {tmpl.is_default && (
                           <span
                             style={{
-                              padding: "2px 8px",
-                              borderRadius: 20,
-                              fontSize: "0.72rem",
                               fontWeight: 800,
-                              background: "rgba(13, 148, 136, 0.15)",
-                              color: "#0f766e",
+                              fontSize: "0.95rem",
+                              color: "var(--heading)",
                             }}
                           >
-                            {isRTL ? "افتراضي" : "Default"}
+                            {tmpl.name}
                           </span>
-                        )}
+                          {tmpl.is_default && (
+                            <span
+                              style={{
+                                padding: "2px 8px",
+                                borderRadius: 20,
+                                fontSize: "0.72rem",
+                                fontWeight: 800,
+                                background: "rgba(13, 148, 136, 0.15)",
+                                color: "#0f766e",
+                              }}
+                            >
+                              {isRTL ? "افتراضي" : "Default"}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          onClick={() => handleApplyTemplate(tmpl)}
+                          style={{
+                            padding: "5px 14px",
+                            fontSize: "0.82rem",
+                            borderRadius: 8,
+                          }}
+                        >
+                          {isRTL ? "تطبيق القالب" : "Apply"}
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleApplyTemplate(tmpl)}
-                        style={{
-                          padding: "5px 14px",
-                          fontSize: "0.82rem",
-                          borderRadius: 8,
-                        }}
-                      >
-                        {isRTL ? "تطبيق القالب" : "Apply"}
-                      </button>
+
+                      {tmpl.description && (
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "0.82rem",
+                            color: "var(--text-secondary)",
+                          }}
+                        >
+                          {tmpl.description}
+                        </p>
+                      )}
                     </div>
+                  ))
+                )}
+              </div>
 
-                    {tmpl.description && (
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "0.82rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {tmpl.description}
-                      </p>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 10,
-                paddingTop: 12,
-                borderTop: "1px solid var(--border-light)",
-              }}
-            >
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      isRTL
-                        ? "هل تريد بدء مستند فارغ ومسح المحتوى الحالي؟"
-                        : "Start blank and clear current content?",
-                    )
-                  ) {
-                    setHtmlContent("");
-                    if (editorRef.current) editorRef.current.innerHTML = "";
-                    if (onChange) onChange("");
-                    setShowTemplatesModal(false);
-                  }
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  paddingTop: 12,
+                  borderTop: "1px solid var(--border-light)",
                 }}
-                style={{ fontSize: "0.84rem" }}
               >
-                {isRTL ? "بدء مستند فارغ" : "Start Blank"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowTemplatesModal(false)}
-                style={{ fontSize: "0.84rem" }}
-              >
-                {t("cancel") || "إلغاء"}
-              </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        isRTL
+                          ? "هل تريد بدء مستند فارغ ومسح المحتوى الحالي؟"
+                          : "Start blank and clear current content?",
+                      )
+                    ) {
+                      setHtmlContent("");
+                      if (editorRef.current) editorRef.current.innerHTML = "";
+                      if (onChange) onChange("");
+                      setShowTemplatesModal(false);
+                    }
+                  }}
+                  style={{ fontSize: "0.84rem" }}
+                >
+                  {isRTL ? "بدء مستند فارغ" : "Start Blank"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowTemplatesModal(false)}
+                  style={{ fontSize: "0.84rem" }}
+                >
+                  {t("cancel") || "إلغاء"}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* Keywords Modal */}
-      {showKeywordsModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(4px)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16,
-          }}
-        >
+      {showKeywordsModal &&
+        createPortal(
           <div
             style={{
-              background: "var(--surface)",
-              color: "var(--heading)",
-              border: "1px solid var(--border)",
-              padding: 24,
-              borderRadius: 16,
-              width: "100%",
-              maxWidth: 620,
-              maxHeight: "85vh",
+              position: "fixed",
+              inset: 0,
+              background: "rgba(15, 23, 42, 0.7)",
+              backdropFilter: "blur(4px)",
+              zIndex: 9999999,
               display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
             }}
           >
             <div
               style={{
+                background: "var(--surface)",
+                color: "var(--heading)",
+                border: "1px solid var(--border)",
+                padding: 24,
+                borderRadius: 16,
+                width: "100%",
+                maxWidth: 620,
+                maxHeight: "85vh",
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-                paddingBottom: 10,
-                borderBottom: "1px solid var(--border-light)",
+                flexDirection: "column",
+                boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
               }}
             >
-              <h4
+              <div
                 style={{
-                  margin: 0,
-                  fontSize: "1.1rem",
-                  fontWeight: 800,
                   display: "flex",
+                  justifyContent: "space-between",
                   alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span>🏷️</span>
-                <span>
-                  {isRTL
-                    ? "الكلمات المفتاحية والمصطلحات"
-                    : "Workspace Keywords"}
-                </span>
-              </h4>
-              <button
-                type="button"
-                onClick={() => setShowKeywordsModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "var(--text-secondary)",
-                  fontSize: "1.1rem",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Top Toolbar: Search & Add Button */}
-            <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
-              <input
-                type="text"
-                className="form-input"
-                placeholder={
-                  isRTL ? "بحث في الكلمات المفتاحية..." : "Search keywords..."
-                }
-                value={keywordSearch}
-                onChange={(e) => setKeywordSearch(e.target.value)}
-                style={{ flex: 1, fontSize: "0.85rem", height: 38 }}
-              />
-              <button
-                type="button"
-                className={`btn ${showNewKeywordForm ? "btn-secondary" : "btn-primary"}`}
-                onClick={() => setShowNewKeywordForm(!showNewKeywordForm)}
-                style={{
-                  padding: "6px 14px",
-                  fontSize: "0.82rem",
-                  borderRadius: 8,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {showNewKeywordForm
-                  ? isRTL
-                    ? "إلغاء الإضافة"
-                    : "Cancel"
-                  : isRTL
-                    ? "+ إضافة كلمة جديدة"
-                    : "+ Add Keyword"}
-              </button>
-            </div>
-
-            {/* Quick Add Form */}
-            {showNewKeywordForm && (
-              <form
-                onSubmit={handleCreateKeywordOnTheFly}
-                style={{
-                  background: "var(--surface-alt)",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: 12,
-                  padding: 14,
                   marginBottom: 14,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
+                  paddingBottom: 10,
+                  borderBottom: "1px solid var(--border-light)",
                 }}
               >
-                <div
+                <h4
                   style={{
-                    fontWeight: 700,
-                    fontSize: "0.86rem",
-                    color: "var(--heading)",
+                    margin: 0,
+                    fontSize: "1.1rem",
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
                   }}
                 >
-                  {isRTL
-                    ? "إضافة مصطلح / كلمة مفتاحية جديدة لنوع مساحة العمل"
-                    : "Add new keyword for this workspace type"}
-                </div>
+                  <span>🏷️</span>
+                  <span>
+                    {isRTL
+                      ? "الكلمات المفتاحية والمصطلحات"
+                      : "Workspace Keywords"}
+                  </span>
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setShowKeywordsModal(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-secondary)",
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Top Toolbar: Search & Add Button */}
+              <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                 <input
                   type="text"
                   className="form-input"
                   placeholder={
-                    isRTL
-                      ? "عنوان الكلمة المفتاحية (مثل: Paracetamol 500mg)"
-                      : "Keyword Title"
+                    isRTL ? "بحث في الكلمات المفتاحية..." : "Search keywords..."
                   }
-                  value={newKwTitle}
-                  onChange={(e) => setNewKwTitle(e.target.value)}
-                  required
-                  style={{ fontSize: "0.84rem" }}
+                  value={keywordSearch}
+                  onChange={(e) => setKeywordSearch(e.target.value)}
+                  style={{ flex: 1, fontSize: "0.85rem", height: 38 }}
                 />
-                <textarea
-                  className="form-textarea"
-                  rows={2}
-                  placeholder={
-                    isRTL
-                      ? "الوصف والجرعة أو التعليمات (اختياري)..."
-                      : "Description / instructions (optional)..."
-                  }
-                  value={newKwDescription}
-                  onChange={(e) => setNewKwDescription(e.target.value)}
-                  style={{ fontSize: "0.84rem" }}
-                />
-                <div
+                <button
+                  type="button"
+                  className={`btn ${showNewKeywordForm ? "btn-secondary" : "btn-primary"}`}
+                  onClick={() => setShowNewKeywordForm(!showNewKeywordForm)}
                   style={{
+                    padding: "6px 14px",
+                    fontSize: "0.82rem",
+                    borderRadius: 8,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {showNewKeywordForm
+                    ? isRTL
+                      ? "إلغاء الإضافة"
+                      : "Cancel"
+                    : isRTL
+                      ? "+ إضافة كلمة جديدة"
+                      : "+ Add Keyword"}
+                </button>
+              </div>
+
+              {/* Quick Add Form */}
+              {showNewKeywordForm && (
+                <form
+                  onSubmit={handleCreateKeywordOnTheFly}
+                  style={{
+                    background: "var(--surface-alt)",
+                    border: "1px solid var(--border-light)",
+                    borderRadius: 12,
+                    padding: 14,
+                    marginBottom: 14,
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
+                    flexDirection: "column",
                     gap: 10,
                   }}
                 >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setNewKwImage(e.target.files?.[0] || null)}
-                    style={{ fontSize: "0.78rem" }}
-                  />
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-sm"
-                    disabled={creatingKeyword || !newKwTitle.trim()}
-                    style={{ padding: "6px 16px", borderRadius: 8 }}
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "0.86rem",
+                      color: "var(--heading)",
+                    }}
                   >
-                    {creatingKeyword
-                      ? isRTL
-                        ? "جاري الحفظ..."
-                        : "Saving..."
-                      : isRTL
-                        ? "حفظ الكلمة"
-                        : "Save Keyword"}
-                  </button>
-                </div>
-              </form>
-            )}
+                    {isRTL
+                      ? "إضافة مصطلح / كلمة مفتاحية جديدة لنوع مساحة العمل"
+                      : "Add new keyword for this workspace type"}
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder={
+                      isRTL
+                        ? "عنوان الكلمة المفتاحية (مثل: Paracetamol 500mg)"
+                        : "Keyword Title"
+                    }
+                    value={newKwTitle}
+                    onChange={(e) => setNewKwTitle(e.target.value)}
+                    required
+                    style={{ fontSize: "0.84rem" }}
+                  />
+                  <textarea
+                    className="form-textarea"
+                    rows={2}
+                    placeholder={
+                      isRTL
+                        ? "الوصف والجرعة أو التعليمات (اختياري)..."
+                        : "Description / instructions (optional)..."
+                    }
+                    value={newKwDescription}
+                    onChange={(e) => setNewKwDescription(e.target.value)}
+                    style={{ fontSize: "0.84rem" }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 10,
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setNewKwImage(e.target.files?.[0] || null)
+                      }
+                      style={{ fontSize: "0.78rem" }}
+                    />
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-sm"
+                      disabled={creatingKeyword || !newKwTitle.trim()}
+                      style={{ padding: "6px 16px", borderRadius: 8 }}
+                    >
+                      {creatingKeyword
+                        ? isRTL
+                          ? "جاري الحفظ..."
+                          : "Saving..."
+                        : isRTL
+                          ? "حفظ الكلمة"
+                          : "Save Keyword"}
+                    </button>
+                  </div>
+                </form>
+              )}
 
-            {/* Keywords List with customizable insertion options */}
-            <div
-              style={{
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                flex: 1,
-                paddingRight: 4,
-              }}
-            >
-              {loadingKeywords ? (
-                <p
-                  style={{
-                    textAlign: "center",
-                    padding: 20,
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  {isRTL
-                    ? "جاري تحميل الكلمات المفتاحية..."
-                    : "Loading keywords..."}
-                </p>
-              ) : keywords.filter((kw) => {
-                  if (!keywordSearch.trim()) return true;
-                  const q = keywordSearch.toLowerCase();
-                  return (
-                    (kw.title && kw.title.toLowerCase().includes(q)) ||
-                    (kw.description && kw.description.toLowerCase().includes(q))
-                  );
-                }).length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: 24,
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  <p style={{ margin: 0, fontWeight: 700 }}>
+              {/* Keywords List with customizable insertion options */}
+              <div
+                style={{
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  flex: 1,
+                  paddingRight: 4,
+                }}
+              >
+                {loadingKeywords ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: 20,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {isRTL
-                      ? "لم يتم العثور على كلمات مطابقة"
-                      : "No matching keywords found"}
+                      ? "جاري تحميل الكلمات المفتاحية..."
+                      : "Loading keywords..."}
                   </p>
-                  <p style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
-                    {isRTL
-                      ? "يمكنك إضافة كلمة مفتاحية جديدة باستخدام الزر أعلاه."
-                      : "You can add a new keyword using the button above."}
-                  </p>
-                </div>
-              ) : (
-                keywords
-                  .filter((kw) => {
+                ) : keywords.filter((kw) => {
                     if (!keywordSearch.trim()) return true;
                     const q = keywordSearch.toLowerCase();
                     return (
@@ -1414,193 +1612,223 @@ export default function RichTextEditor({
                       (kw.description &&
                         kw.description.toLowerCase().includes(q))
                     );
-                  })
-                  .map((kw) => {
-                    const opts = keywordOptions[kw.id] || {
-                      title: true,
-                      description: true,
-                      image: true,
-                    };
-                    return (
-                      <div
-                        key={kw.id}
-                        style={{
-                          border: "1px solid var(--border-light)",
-                          borderRadius: 12,
-                          padding: 12,
-                          background: "var(--surface-alt)",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: 12,
-                        }}
-                      >
+                  }).length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: 24,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    <p style={{ margin: 0, fontWeight: 700 }}>
+                      {isRTL
+                        ? "لم يتم العثور على كلمات مطابقة"
+                        : "No matching keywords found"}
+                    </p>
+                    <p style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
+                      {isRTL
+                        ? "يمكنك إضافة كلمة مفتاحية جديدة باستخدام الزر أعلاه."
+                        : "You can add a new keyword using the button above."}
+                    </p>
+                  </div>
+                ) : (
+                  keywords
+                    .filter((kw) => {
+                      if (!keywordSearch.trim()) return true;
+                      const q = keywordSearch.toLowerCase();
+                      return (
+                        (kw.title && kw.title.toLowerCase().includes(q)) ||
+                        (kw.description &&
+                          kw.description.toLowerCase().includes(q))
+                      );
+                    })
+                    .map((kw) => {
+                      const opts = keywordOptions[kw.id] || {
+                        title: true,
+                        description: true,
+                        image: true,
+                      };
+                      return (
                         <div
+                          key={kw.id}
                           style={{
+                            border: "1px solid var(--border-light)",
+                            borderRadius: 12,
+                            padding: 12,
+                            background: "var(--surface-alt)",
                             display: "flex",
+                            justifyContent: "space-between",
                             alignItems: "center",
-                            gap: 10,
-                            flex: 1,
-                            minWidth: 0,
-                          }}
-                        >
-                          {kw.image_url && (
-                            <img
-                              src={kw.image_url}
-                              alt={kw.title}
-                              style={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 8,
-                                objectFit: "cover",
-                                border: "1px solid var(--border-light)",
-                                flexShrink: 0,
-                              }}
-                            />
-                          )}
-                          <div style={{ minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontWeight: 800,
-                                fontSize: "0.92rem",
-                                color: "var(--heading)",
-                              }}
-                            >
-                              {kw.title}
-                            </div>
-                            {kw.description && (
-                              <div
-                                style={{
-                                  fontSize: "0.8rem",
-                                  color: "var(--text-secondary)",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  maxWidth: "340px",
-                                }}
-                              >
-                                {kw.description}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Customization checkboxes: Title, Description, Image */}
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            flexShrink: 0,
+                            gap: 12,
                           }}
                         >
                           <div
                             style={{
                               display: "flex",
-                              gap: 8,
-                              fontSize: "0.76rem",
-                              color: "var(--text-secondary)",
+                              alignItems: "center",
+                              gap: 10,
+                              flex: 1,
+                              minWidth: 0,
                             }}
                           >
-                            <label
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 3,
-                                cursor: "pointer",
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={opts.title !== false}
-                                onChange={(e) =>
-                                  setKeywordOptions((prev) => ({
-                                    ...prev,
-                                    [kw.id]: {
-                                      ...(prev[kw.id] || {}),
-                                      title: e.target.checked,
-                                    },
-                                  }))
-                                }
-                              />
-                              <span>{isRTL ? "العنوان" : "Title"}</span>
-                            </label>
-
-                            {kw.description && (
-                              <label
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 3,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={opts.description !== false}
-                                  onChange={(e) =>
-                                    setKeywordOptions((prev) => ({
-                                      ...prev,
-                                      [kw.id]: {
-                                        ...(prev[kw.id] || {}),
-                                        description: e.target.checked,
-                                      },
-                                    }))
-                                  }
-                                />
-                                <span>{isRTL ? "الوصف" : "Desc"}</span>
-                              </label>
-                            )}
-
                             {kw.image_url && (
-                              <label
+                              <img
+                                src={kw.image_url}
+                                alt={kw.title}
                                 style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 3,
-                                  cursor: "pointer",
+                                  width: 44,
+                                  height: 44,
+                                  borderRadius: 8,
+                                  objectFit: "cover",
+                                  border: "1px solid var(--border-light)",
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontWeight: 800,
+                                  fontSize: "0.92rem",
+                                  color: "var(--heading)",
                                 }}
                               >
-                                <input
-                                  type="checkbox"
-                                  checked={opts.image !== false}
-                                  onChange={(e) =>
-                                    setKeywordOptions((prev) => ({
-                                      ...prev,
-                                      [kw.id]: {
-                                        ...(prev[kw.id] || {}),
-                                        image: e.target.checked,
-                                      },
-                                    }))
-                                  }
-                                />
-                                <span>{isRTL ? "الصورة" : "Image"}</span>
-                              </label>
-                            )}
+                                {kw.title}
+                              </div>
+                              {kw.description && (
+                                <div
+                                  style={{
+                                    fontSize: "0.8rem",
+                                    color: "var(--text-secondary)",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: "340px",
+                                  }}
+                                >
+                                  {kw.description}
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleInsertKeyword(kw)}
+                          {/* Customization checkboxes: Title, Description, Image */}
+                          <div
                             style={{
-                              padding: "6px 14px",
-                              borderRadius: 8,
-                              fontSize: "0.8rem",
-                              fontWeight: 800,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              flexShrink: 0,
                             }}
                           >
-                            {isRTL ? "إدراج" : "Insert"}
-                          </button>
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                fontSize: "0.76rem",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              <label
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={opts.title !== false}
+                                  onChange={(e) =>
+                                    setKeywordOptions((prev) => ({
+                                      ...prev,
+                                      [kw.id]: {
+                                        ...(prev[kw.id] || {}),
+                                        title: e.target.checked,
+                                      },
+                                    }))
+                                  }
+                                />
+                                <span>{isRTL ? "العنوان" : "Title"}</span>
+                              </label>
+
+                              {kw.description && (
+                                <label
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 3,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={opts.description !== false}
+                                    onChange={(e) =>
+                                      setKeywordOptions((prev) => ({
+                                        ...prev,
+                                        [kw.id]: {
+                                          ...(prev[kw.id] || {}),
+                                          description: e.target.checked,
+                                        },
+                                      }))
+                                    }
+                                  />
+                                  <span>{isRTL ? "الوصف" : "Desc"}</span>
+                                </label>
+                              )}
+
+                              {kw.image_url && (
+                                <label
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 3,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={opts.image !== false}
+                                    onChange={(e) =>
+                                      setKeywordOptions((prev) => ({
+                                        ...prev,
+                                        [kw.id]: {
+                                          ...(prev[kw.id] || {}),
+                                          image: e.target.checked,
+                                        },
+                                      }))
+                                    }
+                                  />
+                                  <span>{isRTL ? "الصورة" : "Image"}</span>
+                                </label>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleInsertKeyword(kw)}
+                              style={{
+                                padding: "6px 14px",
+                                borderRadius: 8,
+                                fontSize: "0.8rem",
+                                fontWeight: 800,
+                              }}
+                            >
+                              {isRTL ? "إدراج" : "Insert"}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
-              )}
+                      );
+                    })
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

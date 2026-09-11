@@ -159,45 +159,45 @@ export default function WorkspacePaymentsPage() {
       case "paid":
         return {
           label: isRTL ? "مدفوع / معتمد" : "Paid",
-          color: "#166534",
-          bg: "#dcfce7",
-          border: "#bbf7d0",
+          color: "var(--badge-success-color)",
+          bg: "var(--badge-success-bg)",
+          border: "var(--badge-success-border)",
         };
       case "verifying":
         return {
           label: isRTL ? "قيد التحقق" : "Verifying",
-          color: "#0369a1",
-          bg: "#e0f2fe",
-          border: "#bae6fd",
+          color: "var(--badge-info-color)",
+          bg: "var(--badge-info-bg)",
+          border: "var(--badge-info-border)",
         };
       case "pending":
         return {
           label: isRTL ? "قيد الانتظار" : "Pending",
-          color: "#b45309",
-          bg: "#fef3c7",
-          border: "#fde68a",
+          color: "var(--badge-warning-color)",
+          bg: "var(--badge-warning-bg)",
+          border: "var(--badge-warning-border)",
         };
       case "failed":
       case "cancelled":
         return {
           label: isRTL ? "مرفوض / ملغى" : "Failed",
-          color: "#991b1b",
-          bg: "#fee2e2",
-          border: "#fecaca",
+          color: "var(--badge-danger-color)",
+          bg: "var(--badge-danger-bg)",
+          border: "var(--badge-danger-border)",
         };
       case "refunded":
         return {
           label: isRTL ? "مسترجع" : "Refunded",
-          color: "#475569",
-          bg: "#f1f5f9",
-          border: "#e2e8f0",
+          color: "var(--badge-neutral-color)",
+          bg: "var(--badge-neutral-bg)",
+          border: "var(--badge-neutral-border)",
         };
       default:
         return {
           label: status,
-          color: "#334155",
-          bg: "#f1f5f9",
-          border: "#cbd5e1",
+          color: "var(--badge-neutral-color)",
+          bg: "var(--badge-neutral-bg)",
+          border: "var(--badge-neutral-border)",
         };
     }
   };
@@ -350,7 +350,11 @@ export default function WorkspacePaymentsPage() {
             }}
           >
             <span
-              style={{ fontSize: "0.85rem", fontWeight: 700, color: "#166534" }}
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-success-color)",
+              }}
             >
               {t("totalCreditLabel")}
             </span>
@@ -358,8 +362,9 @@ export default function WorkspacePaymentsPage() {
               style={{
                 fontSize: "0.78rem",
                 fontWeight: 800,
-                color: "#166534",
-                background: "#dcfce7",
+                color: "var(--badge-success-color)",
+                background: "var(--badge-success-bg)",
+                border: "1px solid var(--badge-success-border)",
                 padding: "3px 8px",
                 borderRadius: 12,
               }}
@@ -368,7 +373,11 @@ export default function WorkspacePaymentsPage() {
             </span>
           </div>
           <div
-            style={{ fontSize: "1.3rem", fontWeight: 800, color: "#166534" }}
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-success-color)",
+            }}
           >
             {walletLoading ? (
               <SkeletonRect height={28} width={100} />
@@ -397,7 +406,11 @@ export default function WorkspacePaymentsPage() {
             }}
           >
             <span
-              style={{ fontSize: "0.85rem", fontWeight: 700, color: "#991b1b" }}
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-danger-color)",
+              }}
             >
               {t("totalDebitLabel")}
             </span>
@@ -405,8 +418,9 @@ export default function WorkspacePaymentsPage() {
               style={{
                 fontSize: "0.78rem",
                 fontWeight: 800,
-                color: "#991b1b",
-                background: "#fee2e2",
+                color: "var(--badge-danger-color)",
+                background: "var(--badge-danger-bg)",
+                border: "1px solid var(--badge-danger-border)",
                 padding: "3px 8px",
                 borderRadius: 12,
               }}
@@ -415,7 +429,11 @@ export default function WorkspacePaymentsPage() {
             </span>
           </div>
           <div
-            style={{ fontSize: "1.3rem", fontWeight: 800, color: "#991b1b" }}
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-danger-color)",
+            }}
           >
             {walletLoading ? (
               <SkeletonRect height={28} width={100} />
@@ -444,7 +462,11 @@ export default function WorkspacePaymentsPage() {
             }}
           >
             <span
-              style={{ fontSize: "0.85rem", fontWeight: 700, color: "#b45309" }}
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-warning-color)",
+              }}
             >
               {t("pendingVerificationLabel")}
             </span>
@@ -452,8 +474,9 @@ export default function WorkspacePaymentsPage() {
               style={{
                 fontSize: "0.78rem",
                 fontWeight: 800,
-                color: "#b45309",
-                background: "#fef3c7",
+                color: "var(--badge-warning-color)",
+                background: "var(--badge-warning-bg)",
+                border: "1px solid var(--badge-warning-border)",
                 padding: "3px 8px",
                 borderRadius: 12,
               }}
@@ -462,7 +485,11 @@ export default function WorkspacePaymentsPage() {
             </span>
           </div>
           <div
-            style={{ fontSize: "1.3rem", fontWeight: 800, color: "#b45309" }}
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-warning-color)",
+            }}
           >
             {walletLoading ? (
               <SkeletonRect height={28} width={100} />
@@ -676,9 +703,17 @@ export default function WorkspacePaymentsPage() {
                             borderRadius: 14,
                             fontSize: "0.75rem",
                             fontWeight: 800,
-                            color: isCredit ? "#15803d" : "#b91c1c",
-                            background: isCredit ? "#dcfce7" : "#fee2e2",
-                            border: `1px solid ${isCredit ? "#bbf7d0" : "#fecaca"}`,
+                            color: isCredit
+                              ? "var(--badge-success-color)"
+                              : "var(--badge-danger-color)",
+                            background: isCredit
+                              ? "var(--badge-success-bg)"
+                              : "var(--badge-danger-bg)",
+                            border: `1px solid ${
+                              isCredit
+                                ? "var(--badge-success-border)"
+                                : "var(--badge-danger-border)"
+                            }`,
                             display: "inline-block",
                           }}
                         >
@@ -688,7 +723,9 @@ export default function WorkspacePaymentsPage() {
                       <td
                         style={{
                           fontWeight: 800,
-                          color: isCredit ? "var(--primary)" : "#b91c1c",
+                          color: isCredit
+                            ? "var(--badge-success-color)"
+                            : "var(--badge-danger-color)",
                         }}
                       >
                         {isCredit ? "+" : "-"}
@@ -794,8 +831,17 @@ export default function WorkspacePaymentsPage() {
                           borderRadius: 12,
                           fontSize: "0.72rem",
                           fontWeight: 800,
-                          color: isCredit ? "#15803d" : "#b91c1c",
-                          background: isCredit ? "#dcfce7" : "#fee2e2",
+                          color: isCredit
+                            ? "var(--badge-success-color)"
+                            : "var(--badge-danger-color)",
+                          background: isCredit
+                            ? "var(--badge-success-bg)"
+                            : "var(--badge-danger-bg)",
+                          border: `1px solid ${
+                            isCredit
+                              ? "var(--badge-success-border)"
+                              : "var(--badge-danger-border)"
+                          }`,
                         }}
                       >
                         {isCredit ? t("creditBadge") : t("debitBadge")}

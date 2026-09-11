@@ -247,16 +247,23 @@ export default function LogsTab({
                         fontWeight: 700,
                         background:
                           log.action === "created"
-                            ? "#dcfce7"
+                            ? "var(--badge-success-bg)"
                             : log.action === "deleted"
-                              ? "#fee2e2"
-                              : "#f3f4f6",
+                              ? "var(--badge-danger-bg)"
+                              : "var(--badge-neutral-bg)",
                         color:
                           log.action === "created"
-                            ? "#15803d"
+                            ? "var(--badge-success-color)"
                             : log.action === "deleted"
-                              ? "#b91c1c"
-                              : "#4b5563",
+                              ? "var(--badge-danger-color)"
+                              : "var(--badge-neutral-color)",
+                        border: `1px solid ${
+                          log.action === "created"
+                            ? "var(--badge-success-border)"
+                            : log.action === "deleted"
+                              ? "var(--badge-danger-border)"
+                              : "var(--badge-neutral-border)"
+                        }`,
                       }}
                     >
                       {log.action}

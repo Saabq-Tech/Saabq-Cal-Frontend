@@ -413,7 +413,7 @@ export default function ResourcesTab({
                 fontWeight: 800,
                 color:
                   calculatedStats.low_stock_count > 0
-                    ? "#b45309"
+                    ? "var(--badge-warning-color)"
                     : "var(--heading)",
               }}
             >
@@ -474,7 +474,7 @@ export default function ResourcesTab({
                 fontWeight: 800,
                 color:
                   calculatedStats.out_of_stock_count > 0
-                    ? "#dc2626"
+                    ? "var(--badge-danger-color)"
                     : "var(--heading)",
               }}
             >
@@ -492,8 +492,8 @@ export default function ResourcesTab({
         <div
           style={{
             padding: "14px 18px",
-            background: "#fffbeb",
-            border: "1px solid #fde68a",
+            background: "var(--banner-warning-bg)",
+            border: "1px solid var(--banner-warning-border)",
             borderRadius: "var(--radius-md)",
             marginBottom: 24,
             display: "flex",
@@ -504,9 +504,17 @@ export default function ResourcesTab({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Icon name="alert-circle" size={20} color="#b45309" />
+            <Icon
+              name="alert-circle"
+              size={20}
+              color="var(--badge-warning-color)"
+            />
             <span
-              style={{ fontSize: "0.88rem", fontWeight: 700, color: "#92400e" }}
+              style={{
+                fontSize: "0.88rem",
+                fontWeight: 700,
+                color: "var(--banner-warning-color)",
+              }}
             >
               {t("lowStockWarningBanner") ||
                 (isRTL
@@ -745,23 +753,32 @@ export default function ResourcesTab({
                   <span
                     style={{
                       fontSize: "0.7rem",
-                      padding: "3px 8px",
+                      padding: "3px 10px",
                       borderRadius: 12,
                       fontWeight: 700,
                       background: isOut
-                        ? "#fee2e2"
+                        ? "var(--badge-danger-bg)"
                         : isLow
-                          ? "#fef3c7"
+                          ? "var(--badge-warning-bg)"
                           : r.status === "available" || r.status === "active"
-                            ? "#dcfce7"
-                            : "#f3f4f6",
+                            ? "var(--badge-success-bg)"
+                            : "var(--badge-neutral-bg)",
                       color: isOut
-                        ? "#991b1b"
+                        ? "var(--badge-danger-color)"
                         : isLow
-                          ? "#92400e"
+                          ? "var(--badge-warning-color)"
                           : r.status === "available" || r.status === "active"
-                            ? "#15803d"
-                            : "#4b5563",
+                            ? "var(--badge-success-color)"
+                            : "var(--badge-neutral-color)",
+                      border: `1px solid ${
+                        isOut
+                          ? "var(--badge-danger-border)"
+                          : isLow
+                            ? "var(--badge-warning-border)"
+                            : r.status === "available" || r.status === "active"
+                              ? "var(--badge-success-border)"
+                              : "var(--badge-neutral-border)"
+                      }`,
                     }}
                   >
                     {isOut
@@ -837,7 +854,7 @@ export default function ResourcesTab({
                       style={{
                         width: "100%",
                         height: 6,
-                        background: "#e2e8f0",
+                        background: "var(--border)",
                         borderRadius: 3,
                         overflow: "hidden",
                       }}
@@ -1154,7 +1171,11 @@ export default function ResourcesTab({
                     borderBottom: "1px solid var(--border-light)",
                   }}
                 >
-                  📊{" "}
+                  <Icon
+                    name="bar-chart"
+                    size={15}
+                    style={{ marginInlineEnd: 6, verticalAlign: "middle" }}
+                  />
                   {isRTL
                     ? "الكميات والأسعار وحدود التنبيه (Inventory & Thresholds)"
                     : "Inventory & Threshold Limits"}
@@ -1293,7 +1314,11 @@ export default function ResourcesTab({
                     borderBottom: "1px solid var(--border-light)",
                   }}
                 >
-                  🚚{" "}
+                  <Icon
+                    name="map-pin"
+                    size={15}
+                    style={{ marginInlineEnd: 6, verticalAlign: "middle" }}
+                  />
                   {isRTL
                     ? "بيانات المورد والموقع والتواريخ (Logistics & Supplier)"
                     : "Logistics & Supplier Details"}

@@ -39,7 +39,7 @@ export default function MemberLoginPage() {
   const [workspaceErrors, setWorkspaceErrors] = useState({});
   const [workspaceTypes, setWorkspaceTypes] = useState([]);
 
-  const defaultRedirect = "/member/profile";
+  const defaultRedirect = "/member/workspace";
   const from = location.state?.from?.pathname || defaultRedirect;
 
   useEffect(() => {

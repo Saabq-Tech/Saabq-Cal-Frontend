@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import UserAvatar from "../../../../components/ui/UserAvatar";
@@ -8,6 +9,7 @@ import UserAvatar from "../../../../components/ui/UserAvatar";
 export default function BookingsCalendar({ onSelectBooking }) {
   const { user } = useAuth();
   const { t, isRTL, lang } = useLanguage();
+  const { customerSingular } = useCustomerLabel();
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarBookings, setCalendarBookings] = useState([]);
@@ -64,6 +66,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
     );
   };
 
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
+
   // Generate calendar grid
   const daysInMonth = new Date(
     currentDate.getFullYear(),
@@ -77,28 +83,28 @@ export default function BookingsCalendar({ onSelectBooking }) {
   ).getDay();
 
   const monthNames = [
-    t("month_1") || "January",
-    t("month_2") || "February",
-    t("month_3") || "March",
-    t("month_4") || "April",
-    t("month_5") || "May",
-    t("month_6") || "June",
-    t("month_7") || "July",
-    t("month_8") || "August",
-    t("month_9") || "September",
-    t("month_10") || "October",
-    t("month_11") || "November",
-    t("month_12") || "December",
+    t("month_1") || "يناير",
+    t("month_2") || "فبراير",
+    t("month_3") || "مارس",
+    t("month_4") || "أبريل",
+    t("month_5") || "مايو",
+    t("month_6") || "يونيو",
+    t("month_7") || "يوليو",
+    t("month_8") || "أغسطس",
+    t("month_9") || "سبتمبر",
+    t("month_10") || "أكتوبر",
+    t("month_11") || "نوفمبر",
+    t("month_12") || "ديسمبر",
   ];
 
   const dayNames = [
-    t("day_0") || "Sun",
-    t("day_1") || "Mon",
-    t("day_2") || "Tue",
-    t("day_3") || "Wed",
-    t("day_4") || "Thu",
-    t("day_5") || "Fri",
-    t("day_6") || "Sat",
+    t("day_0") || (isRTL ? "أحد" : "Sun"),
+    t("day_1") || (isRTL ? "إثنين" : "Mon"),
+    t("day_2") || (isRTL ? "ثلاثاء" : "Tue"),
+    t("day_3") || (isRTL ? "أربعاء" : "Wed"),
+    t("day_4") || (isRTL ? "خميس" : "Thu"),
+    t("day_5") || (isRTL ? "جمعة" : "Fri"),
+    t("day_6") || (isRTL ? "سبت" : "Sat"),
   ];
 
   // Map bookings to days
@@ -133,17 +139,45 @@ export default function BookingsCalendar({ onSelectBooking }) {
     return "";
   };
 
-  const getStatusColor = (status, isMine = true) => {
+  const getEventBadgeStyle = (status, isMine = true) => {
     switch (status) {
       case "cancelled":
-        return "#ef4444"; // Red
+        return {
+          bg: "var(--badge-danger-bg)",
+          color: "var(--badge-danger-color)",
+          border: "1px solid var(--badge-danger-border)",
+          dot: "#ef4444",
+        };
       case "pending":
-        return "#f59e0b"; // Warning Yellow/Orange
+        return {
+          bg: "var(--badge-warning-bg)",
+          color: "var(--badge-warning-color)",
+          border: "1px solid var(--badge-warning-border)",
+          dot: "#f59e0b",
+        };
       case "completed":
-        return "var(--primary)"; // Main Color
+        return {
+          bg: "var(--badge-teal-bg)",
+          color: "var(--badge-teal-color)",
+          border: "1px solid var(--badge-teal-border)",
+          dot: "#14b8a6",
+        };
       case "confirmed":
       default:
-        return isMine ? "var(--primary)" : "#8b5cf6";
+        if (!isMine) {
+          return {
+            bg: "rgba(139, 92, 246, 0.16)",
+            color: "#c084fc",
+            border: "1px solid rgba(139, 92, 246, 0.35)",
+            dot: "#8b5cf6",
+          };
+        }
+        return {
+          bg: "rgba(3, 154, 183, 0.18)",
+          color: "var(--primary)",
+          border: "1px solid rgba(3, 154, 183, 0.4)",
+          dot: "var(--primary)",
+        };
     }
   };
 
@@ -151,75 +185,31 @@ export default function BookingsCalendar({ onSelectBooking }) {
     switch (status) {
       case "confirmed":
         return (
-          <span
-            style={{
-              background: "var(--primary)",
-              color: "#ffffff",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-            }}
-          >
-            {t("statusConfirmed") || "Confirmed"}
+          <span className="badge-status badge-status-success">
+            {t("statusConfirmed") || "مؤكد"}
           </span>
         );
       case "pending":
         return (
-          <span
-            style={{
-              background: "#f59e0b",
-              color: "#ffffff",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-            }}
-          >
-            {t("statusPending") || "Pending"}
+          <span className="badge-status badge-status-warning">
+            {t("statusPending") || "قيد الانتظار"}
           </span>
         );
       case "cancelled":
         return (
-          <span
-            style={{
-              background: "#ef4444",
-              color: "#ffffff",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-            }}
-          >
-            {t("statusCancelled") || "Cancelled"}
+          <span className="badge-status badge-status-danger">
+            {t("statusCancelled") || "ملغى"}
           </span>
         );
       case "completed":
         return (
-          <span
-            style={{
-              background: "var(--primary)",
-              color: "#ffffff",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-            }}
-          >
-            {t("statusCompleted") || "Completed"}
+          <span className="badge-status badge-status-teal">
+            {t("statusCompleted") || "مكتمل"}
           </span>
         );
       default:
         return (
-          <span
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-            }}
-          >
-            {status}
-          </span>
+          <span className="badge-status badge-status-neutral">{status}</span>
         );
     }
   };
@@ -235,8 +225,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
     const fullGrid = [...totalSlots, ...endBlanks];
 
     return fullGrid.map((day, idx) => {
-      if (!day)
-        return <div key={`blank-${idx}`} className="calendar-day-blank" />;
+      if (!day) return <div key={`blank-${idx}`} className="cal-day-blank" />;
 
       const key = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
       const dayBookings = bookingsByDay[key] || [];
@@ -253,103 +242,99 @@ export default function BookingsCalendar({ onSelectBooking }) {
         <div
           key={day}
           onClick={() => setSelectedDay(isSelected ? null : key)}
-          className={`calendar-day-cell ${isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}`}
+          className={`cal-day-cell ${isToday ? "is-today" : ""} ${isSelected ? "is-selected" : ""}`}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: 10,
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: isToday ? 800 : 600,
-                color: isToday ? "var(--primary)" : "var(--heading)",
-                fontSize: isToday ? "1rem" : "0.9rem",
-                width: 24,
-                height: 24,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "50%",
-                background: isToday ? "var(--primary-subtle)" : "transparent",
-              }}
-            >
-              {day}
-            </span>
-            {dayBookings.length > 0 && (
+          <div className="cal-day-header">
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span
-                style={{
-                  fontSize: "0.7rem",
-                  background: "var(--primary)",
-                  color: "#fff",
-                  borderRadius: "12px",
-                  padding: "2px 8px",
-                  fontWeight: 700,
-                }}
+                className={`cal-day-number ${isToday ? "today-badge" : ""}`}
               >
-                {dayBookings.length}
+                {day}
+              </span>
+              {isToday && (
+                <span className="cal-today-chip">
+                  {isRTL ? "اليوم" : "Today"}
+                </span>
+              )}
+            </div>
+            {dayBookings.length > 0 && (
+              <span className="cal-day-count-badge">
+                {dayBookings.length}{" "}
+                {isRTL
+                  ? dayBookings.length === 1
+                    ? "موعد"
+                    : "مواعيد"
+                  : dayBookings.length === 1
+                    ? "apt"
+                    : "apts"}
               </span>
             )}
           </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
+
+          <div className="cal-events-list">
             {dayBookings.slice(0, 3).map((b) => {
-              const isMine = b.workspace_member_id === user.id;
-              const bgColor = getStatusColor(b.status, isMine);
-              const time = new Date(b.starts_at).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
+              const isMine = b.workspace_member_id === user?.id;
+              const style = getEventBadgeStyle(b.status, isMine);
+              const time = new Date(b.starts_at).toLocaleTimeString(
+                isRTL ? "ar-SA" : "en-US",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              );
+              const clientName =
+                b.customer_name_snapshot ||
+                b.customer?.name ||
+                customerSingular;
 
               return (
                 <div
                   key={b.id}
-                  className="calendar-event"
-                  style={{ background: bgColor }}
-                  title={`${time} - ${b.customer_name_snapshot || b.customer?.name}`}
+                  className="cal-event-pill"
+                  style={{
+                    background: style.bg,
+                    color: style.color,
+                    border: style.border,
+                  }}
+                  title={`${time} - ${clientName}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onSelectBooking) onSelectBooking(b.id);
+                  }}
                 >
-                  <span>{time}</span>
-                  <span className="calendar-event-name">
-                    {" "}
-                    - {b.customer_name_snapshot || b.customer?.name}
-                  </span>
+                  <span
+                    className="cal-event-dot"
+                    style={{ background: style.dot }}
+                  />
+                  <span className="cal-event-time">{time}</span>
+                  <span className="cal-event-title">{clientName}</span>
                 </div>
               );
             })}
+
             {dayBookings.length > 3 && (
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  textAlign: "center",
-                  fontWeight: 700,
-                  marginTop: 4,
-                }}
-              >
-                +{dayBookings.length - 3} {isRTL ? "المزيد" : "more"}
+              <div className="cal-more-badge">
+                +{dayBookings.length - 3} {isRTL ? "مواعيد إضافية" : "more"}
               </div>
             )}
           </div>
-          {/* Mobile dots - visible only on small screens */}
+
+          {/* Mobile dots indicator */}
           {dayBookings.length > 0 && (
-            <div className="calendar-mobile-dots">
-              {dayBookings.slice(0, 5).map((b) => {
-                const isMine = b.workspace_member_id === user.id;
+            <div className="cal-mobile-dots">
+              {dayBookings.slice(0, 4).map((b) => {
+                const isMine = b.workspace_member_id === user?.id;
+                const style = getEventBadgeStyle(b.status, isMine);
                 return (
                   <span
                     key={b.id}
-                    className="calendar-mobile-dot"
-                    style={{ background: getStatusColor(b.status, isMine) }}
+                    className="cal-mobile-dot"
+                    style={{ background: style.dot }}
                   />
                 );
               })}
-              {dayBookings.length > 5 && (
-                <span
-                  className="calendar-mobile-dot"
-                  style={{ background: "var(--text-secondary)" }}
-                />
+              {dayBookings.length > 4 && (
+                <span className="cal-mobile-dot-more">+</span>
               )}
             </div>
           )}
@@ -359,54 +344,49 @@ export default function BookingsCalendar({ onSelectBooking }) {
   };
 
   return (
-    <div className="card-body">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 24,
-        }}
-      >
-        <div style={{ flex: "1 1 0", minWidth: 0 }}>
-          <h2
-            style={{
-              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceBookings") || "المواعيد والحجوزات"} -{" "}
-            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+    <div className="workspace-bookings-calendar">
+      {/* Calendar Header Bar */}
+      <div className="cal-header-bar">
+        <div className="cal-title-section">
+          <h2 className="cal-main-title">
+            <Icon
+              name="calendar"
+              size={22}
+              style={{ color: "var(--primary)" }}
+            />
+            <span>
+              {t("workspaceBookings") || "قائمة المواعيد"} -{" "}
+              {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+            </span>
           </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "6px 0 0",
-            }}
-          >
+          <p className="cal-subtitle">
             {t("workspaceBookingsDesc") ||
-              "استعراض وتحديث حالة كافة الحجوزات والجلسات المقررة للمساحة"}
+              "إدارة ومتابعة كافة المواعيد المحجوزة لمساحة العمل"}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+
+        {/* Navigation Controls */}
+        <div className="cal-nav-controls">
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm cal-nav-today-btn"
+            onClick={handleToday}
+          >
+            {isRTL ? "اليوم" : "Today"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm cal-nav-arrow-btn"
             onClick={handlePrevMonth}
-            style={{ borderRadius: "8px", padding: "6px 12px" }}
+            title={isRTL ? "الشهر السابق" : "Previous Month"}
           >
             <Icon name={isRTL ? "chevron-right" : "chevron-left"} size={18} />
           </button>
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm cal-nav-arrow-btn"
             onClick={handleNextMonth}
-            style={{ borderRadius: "8px", padding: "6px 12px" }}
+            title={isRTL ? "الشهر التالي" : "Next Month"}
           >
             <Icon name={isRTL ? "chevron-left" : "chevron-right"} size={18} />
           </button>
@@ -416,7 +396,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
       {loading ? (
         <div
           style={{
-            minHeight: 400,
+            minHeight: 420,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -425,8 +405,8 @@ export default function BookingsCalendar({ onSelectBooking }) {
           <div
             className="spinner"
             style={{
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               border: "4px solid var(--primary-subtle)",
               borderTopColor: "var(--primary)",
               borderRadius: "50%",
@@ -435,11 +415,12 @@ export default function BookingsCalendar({ onSelectBooking }) {
           />
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <div className="calendar-wrapper">
-            <div className="calendar-grid">
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Main Grid Wrapper */}
+          <div className="cal-wrapper">
+            <div className="cal-grid">
               {dayNames.map((day) => (
-                <div key={day} className="calendar-header-cell">
+                <div key={day} className="cal-header-cell">
                   {day}
                 </div>
               ))}
@@ -447,355 +428,646 @@ export default function BookingsCalendar({ onSelectBooking }) {
             </div>
           </div>
 
-          {selectedDay && bookingsByDay[selectedDay] && (
+          {/* Selected Day Expanded Drawer */}
+          {selectedDay && (
             <div
+              className="cal-selected-day-drawer"
               style={{
                 background: "var(--surface-alt)",
-                padding: 20,
+                padding: "18px 16px",
                 borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border-light)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
               }}
             >
-              <h3
+              <div
                 style={{
-                  fontSize: "1.15rem",
-                  fontWeight: 800,
-                  marginTop: 0,
-                  marginBottom: 16,
-                  color: "var(--heading)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 14,
+                  flexWrap: "wrap",
+                  gap: 10,
                 }}
               >
-                {isRTL ? "مواعيد يوم" : "Appointments for"}{" "}
-                {(() => {
-                  const parts = selectedDay.split("-");
-                  const d = new Date(
-                    parseInt(parts[0]),
-                    parseInt(parts[1]),
-                    parseInt(parts[2]),
-                  );
-                  return d.toLocaleDateString(isRTL ? "ar" : "en", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                  });
-                })()}
-              </h3>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 12 }}
-              >
-                {bookingsByDay[selectedDay].map((b) => {
-                  const customerName =
-                    b.customer_name_snapshot || b.customer?.name || "عميل";
-                  const serviceTitle =
-                    formatTranslatable(b.service?.name) ||
-                    b.service_name_snapshot ||
-                    b.service?.title ||
-                    "خدمة";
-                  const isMine = b.workspace_member_id === user.id;
+                <h3
+                  style={{
+                    fontSize: "1.05rem",
+                    fontWeight: 800,
+                    margin: 0,
+                    color: "var(--heading)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Icon
+                    name="clock"
+                    size={18}
+                    style={{ color: "var(--primary)" }}
+                  />
+                  {isRTL ? "مواعيد يوم" : "Appointments for"}{" "}
+                  {(() => {
+                    const parts = selectedDay.split("-");
+                    const d = new Date(
+                      parseInt(parts[0], 10),
+                      parseInt(parts[1], 10),
+                      parseInt(parts[2], 10),
+                    );
+                    return d.toLocaleDateString(isRTL ? "ar-SA" : "en-US", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    });
+                  })()}
+                </h3>
 
-                  return (
-                    <div
-                      key={b.id}
-                      className="booking-list-item"
-                      style={{
-                        borderInlineStart: `4px solid ${getStatusColor(b.status, isMine)}`,
-                      }}
-                      onClick={() => onSelectBooking && onSelectBooking(b.id)}
-                    >
-                      <div className="booking-list-item-main">
-                        <UserAvatar
-                          name={customerName}
-                          avatarUrl={b.customer?.avatar_url}
-                          size={40}
-                        />
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div className="booking-list-customer-name">
-                            {customerName}
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-xs"
+                  onClick={() => setSelectedDay(null)}
+                  style={{ borderRadius: 6 }}
+                >
+                  <Icon name="x" size={14} />
+                  <span>{isRTL ? "إغلاق" : "Close"}</span>
+                </button>
+              </div>
+
+              {bookingsByDay[selectedDay] &&
+              bookingsByDay[selectedDay].length > 0 ? (
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {bookingsByDay[selectedDay].map((b) => {
+                    const customerName =
+                      b.customer_name_snapshot ||
+                      b.customer?.name ||
+                      customerSingular;
+                    const serviceTitle =
+                      formatTranslatable(b.service?.name) ||
+                      b.service_name_snapshot ||
+                      b.service?.title ||
+                      (isRTL ? "خدمة" : "Service");
+                    const isMine = b.workspace_member_id === user?.id;
+                    const style = getEventBadgeStyle(b.status, isMine);
+
+                    return (
+                      <div
+                        key={b.id}
+                        className="booking-list-item"
+                        style={{
+                          borderInlineStart: `4px solid ${style.dot}`,
+                        }}
+                        onClick={() => onSelectBooking && onSelectBooking(b.id)}
+                      >
+                        <div className="booking-list-item-main">
+                          <UserAvatar
+                            name={customerName}
+                            avatarUrl={b.customer?.avatar_url}
+                            size={40}
+                          />
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div className="booking-list-customer-name">
+                              {customerName}
+                            </div>
+                            <div className="booking-list-service-title">
+                              {serviceTitle}
+                              {b.follow_up_to_id && (
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    marginInlineStart: 8,
+                                    padding: "2px 6px",
+                                    fontSize: "0.7rem",
+                                    background: "rgba(59, 130, 246, 0.12)",
+                                    color: "#3b82f6",
+                                    borderRadius: 10,
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {isRTL ? "متابعة" : "Follow-up"}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="booking-list-service-title">
-                            {serviceTitle}
-                            {b.follow_up_to_id && (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  marginInlineStart: 8,
-                                  padding: "2px 6px",
-                                  fontSize: "0.7rem",
-                                  background: "rgba(59, 130, 246, 0.1)",
-                                  color: "#2563eb",
-                                  borderRadius: 10,
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {isRTL ? "متابعة" : "Follow-up"}
-                              </span>
+                        </div>
+                        <div className="booking-list-item-meta">
+                          <div className="booking-list-time">
+                            {new Date(b.starts_at).toLocaleTimeString(
+                              isRTL ? "ar-SA" : "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
                             )}
                           </div>
+                          <div>{renderStatusBadge(b.status)}</div>
                         </div>
                       </div>
-                      <div className="booking-list-item-meta">
-                        <div className="booking-list-time">
-                          {new Date(b.starts_at).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </div>
-                        <div style={{ marginTop: 2 }}>
-                          {renderStatusBadge(b.status)}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "16px 12px",
+                    color: "var(--text-secondary)",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  {isRTL
+                    ? "لا توجد مواعيد مسجلة في هذا اليوم"
+                    : "No appointments scheduled for this day"}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* Legend */}
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginTop: 24,
-          fontSize: "0.85rem",
-          color: "var(--text-secondary)",
-          fontWeight: 600,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {/* Modern Status Legend Bar */}
+      <div className="cal-legend-bar">
+        <div className="cal-legend-item">
           <span
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: 3,
-              background: "var(--primary)",
-            }}
-          ></span>
-          {isRTL ? "مكتمل / رئيسي" : "Completed / Main"}
+            className="cal-legend-indicator"
+            style={{ background: "var(--primary)" }}
+          />
+          <span>{isRTL ? "مؤكد / رئيسي" : "Confirmed / Main"}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="cal-legend-item">
           <span
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: 3,
-              background: "#f59e0b",
-            }}
-          ></span>
-          {isRTL ? "قيد الانتظار" : "Pending"}
+            className="cal-legend-indicator"
+            style={{ background: "#f59e0b" }}
+          />
+          <span>{isRTL ? "قيد الانتظار" : "Pending"}</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div className="cal-legend-item">
           <span
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: 3,
-              background: "#ef4444",
-            }}
-          ></span>
-          {isRTL ? "ملغى" : "Cancelled"}
+            className="cal-legend-indicator"
+            style={{ background: "#ef4444" }}
+          />
+          <span>{isRTL ? "ملغى" : "Cancelled"}</span>
+        </div>
+        <div className="cal-legend-item">
+          <span
+            className="cal-legend-indicator"
+            style={{ background: "#14b8a6" }}
+          />
+          <span>{isRTL ? "مكتمل" : "Completed"}</span>
         </div>
         {canSeeOthers && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="cal-legend-item">
             <span
-              style={{
-                width: 14,
-                height: 14,
-                borderRadius: 3,
-                background: "#8b5cf6",
-              }}
-            ></span>
-            {isRTL ? "عضو آخر" : "Other Member"}
+              className="cal-legend-indicator"
+              style={{ background: "#8b5cf6" }}
+            />
+            <span>{isRTL ? "عضو آخر" : "Other Member"}</span>
           </div>
         )}
       </div>
 
       <style>{`
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .calendar-wrapper {
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          border-radius: var(--radius-md);
-          border: 1px solid var(--border-light);
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-          background: var(--surface);
-        }
-        .calendar-wrapper::-webkit-scrollbar {
-          height: 8px;
-        }
-        .calendar-wrapper::-webkit-scrollbar-thumb {
-          background-color: var(--border-dark);
-          border-radius: 4px;
-        }
-        .calendar-grid {
-          display: grid;
-          grid-template-columns: repeat(7, minmax(0, 1fr));
+
+        .workspace-bookings-calendar {
           width: 100%;
-          min-width: 0;
-        }
-        .calendar-header-cell {
-          text-align: center;
-          padding: 12px 4px;
-          font-weight: 700;
-          font-size: 0.82rem;
-          color: var(--text-secondary);
-          border-inline-end: 1px solid var(--border-light);
-          border-bottom: 1px solid var(--border-light);
-          background: var(--surface-alt);
-        }
-        .calendar-header-cell:nth-child(7n) {
-          border-inline-end: none;
-        }
-        .calendar-day-cell {
-          min-height: 100px;
-          border-inline-end: 1px solid var(--border-light);
-          border-bottom: 1px solid var(--border-light);
-          padding: 6px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          background: var(--surface);
-          position: relative;
-          overflow: hidden;
-        }
-        .calendar-grid > .calendar-day-cell:nth-last-child(-n+7) {
-          border-bottom: none;
-        }
-        .calendar-grid > .calendar-day-blank:nth-last-child(-n+7) {
-          border-bottom: none;
-        }
-        .calendar-day-cell:nth-child(7n) {
-          border-inline-end: none;
-        }
-        .calendar-day-cell:hover {
-          background: var(--surface-alt) !important;
-        }
-        .calendar-day-cell.is-today {
-          background: var(--surface);
-        }
-        .calendar-day-cell.is-selected {
-          background: var(--primary-subtle) !important;
-          box-shadow: inset 0 0 0 2px var(--primary);
-        }
-        .calendar-day-blank {
-          min-height: 100px;
-          border-inline-end: 1px solid var(--border-light);
-          border-bottom: 1px solid var(--border-light);
-          background: rgba(0,0,0,0.02);
-        }
-        .calendar-day-blank:nth-child(7n) {
-          border-inline-end: none;
-        }
-        .calendar-event {
-          font-size: 0.72rem;
-          color: #fff;
-          padding: 4px 6px;
-          border-radius: 6px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          margin-bottom: 4px;
-          font-weight: 600;
-          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-          transition: transform 0.1s ease, box-shadow 0.1s ease;
-        }
-        .calendar-event:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* ── Tablet (≤ 1024px) ── */
-        @media (max-width: 1024px) {
-          .calendar-day-cell,
-          .calendar-day-blank {
-            min-height: 80px;
-            padding: 5px 4px;
-          }
-          .calendar-event {
-            font-size: 0.68rem;
-            padding: 3px 5px;
-          }
-        }
-
-        /* ── Mobile (≤ 640px): compact grid, hide event names, show only dots ── */
-        @media (max-width: 640px) {
-          .calendar-header-cell {
-            padding: 8px 2px;
-            font-size: 0.7rem;
-          }
-          .calendar-day-cell,
-          .calendar-day-blank {
-            min-height: 48px;
-            padding: 4px 2px;
-          }
-          .calendar-day-cell > div:first-child {
-            margin-bottom: 4px !important;
-          }
-          .calendar-day-cell > div:first-child > span:first-child {
-            font-size: 0.78rem !important;
-            width: 20px !important;
-            height: 20px !important;
-          }
-          .calendar-event {
-            font-size: 0 !important;
-            padding: 0 !important;
-            margin-bottom: 0 !important;
-            height: 0 !important;
-            opacity: 0 !important;
-            overflow: hidden !important;
-          }
-          .calendar-event-name {
-            display: none !important;
-          }
-          .calendar-mobile-dots {
-            display: flex !important;
-          }
-          .booking-list-item {
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-            padding: 12px !important;
-          }
-          .booking-list-item-main {
-            flex: 1 1 100% !important;
-            margin-bottom: 2px !important;
-          }
-          .booking-list-item-meta {
-            flex: 1 1 100% !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            border-top: 1px dashed var(--border-light) !important;
-            padding-top: 8px !important;
-          }
-        }
-
-        /* mobile dots - hidden on desktop */
-        .calendar-mobile-dots {
-          display: none;
-          gap: 3px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-        .calendar-mobile-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          flex-shrink: 0;
-        }
-
-        .booking-list-item {
+        .cal-header-bar {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin-bottom: 20px;
+        }
+
+        .cal-title-section {
+          flex: 1 1 0;
+          min-width: 0;
+        }
+
+        .cal-main-title {
+          font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+          font-weight: 800;
+          margin: 0;
+          color: var(--heading);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .cal-subtitle {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          margin: 6px 0 0;
+        }
+
+        .cal-nav-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .cal-nav-today-btn {
+          border-radius: 8px;
+          padding: 6px 14px;
+          font-size: 0.82rem;
+          font-weight: 700;
+        }
+
+        .cal-nav-arrow-btn {
+          border-radius: 8px;
+          padding: 6px 12px;
+        }
+
+        .cal-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--border);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
           background: var(--surface);
-          padding: 14px 16px;
-          border-radius: var(--radius-sm);
-          border: 1px solid var(--border-light);
+        }
+        .cal-wrapper::-webkit-scrollbar {
+          height: 8px;
+        }
+        .cal-wrapper::-webkit-scrollbar-thumb {
+          background-color: var(--border-light);
+          border-radius: 4px;
+        }
+
+        .cal-grid {
+          display: grid;
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+          width: 100%;
+          min-width: 680px;
+        }
+
+        .cal-header-cell {
+          text-align: center;
+          padding: 12px 6px;
+          font-weight: 800;
+          font-size: 0.84rem;
+          color: var(--heading);
+          border-inline-end: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          background: var(--surface-alt);
+        }
+        .cal-header-cell:nth-child(7n) {
+          border-inline-end: none;
+        }
+
+        .cal-day-cell {
+          min-height: 116px;
+          border-inline-end: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          padding: 8px 10px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: background 0.15s ease, box-shadow 0.15s ease;
+          background: var(--surface);
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          overflow: hidden;
+        }
+        .cal-grid > .cal-day-cell:nth-last-child(-n+7) {
+          border-bottom: none;
+        }
+        .cal-grid > .cal-day-blank:nth-last-child(-n+7) {
+          border-bottom: none;
+        }
+        .cal-day-cell:nth-child(7n) {
+          border-inline-end: none;
+        }
+
+        .cal-day-cell:hover {
+          background: var(--surface-alt) !important;
+        }
+        .cal-day-cell.is-selected {
+          background: var(--surface-alt) !important;
+          box-shadow: inset 0 0 0 2px var(--primary) !important;
+        }
+
+        .cal-day-cell.is-today {
+          background: linear-gradient(180deg, rgba(3, 154, 183, 0.12) 0%, rgba(3, 154, 183, 0.02) 100%) !important;
+          border-top: 3px solid var(--primary) !important;
+        }
+        .cal-day-cell.is-today:hover {
+          background: linear-gradient(180deg, rgba(3, 154, 183, 0.18) 0%, rgba(3, 154, 183, 0.06) 100%) !important;
+        }
+        .cal-day-cell.is-today.is-selected {
+          box-shadow: inset 0 0 0 2px var(--primary), 0 0 14px rgba(3, 154, 183, 0.25) !important;
+        }
+
+        .cal-today-chip {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: var(--primary);
+          background: rgba(3, 154, 183, 0.16);
+          border: 1px solid rgba(3, 154, 183, 0.35);
+          padding: 1px 6px;
+          border-radius: 10px;
+          letter-spacing: 0.2px;
+          line-height: 1.4;
+        }
+
+        .cal-day-blank {
+          min-height: 116px;
+          border-inline-end: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          background: rgba(0, 0, 0, 0.02);
+          cursor: default;
+        }
+        html.dark .cal-day-blank,
+        [data-theme="dark"] .cal-day-blank {
+          background: rgba(255, 255, 255, 0.015);
+        }
+        .cal-day-blank:nth-child(7n) {
+          border-inline-end: none;
+        }
+
+        .cal-day-header {
+          display: flex;
+          justifyContent: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+        }
+
+        .cal-day-number {
+          font-weight: 700;
+          color: var(--heading);
+          font-size: 0.92rem;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.15s ease;
+        }
+        .cal-day-number.today-badge {
+          background: var(--primary) !important;
+          color: #ffffff !important;
+          font-weight: 800;
+          box-shadow: 0 2px 8px rgba(3, 154, 183, 0.45);
+        }
+
+        .cal-day-count-badge {
+          font-size: 0.7rem;
+          background: var(--primary-subtle);
+          color: var(--primary);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 1px 7px;
+          font-weight: 700;
+        }
+
+        .cal-events-list {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+        }
+
+        .cal-event-pill {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.72rem;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-weight: 700;
+          transition: transform 0.1s ease, filter 0.1s ease;
+          overflow: hidden;
+          cursor: pointer;
+          line-height: 1.3;
+        }
+        .cal-event-pill:hover {
+          transform: translateY(-1px);
+          filter: brightness(1.1);
+        }
+        .cal-event-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+        .cal-event-time {
+          font-size: 0.68rem;
+          opacity: 0.9;
+          flex-shrink: 0;
+        }
+        .cal-event-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex: 1;
+        }
+
+        .cal-more-badge {
+          font-size: 0.7rem;
+          color: var(--primary);
+          background: var(--primary-subtle);
+          border-radius: 6px;
+          padding: 2px 6px;
+          text-align: center;
+          font-weight: 700;
+          margin-top: 2px;
+        }
+
+        .cal-mobile-dots {
+          display: none;
+        }
+
+        /* ── Tablet & Mobile Responsiveness ── */
+        @media (max-width: 768px) {
+          .cal-header-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+          }
+          .cal-title-section {
+            width: 100%;
+            flex: none;
+          }
+          .cal-main-title {
+            font-size: 1.12rem !important;
+            flex-wrap: wrap;
+          }
+          .cal-subtitle {
+            font-size: 0.8rem !important;
+            line-height: 1.4;
+          }
+          .cal-nav-controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+          }
+          .cal-nav-today-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 7px 12px;
+          }
+          .cal-nav-arrow-btn {
+            padding: 7px 14px;
+          }
+
+          .cal-wrapper {
+            overflow-x: hidden !important;
+            border-radius: 12px;
+          }
+
+          .cal-grid {
+            min-width: 0 !important;
+            width: 100% !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+          }
+
+          .cal-header-cell {
+            padding: 8px 1px !important;
+            font-size: 0.72rem !important;
+            font-weight: 800;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .cal-day-cell {
+            min-height: 52px !important;
+            max-height: 66px !important;
+            padding: 3px 2px !important;
+            gap: 1px !important;
+            align-items: center;
+          }
+
+          .cal-day-blank {
+            min-height: 52px !important;
+            max-height: 66px !important;
+          }
+
+          .cal-day-header {
+            margin-bottom: 0 !important;
+            justify-content: center !important;
+            width: 100%;
+          }
+
+          .cal-day-number {
+            width: 22px !important;
+            height: 22px !important;
+            font-size: 0.78rem !important;
+            margin: 0 auto;
+          }
+
+          .cal-today-chip {
+            display: none !important;
+          }
+
+          .cal-day-count-badge {
+            display: none !important;
+          }
+
+          .cal-events-list {
+            display: none !important;
+          }
+
+          .cal-event-pill {
+            display: none !important;
+          }
+
+          .cal-more-badge {
+            display: none !important;
+          }
+
+          .cal-mobile-dots {
+            display: flex !important;
+            gap: 2px !important;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2px;
+            width: 100%;
+          }
+
+          .cal-mobile-dot {
+            width: 5px !important;
+            height: 5px !important;
+            border-radius: 50%;
+            flex-shrink: 0;
+          }
+
+          .cal-mobile-dot-more {
+            font-size: 0.6rem !important;
+            color: var(--text-secondary);
+            font-weight: 800;
+            line-height: 1;
+          }
+
+          .cal-selected-day-drawer {
+            padding: 14px 10px !important;
+          }
+
+          .booking-list-item {
+            padding: 10px 12px !important;
+          }
+
+          .booking-list-customer-name {
+            font-size: 0.88rem !important;
+          }
+
+          .booking-list-time {
+            font-size: 0.78rem !important;
+          }
+        }
+
+        /* Legend Bar */
+        .cal-legend-bar {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-top: 14px;
+          padding: 12px 18px;
+          border-radius: var(--radius-md);
+          background: var(--surface-alt);
+          border: 1px solid var(--border);
+          flex-wrap: wrap;
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: var(--text-secondary);
+        }
+        .cal-legend-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .cal-legend-indicator {
+          width: 10px;
+          height: 10px;
+          border-radius: 3px;
+          flex-shrink: 0;
+        }
+
+        /* Booking details drawer list */
+        .booking-list-item {
+          display: flex;
+          justifyContent: space-between;
+          align-items: center;
+          background: var(--surface);
+          padding: 12px 16px;
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border);
+          cursor: pointer;
+          transition: all 0.15s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .booking-list-item:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+          background: var(--surface-alt);
         }
         .booking-list-item-main {
           display: flex;
@@ -813,7 +1085,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
           text-overflow: ellipsis;
         }
         .booking-list-service-title {
-          font-size: 0.84rem;
+          font-size: 0.82rem;
           color: var(--text-secondary);
           margin-top: 2px;
           white-space: nowrap;
@@ -828,14 +1100,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
         }
         .booking-list-time {
           font-weight: 800;
-          font-size: 0.9rem;
+          font-size: 0.88rem;
           color: var(--heading);
           white-space: nowrap;
-        }
-        .booking-list-item:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-          border-color: var(--border-dark);
         }
       `}</style>
     </div>

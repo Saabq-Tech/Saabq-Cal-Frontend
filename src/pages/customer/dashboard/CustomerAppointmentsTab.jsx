@@ -9,8 +9,11 @@ import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import UserAvatar from "../../../components/ui/UserAvatar";
 import { extractTranslatableText } from "../../../utils/text";
+import { useAuth } from "../../../context/AuthContext";
+import { getPublicAssetUrl } from "../../../utils/url";
 
 export default function CustomerAppointmentsTab() {
+  const { user } = useAuth();
   const { t, isRTL, lang } = useLanguage();
   const toast = useToast();
   const navigate = useNavigate();
@@ -101,26 +104,404 @@ export default function CustomerAppointmentsTab() {
     }
   };
 
-  const handlePrintPrescription = (summary, id) => {
+  const handlePrintPrescription = (summary, id, appt = selectedAppointment) => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
+
+    const ws = appt?.workspace || {};
+    const wsName = ws.name || (isRTL ? "مساحة العمل" : "Workspace");
+    const wsLogo = ws.logo_url || (ws.logo ? getPublicAssetUrl(ws.logo) : "");
+    const wsPhone = ws.phone || "";
+    const wsEmail = ws.email || "";
+    const wsAddress = ws.address || "";
+    const saabqLogo = getPublicAssetUrl("/logo.png");
+
+    let formattedDate = appt?.starts_at || appt?.date || "";
+    let formattedTime = "";
+    if (appt?.starts_at) {
+      try {
+        const d = new Date(appt.starts_at);
+        formattedDate = d.toLocaleDateString(isRTL ? "ar-SA" : "en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        formattedTime = d.toLocaleTimeString(isRTL ? "ar-SA" : "en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch {
+        formattedDate = String(appt.starts_at || appt.date || "");
+      }
+    }
+
+    const serviceTitle =
+      getTransText(appt?.service?.name) ||
+      appt?.service_name ||
+      appt?.service?.title ||
+      (isRTL ? "خدمة" : "Service");
+    const serviceDuration = appt?.service?.duration_minutes || 30;
+    const providerName =
+      appt?.workspace_member?.name || (isRTL ? "فريق العمل" : "Specialist");
+    const customerName =
+      user?.name || appt?.customer_name || (isRTL ? "العميل" : "Client");
+    const customerPhone = user?.phone || appt?.customer_phone || "";
+
+    const statusMap = {
+      pending: isRTL ? "قيد الانتظار" : "Pending",
+      confirmed: isRTL ? "مؤكد" : "Confirmed",
+      completed: isRTL ? "مكتمل" : "Completed",
+      cancelled: isRTL ? "ملغي" : "Cancelled",
+      rescheduled: isRTL ? "معاد جدولته" : "Rescheduled",
+    };
+    const statusText =
+      statusMap[appt?.status] || appt?.status || (isRTL ? "مؤكد" : "Confirmed");
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="${isRTL ? "rtl" : "ltr"}" lang="${lang}">
         <head>
           <meta charset="utf-8" />
-          <title>${isRTL ? "الوصفة الطبية والتقرير" : "Prescription & Summary"} #${id || ""}</title>
+          <title>${isRTL ? "تقرير وملخص الموعد" : "Appointment Report & Summary"} #${id || appt?.id || ""}</title>
           <style>
-            body { font-family: system-ui, -apple-system, sans-serif; padding: 28px; color: #1e293b; }
-            table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px 12px; }
-            @media print { body { padding: 0; } }
+            @page {
+              size: A4 portrait;
+              margin: 14mm 12mm 16mm 12mm;
+            }
+            *, *::before, *::after {
+              box-sizing: border-box;
+            }
+            body {
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              color: #0f172a;
+              background: #ffffff;
+              font-size: 13px;
+              line-height: 1.6;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-wrapper {
+              width: 100%;
+              max-width: 820px;
+              margin: 0 auto;
+            }
+
+            /* ── Header: Workspace Letterhead + Platform Seal ── */
+            .letterhead {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              border-bottom: 2px solid #0284c7;
+              padding-bottom: 14px;
+              margin-bottom: 18px;
+              gap: 16px;
+            }
+            .ws-info {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .ws-logo {
+              width: 56px;
+              height: 56px;
+              border-radius: 10px;
+              object-fit: cover;
+              border: 1px solid #e2e8f0;
+            }
+            .ws-logo-placeholder {
+              width: 54px;
+              height: 54px;
+              border-radius: 10px;
+              background: #f1f5f9;
+              border: 1px solid #cbd5e1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 22px;
+              font-weight: 800;
+              color: #0284c7;
+            }
+            .ws-title {
+              font-size: 18px;
+              font-weight: 800;
+              color: #0f172a;
+              margin: 0 0 4px 0;
+            }
+            .ws-contacts {
+              font-size: 11px;
+              color: #64748b;
+              display: flex;
+              gap: 10px;
+              flex-wrap: wrap;
+            }
+            .platform-branding {
+              text-align: ${isRTL ? "left" : "right"};
+              display: flex;
+              flex-direction: column;
+              align-items: ${isRTL ? "flex-start" : "flex-end"};
+              gap: 4px;
+            }
+            .platform-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: #f0fdf4;
+              border: 1px solid #bbf7d0;
+              padding: 4px 10px;
+              border-radius: 6px;
+              font-size: 11px;
+              font-weight: 700;
+              color: #166534;
+            }
+            .platform-logo {
+              height: 18px;
+              width: auto;
+            }
+            .platform-sub {
+              font-size: 10px;
+              color: #94a3b8;
+            }
+
+            /* ── Document Ribbon ── */
+            .doc-ribbon {
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 10px 16px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 16px;
+            }
+            .doc-heading {
+              font-size: 15px;
+              font-weight: 800;
+              color: #0f172a;
+              margin: 0;
+            }
+            .doc-ref {
+              font-size: 12px;
+              color: #0284c7;
+              font-weight: 700;
+              font-family: monospace;
+            }
+            .status-pill {
+              font-size: 11px;
+              font-weight: 700;
+              padding: 3px 10px;
+              border-radius: 12px;
+              background: #e0f2fe;
+              color: #0369a1;
+              border: 1px solid #bae6fd;
+            }
+
+            /* ── Details Grid ── */
+            .grid-table {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 12px;
+              background: #ffffff;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 14px 16px;
+              margin-bottom: 20px;
+            }
+            .grid-cell {
+              display: flex;
+              flex-direction: column;
+              gap: 2px;
+            }
+            .cell-label {
+              font-size: 11px;
+              font-weight: 600;
+              color: #64748b;
+            }
+            .cell-value {
+              font-size: 13px;
+              font-weight: 700;
+              color: #1e293b;
+            }
+
+            /* ── Report Content Area ── */
+            .report-box {
+              background: #ffffff;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              padding: 20px;
+              min-height: 240px;
+              margin-bottom: 24px;
+            }
+            .report-box-title {
+              font-size: 12px;
+              font-weight: 800;
+              color: #0284c7;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin: 0 0 12px 0;
+              padding-bottom: 6px;
+              border-bottom: 1px solid #e2e8f0;
+            }
+            .report-content {
+              line-height: 1.8;
+              font-size: 13px;
+              color: #1e293b;
+            }
+            .report-content p { margin: 0 0 10px 0; }
+            .report-content h1, .report-content h2, .report-content h3 {
+              color: #0f172a;
+              margin-top: 14px;
+              margin-bottom: 8px;
+            }
+            .report-content table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 12px 0;
+            }
+            .report-content th, .report-content td {
+              border: 1px solid #cbd5e1;
+              padding: 8px 10px;
+              text-align: ${isRTL ? "right" : "left"};
+            }
+            .report-content th {
+              background: #f1f5f9;
+              font-weight: 700;
+            }
+            .report-content ul, .report-content ol {
+              margin: 8px 0;
+              padding-inline-start: 20px;
+            }
+
+            /* ── Signoff & Stamp ── */
+            .signoff-section {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-top: 36px;
+              padding-top: 16px;
+              page-break-inside: avoid;
+            }
+            .signoff-col {
+              text-align: center;
+              width: 220px;
+            }
+            .signoff-slot {
+              height: 48px;
+              border-bottom: 1px dashed #94a3b8;
+              margin-bottom: 6px;
+            }
+            .signoff-title {
+              font-size: 11px;
+              color: #64748b;
+              font-weight: 600;
+            }
+
+            /* ── Footer Branding ── */
+            .letterhead-footer {
+              margin-top: 24px;
+              padding-top: 12px;
+              border-top: 1px solid #e2e8f0;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 10px;
+              color: #94a3b8;
+              page-break-inside: avoid;
+            }
           </style>
         </head>
         <body>
-          ${summary || ""}
+          <div class="print-wrapper">
+            <!-- Header: Workspace & Platform -->
+            <header class="letterhead">
+              <div class="ws-info">
+                ${
+                  wsLogo
+                    ? `<img src="${wsLogo}" class="ws-logo" alt="${wsName}" onerror="this.style.display='none'" />`
+                    : `<div class="ws-logo-placeholder">${wsName ? wsName.charAt(0) : "W"}</div>`
+                }
+                <div>
+                  <h1 class="ws-title">${wsName}</h1>
+                  <div class="ws-contacts">
+                    ${wsPhone ? `<span>📞 ${wsPhone}</span>` : ""}
+                    ${wsEmail ? `<span>✉️ ${wsEmail}</span>` : ""}
+                    ${wsAddress ? `<span>📍 ${wsAddress}</span>` : ""}
+                  </div>
+                </div>
+              </div>
+
+              <div class="platform-branding">
+                <div class="platform-badge">
+                  <img src="${saabqLogo}" class="platform-logo" alt="Saabq" onerror="this.style.display='none'" />
+                  <span>${isRTL ? "تقويم سابق | Saabq Cal" : "Saabq Cal Platform"}</span>
+                </div>
+                <div class="platform-sub">${isRTL ? "نظام إدارة المواعيد والخدمات المعتمد" : "Verified Booking & Operations System"}</div>
+              </div>
+            </header>
+
+            <!-- Document Ribbon -->
+            <div class="doc-ribbon">
+              <div>
+                <h2 class="doc-heading">${isRTL ? "تقرير الجلسة / ملخص الموعد" : "Session Report & Summary"}</h2>
+                <div class="doc-ref">${isRTL ? "رقم الموعد المرجعي:" : "Booking ID:"} #${id || appt?.id || ""}</div>
+              </div>
+              <span class="status-pill">${statusText}</span>
+            </div>
+
+            <!-- Details Grid -->
+            <div class="grid-table">
+              <div class="grid-cell">
+                <span class="cell-label">${isRTL ? "العميل / المستفيد" : "Customer / Client"}</span>
+                <span class="cell-value">${customerName} ${customerPhone ? `(${customerPhone})` : ""}</span>
+              </div>
+              <div class="grid-cell">
+                <span class="cell-label">${isRTL ? "الخدمة المقدمة" : "Service"}</span>
+                <span class="cell-value">${serviceTitle} ${serviceDuration ? `(${serviceDuration} ${isRTL ? "دقيقة" : "min"})` : ""}</span>
+              </div>
+              <div class="grid-cell">
+                <span class="cell-label">${isRTL ? "مقدم الخدمة / الأخصائي" : "Specialist / Provider"}</span>
+                <span class="cell-value">${providerName}</span>
+              </div>
+              <div class="grid-cell">
+                <span class="cell-label">${isRTL ? "موعد الجلسة" : "Appointment Time"}</span>
+                <span class="cell-value">${formattedDate} ${formattedTime ? `— ${formattedTime}` : ""}</span>
+              </div>
+            </div>
+
+            <!-- Report Body -->
+            <section class="report-box">
+              <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
+              <div class="report-content">
+                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
+              </div>
+            </section>
+
+            <!-- Signoff & Stamp -->
+            <div class="signoff-section">
+              <div class="signoff-col">
+                <div class="signoff-slot"></div>
+                <div class="signoff-title">${isRTL ? "توقيع واعتماد مقدم الخدمة" : "Provider Signature"}</div>
+              </div>
+              <div class="signoff-col">
+                <div class="signoff-slot"></div>
+                <div class="signoff-title">${isRTL ? "ختم المنشأة ومساحة العمل" : "Workspace Stamp"}</div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="letterhead-footer">
+              <span>${isRTL ? "تم إصدار وتوثيق هذا المستند إلكترونياً عبر منصة تقويم سابق (Saabq Cal)" : "Issued & verified electronically via Saabq Cal Platform"}</span>
+              <span>${new Date().toLocaleDateString(isRTL ? "ar-SA" : "en-US", { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+            </footer>
+          </div>
+
           <script>
-            window.onload = function() { window.print(); window.close(); };
+            window.onload = function() {
+              window.print();
+              window.close();
+            };
           </script>
         </body>
       </html>
@@ -1801,8 +2182,8 @@ export default function CustomerAppointmentsTab() {
                             }}
                           >
                             {isRTL
-                              ? "الوصفة الطبية والتقرير الطبي / ملخص الاستشارة"
-                              : "Prescription & Consultation Summary"}
+                              ? "تقرير الجلسة / الملخص"
+                              : "Session Report & Summary"}
                           </h4>
                         </div>
                         <button
@@ -1823,7 +2204,7 @@ export default function CustomerAppointmentsTab() {
                           }}
                         >
                           <Icon name="printer" size={14} />
-                          {isRTL ? "طباعة الوصفة" : "Print"}
+                          {isRTL ? "طباعة التقرير" : "Print Report"}
                         </button>
                       </div>
 

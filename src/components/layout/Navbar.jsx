@@ -81,10 +81,6 @@ export default function Navbar() {
   const userPermissions = Array.isArray(user?.permissions)
     ? user.permissions
     : [];
-  const canViewPermission = (permissionsArray) => {
-    if (isOwner) return true;
-    return permissionsArray.some((perm) => userPermissions.includes(perm));
-  };
 
   // Track active section on home page scroll
   useEffect(() => {
@@ -236,8 +232,8 @@ export default function Navbar() {
   // from the shared nav config so they stay in sync with the real menus.
   const isWorkspaceActive = user?.workspace?.status === "active";
   const drawerAccountTabs = getAccountTabs(t, userType);
-  const drawerWorkspaceTabs = getWorkspaceTabs(t).filter((tab) =>
-    canViewWorkspaceTab(tab, isOwner, userPermissions),
+  const drawerWorkspaceTabs = getWorkspaceTabs(t, user?.workspace, lang).filter(
+    (tab) => canViewWorkspaceTab(tab, isOwner, userPermissions),
   );
 
   return (
@@ -460,127 +456,54 @@ export default function Navbar() {
                   />
                 </button>
                 {wsDropdownOpen && (
-                  <div className="navbar-dropdown-menu">
-                    <Link
-                      to="/member/workspace"
-                      onClick={() => setWsDropdownOpen(false)}
-                    >
-                      <Icon name="home" size={16} />
-                      {t("home")}
-                    </Link>
-                    {canViewPermission(["settings_read", "settings_write"]) && (
-                      <Link
-                        to="/member/workspace/settings"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="monitor" size={16} />
-                        {t("workspaceSettings")}
-                      </Link>
-                    )}
-                    {canViewPermission(["schedule_read", "schedule_write"]) && (
-                      <Link
-                        to="/member/workspace/schedules"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="clock" size={16} />
-                        {t("navSchedules")}
-                      </Link>
-                    )}
-                    {canViewPermission(["service_read", "service_write"]) && (
-                      <Link
-                        to="/member/workspace/services"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="custom-bc148024" size={16} />
-                        {t("navServices")}
-                      </Link>
-                    )}
-                    {canViewPermission(["member_read", "member_write"]) && (
-                      <Link
-                        to="/member/workspace/members"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="custom-cdbb0862" size={16} />
-                        {t("navMembers")}
-                      </Link>
-                    )}
-                    {canViewPermission(["role_read", "role_write"]) && (
-                      <Link
-                        to="/member/workspace/roles"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="shield" size={16} />
-                        {t("workspaceRoles")}
-                      </Link>
-                    )}
-                    {canViewPermission(["booking_read", "booking_write"]) && (
-                      <Link
-                        to="/member/workspace/bookings"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="calendar" size={16} />
-                        <span>{t("navBookings")}</span>
-                        {pendingBookingsCount > 0 && (
-                          <span
-                            style={{
-                              marginInlineStart: "auto",
-                              padding: "2px 7px",
-                              borderRadius: 10,
-                              fontSize: "0.72rem",
-                              fontWeight: 800,
-                              background: "#f59e0b",
-                              color: "#ffffff",
-                            }}
-                          >
-                            {pendingBookingsCount}
-                          </span>
-                        )}
-                      </Link>
-                    )}
-                    {canViewPermission([
-                      "subscription_read",
-                      "subscription_write",
-                    ]) && (
-                      <Link
-                        to="/member/workspace/subscriptions"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="credit-card" size={16} />
-                        {t("navSubscriptions")}
-                      </Link>
-                    )}
-                    {canViewPermission(["resource_read", "resource_write"]) && (
-                      <Link
-                        to="/member/workspace/resources"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="briefcase" size={16} />
-                        {t("workspaceResources") || "الموارد والقاعات"}
-                      </Link>
-                    )}
-                    {canViewPermission(["settings_read"]) && (
-                      <Link
-                        to="/member/workspace/logs"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="clipboard-list" size={16} />
-                        {t("auditLogs") || "سجل النشاطات"}
-                      </Link>
-                    )}
-                    {canViewPermission([
-                      "payment_read",
-                      "payment_write",
-                      "booking_read",
-                      "booking_write",
-                    ]) && (
-                      <Link
-                        to="/member/workspace/payments"
-                        onClick={() => setWsDropdownOpen(false)}
-                      >
-                        <Icon name="credit-card" size={16} />
-                        {t("paymentsAndFinance") || "المدفوعات والمالية"}
-                      </Link>
-                    )}
+                  <div className="navbar-dropdown-menu" role="menu">
+                    {drawerWorkspaceTabs.map((tab) => {
+                      const isCapAllowed =
+                        isWorkspaceActive &&
+                        checkWorkspaceCapability(user, tab.capability);
+
+                      return (
+                        <Link
+                          key={tab.id}
+                          to={tab.path}
+                          role="menuitem"
+                          onClick={() => setWsDropdownOpen(false)}
+                          style={{
+                            opacity: isCapAllowed ? 1 : 0.6,
+                          }}
+                        >
+                          <Icon name={tab.icon} size={16} />
+                          <span style={{ flex: 1 }}>{tab.label}</span>
+                          {tab.id === "bookings" &&
+                            pendingBookingsCount > 0 && (
+                              <span
+                                style={{
+                                  padding: "2px 7px",
+                                  borderRadius: 10,
+                                  fontSize: "0.72rem",
+                                  fontWeight: 800,
+                                  background: "#f59e0b",
+                                  color: "#ffffff",
+                                  lineHeight: 1,
+                                  marginInlineStart: 6,
+                                }}
+                              >
+                                {pendingBookingsCount}
+                              </span>
+                            )}
+                          {!isCapAllowed && (
+                            <Icon
+                              name="lock"
+                              size={13}
+                              style={{
+                                color: "var(--muted)",
+                                marginInlineStart: 6,
+                              }}
+                            />
+                          )}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </li>
@@ -1017,7 +940,24 @@ export default function Navbar() {
                                   onClick={closeMobileDrawer}
                                 >
                                   <Icon name={tab.icon} />
-                                  <span>{tab.label}</span>
+                                  <span style={{ flex: 1 }}>{tab.label}</span>
+                                  {tab.id === "bookings" &&
+                                    pendingBookingsCount > 0 && (
+                                      <span
+                                        style={{
+                                          marginInlineStart: "auto",
+                                          padding: "2px 7px",
+                                          borderRadius: 10,
+                                          fontSize: "0.72rem",
+                                          fontWeight: 800,
+                                          background: "#f59e0b",
+                                          color: "#ffffff",
+                                          lineHeight: 1,
+                                        }}
+                                      >
+                                        {pendingBookingsCount}
+                                      </span>
+                                    )}
                                 </NavLink>
                               );
                             })}

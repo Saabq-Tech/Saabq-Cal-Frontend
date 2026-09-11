@@ -105,14 +105,15 @@ export default function WorkspaceCustomersPage() {
       } catch (err) {
         console.error("Failed to fetch customers:", err);
         toast.show(
-          t("errorLoadingData") || "حدث خطأ أثناء تحميل قائمة العملاء",
+          t("errorLoadingData") ||
+            `حدث خطأ أثناء تحميل قائمة ${customerPlural}`,
           "error",
         );
       } finally {
         setLoading(false);
       }
     },
-    [search, statusFilter, sortBy, t, toast],
+    [search, statusFilter, sortBy, t, toast, customerPlural],
   );
 
   useEffect(() => {
@@ -170,14 +171,15 @@ export default function WorkspaceCustomersPage() {
           customerForm,
         );
         toast.show(
-          t("customerUpdatedSuccess") || "تم تحديث بيانات العميل بنجاح",
+          t("customerUpdatedSuccess") ||
+            `تم تحديث بيانات ${customerSingular} بنجاح`,
           "success",
         );
         setIsEditModalOpen(false);
       } else {
         await client.post(endpoints.workspaceCustomers, customerForm);
         toast.show(
-          t("customerCreatedSuccess") || "تم إضافة العميل بنجاح",
+          t("customerCreatedSuccess") || `تم إضافة ${customerSingular} بنجاح`,
           "success",
         );
         setIsAddModalOpen(false);
@@ -205,7 +207,7 @@ export default function WorkspaceCustomersPage() {
     try {
       await client.delete(endpoints.workspaceCustomerItem(selectedCustomer.id));
       toast.show(
-        t("customerDeletedSuccess") || "تم فك ارتباط العميل بنجاح",
+        t("customerDeletedSuccess") || `تم فك ارتباط ${customerSingular} بنجاح`,
         "success",
       );
       setIsDeleteModalOpen(false);
@@ -305,7 +307,7 @@ export default function WorkspaceCustomersPage() {
               }}
             >
               {t("customersSubtitle") ||
-                "عرض وإدارة سجلات وملفات العملاء الخاصة بمساحة العمل والمتابعة الشاملة لمواعيدهم."}
+                `عرض وإدارة سجلات وملفات ${customerPlural} الخاصة بمساحة العمل والمتابعة الشاملة لمواعيدهم.`}
             </p>
           </div>
         </div>
@@ -433,7 +435,9 @@ export default function WorkspaceCustomersPage() {
                 fontWeight: 600,
               }}
             >
-              {t("activeVipCustomers") || "النشطون والمميزون"}
+              {customerPlural +
+                " " +
+                (t("activeAndVipSuffix") || "النشطون والمميزون")}
             </div>
             <div
               style={{
@@ -590,7 +594,7 @@ export default function WorkspaceCustomersPage() {
             </option>
             <option value="active">{t("filterStatusActive") || "نشط"}</option>
             <option value="vip">
-              {t("filterStatusVip") || "عميل مميز (VIP)"}
+              {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
             </option>
             <option value="lead">
               {t("filterStatusLead") || "محتمل / جديد"}
@@ -727,7 +731,7 @@ export default function WorkspaceCustomersPage() {
               marginBottom: 6,
             }}
           >
-            {t("noCustomersFound") || "لم يتم العثور على أي عملاء"}
+            {t("noCustomersFound") || `لم يتم العثور على أي ${customerPlural}`}
           </h3>
           <p
             style={{
@@ -738,7 +742,7 @@ export default function WorkspaceCustomersPage() {
             }}
           >
             {t("noCustomersFoundDesc") ||
-              "لم تتم إضافة أي عملاء حتى الآن أو لا توجد نتائج مطابقة للبحث الحالي."}
+              `لم تتم إضافة أي ${customerPlural} حتى الآن أو لا توجد نتائج مطابقة للبحث الحالي.`}
           </p>
           {canWrite && (
             <button
@@ -919,8 +923,10 @@ export default function WorkspaceCustomersPage() {
                                   fontSize: "0.68rem",
                                   padding: "2px 6px",
                                   borderRadius: 12,
-                                  background: "#fef3c7",
-                                  color: "#92400e",
+                                  background: "var(--badge-warning-bg)",
+                                  color: "var(--badge-warning-color)",
+                                  border:
+                                    "1px solid var(--badge-warning-border)",
                                   fontWeight: 800,
                                 }}
                               >
@@ -1314,9 +1320,14 @@ export default function WorkspaceCustomersPage() {
                         fontSize: "0.72rem",
                         fontWeight: 700,
                         background: isVip
-                          ? "#fef3c7"
-                          : "rgba(2, 105, 130, 0.1)",
-                        color: isVip ? "#92400e" : "var(--primary)",
+                          ? "var(--badge-warning-bg)"
+                          : "var(--primary-subtle)",
+                        color: isVip
+                          ? "var(--badge-warning-color)"
+                          : "var(--primary)",
+                        border: isVip
+                          ? "1px solid var(--badge-warning-border)"
+                          : "none",
                       }}
                     >
                       {isVip ? "VIP" : status}
@@ -1737,7 +1748,7 @@ export default function WorkspaceCustomersPage() {
                       {t("filterStatusActive") || "نشط"}
                     </option>
                     <option value="vip">
-                      {t("filterStatusVip") || "عميل مميز (VIP)"}
+                      {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
                     </option>
                     <option value="lead">
                       {t("filterStatusLead") || "محتمل / جديد"}
@@ -1769,7 +1780,7 @@ export default function WorkspaceCustomersPage() {
                   }
                   placeholder={
                     t("internalNotesPlaceholder") ||
-                    "أضف ملاحظات خاصة أو تعليمات داخلية عن هذا العميل..."
+                    `أضف ملاحظات خاصة أو تعليمات داخلية عن هذا ${customerSingular}...`
                   }
                 />
               </div>
@@ -1863,7 +1874,7 @@ export default function WorkspaceCustomersPage() {
               }}
             >
               {t("confirmDeleteCustomer") ||
-                "هل أنت متأكد من حذف هذا العميل من مساحة العمل؟"}
+                `هل أنت متأكد من حذف هذا ${customerSingular} من مساحة العمل؟`}
             </h3>
             <p
               style={{
@@ -1874,7 +1885,7 @@ export default function WorkspaceCustomersPage() {
               }}
             >
               {t("confirmDeleteCustomerDesc") ||
-                "سيتم فك ارتباط العميل بمساحة العمل الحالية ولن يظهر في قائمتك. سجلات المواعيد والمدفوعات السابقة ستبقى محفوظة لأغراض الأرشفة."}
+                `سيتم فك ارتباط ${customerSingular} بمساحة العمل الحالية ولن يظهر في قائمتك. سجلات المواعيد والمدفوعات السابقة ستبقى محفوظة لأغراض الأرشفة.`}
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button

@@ -78,6 +78,13 @@ const MemberSecurityPage = lazy(
 const MemberChangePasswordPage = lazy(
   () => import("./pages/member/dashboard/MemberChangePasswordPage"),
 );
+const IntegrationsSettingsPage = lazy(
+  () => import("./pages/member/dashboard/IntegrationsSettingsPage"),
+);
+const NotificationsPage = lazy(
+  () => import("./components/dashboard/NotificationsPage"),
+);
+const ChatsPage = lazy(() => import("./components/dashboard/ChatsPage"));
 
 // Workspace Suite Pages & Layout
 const WorkspaceLayout = lazy(
@@ -100,6 +107,9 @@ const WorkspaceServicesPage = lazy(
 );
 const WorkspaceBookingsPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceBookingsPage"),
+);
+const WorkspaceBookingDetailPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceBookingDetailPage"),
 );
 const WorkspaceSchedulesPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceSchedulesPage"),
@@ -381,13 +391,25 @@ export default function App() {
                       </WorkspaceDashboardLayout>
                     }
                   >
-                    <Route index element={<Navigate to="profile" replace />} />
+                    <Route
+                      index
+                      element={<Navigate to="/member/workspace" replace />}
+                    />
                     <Route path="profile" element={<MemberProfilePage />} />
                     <Route path="security" element={<MemberSecurityPage />} />
                     <Route
                       path="change-password"
                       element={<MemberChangePasswordPage />}
                     />
+                    <Route
+                      path="integrations"
+                      element={<IntegrationsSettingsPage />}
+                    />
+                    <Route
+                      path="notifications"
+                      element={<NotificationsPage />}
+                    />
+                    <Route path="chats" element={<ChatsPage />} />
                   </Route>
 
                   {/* Workspace Suite Routes */}
@@ -429,6 +451,10 @@ export default function App() {
                       element={<WorkspaceBookingsPage />}
                     />
                     <Route
+                      path="bookings/:bookingId"
+                      element={<WorkspaceBookingDetailPage />}
+                    />
+                    <Route
                       path="schedules"
                       element={<WorkspaceSchedulesPage />}
                     />
@@ -441,6 +467,7 @@ export default function App() {
                       element={<WorkspaceResourcesPage />}
                     />
                     <Route path="logs" element={<WorkspaceLogsPage />} />
+                    <Route path="reports" element={<WorkspaceLogsPage />} />
                     <Route
                       path="templates"
                       element={

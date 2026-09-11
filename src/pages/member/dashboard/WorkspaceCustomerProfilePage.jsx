@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import { useToast } from "../../../context/ToastContext";
@@ -10,7 +10,7 @@ import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
   const { user } = useAuth();
-  const { t, lang } = useLanguage();
+  const { t, lang, isRTL } = useLanguage();
   const toast = useToast();
 
   const workspace = user?.workspace;
@@ -46,7 +46,25 @@ export default function WorkspaceCustomerProfilePage() {
   // State
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("timeline"); // 'timeline' | 'workspace_data' | 'financial'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "timeline"; // 'timeline' | 'workspace_data' | 'financial'
+  const setActiveTab = useCallback(
+    (tab) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (tab === "timeline") {
+            next.delete("tab");
+          } else {
+            next.set("tab", tab);
+          }
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const [timelineFilter, setTimelineFilter] = useState("all");
 
   // Edit State
@@ -84,13 +102,14 @@ export default function WorkspaceCustomerProfilePage() {
     } catch (err) {
       console.error("Failed to load customer profile:", err);
       toast.show(
-        t("customerNotFound") || "العميل غير موجود أو ليس لديك صلاحية لعرضه",
+        t("customerNotFound") ||
+          `${customerSingular} غير موجود أو ليس لديك صلاحية لعرضه`,
         "error",
       );
     } finally {
       setLoading(false);
     }
-  }, [customerId, t, toast]);
+  }, [customerId, t, toast, customerSingular]);
 
   useEffect(() => {
     fetchCustomer();
@@ -100,11 +119,21 @@ export default function WorkspaceCustomerProfilePage() {
   const handleSaveNotes = async () => {
     setSavingNotes(true);
     try {
-      await client.put(endpoints.workspaceCustomerItem(customerId), {
-        internal_notes: internalNotes,
-      });
+      const res = await client.put(
+        endpoints.workspaceCustomerItem(customerId),
+        {
+          internal_notes: internalNotes,
+        },
+      );
       toast.show(t("savedSuccessfully") || "تم حفظ الملاحظات بنجاح", "success");
-      fetchCustomer();
+      const updated = res.data?.data;
+      if (updated) {
+        setCustomer(updated);
+        const pivot = updated.workspace_customer || {};
+        setInternalNotes(pivot.internal_notes || updated.notes || "");
+      } else {
+        fetchCustomer();
+      }
     } catch (err) {
       toast.show(
         err.response?.data?.message ||
@@ -146,7 +175,8 @@ export default function WorkspaceCustomerProfilePage() {
         customerForm,
       );
       toast.show(
-        t("customerUpdatedSuccess") || "تم تحديث بيانات العميل بنجاح",
+        t("customerUpdatedSuccess") ||
+          `تم تحديث بيانات ${customerSingular} بنجاح`,
         "success",
       );
       setIsEditModalOpen(false);
@@ -255,7 +285,7 @@ export default function WorkspaceCustomerProfilePage() {
             marginBottom: 8,
           }}
         >
-          {t("customerNotFound") || "العميل غير موجود"}
+          {t("customerNotFound") || `${customerSingular} غير موجود`}
         </h2>
         <Link
           to="/member/workspace/customers"
@@ -263,7 +293,9 @@ export default function WorkspaceCustomerProfilePage() {
           style={{ marginTop: 12 }}
         >
           <Icon name="arrow-right" size={16} />
-          <span>{t("backToCustomers") || "العودة لقائمة العملاء"}</span>
+          <span>
+            {t("backToCustomers") || `العودة لقائمة ${customerPlural}`}
+          </span>
         </Link>
       </div>
     );
@@ -372,6 +404,7 @@ export default function WorkspaceCustomerProfilePage() {
             }}
           >
             <div
+              className="customer-avatar-large"
               style={{
                 width: 72,
                 height: 72,
@@ -498,6 +531,7 @@ export default function WorkspaceCustomerProfilePage() {
 
           {/* Right Action Shortcuts */}
           <div
+            className="customer-hero-actions"
             style={{
               display: "flex",
               alignItems: "center",
@@ -836,13 +870,14 @@ export default function WorkspaceCustomerProfilePage() {
                 : isEducation
                   ? t("academicRecordTitle") || "الملف الأكاديمي للطالب"
                   : isConsulting
-                    ? t("corporateRecordTitle") || "ملف العميل التجاري"
+                    ? t("corporateRecordTitle") ||
+                      `ملف ${customerSingular} التجاري`
                     : isFitness
                       ? t("fitnessRecordTitle") || "الملف الرياضي والصحي"
                       : isBeauty
                         ? t("beautyRecordTitle") || "ملف العناية والتجميل"
                         : t("generalRecordTitle") ||
-                          "سجل العميل والبيانات الخاصة"}
+                          `سجل ${customerSingular} والبيانات الخاصة`}
             </h3>
           </div>
 
@@ -1360,12 +1395,15 @@ export default function WorkspaceCustomerProfilePage() {
 
       {/* Main Tabs Navigation */}
       <div
-        className="profile-tabs-header"
+        className="profile-tabs-header no-scrollbar"
         style={{
           display: "flex",
           borderBottom: "2px solid var(--border-light, #e2e8f0)",
-          gap: 24,
+          gap: 20,
           marginBottom: 24,
+          overflowX: "auto",
+          whiteSpace: "nowrap",
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <button
@@ -1391,6 +1429,8 @@ export default function WorkspaceCustomerProfilePage() {
             gap: 8,
             marginBottom: -2,
             transition: "all 0.15s ease",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <Icon name="history" size={18} />
@@ -1438,6 +1478,8 @@ export default function WorkspaceCustomerProfilePage() {
             gap: 8,
             marginBottom: -2,
             transition: "all 0.15s ease",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <Icon name="clipboard-list" size={18} />
@@ -1467,6 +1509,8 @@ export default function WorkspaceCustomerProfilePage() {
             gap: 8,
             marginBottom: -2,
             transition: "all 0.15s ease",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <Icon name="credit-card" size={18} />
@@ -1561,7 +1605,8 @@ export default function WorkspaceCustomerProfilePage() {
                   margin: "0 auto 16px",
                 }}
               >
-                لم يسجل هذا العميل أي مواعيد في مساحة العمل هذه حتى الآن.
+                {t("noCustomerAppointmentsYet") ||
+                  `لم يسجل هذا ${customerSingular} أي مواعيد في مساحة العمل هذه حتى الآن.`}
               </p>
               {canBook && (
                 <button
@@ -1767,42 +1812,51 @@ export default function WorkspaceCustomerProfilePage() {
                       {/* Clinical Doctor Summary / Prescription */}
                       {apt.summary && (
                         <div
+                          className="clinical-summary-box"
                           style={{
                             background: "rgba(2, 105, 130, 0.05)",
                             border: "1px solid rgba(2, 105, 130, 0.15)",
                             borderRadius: 10,
-                            padding: "10px 14px",
+                            padding: "12px 14px",
                             marginTop: 12,
+                            textAlign: isRTL ? "right" : "left",
+                            direction: isRTL ? "rtl" : "ltr",
                           }}
                         >
                           <div
                             style={{
                               fontWeight: 700,
-                              fontSize: "0.8rem",
+                              fontSize: "0.82rem",
                               color: "var(--primary)",
-                              marginBottom: 4,
+                              marginBottom: 6,
                               display: "flex",
                               alignItems: "center",
-                              gap: 4,
+                              gap: 6,
                             }}
                           >
-                            <Icon name="file-text" size={14} />
+                            <Icon name="file-text" size={15} />
                             <span>
                               {t("clinicalSummary") ||
                                 "ملخص الجلسة والتشخيص الطبي"}
                             </span>
                           </div>
-                          <p
+                          <div
+                            className="prose clinical-summary-content"
                             style={{
                               margin: 0,
-                              fontSize: "0.85rem",
+                              fontSize: "0.88rem",
                               color: "var(--heading)",
-                              lineHeight: 1.5,
-                              whiteSpace: "pre-wrap",
+                              lineHeight: 1.6,
+                              textAlign: isRTL ? "right" : "left",
+                              direction: isRTL ? "rtl" : "ltr",
                             }}
-                          >
-                            {apt.summary}
-                          </p>
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                typeof apt.summary === "string"
+                                  ? apt.summary
+                                  : "",
+                            }}
+                          />
                         </div>
                       )}
 
@@ -1849,12 +1903,14 @@ export default function WorkspaceCustomerProfilePage() {
                                     color: "var(--text-secondary)",
                                   }}
                                 >
-                                  {ans.question?.label
-                                    ? typeof ans.question.label === "object"
-                                      ? ans.question.label[lang] ||
-                                        ans.question.label.ar
-                                      : ans.question.label
-                                    : t("question") || "سؤال"}
+                                  {ans.question_label ||
+                                    (ans.question?.label
+                                      ? typeof ans.question.label === "object"
+                                        ? ans.question.label[lang] ||
+                                          ans.question.label.ar ||
+                                          ans.question.label.en
+                                        : ans.question.label
+                                      : t("question") || "سؤال")}
                                   :
                                 </span>{" "}
                                 <span
@@ -1863,7 +1919,12 @@ export default function WorkspaceCustomerProfilePage() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  {ans.answer || "—"}
+                                  {Array.isArray(ans.answer)
+                                    ? ans.answer.join(", ")
+                                    : typeof ans.answer === "object" &&
+                                        ans.answer !== null
+                                      ? JSON.stringify(ans.answer)
+                                      : ans.answer_text || ans.answer || "—"}
                                 </span>
                               </div>
                             ))}
@@ -1881,10 +1942,7 @@ export default function WorkspaceCustomerProfilePage() {
 
       {/* Tab 2: Workspace Data & Internal Notes */}
       {activeTab === "workspace_data" && (
-        <div
-          className="tab-notes-view animate-fade-in"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}
-        >
+        <div className="tab-notes-view animate-fade-in">
           {/* Notes Card */}
           <div
             className="glass-card"
@@ -1924,9 +1982,11 @@ export default function WorkspaceCustomerProfilePage() {
                 fontSize: "0.82rem",
                 color: "var(--text-secondary)",
                 marginBottom: 14,
+                lineHeight: 1.5,
               }}
             >
-              هذه الملاحظات خاصة بمساحة العمل فقط ولا تظهر للعميل إطلاقاً.
+              {t("internalNotesNotice") ||
+                `هذه الملاحظات خاصة بمساحة العمل فقط ولا تظهر لـ${customerSingular} إطلاقاً.`}
             </p>
 
             <textarea
@@ -1936,10 +1996,16 @@ export default function WorkspaceCustomerProfilePage() {
               onChange={(e) => setInternalNotes(e.target.value)}
               placeholder={
                 t("internalNotesPlaceholder") ||
-                "أضف ملاحظات سرية، تفضيلات العميل، أو تعليمات خاصة بمتابعة حالته..."
+                `أضف ملاحظات سرية، تفضيلات ${customerSingular}، أو تعليمات خاصة بمتابعة حالته...`
               }
               disabled={!canWrite}
-              style={{ width: "100%", fontSize: "0.88rem", lineHeight: 1.6 }}
+              style={{
+                width: "100%",
+                fontSize: "0.88rem",
+                lineHeight: 1.6,
+                boxSizing: "border-box",
+                resize: "vertical",
+              }}
             />
 
             {canWrite && (
@@ -1947,7 +2013,7 @@ export default function WorkspaceCustomerProfilePage() {
                 style={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  marginTop: 12,
+                  marginTop: 14,
                 }}
               >
                 <button
@@ -1955,11 +2021,15 @@ export default function WorkspaceCustomerProfilePage() {
                   className="btn btn-primary"
                   onClick={handleSaveNotes}
                   disabled={savingNotes}
-                  style={{ fontSize: "0.82rem", padding: "8px 16px" }}
+                  style={{
+                    fontSize: "0.84rem",
+                    padding: "9px 20px",
+                    fontWeight: 700,
+                  }}
                 >
                   {savingNotes
                     ? t("saving") || "جاري الحفظ..."
-                    : t("saveChanges") || "حفظ الملاحظات"}
+                    : t("saveChanges") || "حفظ التغييرات"}
                 </button>
               </div>
             )}
@@ -1988,9 +2058,13 @@ export default function WorkspaceCustomerProfilePage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div
+                className="profile-detail-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
                   borderBottom: "1px solid var(--border-light, #f1f5f9)",
                   paddingBottom: 8,
                 }}
@@ -2000,6 +2074,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.82rem",
                     color: "var(--text-secondary)",
                     fontWeight: 600,
+                    flexShrink: 0,
                   }}
                 >
                   {t("email") || "البريد الإلكتروني"}:
@@ -2009,16 +2084,23 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.86rem",
                     fontWeight: 700,
                     color: "var(--heading)",
+                    wordBreak: "break-all",
+                    textAlign: isRTL ? "left" : "right",
                   }}
+                  dir="ltr"
                 >
                   {customer.email || "—"}
                 </span>
               </div>
 
               <div
+                className="profile-detail-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
                   borderBottom: "1px solid var(--border-light, #f1f5f9)",
                   paddingBottom: 8,
                 }}
@@ -2028,6 +2110,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.82rem",
                     color: "var(--text-secondary)",
                     fontWeight: 600,
+                    flexShrink: 0,
                   }}
                 >
                   {t("phone") || "رقم الهاتف"}:
@@ -2037,6 +2120,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.86rem",
                     fontWeight: 700,
                     color: "var(--heading)",
+                    wordBreak: "break-word",
                   }}
                   dir="ltr"
                 >
@@ -2045,9 +2129,13 @@ export default function WorkspaceCustomerProfilePage() {
               </div>
 
               <div
+                className="profile-detail-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
                   borderBottom: "1px solid var(--border-light, #f1f5f9)",
                   paddingBottom: 8,
                 }}
@@ -2057,6 +2145,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.82rem",
                     color: "var(--text-secondary)",
                     fontWeight: 600,
+                    flexShrink: 0,
                   }}
                 >
                   {t("customerFileNo") || "رقم الملف / المرجع"}:
@@ -2066,6 +2155,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.86rem",
                     fontWeight: 700,
                     color: "var(--primary)",
+                    wordBreak: "break-word",
                   }}
                 >
                   {pivot.customer_reference || "—"}
@@ -2073,9 +2163,13 @@ export default function WorkspaceCustomerProfilePage() {
               </div>
 
               <div
+                className="profile-detail-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
                   borderBottom: "1px solid var(--border-light, #f1f5f9)",
                   paddingBottom: 8,
                 }}
@@ -2085,9 +2179,10 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.82rem",
                     color: "var(--text-secondary)",
                     fontWeight: 600,
+                    flexShrink: 0,
                   }}
                 >
-                  {t("status") || "حالة العميل"}:
+                  {t("status") || `حالة ${customerSingular}`}:
                 </span>
                 <span
                   style={{
@@ -2106,9 +2201,13 @@ export default function WorkspaceCustomerProfilePage() {
               </div>
 
               <div
+                className="profile-detail-row"
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 8,
                   paddingBottom: 8,
                 }}
               >
@@ -2117,6 +2216,7 @@ export default function WorkspaceCustomerProfilePage() {
                     fontSize: "0.82rem",
                     color: "var(--text-secondary)",
                     fontWeight: 600,
+                    flexShrink: 0,
                   }}
                 >
                   {t("customerDob") || "تاريخ الميلاد"}:
@@ -2383,7 +2483,7 @@ export default function WorkspaceCustomerProfilePage() {
                 className="form-row"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                   gap: 14,
                   marginBottom: 14,
                 }}
@@ -2439,7 +2539,7 @@ export default function WorkspaceCustomerProfilePage() {
                 className="form-row"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
                   gap: 14,
                   marginBottom: 14,
                 }}
@@ -2513,7 +2613,7 @@ export default function WorkspaceCustomerProfilePage() {
                 className="form-row"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
                   gap: 14,
                   marginBottom: 14,
                 }}
@@ -2575,7 +2675,7 @@ export default function WorkspaceCustomerProfilePage() {
                       {t("filterStatusActive") || "نشط"}
                     </option>
                     <option value="vip">
-                      {t("filterStatusVip") || "عميل مميز (VIP)"}
+                      {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
                     </option>
                     <option value="lead">
                       {t("filterStatusLead") || "محتمل / جديد"}
