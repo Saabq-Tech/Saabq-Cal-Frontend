@@ -9,20 +9,63 @@ export default function InstallAppButton({
 }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const isStandalone =
+      (window.matchMedia &&
+        (window.matchMedia("(display-mode: standalone)").matches ||
+          window.matchMedia("(display-mode: fullscreen)").matches ||
+          window.matchMedia("(display-mode: minimal-ui)").matches ||
+          window.matchMedia("(display-mode: window-controls-overlay)")
+            .matches)) ||
+      (window.navigator && window.navigator.standalone === true) ||
+      (document.referrer && document.referrer.startsWith("android-app://"));
+
+    if (isStandalone) return true;
+
+    try {
+      if (localStorage.getItem("pwa_installed") === "true") {
+        return true;
+      }
+    } catch {}
+
+    return false;
+  });
   const { t, lang } = useLanguage();
 
   useEffect(() => {
-    // Check if the app is already installed/running in standalone mode
-    const isStandalone =
-      window.matchMedia &&
-      window.matchMedia("(display-mode: standalone)").matches;
-    const isIOSStandalone =
-      window.navigator && window.navigator.standalone === true;
+    // Check media query changes dynamically
+    const mqlStandalone = window.matchMedia
+      ? window.matchMedia("(display-mode: standalone)")
+      : null;
+    const handleMqlChange = (e) => {
+      if (e.matches) {
+        setIsInstalled(true);
+        try {
+          localStorage.setItem("pwa_installed", "true");
+        } catch {}
+      }
+    };
 
-    if (isStandalone || isIOSStandalone) {
-      setIsInstalled(true);
-      return;
+    if (mqlStandalone?.addEventListener) {
+      mqlStandalone.addEventListener("change", handleMqlChange);
+    } else if (mqlStandalone?.addListener) {
+      mqlStandalone.addListener(handleMqlChange);
+    }
+
+    // Check getInstalledRelatedApps API if supported (Chrome 80+, Android, Edge)
+    if ("getInstalledRelatedApps" in navigator) {
+      navigator
+        .getInstalledRelatedApps()
+        .then((relatedApps) => {
+          if (Array.isArray(relatedApps) && relatedApps.length > 0) {
+            setIsInstalled(true);
+            try {
+              localStorage.setItem("pwa_installed", "true");
+            } catch {}
+          }
+        })
+        .catch(() => {});
     }
 
     const handleBeforeInstallPrompt = (e) => {
@@ -34,6 +77,9 @@ export default function InstallAppButton({
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
+      try {
+        localStorage.setItem("pwa_installed", "true");
+      } catch {}
       setIsModalOpen(false);
       // Clear the deferredPrompt
       setDeferredPrompt(null);
@@ -43,6 +89,11 @@ export default function InstallAppButton({
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
+      if (mqlStandalone?.removeEventListener) {
+        mqlStandalone.removeEventListener("change", handleMqlChange);
+      } else if (mqlStandalone?.removeListener) {
+        mqlStandalone.removeListener(handleMqlChange);
+      }
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt,
@@ -64,6 +115,10 @@ export default function InstallAppButton({
     setDeferredPrompt(null);
 
     if (outcome === "accepted") {
+      setIsInstalled(true);
+      try {
+        localStorage.setItem("pwa_installed", "true");
+      } catch {}
       setIsModalOpen(false);
     }
   };

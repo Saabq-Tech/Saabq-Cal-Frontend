@@ -279,51 +279,32 @@ export default function MemberOverviewTab() {
       }
     });
 
-    const hasRealBookings = bookings.length > 0;
-    const totalBookings = hasRealBookings ? bookings.length : 10;
-    const compCount =
-      completedCount > 0 ? completedCount : hasRealBookings ? 0 : 6;
-    const pendCount = pendingCount > 0 ? pendingCount : hasRealBookings ? 0 : 3;
-    const confCount =
-      confirmedCount > 0 ? confirmedCount : hasRealBookings ? 0 : 1;
-    const cancCount =
-      cancelledCount > 0 ? cancelledCount : hasRealBookings ? 0 : 0;
-
-    const activeDenominator = compCount + pendCount + confCount;
+    const totalBookings = bookings.length;
+    const activeDenominator = completedCount + pendingCount + confirmedCount;
     const completionRate =
       activeDenominator > 0
-        ? Math.round((compCount / activeDenominator) * 100)
-        : 85;
+        ? Math.round((completedCount / activeDenominator) * 100)
+        : 0;
     const avgValue =
-      compCount > 0
-        ? Math.round(monthRevenue / compCount)
-        : monthRevenue > 0
+      completedCount > 0
+        ? Math.round(monthRevenue / completedCount)
+        : totalBookings > 0 && monthRevenue > 0
           ? Math.round(monthRevenue / totalBookings)
-          : 220;
+          : 0;
 
     return {
       totalBookings,
-      todayCount: todayCount > 0 ? todayCount : hasRealBookings ? 0 : 1,
-      weekCount: weekCount > 0 ? weekCount : hasRealBookings ? 0 : 1,
-      pendingCount: pendCount,
-      completedCount: compCount,
-      confirmedCount: confCount,
-      cancelledCount: cancCount,
+      todayCount,
+      weekCount,
+      pendingCount,
+      completedCount,
+      confirmedCount,
+      cancelledCount,
       completionRate,
       avgValue,
-      customerCount:
-        customerTotal !== null && customerTotal > 0
-          ? customerTotal
-          : customerTotal === 0
-            ? 0
-            : 13,
-      revenue:
-        monthRevenue > 0
-          ? monthRevenue.toLocaleString("en-US")
-          : hasRealBookings
-            ? "0"
-            : "4,400",
-      rawRevenue: monthRevenue > 0 ? monthRevenue : hasRealBookings ? 0 : 4400,
+      customerCount: customerTotal !== null ? customerTotal : 0,
+      revenue: monthRevenue.toLocaleString("en-US"),
+      rawRevenue: monthRevenue,
       currency,
     };
   }, [bookings, customerTotal, getDateKey]);
@@ -605,51 +586,11 @@ export default function MemberOverviewTab() {
       return positionedEvents;
     }
 
-    // If workspace has real bookings, an empty day should have no bookings
-    if (bookings.length > 0) {
-      return [];
-    }
-
-    // Fallback sample cards only when workspace has ZERO bookings overall
-    const d1Start = new Date(selectedDate);
-    d1Start.setHours(9, 0, 0, 0);
-    const d1End = new Date(selectedDate);
-    d1End.setHours(9, 45, 0, 0);
-
-    const d2Start = new Date(selectedDate);
-    d2Start.setHours(11, 0, 0, 0);
-    const d2End = new Date(selectedDate);
-    d2End.setHours(12, 15, 0, 0);
-
-    return [
-      {
-        id: "sample-1",
-        name: lang === "ar" ? "سارة محمد" : "Sarah Mohammed",
-        time: `${formatTime(d1Start, is24Hour)} – ${formatTime(d1End, is24Hour)}`,
-        service: lang === "ar" ? "استشارة" : "Consultation",
-        variant: "green",
-        topPx: ((9 * 60) / 60) * HOUR_HEIGHT,
-        heightPx: Math.max(54, (45 / 60) * HOUR_HEIGHT - 4),
-        laneIndex: 0,
-        numLanes: 1,
-      },
-      {
-        id: "sample-2",
-        name: lang === "ar" ? "محمد الأمين" : "Mohammed Al-Amin",
-        time: `${formatTime(d2Start, is24Hour)} – ${formatTime(d2End, is24Hour)}`,
-        service: lang === "ar" ? "جلسة متابعة" : "Follow-up Session",
-        variant: "blue",
-        topPx: ((11 * 60) / 60) * HOUR_HEIGHT,
-        heightPx: Math.max(54, (75 / 60) * HOUR_HEIGHT - 4),
-        laneIndex: 0,
-        numLanes: 1,
-      },
-    ];
+    // No bookings for selected day
+    return [];
   }, [
-    bookings,
     bookingsByDay,
     selectedDateKey,
-    selectedDate,
     getText,
     lang,
     custSingular,
@@ -696,33 +637,8 @@ export default function MemberOverviewTab() {
         };
       });
 
-    if (realUpcoming.length > 0) return realUpcoming;
-
-    const s1 = new Date();
-    s1.setHours(9, 30, 0, 0);
-    const s2 = new Date();
-    s2.setHours(11, 0, 0, 0);
-    const s3 = new Date();
-    s3.setHours(13, 30, 0, 0);
-
-    return [
-      {
-        id: "u-1",
-        time: formatTime(s1, is24Hour),
-        name: lang === "ar" ? "ربيع عبدالله" : "Rabie Abdullah",
-      },
-      {
-        id: "u-2",
-        time: formatTime(s2, is24Hour),
-        name: lang === "ar" ? "خالد الشهري" : "Khaled Al-Shehri",
-      },
-      {
-        id: "u-3",
-        time: formatTime(s3, is24Hour),
-        name: lang === "ar" ? "مركز التطوير" : "Development Center",
-      },
-    ];
-  }, [bookings, lang, custSingular, formatTime, is24Hour]);
+    return realUpcoming;
+  }, [bookings, custSingular, formatTime, is24Hour]);
 
   // Generate complete 24 hours of the day
   const hoursList = useMemo(() => {
@@ -777,32 +693,6 @@ export default function MemberOverviewTab() {
     <div className="workspace-main-dashboard animate-fade-in-up">
       <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
 
-      {/* Top action icons */}
-      <div className="workspace-dashboard-top-actions">
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          onClick={() => navigate("/member/workspace/settings")}
-          title={t("workspaceSettings") || "الإعدادات"}
-        >
-          <Icon name="settings" size={18} />
-        </button>
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          title={t("notifications") || "الإشعارات"}
-        >
-          <Icon name="bell" size={18} />
-        </button>
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          title={t("search") || "البحث"}
-        >
-          <Icon name="search" size={18} />
-        </button>
-      </div>
-
       {/* 8 Organized & Colored Executive Stat Cards */}
       <div className="workspace-stats-grid">
         {/* 1. Total Revenue (Emerald Green Theme) */}
@@ -817,7 +707,13 @@ export default function MemberOverviewTab() {
               </div>
             </div>
             <span className="stat-pill">
-              {lang === "ar" ? "+14% هذا الشهر" : "+14% this month"}
+              {stats.rawRevenue > 0
+                ? lang === "ar"
+                  ? "هذا الشهر"
+                  : "This month"
+                : lang === "ar"
+                  ? "الشهر الحالي"
+                  : "Current month"}
             </span>
           </div>
           <div className="workspace-stat-number revenue-number">
@@ -1248,19 +1144,34 @@ export default function MemberOverviewTab() {
               {lang === "ar" ? "المواعيد القادمة" : "Upcoming Appointments"}
             </div>
             <div className="upcoming-widget-list">
-              {upcomingList.map((item) => (
+              {upcomingList.length > 0 ? (
+                upcomingList.map((item) => (
+                  <div
+                    key={item.id}
+                    className="upcoming-widget-item"
+                    onClick={() => {
+                      if (item.rawBooking) setSelectedEventModal(item);
+                    }}
+                    style={{ cursor: item.rawBooking ? "pointer" : "default" }}
+                  >
+                    <span className="upcoming-time">{item.time}</span>
+                    <span className="upcoming-name">{item.name}</span>
+                  </div>
+                ))
+              ) : (
                 <div
-                  key={item.id}
-                  className="upcoming-widget-item"
-                  onClick={() => {
-                    if (item.rawBooking) setSelectedEventModal(item);
+                  style={{
+                    padding: "20px 12px",
+                    textAlign: "center",
+                    color: "var(--muted)",
+                    fontSize: "0.82rem",
                   }}
-                  style={{ cursor: item.rawBooking ? "pointer" : "default" }}
                 >
-                  <span className="upcoming-time">{item.time}</span>
-                  <span className="upcoming-name">{item.name}</span>
+                  {lang === "ar"
+                    ? "لا توجد مواعيد قادمة"
+                    : "No upcoming appointments"}
                 </div>
-              ))}
+              )}
             </div>
             <div className="upcoming-widget-footer">
               <Link

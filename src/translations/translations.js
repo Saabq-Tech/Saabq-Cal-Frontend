@@ -692,11 +692,16 @@ export const translations = {
     fieldRequired: "هذا الحقل مطلوب",
     workspaceInactiveTitle: "مساحة العمل غير مفعّلة!",
     workspaceInactiveDesc:
-      "مساحة العمل بتاعتك مستنية موافقة الإدارة أو مش متفعلة دلوقتي. تم تقييد الوصول لصفحات وبيانات مساحة العمل.",
+      "مساحة العمل الخاصة بك بانتظار موافقة الإدارة أو غير مفعّلة حالياً. تم تقييد الوصول لصفحات وبيانات مساحة العمل.",
     workspaceInactiveBadge: "غير مفعّلة (بانتظار تفعيل الإدارة)",
-    workspaceLockedTitle: "صفحات مساحة العمل مقفلة",
+    workspacePendingApprovalTitle: "مساحة العمل بانتظار موافقة الإدارة",
+    workspacePendingApprovalDesc:
+      "تم إنشاء مساحة العمل الخاصة بك بنجاح وهي قيد المراجعة وبانتظار موافقة فريق الإدارة. يمكنك التواصل مع الدعم الفني للاستفسار أو طلب تفعيل مساحة العمل.",
+    contactSupportForApproval: "تواصل مع الدعم الفني للتفعيل",
+    statusPendingApproval: "بانتظار موافقة الإدارة",
+    workspaceLockedTitle: "صفحات مساحة العمل بانتظار الموافقة",
     workspaceLockedDesc:
-      "متقدرش تتصفح أو تعدل بيانات مساحة العمل لأن الحساب لسه مش متفعل أو مستني موافقة أدمن المنصة. تقدر تكمل تعديل ملفك الشخصي وتشوف الدعم الفني.",
+      "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب قيد المراجعة وبانتظار موافقة إدارة المنصة. يمكنك التواصل مباشرة مع فريق الدعم الفني عبر المحادثات لتسريع التفعيل، أو إدارة ملفك الشخصي.",
     brandingAndIdentity: "الهوية والعلامة التجارية",
     logo: "شعار التطبيق (الفاتح)",
     coverImage: "صورة الغلاف",
@@ -2688,9 +2693,14 @@ export const translations = {
     workspaceInactiveDesc:
       "Your workspace is awaiting admin approval or currently deactivated. Access to workspace pages and data has been restricted.",
     workspaceInactiveBadge: "Inactive (Pending Admin Approval)",
-    workspaceLockedTitle: "Workspace Pages Locked",
+    workspacePendingApprovalTitle: "Workspace Awaiting Admin Approval",
+    workspacePendingApprovalDesc:
+      "Your workspace has been created and is currently awaiting administrator review and approval. You can contact support to inquire or request activation.",
+    contactSupportForApproval: "Contact Support for Activation",
+    statusPendingApproval: "Pending Admin Approval",
+    workspaceLockedTitle: "Workspace Awaiting Approval",
     workspaceLockedDesc:
-      "You cannot browse or edit workspace data because the account is not active yet. You may continue to manage your personal profile and support.",
+      "You cannot browse or edit workspace data because the workspace is under review and awaiting administrator approval. You can contact support via chat to expedite activation or manage your personal profile.",
     brandingAndIdentity: "Branding & Identity",
     logo: "App Logo",
     coverImage: "Cover Image",

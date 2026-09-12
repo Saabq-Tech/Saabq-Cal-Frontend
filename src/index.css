@@ -2570,11 +2570,55 @@ html.dark .auth-panel-right {
 
 /* ── Mobile-First Responsive Overrides (< 768px) ── */
 @media (max-width: 768px) {
+  /* Remove scrollbars on mobile for homescreen, blog, workspaces, and all views while maintaining smooth scrolling */
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  #root,
+  .app-layout,
+  .main-content,
+  .explore-hero,
+  main,
+  section,
+  div {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  *::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  #root::-webkit-scrollbar,
+  .app-layout::-webkit-scrollbar,
+  .main-content::-webkit-scrollbar,
+  .explore-hero::-webkit-scrollbar,
+  main::-webkit-scrollbar,
+  section::-webkit-scrollbar,
+  div::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
+  *::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-button,
+  *::-webkit-scrollbar-corner {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
   /* Ban horizontal scrollbars across all containers on mobile */
   html,
   body,
   #root,
   .app-container,
+  .app-layout,
   .main-content,
   .card,
   .modal-card,
@@ -2709,6 +2753,50 @@ html.dark .auth-panel-right {
   /* General card padding reduction on mobile */
   .card {
     padding: 14px 10px !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  #root,
+  .app-layout,
+  .main-content,
+  .explore-hero,
+  main,
+  section,
+  div {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  *::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  #root::-webkit-scrollbar,
+  .app-layout::-webkit-scrollbar,
+  .main-content::-webkit-scrollbar,
+  .explore-hero::-webkit-scrollbar,
+  main::-webkit-scrollbar,
+  section::-webkit-scrollbar,
+  div::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+  }
+
+  *::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-button,
+  *::-webkit-scrollbar-corner {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
   }
 }
 
@@ -6238,12 +6326,18 @@ html.dark .timeline-event-card .event-card-time,
 
 @media (max-width: 768px) {
   .workspace-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
   .workspace-timeline-container {
     --timeline-time-col-width: 62px;
+  }
+
+  /* Hide time pill inside event cards on mobile/tablets for responsive clean layout */
+  .timeline-event-time-pill,
+  .timeline-event-card .event-card-time {
+    display: none !important;
   }
 }
 
@@ -6317,48 +6411,118 @@ html.dark .timeline-event-card .event-card-time,
   }
 
   .timeline-event-card {
-    padding: 6px 10px;
-    border-radius: 10px;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
+  .timeline-event-card-inner {
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .timeline-event-info {
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .timeline-event-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+  }
+
+  .timeline-event-text-group {
+    min-width: 0;
+    flex: 1;
+    gap: 1px;
   }
 
   .timeline-event-name,
   .timeline-event-card .event-card-name {
-    font-size: 0.84rem;
-    line-height: 1.25;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
-  .timeline-event-time-pill,
-  .timeline-event-card .event-card-time {
-    font-size: 0.7rem;
-    padding: 2px 7px;
+  .timeline-event-bullet {
+    font-size: 0.6rem;
+    opacity: 0.45;
   }
 
   .timeline-event-service,
   .timeline-event-card .event-card-service {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.85;
+  }
+
+  .timeline-event-time-pill,
+  .timeline-event-card .event-card-time {
+    display: none !important;
   }
 
   .workspace-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
   .workspace-stat-card {
-    padding: 12px 14px;
+    padding: 12px 10px;
     border-radius: 14px;
     gap: 8px;
+    min-width: 0;
+  }
+
+  .stat-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .stat-header-left {
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .stat-icon-wrap {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  .stat-icon-wrap svg {
+    width: 14px;
+    height: 14px;
   }
 
   .workspace-stat-label {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
+    line-height: 1.2;
+  }
+
+  .stat-pill {
+    font-size: 0.62rem;
+    padding: 1px 6px;
   }
 
   .workspace-stat-number {
-    font-size: 1.55rem;
+    font-size: 1.3rem;
+    margin: 2px 0;
   }
 
   .workspace-stat-number.revenue-number .currency-unit {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+  }
+
+  .stat-card-footer {
+    font-size: 0.68rem;
+    line-height: 1.25;
   }
 
   .analytics-insights-deck,
@@ -6366,6 +6530,12 @@ html.dark .timeline-event-card .event-card-time,
   .analytics-tables-deck {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .workspace-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -6508,7 +6678,7 @@ html.dark .timeline-event-card .event-card-time,
   /* Sidebar becomes horizontal scrollable tabs on mobile */
   .workspace-dashboard-sidebar {
     position: sticky;
-    top: var(--navbar-height, 72px);
+    top: 0;
     z-index: 20;
     height: auto;
     flex-direction: row;
@@ -12936,6 +13106,15 @@ html.dark .hero-lp-actions .btn-outline:hover:not(:disabled) {
   }
 
   .hero-mockup {
+    display: none !important;
+  }
+
+  /* Hide the sectors card section and its navigation item on mobile screens */
+  #sectors {
+    display: none !important;
+  }
+
+  .mobile-drawer a[href="/#sectors"] {
     display: none !important;
   }
 

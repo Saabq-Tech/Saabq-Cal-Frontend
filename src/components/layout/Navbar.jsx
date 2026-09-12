@@ -106,7 +106,7 @@ export default function Navbar() {
 
           sections.forEach((id) => {
             const el = document.getElementById(id);
-            if (el) {
+            if (el && el.offsetParent !== null) {
               const top = el.offsetTop;
               if (scrollPos >= top) {
                 current = id;

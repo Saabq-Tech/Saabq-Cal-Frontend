@@ -279,51 +279,37 @@ export default function WorkspaceLogsPage() {
       }
     });
 
-    const hasRealBookings = bookings.length > 0;
-    const totalBookings = hasRealBookings ? bookings.length : 10;
-    const compCount =
-      completedCount > 0 ? completedCount : hasRealBookings ? 0 : 6;
-    const pendCount = pendingCount > 0 ? pendingCount : hasRealBookings ? 0 : 3;
-    const confCount =
-      confirmedCount > 0 ? confirmedCount : hasRealBookings ? 0 : 1;
-    const cancCount =
-      cancelledCount > 0 ? cancelledCount : hasRealBookings ? 0 : 0;
+    const totalBookings = bookings.length;
+    const compCount = completedCount;
+    const pendCount = pendingCount;
+    const confCount = confirmedCount;
+    const cancCount = cancelledCount;
 
     const activeDenominator = compCount + pendCount + confCount;
     const completionRate =
       activeDenominator > 0
         ? Math.round((compCount / activeDenominator) * 100)
-        : 85;
+        : 0;
     const avgValue =
       compCount > 0
         ? Math.round(monthRevenue / compCount)
-        : monthRevenue > 0
+        : totalBookings > 0 && monthRevenue > 0
           ? Math.round(monthRevenue / totalBookings)
-          : 220;
+          : 0;
 
     return {
       totalBookings,
-      todayCount: todayCount > 0 ? todayCount : hasRealBookings ? 0 : 1,
-      weekCount: weekCount > 0 ? weekCount : hasRealBookings ? 0 : 1,
+      todayCount,
+      weekCount,
       pendingCount: pendCount,
       completedCount: compCount,
       confirmedCount: confCount,
       cancelledCount: cancCount,
       completionRate,
       avgValue,
-      customerCount:
-        customerTotal !== null && customerTotal > 0
-          ? customerTotal
-          : customerTotal === 0
-            ? 0
-            : 13,
-      revenue:
-        monthRevenue > 0
-          ? monthRevenue.toLocaleString("en-US")
-          : hasRealBookings
-            ? "0"
-            : "4,400",
-      rawRevenue: monthRevenue > 0 ? monthRevenue : hasRealBookings ? 0 : 4400,
+      customerCount: customerTotal !== null ? customerTotal : 0,
+      revenue: monthRevenue.toLocaleString("en-US"),
+      rawRevenue: monthRevenue,
       currency,
     };
   }, [bookings, customerTotal, getDateKey]);
@@ -383,32 +369,8 @@ export default function WorkspaceLogsPage() {
       });
     }
 
-    const hasAny = days.some((d) => d.count > 0 || d.revenue > 0);
-    if (!hasAny && bookings.length === 0) {
-      const mockSamples = [
-        { count: 1, revenue: 450 },
-        { count: 2, revenue: 800 },
-        { count: 1, revenue: 350 },
-        { count: 3, revenue: 1200 },
-        { count: 2, revenue: 900 },
-        { count: 0, revenue: 0 },
-        { count: 1, revenue: 700 },
-        { count: 4, revenue: 1600 },
-        { count: 2, revenue: 850 },
-        { count: 3, revenue: 1100 },
-        { count: 1, revenue: 400 },
-        { count: 2, revenue: 750 },
-        { count: 5, revenue: 1900 },
-        { count: 3, revenue: 1250 },
-      ];
-      days.forEach((d, idx) => {
-        d.count = mockSamples[idx % mockSamples.length]?.count || 0;
-        d.revenue = mockSamples[idx % mockSamples.length]?.revenue || 0;
-      });
-    }
-
     return days;
-  }, [bookingsByDay, getDateKey, lang, t, bookings.length, trendPeriod]);
+  }, [bookingsByDay, getDateKey, lang, t, trendPeriod]);
 
   // Status segments for SVG Donut chart
   const statusSegments = useMemo(() => {
@@ -466,24 +428,8 @@ export default function WorkspaceLogsPage() {
       }
     });
 
-    let maxCount = Math.max(...Object.values(hoursMap), 1);
     const hasReal = Object.values(hoursMap).some((v) => v > 0);
-
-    if (!hasReal) {
-      const mockDist = {
-        9: 1,
-        10: 2,
-        11: 3,
-        12: 2,
-        15: 4,
-        16: 3,
-        17: 5,
-        18: 2,
-        19: 1,
-      };
-      Object.assign(hoursMap, mockDist);
-      maxCount = 5;
-    }
+    const maxCount = hasReal ? Math.max(...Object.values(hoursMap)) : 1;
 
     return Object.entries(hoursMap).map(([h, count]) => {
       const hourNum = parseInt(h, 10);
@@ -493,8 +439,8 @@ export default function WorkspaceLogsPage() {
         hour: hourNum,
         label: formatTime(d, is24Hour),
         count,
-        percentage: Math.round((count / maxCount) * 100),
-        isPeak: count === maxCount && count > 0,
+        percentage: hasReal ? Math.round((count / maxCount) * 100) : 0,
+        isPeak: hasReal && count === maxCount && count > 0,
       };
     });
   }, [bookings, formatTime, is24Hour]);
@@ -526,26 +472,7 @@ export default function WorkspaceLogsPage() {
       }));
     }
 
-    return [
-      {
-        name: lang === "ar" ? "استشارة أولية" : "Initial Consultation",
-        count: 6,
-        revenue: 2400,
-        pct: 60,
-      },
-      {
-        name: lang === "ar" ? "جلسة علاج ومتابعة" : "Follow-up Session",
-        count: 3,
-        revenue: 1500,
-        pct: 30,
-      },
-      {
-        name: lang === "ar" ? "فحص دوري" : "Periodic Checkup",
-        count: 1,
-        revenue: 500,
-        pct: 10,
-      },
-    ];
+    return [];
   }, [bookings, getText, lang]);
 
   // Filtered appointments for the detailed table
@@ -774,8 +701,7 @@ export default function WorkspaceLogsPage() {
                       : "Peak Booking Hour"}
                   </div>
                   <div className="insight-value">
-                    {peakHoursData.find((p) => p.isPeak)?.label ||
-                      (lang === "ar" ? "04:00 م" : "04:00 PM")}
+                    {peakHoursData.find((p) => p.isPeak)?.label || "—"}
                   </div>
                 </div>
               </div>
@@ -807,36 +733,49 @@ export default function WorkspaceLogsPage() {
                 <div className="donut-chart-wrapper">
                   <div className="donut-svg-box">
                     <svg viewBox="0 0 160 160" width="100%" height="100%">
-                      {(() => {
-                        const radius = 55;
-                        const circumference = 2 * Math.PI * radius;
-                        let accumulatedOffset = 0;
+                      {stats.totalBookings === 0 ? (
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="55"
+                          fill="none"
+                          stroke="var(--border)"
+                          strokeWidth="18"
+                          opacity="0.4"
+                        />
+                      ) : (
+                        (() => {
+                          const radius = 55;
+                          const circumference = 2 * Math.PI * radius;
+                          let accumulatedOffset = 0;
 
-                        return statusSegments.map((seg) => {
-                          const strokeLength = (seg.pct / 100) * circumference;
-                          const dashArray = `${Math.max(0, strokeLength - 2)} ${circumference - strokeLength + 2}`;
-                          const dashOffset = -accumulatedOffset;
-                          accumulatedOffset += strokeLength;
+                          return statusSegments.map((seg) => {
+                            const strokeLength =
+                              (seg.pct / 100) * circumference;
+                            const dashArray = `${Math.max(0, strokeLength - 2)} ${circumference - strokeLength + 2}`;
+                            const dashOffset = -accumulatedOffset;
+                            accumulatedOffset += strokeLength;
 
-                          return (
-                            <circle
-                              key={seg.key}
-                              cx="80"
-                              cy="80"
-                              r={radius}
-                              fill="none"
-                              stroke={seg.color}
-                              strokeWidth="18"
-                              strokeDasharray={dashArray}
-                              strokeDashoffset={dashOffset}
-                              transform="rotate(-90 80 80)"
-                              style={{
-                                transition: "stroke-dasharray 0.6s ease",
-                              }}
-                            />
-                          );
-                        });
-                      })()}
+                            return (
+                              <circle
+                                key={seg.key}
+                                cx="80"
+                                cy="80"
+                                r={radius}
+                                fill="none"
+                                stroke={seg.color}
+                                strokeWidth="18"
+                                strokeDasharray={dashArray}
+                                strokeDashoffset={dashOffset}
+                                transform="rotate(-90 80 80)"
+                                style={{
+                                  transition: "stroke-dasharray 0.6s ease",
+                                }}
+                              />
+                            );
+                          });
+                        })()
+                      )}
                     </svg>
                     <div className="donut-center-text">
                       <div className="donut-center-value">
@@ -905,18 +844,33 @@ export default function WorkspaceLogsPage() {
                     </span>
                   </div>
                   <div className="peak-hours-list">
-                    {peakHoursData.slice(0, 4).map((h) => (
-                      <div key={h.hour} className="peak-hour-row">
-                        <span className="peak-hour-label">{h.label}</span>
-                        <div className="peak-hour-track">
-                          <div
-                            className={`peak-hour-fill ${h.isPeak ? "is-peak" : ""}`}
-                            style={{ width: `${Math.max(8, h.percentage)}%` }}
-                          />
-                        </div>
-                        <span className="peak-hour-count">{h.count}</span>
+                    {bookings.length === 0 ? (
+                      <div
+                        style={{
+                          padding: "16px 8px",
+                          textAlign: "center",
+                          color: "var(--muted)",
+                          fontSize: "0.82rem",
+                        }}
+                      >
+                        {lang === "ar"
+                          ? "لا توجد مواعيد مسجلة لحساب ساعات الذروة"
+                          : "No bookings recorded for peak hours"}
                       </div>
-                    ))}
+                    ) : (
+                      peakHoursData.slice(0, 4).map((h) => (
+                        <div key={h.hour} className="peak-hour-row">
+                          <span className="peak-hour-label">{h.label}</span>
+                          <div className="peak-hour-track">
+                            <div
+                              className={`peak-hour-fill ${h.isPeak ? "is-peak" : ""}`}
+                              style={{ width: `${Math.max(8, h.percentage)}%` }}
+                            />
+                          </div>
+                          <span className="peak-hour-count">{h.count}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -1189,6 +1143,26 @@ export default function WorkspaceLogsPage() {
                         </div>
                       </div>
                     )}
+
+                  {bookings.length === 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "42%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        color: "var(--muted)",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        pointerEvents: "none",
+                        textAlign: "center",
+                      }}
+                    >
+                      {lang === "ar"
+                        ? "لا توجد بيانات حجوزات أو إيرادات في هذه الفترة"
+                        : "No booking or revenue data for this period"}
+                    </div>
+                  )}
                 </div>
 
                 {/* Chart Legend */}
@@ -1260,72 +1234,95 @@ export default function WorkspaceLogsPage() {
                 </div>
 
                 <div className="top-services-list">
-                  {topServicesData.map((srv, sIdx) => (
-                    <div key={sIdx} className="top-service-item">
-                      <div className="top-service-row">
+                  {topServicesData.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "36px 16px",
+                        textAlign: "center",
+                        color: "var(--muted)",
+                        fontSize: "0.86rem",
+                      }}
+                    >
+                      <Icon
+                        name="sparkles"
+                        size={24}
+                        style={{ margin: "0 auto 8px", opacity: 0.4 }}
+                      />
+                      <div>
+                        {lang === "ar"
+                          ? "لا توجد خدمات محجوزة حتى الآن"
+                          : "No booked services recorded yet"}
+                      </div>
+                    </div>
+                  ) : (
+                    topServicesData.map((srv, sIdx) => (
+                      <div key={sIdx} className="top-service-item">
+                        <div className="top-service-row">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 6,
+                                background:
+                                  sIdx === 0 ? "#f59e0b" : "var(--border)",
+                                color:
+                                  sIdx === 0 ? "#ffffff" : "var(--heading)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.72rem",
+                                fontWeight: 800,
+                              }}
+                            >
+                              #{sIdx + 1}
+                            </span>
+                            <span className="top-service-name">{srv.name}</span>
+                          </div>
+                          <span className="top-service-meta">
+                            {srv.count} {lang === "ar" ? "حجز" : "bookings"}
+                          </span>
+                        </div>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 8,
+                            justifyContent: "space-between",
+                            fontSize: "0.74rem",
+                            color: "var(--muted)",
                           }}
                         >
-                          <span
-                            style={{
-                              width: 22,
-                              height: 22,
-                              borderRadius: 6,
-                              background:
-                                sIdx === 0 ? "#f59e0b" : "var(--border)",
-                              color: sIdx === 0 ? "#ffffff" : "var(--heading)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.72rem",
-                              fontWeight: 800,
-                            }}
-                          >
-                            #{sIdx + 1}
+                          <span>
+                            {srv.revenue.toLocaleString()} {stats.currency}
                           </span>
-                          <span className="top-service-name">{srv.name}</span>
+                          <span>
+                            {srv.pct}%{" "}
+                            {lang === "ar" ? "من الإجمالي" : "of total"}
+                          </span>
                         </div>
-                        <span className="top-service-meta">
-                          {srv.count} {lang === "ar" ? "حجز" : "bookings"}
-                        </span>
+                        <div className="legend-bar-track">
+                          <div
+                            className="legend-bar-fill"
+                            style={{
+                              width: `${srv.pct}%`,
+                              background:
+                                sIdx === 0
+                                  ? "#10b981"
+                                  : sIdx === 1
+                                    ? "#3b82f6"
+                                    : "#6366f1",
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          fontSize: "0.74rem",
-                          color: "var(--muted)",
-                        }}
-                      >
-                        <span>
-                          {srv.revenue.toLocaleString()} {stats.currency}
-                        </span>
-                        <span>
-                          {srv.pct}%{" "}
-                          {lang === "ar" ? "من الإجمالي" : "of total"}
-                        </span>
-                      </div>
-                      <div className="legend-bar-track">
-                        <div
-                          className="legend-bar-fill"
-                          style={{
-                            width: `${srv.pct}%`,
-                            background:
-                              sIdx === 0
-                                ? "#10b981"
-                                : sIdx === 1
-                                  ? "#3b82f6"
-                                  : "#6366f1",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
