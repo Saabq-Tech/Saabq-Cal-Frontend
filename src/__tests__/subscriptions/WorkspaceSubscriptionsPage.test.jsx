@@ -27,7 +27,15 @@ vi.mock("../../api/client", async () => {
 
 vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { is_owner: true, permissions: ["settings_write"] },
+    user: {
+      is_owner: true,
+      permissions: [
+        "settings_read",
+        "settings_update",
+        "subscription_read",
+        "subscription_update",
+      ],
+    },
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,
 }));

@@ -14,11 +14,20 @@ import CapabilityGate from "../../../components/common/CapabilityGate";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import Icon from "../../../components/common/Icon";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceBookingsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadBookings,
+    canCreateBookings,
+    canUpdateBookings,
+    canDeleteBookings,
+  } = usePermissions();
 
   const [bookings, setBookings] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -28,18 +37,9 @@ export default function WorkspaceBookingsPage() {
   const [viewMode, setViewMode] = useState("calendar"); // 'list' or 'calendar'
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("booking_read") ||
-    userPermissions.includes("bookings_read");
+  const canRead = isOwner || canReadBookings;
   const canEdit =
-    isOwner ||
-    userPermissions.includes("booking_write") ||
-    userPermissions.includes("bookings_write");
+    isOwner || canCreateBookings || canUpdateBookings || canDeleteBookings;
 
   const isCapAllowed = checkWorkspaceCapability(user, "BOOKING");
 
@@ -115,7 +115,7 @@ export default function WorkspaceBookingsPage() {
                 </button>
               </div>
 
-              {canEdit && (
+              {canCreateBookings && (
                 <button
                   type="button"
                   className="btn btn-primary btn-sm new-booking-trigger-btn"
@@ -140,6 +140,9 @@ export default function WorkspaceBookingsPage() {
                   navigate(`/member/workspace/bookings/${id}`)
                 }
                 canEdit={canEdit}
+                canCreate={canCreateBookings}
+                canUpdate={canUpdateBookings}
+                canDelete={canDeleteBookings}
                 onReloadBookings={() => loadBookings(page)}
               />
             ) : (
@@ -150,11 +153,13 @@ export default function WorkspaceBookingsPage() {
               />
             )}
 
-            <CreateBookingModal
-              isOpen={showCreateModal}
-              onClose={() => setShowCreateModal(false)}
-              onSuccess={() => loadBookings(page)}
-            />
+            {canCreateBookings && (
+              <CreateBookingModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onSuccess={() => loadBookings(page)}
+              />
+            )}
           </>
         )}
       </div>

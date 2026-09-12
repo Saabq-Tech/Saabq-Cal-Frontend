@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import ConfirmationModal from "./ConfirmationModal";
+import { formatCurrency } from "../../../../utils/currency";
 
 const defaultFormState = {
   id: null,
@@ -28,10 +30,22 @@ export default function ResourcesTab({
   resources = [],
   stats = null,
   canEdit = false,
+  canCreate,
+  canUpdate,
+  canDelete,
   onSaveResource,
   onDeleteResource,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
+  const { user } = useAuth();
   const { t, isRTL } = useLanguage();
+  const wsCurrency =
+    user?.workspace?.currency ||
+    user?.workspace?.currency_code ||
+    user?.workspace?.currency_symbol ||
+    "SAR";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
   const [searchTerm, setSearchTerm] = useState("");
@@ -187,14 +201,6 @@ export default function ResourcesTab({
     });
   };
 
-  const formatCurrency = (val) => {
-    const num = parseFloat(val) || 0;
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
   return (
     <div className="card-body">
       {/* Top Section Header */}
@@ -239,7 +245,7 @@ export default function ResourcesTab({
                 : "Manage workspace assets, equipment, pricing, low-stock threshold limits, and suppliers.")}
           </p>
         </div>
-        {canEdit && (
+        {allowCreate && (
           <button className="btn btn-primary" onClick={handleOpenCreate}>
             <Icon name="plus" size={16} />
             {t("addResource") ||
@@ -359,7 +365,12 @@ export default function ResourcesTab({
                 color: "var(--heading)",
               }}
             >
-              ${formatCurrency(calculatedStats.total_inventory_value)}
+              {formatCurrency(
+                calculatedStats.total_inventory_value,
+                wsCurrency,
+                isRTL,
+                "0",
+              )}
             </div>
           </div>
         </div>
@@ -889,11 +900,11 @@ export default function ResourcesTab({
                 >
                   <span style={{ color: "var(--text-secondary)" }}>
                     {t("unitPrice") || (isRTL ? "سعر الوحدة:" : "Unit Price:")}{" "}
-                    <b>${formatCurrency(unitPrice)}</b>
+                    <b>{formatCurrency(unitPrice, wsCurrency, isRTL, "0")}</b>
                   </span>
                   <span style={{ color: "var(--heading)", fontWeight: 800 }}>
-                    {t("totalValue") || (isRTL ? "الإجمالي:" : "Total:")} $
-                    {formatCurrency(totalVal)}
+                    {t("totalValue") || (isRTL ? "الإجمالي:" : "Total:")}{" "}
+                    {formatCurrency(totalVal, wsCurrency, isRTL, "0")}
                   </span>
                 </div>
 
@@ -973,7 +984,7 @@ export default function ResourcesTab({
                 </div>
 
                 {/* Actions */}
-                {canEdit && (
+                {(allowUpdate || allowDelete) && (
                   <div
                     style={{
                       display: "flex",
@@ -982,20 +993,24 @@ export default function ResourcesTab({
                       paddingTop: 10,
                     }}
                   >
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleOpenEdit(r)}
-                      style={{ flex: 1 }}
-                    >
-                      <Icon name="edit-2" size={14} />
-                      {t("edit") || (isRTL ? "تعديل" : "Edit")}
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleOpenDelete(r.id)}
-                    >
-                      <Icon name="trash-2" size={14} />
-                    </button>
+                    {allowUpdate && (
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleOpenEdit(r)}
+                        style={{ flex: 1 }}
+                      >
+                        <Icon name="edit-2" size={14} />
+                        {t("edit") || (isRTL ? "تعديل" : "Edit")}
+                      </button>
+                    )}
+                    {allowDelete && (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleOpenDelete(r.id)}
+                      >
+                        <Icon name="trash-2" size={14} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1298,7 +1313,12 @@ export default function ResourcesTab({
                         background: "var(--surface-alt)",
                         fontWeight: 800,
                       }}
-                      value={`$${formatCurrency((form.quantity || 0) * (form.unit_price || 0))}`}
+                      value={formatCurrency(
+                        (form.quantity || 0) * (form.unit_price || 0),
+                        wsCurrency,
+                        isRTL,
+                        "0",
+                      )}
                     />
                   </div>
                 </div>

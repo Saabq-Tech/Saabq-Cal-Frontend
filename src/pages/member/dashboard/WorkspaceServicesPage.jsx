@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import ServicesTab from "./workspace-settings/ServicesTab";
 import SEO from "../../../components/ui/SEO";
@@ -13,24 +14,22 @@ export default function WorkspaceServicesPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadServices,
+    canCreateServices,
+    canUpdateServices,
+    canDeleteServices,
+  } = usePermissions();
 
   const [services, setServices] = useState([]);
   const [members, setMembers] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("service_read") ||
-    userPermissions.includes("services_read");
+  const canRead = isOwner || canReadServices;
   const canEdit =
-    isOwner ||
-    userPermissions.includes("service_write") ||
-    userPermissions.includes("services_write");
+    isOwner || canCreateServices || canUpdateServices || canDeleteServices;
 
   const isCapAllowed = checkWorkspaceCapability(user, "BOOKING");
 
@@ -79,24 +78,24 @@ export default function WorkspaceServicesPage() {
           endpoints.workspaceServiceItem(serviceId),
           serviceForm,
         );
-        toast.success(t("serviceUpdatedSuccess") || "تم تحديث الخدمة بنجاح");
+        toast.success(t("serviceUpdatedSuccess") || "اتحدثت الخدمة بنجاح");
       } else {
         await client.post(endpoints.workspaceServices, serviceForm);
-        toast.success(t("serviceAddedSuccess") || "تم إضافة الخدمة بنجاح");
+        toast.success(t("serviceAddedSuccess") || "اتضافت الخدمة بنجاح");
       }
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ في حفظ الخدمة");
+      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الخدمة");
     }
   };
 
   const handleDeleteService = async (serviceId) => {
     try {
       await client.delete(endpoints.workspaceServiceItem(serviceId));
-      toast.success(t("serviceDeletedSuccess") || "تم حذف الخدمة بنجاح");
+      toast.success(t("serviceDeletedSuccess") || "اتحذفت الخدمة بنجاح");
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف الخدمة");
+      toast.error(err.response?.data?.message || "حصل خطأ في حذف الخدمة");
     }
   };
 
@@ -121,6 +120,9 @@ export default function WorkspaceServicesPage() {
             members={members}
             schedules={schedules}
             canEdit={canEdit}
+            canCreate={canCreateServices}
+            canUpdate={canUpdateServices}
+            canDelete={canDeleteServices}
             onSaveService={handleSaveService}
             onDeleteService={handleDeleteService}
           />

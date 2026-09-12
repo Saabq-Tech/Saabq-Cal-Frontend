@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
+import { getCurrencySymbol } from "../../../../utils/currency";
 
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
+  const { isOwner, canCreateBookings } = usePermissions();
   const { t, lang } = useLanguage();
   const toast = useToast();
   const { user } = useAuth();
@@ -167,7 +170,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     fetchData();
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || (!isOwner && !canCreateBookings)) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -351,11 +354,18 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               </option>
               {services.map((s) => {
                 const sTitle = formatTranslatable(s.name || s.title);
+                const currSym = getCurrencySymbol(
+                  s.currency_detail ||
+                    s.currency ||
+                    workspace?.currency ||
+                    "SAR",
+                  lang === "ar",
+                );
                 return (
                   <option key={s.id} value={s.id}>
                     {sTitle} ({s.duration_minutes || s.duration || 30}{" "}
-                    {t("mins") || "دقيقة"} - {s.price || 0}{" "}
-                    {formatTranslatable(s.currency) || "SAR"})
+                    {t("mins") || (lang === "ar" ? "دقيقة" : "mins")} -{" "}
+                    {s.price || 0} {currSym})
                   </option>
                 );
               })}

@@ -7,9 +7,10 @@ import SEO from "../../../../components/ui/SEO";
 import { SkeletonRect } from "../../../../components/ui/Skeleton";
 import { createPortal } from "react-dom";
 import Icon from "../../../../components/common/Icon";
-import { formatCurrency } from "../../../../utils/currency";
+import { formatCurrency, getCurrencySymbol } from "../../../../utils/currency";
 import { useAuth } from "../../../../context/AuthContext";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import RichTextEditor from "../../../../components/common/RichTextEditor";
 import { getPublicAssetUrl } from "../../../../utils/url";
 
@@ -17,12 +18,24 @@ export default function BookingDetailsPage({
   bookingId,
   initialBooking,
   onBack,
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onReloadBookings,
 }) {
   const { t, isRTL, lang } = useLanguage();
   const { customerSingular } = useCustomerLabel();
   const toast = useToast();
+  const { isOwner, canCreateBookings, canUpdateBookings, canDeleteBookings } =
+    usePermissions();
+
+  const allowCreate =
+    canCreate !== undefined ? canCreate : isOwner || canCreateBookings;
+  const allowUpdate =
+    canUpdate !== undefined ? canUpdate : isOwner || canUpdateBookings;
+  const allowDelete =
+    canDelete !== undefined ? canDelete : isOwner || canDeleteBookings;
 
   const [booking, setBooking] = useState(initialBooking || null);
   const [loading, setLoading] = useState(!initialBooking);
@@ -555,14 +568,14 @@ export default function BookingDetailsPage({
     "خدمة";
   const servicePrice = b.service?.price || b.snapshot?.price || 0;
   const rawCurrency =
-    b.service?.currency || b.snapshot?.currency || b.currency || "SAR";
-  const serviceCurrency =
-    typeof rawCurrency === "object" && rawCurrency !== null
-      ? rawCurrency.symbol_native ||
-        rawCurrency.symbol ||
-        rawCurrency.code ||
-        "SAR"
-      : rawCurrency || "SAR";
+    b.service?.currencyRelation ||
+    b.service?.currency ||
+    b.snapshot?.currency ||
+    b.currency ||
+    user?.workspace?.currency ||
+    user?.workspace?.currency_code ||
+    "SAR";
+  const serviceCurrency = getCurrencySymbol(rawCurrency, isRTL);
   const serviceDuration =
     b.service?.duration_minutes || b.snapshot?.duration_minutes || 30;
   const providerName =
@@ -574,7 +587,6 @@ export default function BookingDetailsPage({
   const isCompleted = currentStatus === "completed";
   const isCancelled = currentStatus === "cancelled";
 
-  const isOwner = user?.is_owner === true;
   const userPermissions = Array.isArray(user?.permissions)
     ? user.permissions
     : [];
@@ -584,6 +596,8 @@ export default function BookingDetailsPage({
   const canEditSummary =
     isOwner ||
     canEdit ||
+    userPermissions.includes("booking_create") ||
+    userPermissions.includes("booking_update") ||
     userPermissions.includes("booking_write") ||
     userPermissions.includes("bookings_write") ||
     isAssignedProvider;
@@ -2145,33 +2159,35 @@ export default function BookingDetailsPage({
                   للانتظار بعد الانتهاء.
                 </div>
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-                  gap: 14,
-                  width: "100%",
-                }}
-              >
-                <button
-                  type="button"
-                  className="btn btn-sm btn-primary"
-                  onClick={() => setShowFollowUpModal(true)}
+              {allowCreate && (
+                <div
                   style={{
-                    fontSize: "0.92rem",
-                    fontWeight: 800,
-                    padding: "12px 18px",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: 8,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+                    gap: 14,
                     width: "100%",
                   }}
                 >
-                  <Icon name="plus" size={16} />
-                  {isRTL ? "إنشاء موعد متابعة" : "Create Follow-up"}
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary"
+                    onClick={() => setShowFollowUpModal(true)}
+                    style={{
+                      fontSize: "0.92rem",
+                      fontWeight: 800,
+                      padding: "12px 18px",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 8,
+                      width: "100%",
+                    }}
+                  >
+                    <Icon name="plus" size={16} />
+                    {isRTL ? "إنشاء موعد متابعة" : "Create Follow-up"}
+                  </button>
+                </div>
+              )}
             </div>
           ) : isCancelled ? (
             <div
@@ -2205,7 +2221,7 @@ export default function BookingDetailsPage({
                 width: "100%",
               }}
             >
-              {currentStatus === "pending" && (
+              {allowUpdate && currentStatus === "pending" && (
                 <button
                   type="button"
                   className="btn btn-sm"
@@ -2235,7 +2251,7 @@ export default function BookingDetailsPage({
                 </button>
               )}
 
-              {currentStatus === "confirmed" && (
+              {allowUpdate && currentStatus === "confirmed" && (
                 <button
                   type="button"
                   className="btn btn-sm"
@@ -2265,60 +2281,64 @@ export default function BookingDetailsPage({
                 </button>
               )}
 
-              <button
-                type="button"
-                className="btn btn-sm btn-secondary"
-                onClick={() => {
-                  setShowRescheduleModal(true);
-                  const d = b.starts_at ? new Date(b.starts_at) : new Date();
-                  setRescheduleDate(d.toISOString().split("T")[0]);
-                  setRescheduleTime(d.toTimeString().slice(0, 5));
-                  setRescheduleReason("");
-                }}
-                disabled={updatingStatus}
-                style={{
-                  fontSize: "0.92rem",
-                  fontWeight: 800,
-                  padding: "12px 18px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                }}
-              >
-                <Icon name="calendar" size={16} />
-                {isRTL ? "إعادة جدولة الموعد" : "Reschedule Booking"}
-              </button>
+              {allowUpdate && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    setShowRescheduleModal(true);
+                    const d = b.starts_at ? new Date(b.starts_at) : new Date();
+                    setRescheduleDate(d.toISOString().split("T")[0]);
+                    setRescheduleTime(d.toTimeString().slice(0, 5));
+                    setRescheduleReason("");
+                  }}
+                  disabled={updatingStatus}
+                  style={{
+                    fontSize: "0.92rem",
+                    fontWeight: 800,
+                    padding: "12px 18px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 8,
+                    width: "100%",
+                  }}
+                >
+                  <Icon name="calendar" size={16} />
+                  {isRTL ? "إعادة جدولة الموعد" : "Reschedule Booking"}
+                </button>
+              )}
 
-              <button
-                type="button"
-                className="btn btn-sm"
-                onClick={() =>
-                  setConfirmAction({
-                    targetStatus: "cancelled",
-                    label: t("cancelAppointment") || "إلغاء الموعد",
-                    color: "#ef4444",
-                    requiresReason: true,
-                  })
-                }
-                disabled={updatingStatus}
-                style={{
-                  background: "#ef4444",
-                  color: "#fff",
-                  fontSize: "0.92rem",
-                  fontWeight: 800,
-                  padding: "12px 18px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 8,
-                  width: "100%",
-                }}
-              >
-                <Icon name="x" size={16} />
-                {t("cancelAppointment") || "إلغاء الموعد"}
-              </button>
+              {allowDelete && (
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() =>
+                    setConfirmAction({
+                      targetStatus: "cancelled",
+                      label: t("cancelAppointment") || "إلغاء الموعد",
+                      color: "#ef4444",
+                      requiresReason: true,
+                    })
+                  }
+                  disabled={updatingStatus}
+                  style={{
+                    background: "#ef4444",
+                    color: "#fff",
+                    fontSize: "0.92rem",
+                    fontWeight: 800,
+                    padding: "12px 18px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 8,
+                    width: "100%",
+                  }}
+                >
+                  <Icon name="x" size={16} />
+                  {t("cancelAppointment") || "إلغاء الموعد"}
+                </button>
+              )}
             </div>
           )}
         </div>

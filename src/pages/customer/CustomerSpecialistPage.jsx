@@ -747,7 +747,10 @@ export default function CustomerSpecialistPage() {
                       >
                         {formatCurrency(
                           srv.price,
-                          srv.currency_detail || srv.currency,
+                          srv.currencyRelation ||
+                            srv.currency_detail ||
+                            srv.currency ||
+                            specialist?.workspace?.currency,
                           isRTL,
                           t("freeService"),
                         )}

@@ -20,13 +20,13 @@ export default function CapabilityGate({ capabilityCode, children }) {
 
   const title = !hasActiveSub
     ? t("noSubscriptionTitle") || "مفيش اشتراك شغال لمساحة العمل"
-    : t("capabilityLockedTitle") || "هذه الميزة غير متاحة في باقتك الحالية";
+    : t("capabilityLockedTitle") || "الميزة دي مش متاحة في باقتك الحالية";
 
   const description = !hasActiveSub
     ? t("noSubscriptionDesc") ||
       "مساحة العمل بتاعتك معندهاش اشتراك متفعّل. من فضلك اشترك في باقة من الباقات عشان تستفيد من كل المميزات."
     : t("capabilityLockedDesc") ||
-      "الميزة المطلوبة تتطلب ترقية باقة الاشتراك الخاصة بمساحة العمل للوصول إليها واستخدامها.";
+      "الميزة دي محتاجة ترقية باقة الاشتراك بتاعة مساحة العمل عشان تقدر تستخدمها.";
 
   return (
     <div

@@ -9,9 +9,15 @@ import SearchableSelect from "../../../../components/common/SearchableSelect";
 export default function SchedulesTab({
   schedules,
   startOfWeek = "sunday",
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onRefresh,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
   const { t, lang } = useLanguage();
   const toast = useToast();
 
@@ -425,7 +431,7 @@ export default function SchedulesTab({
 
   // Weekly Hours Multi-slot Handlers
   const handleToggleDay = (dayKey) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -446,7 +452,7 @@ export default function SchedulesTab({
   };
 
   const handleAddSlot = (dayKey) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -465,7 +471,7 @@ export default function SchedulesTab({
   };
 
   const handleRemoveSlot = (dayKey, slotIdx) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -485,7 +491,7 @@ export default function SchedulesTab({
   };
 
   const handleSlotChange = (dayKey, slotIdx, field, value) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -612,7 +618,7 @@ export default function SchedulesTab({
   };
 
   const handleDeleteException = async (exId) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowDelete || !activeSchedule) return;
     try {
       await client.delete(
         `${endpoints.workspaceSchedules}/${activeSchedule.id}/overrides/${exId}`,
@@ -633,17 +639,7 @@ export default function SchedulesTab({
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
       {/* 1. Header Toolbar & Schedule Switcher Bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-          paddingBottom: 16,
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
+      <div className="schedules-tab-header">
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -691,7 +687,7 @@ export default function SchedulesTab({
           </p>
         </div>
 
-        {canEdit && (
+        {allowCreate && (
           <button
             className="btn btn-primary btn-sm"
             onClick={handleOpenCreateModal}
@@ -750,7 +746,7 @@ export default function SchedulesTab({
             {t("noSchedulesDesc") ||
               "قم بإنشاء جدول العمل الأول لمساحتك لتحديد أيام وساعات العمل المتاحة."}
           </p>
-          {canEdit && (
+          {allowCreate && (
             <button
               className="btn btn-primary btn-sm"
               onClick={handleOpenCreateModal}
@@ -981,7 +977,7 @@ export default function SchedulesTab({
                   })()}
                 </div>
 
-                {activeSchedule && canEdit && (
+                {activeSchedule && (allowUpdate || allowDelete) && (
                   <div
                     style={{
                       display: "flex",
@@ -989,97 +985,105 @@ export default function SchedulesTab({
                       gap: 8,
                     }}
                   >
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={handleOpenEditModal}
-                      style={{
-                        fontSize: "0.82rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Icon name="edit" size={13} />
-                      {t("editScheduleNameBtn") || "تعديل"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={handleDeleteSchedule}
-                      disabled={activeSchedule.is_default}
-                      style={{
-                        fontSize: "0.82rem",
-                        fontWeight: 600,
-                        color: activeSchedule.is_default
-                          ? "var(--muted)"
-                          : "#ef4444",
-                        opacity: activeSchedule.is_default ? 0.5 : 1,
-                        cursor: activeSchedule.is_default
-                          ? "not-allowed"
-                          : "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Icon name="trash" size={13} />
-                      {t("deleteScheduleBtn") || "حذف"}
-                    </button>
+                    {allowUpdate && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleOpenEditModal}
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 600,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="edit" size={13} />
+                        {t("editScheduleNameBtn") || "تعديل"}
+                      </button>
+                    )}
+                    {allowDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleDeleteSchedule}
+                        disabled={activeSchedule.is_default}
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 600,
+                          color: activeSchedule.is_default
+                            ? "var(--muted)"
+                            : "#ef4444",
+                          opacity: activeSchedule.is_default ? 0.5 : 1,
+                          cursor: activeSchedule.is_default
+                            ? "not-allowed"
+                            : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="trash" size={13} />
+                        {t("deleteScheduleBtn") || "حذف"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
             {/* Desktop / Tablet Actions */}
-            {activeSchedule && canEdit && (
+            {activeSchedule && (allowUpdate || allowDelete) && (
               <div className="schedule-top-bar-actions schedule-desktop-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleOpenEditModal}
-                  title={t("editScheduleModalTitle") || "تعديل بيانات الجدول"}
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon name="edit" size={13} />
-                  {t("editScheduleNameBtn") || "تعديل"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleDeleteSchedule}
-                  disabled={activeSchedule.is_default}
-                  title={
-                    activeSchedule.is_default
-                      ? t("cannotDeleteDefaultSchedule") ||
-                        "لا يمكن حذف الجدول الافتراضي لمساحة العمل"
-                      : t("deleteScheduleBtn") || "حذف الجدول"
-                  }
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: activeSchedule.is_default
-                      ? "var(--muted)"
-                      : "#ef4444",
-                    opacity: activeSchedule.is_default ? 0.5 : 1,
-                    cursor: activeSchedule.is_default
-                      ? "not-allowed"
-                      : "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon name="trash" size={13} />
-                  {t("deleteScheduleBtn") || "حذف"}
-                </button>
+                {allowUpdate && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleOpenEditModal}
+                    title={t("editScheduleModalTitle") || "تعديل بيانات الجدول"}
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="edit" size={13} />
+                    {t("editScheduleNameBtn") || "تعديل"}
+                  </button>
+                )}
+                {allowDelete && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleDeleteSchedule}
+                    disabled={activeSchedule.is_default}
+                    title={
+                      activeSchedule.is_default
+                        ? t("cannotDeleteDefaultSchedule") ||
+                          "لا يمكن حذف الجدول الافتراضي لمساحة العمل"
+                        : t("deleteScheduleBtn") || "حذف الجدول"
+                    }
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      color: activeSchedule.is_default
+                        ? "var(--muted)"
+                        : "#ef4444",
+                      opacity: activeSchedule.is_default ? 0.5 : 1,
+                      cursor: activeSchedule.is_default
+                        ? "not-allowed"
+                        : "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="trash" size={13} />
+                    {t("deleteScheduleBtn") || "حذف"}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -1128,12 +1132,12 @@ export default function SchedulesTab({
                           type="checkbox"
                           checked={isDayEnabled}
                           onChange={() => handleToggleDay(d.key)}
-                          disabled={!canEdit}
+                          disabled={!allowUpdate}
                           style={{
                             accentColor: "var(--primary)",
                             width: 18,
                             height: 18,
-                            cursor: canEdit ? "pointer" : "default",
+                            cursor: allowUpdate ? "pointer" : "default",
                           }}
                         />
                         <span
@@ -1175,7 +1179,7 @@ export default function SchedulesTab({
                                     e.target.value,
                                   )
                                 }
-                                disabled={!canEdit}
+                                disabled={!allowUpdate}
                               />
                               <span
                                 style={{
@@ -1198,10 +1202,10 @@ export default function SchedulesTab({
                                     e.target.value,
                                   )
                                 }
-                                disabled={!canEdit}
+                                disabled={!allowUpdate}
                               />
 
-                              {canEdit && (
+                              {allowUpdate && (
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveSlot(d.key, sIdx)}
@@ -1237,7 +1241,7 @@ export default function SchedulesTab({
                       </div>
 
                       {/* Action: Add Slot */}
-                      {canEdit && isDayEnabled && (
+                      {allowUpdate && isDayEnabled && (
                         <button
                           type="button"
                           className="btn btn-ghost btn-sm"
@@ -1255,7 +1259,7 @@ export default function SchedulesTab({
                   );
                 })}
               </div>
-              {canEdit && (
+              {allowUpdate && (
                 <div
                   style={{
                     display: "flex",
@@ -1355,7 +1359,7 @@ export default function SchedulesTab({
                       valid_from: e.target.value,
                     })
                   }
-                  disabled={!canEdit}
+                  disabled={!allowUpdate}
                 />
               </div>
 
@@ -1373,12 +1377,12 @@ export default function SchedulesTab({
                       valid_until: e.target.value,
                     })
                   }
-                  disabled={!canEdit}
+                  disabled={!allowUpdate}
                 />
               </div>
             </div>
 
-            {canEdit && (
+            {allowUpdate && (
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button
                   type="button"
@@ -1448,7 +1452,7 @@ export default function SchedulesTab({
             </p>
 
             {/* Inline Add Exception Form */}
-            {canEdit && (
+            {allowUpdate && (
               <form
                 onSubmit={handleAddException}
                 style={{
@@ -1731,7 +1735,7 @@ export default function SchedulesTab({
                       </div>
                     </div>
 
-                    {canEdit && (
+                    {allowDelete && (
                       <button
                         type="button"
                         onClick={() => handleDeleteException(ex.id)}

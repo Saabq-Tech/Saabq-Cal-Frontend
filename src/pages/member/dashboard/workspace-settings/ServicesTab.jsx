@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useAuth } from "../../../../context/AuthContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import ConfirmationModal from "./ConfirmationModal";
+import { getCurrencySymbol } from "../../../../utils/currency";
 
 const defaultFormState = {
   id: null,
@@ -42,12 +44,34 @@ export default function ServicesTab({
   services = [],
   members = [],
   schedules = [],
-  canEdit,
+  canEdit: propCanEdit,
+  canCreate: propCanCreate,
+  canUpdate: propCanUpdate,
+  canDelete: propCanDelete,
   onSaveService,
   onDeleteService,
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+  const {
+    isOwner: hookIsOwner,
+    canCreateServices,
+    canUpdateServices,
+    canDeleteServices,
+  } = usePermissions();
+
+  const isOwner = hookIsOwner || user?.is_owner === true;
+  const canCreate =
+    propCanCreate !== undefined ? propCanCreate : isOwner || canCreateServices;
+  const canUpdate =
+    propCanUpdate !== undefined ? propCanUpdate : isOwner || canUpdateServices;
+  const canDelete =
+    propCanDelete !== undefined ? propCanDelete : isOwner || canDeleteServices;
+  const _canEdit =
+    propCanEdit !== undefined
+      ? propCanEdit
+      : canCreate || canUpdate || canDelete;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTelegramInstructionModalOpen, setIsTelegramInstructionModalOpen] =
     useState(false);
@@ -62,11 +86,9 @@ export default function ServicesTab({
     onConfirm: null,
   });
 
-  const isOwner = user?.is_owner === true;
-
   const canDeleteService = (s) => {
-    if (!canEdit || !s) return false;
-    if (isOwner) return true;
+    if (!s) return false;
+    if (isOwner || canDelete) return true;
     if (
       s.workspace_member_id &&
       Number(s.workspace_member_id) === Number(user?.id)
@@ -141,7 +163,20 @@ export default function ServicesTab({
   };
 
   const handleOpenCreate = () => {
-    setForm(defaultFormState);
+    const defaultCurr =
+      user?.workspace?.currency?.code ||
+      user?.workspace?.currency_code ||
+      (availableCurrencies && availableCurrencies.length > 0
+        ? availableCurrencies[0].code
+        : "SAR");
+    const matchedCurr = availableCurrencies?.find(
+      (c) => c.code?.toUpperCase() === defaultCurr?.toUpperCase(),
+    );
+    setForm({
+      ...defaultFormState,
+      currency: defaultCurr,
+      currency_id: matchedCurr?.id || null,
+    });
     setIsModalOpen(true);
   };
 
@@ -345,7 +380,7 @@ export default function ServicesTab({
                 : "Manage customer services, pricing, and durations")}
           </p>
         </div>
-        {canEdit ? (
+        {canCreate ? (
           <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
             +{" "}
             {t("addService") ||
@@ -414,7 +449,7 @@ export default function ServicesTab({
                 ? "قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد."
                 : "Add your first service to allow customers to select and book appointments.")}
           </p>
-          {canEdit && (
+          {canCreate && (
             <button
               className="btn btn-primary btn-sm"
               onClick={handleOpenCreate}
@@ -432,14 +467,13 @@ export default function ServicesTab({
             const isFeatured = s.is_featured ?? false;
             const duration = s.duration_minutes || s.duration || 30;
             const price = s.price ?? 0;
-            const rawCurr = s.currency;
-            const currencySymbol =
-              typeof rawCurr === "object" && rawCurr !== null
-                ? rawCurr.symbol_native ||
-                  rawCurr.symbol ||
-                  rawCurr.code ||
-                  "SAR"
-                : rawCurr || "SAR";
+            const rawCurr =
+              s.currencyRelation ||
+              s.currency ||
+              user?.workspace?.currency ||
+              user?.workspace?.currency_code ||
+              "SAR";
+            const currencySymbol = getCurrencySymbol(rawCurr, isRTL);
 
             const nameDisplay =
               typeof s.name === "object"
@@ -927,7 +961,7 @@ export default function ServicesTab({
                       </span>
                     )}
 
-                    {canEdit && (
+                    {canUpdate && (
                       <button
                         type="button"
                         className="btn btn-primary btn-sm"

@@ -9,27 +9,27 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceMembersPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadMembers,
+    canCreateMembers,
+    canUpdateMembers,
+    canDeleteMembers,
+  } = usePermissions();
 
   const [membersList, setMembersList] = useState([]);
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("member_read") ||
-    userPermissions.includes("members_read");
+  const canRead = isOwner || canReadMembers;
   const canEdit =
-    isOwner ||
-    userPermissions.includes("member_write") ||
-    userPermissions.includes("members_write");
+    isOwner || canCreateMembers || canUpdateMembers || canDeleteMembers;
 
   const isCapAllowed = checkWorkspaceCapability(user, "TEAM_MEMBERS");
 
@@ -71,28 +71,24 @@ export default function WorkspaceMembersPage() {
       const memberId = formData.id || formData.editing_id;
       if (memberId) {
         await client.put(endpoints.workspaceMemberItem(memberId), formData);
-        toast.success(
-          t("memberUpdatedSuccess") || "تم تحديث بيانات العضو بنجاح",
-        );
+        toast.success(t("memberUpdatedSuccess") || "اتحدثت بيانات العضو بنجاح");
       } else {
         await client.post(endpoints.workspaceMembers, formData);
-        toast.success(
-          t("inviteSentSuccess") || "تم إرسال الدعوة إلى العضو بنجاح",
-        );
+        toast.success(t("inviteSentSuccess") || "اتبعتت الدعوة للعضو بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشلت العملية");
+      toast.error(err.response?.data?.message || "حصل خطأ في العملية");
     }
   };
 
   const handleDeleteMember = async (member) => {
     try {
       await client.delete(endpoints.workspaceMemberItem(member.id));
-      toast.success(t("memberDeletedSuccess") || "تم حذف العضو من مساحة العمل");
+      toast.success(t("memberDeletedSuccess") || "اتحذف العضو من مساحة العمل");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشل حذف العضو");
+      toast.error(err.response?.data?.message || "حصل خطأ في حذف العضو");
     }
   };
 
@@ -111,6 +107,9 @@ export default function WorkspaceMembersPage() {
             membersList={membersList}
             rolesList={rolesList}
             canEdit={canEdit}
+            canCreate={canCreateMembers}
+            canUpdate={canUpdateMembers}
+            canDelete={canDeleteMembers}
             onSaveMember={handleSaveMember}
             onDeleteMember={handleDeleteMember}
           />

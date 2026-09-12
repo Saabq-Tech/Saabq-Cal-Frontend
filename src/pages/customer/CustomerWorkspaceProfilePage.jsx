@@ -1035,7 +1035,10 @@ export default function WorkspaceProfilePage() {
                       >
                         {formatCurrency(
                           srv.price,
-                          srv.currency_detail || srv.currency,
+                          srv.currencyRelation ||
+                            srv.currency_detail ||
+                            srv.currency ||
+                            workspace?.currency,
                           isRTL,
                           t("freeService"),
                         )}

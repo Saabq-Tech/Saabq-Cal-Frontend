@@ -2411,26 +2411,41 @@ html.dark .auth-panel-right {
   }
 }
 
-/* ── Modal System ── */
-/* ── Modal System (Mobile-First & Responsive) ── */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(10, 24, 33, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 999999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  overflow-y: auto;
-  box-sizing: border-box;
+/* ── Modal System (Mobile-First, Full Viewport, Top Layer) ── */
+.modal-backdrop,
+.modal-overlay,
+.modal-wrapper-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  background-color: rgba(10, 24, 33, 0.72) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  z-index: 9999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.workspace-dashboard-content,
+.dashboard-content {
+  transform: none !important;
+  perspective: none !important;
+  filter: none !important;
 }
 
 /* Custom Modern Scrollbar */
@@ -2492,9 +2507,26 @@ html.dark .auth-panel-right {
   max-width: min(900px, calc(100vw - 32px));
 }
 
+.modal-container,
+.modal-content,
+.modal-dialog {
+  width: 100%;
+  max-height: min(92vh, 850px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: auto;
+  position: relative;
+  box-sizing: border-box;
+  z-index: 10000000 !important;
+}
+
 /* Box-Sizing & Bounds for Modal Children */
 .modal-card,
 .modal-card *,
+.modal-container,
+.modal-container *,
+.modal-content,
+.modal-content *,
 .modal-body,
 .modal-body * {
   box-sizing: border-box;
@@ -2635,38 +2667,58 @@ html.dark .auth-panel-right {
     white-space: normal !important;
   }
 
-  .modal-backdrop {
-    padding: 10px 8px !important;
-    align-items: center !important;
+  .modal-backdrop,
+  .modal-overlay,
+  .modal-wrapper-overlay {
+    padding: max(14px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(24px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left)) !important;
+    align-items: flex-start !important;
     justify-content: center !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .modal-card,
   .modal-card.modal-sm,
   .modal-card.modal-md,
   .modal-card.modal-lg,
-  .modal-card.modal-xl {
+  .modal-card.modal-xl,
+  .modal-container,
+  .modal-content,
+  .modal-dialog {
     width: 100% !important;
-    max-width: min(600px, calc(100vw - 16px)) !important;
-    max-height: 94vh !important;
+    max-width: min(580px, calc(100vw - 20px)) !important;
+    max-height: calc(100dvh - 36px) !important;
+    max-height: calc(100vh - 36px) !important;
     padding: 16px 14px !important;
     margin: auto !important;
     box-sizing: border-box !important;
-    border-radius: var(--radius-md, 12px) !important;
+    border-radius: var(--radius-lg, 16px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .modal-header {
     margin-bottom: 12px !important;
     padding-bottom: 10px !important;
+    position: sticky !important;
+    top: -16px !important;
+    background: inherit !important;
+    z-index: 10 !important;
   }
 
   .modal-title {
-    font-size: 1.08rem !important;
+    font-size: 1.05rem !important;
+    line-height: 1.4 !important;
+    word-break: break-word !important;
   }
 
   .modal-body {
-    gap: 14px !important;
-    padding: 4px 0 !important;
+    gap: 12px !important;
+    padding: 2px 0 !important;
     overflow-x: hidden !important;
   }
 
@@ -2706,8 +2758,12 @@ html.dark .auth-panel-right {
   .modal-actions {
     flex-direction: column-reverse !important;
     gap: 8px !important;
-    margin-top: 12px !important;
+    margin-top: 14px !important;
     padding-top: 12px !important;
+    position: sticky !important;
+    bottom: -16px !important;
+    background: inherit !important;
+    z-index: 10 !important;
   }
 
   .modal-actions button,
@@ -4382,13 +4438,39 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
   font-weight: 700;
 }
 
-/* Content area */
 .workspace-dashboard-content {
   flex: 1;
   min-width: 0;
   padding: 16px 24px 48px;
   overflow-y: auto;
   background: var(--bg);
+}
+
+@media (max-width: 768px) {
+  .workspace-dashboard-banners {
+    padding: 0 12px;
+  }
+  .workspace-dashboard-content {
+    padding: 10px 12px 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  .workspace-dashboard-banners {
+    padding: 0 8px;
+  }
+  .workspace-dashboard-content {
+    padding: 8px 8px 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-dashboard-banners {
+    padding: 0 6px;
+  }
+  .workspace-dashboard-content {
+    padding: 6px 6px 64px;
+  }
 }
 
 /* Eliminate excessive gap when banner or dashboard is the first child */
@@ -5325,6 +5407,8 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
 
 .workspace-timeline-container {
   --timeline-time-col-width: 74px;
+  --timeline-event-gutter: 8px;
+  --timeline-event-gap: 6px;
   position: relative;
   max-height: 680px;
   overflow-y: auto;
@@ -6325,13 +6409,34 @@ html.dark .timeline-event-card .event-card-time,
 }
 
 @media (max-width: 768px) {
+  .workspace-main-content-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
   .workspace-stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .workspace-timeline-column {
+    padding: 12px 10px;
+    border-radius: 14px;
   }
 
   .workspace-timeline-container {
-    --timeline-time-col-width: 62px;
+    --timeline-time-col-width: 52px;
+    --timeline-event-gutter: 4px;
+    --timeline-event-gap: 4px;
+    padding-inline-end: 2px;
+  }
+
+  .timeline-hour-slot {
+    gap: 6px;
+  }
+
+  .timeline-time-label {
+    font-size: 0.74rem;
   }
 
   /* Hide time pill inside event cards on mobile/tablets for responsive clean layout */
@@ -6339,28 +6444,84 @@ html.dark .timeline-event-card .event-card-time,
   .timeline-event-card .event-card-time {
     display: none !important;
   }
+
+  .workspace-mini-calendar-card {
+    padding: 12px 10px;
+    border-radius: 14px;
+  }
+
+  .mini-calendar-header {
+    margin-bottom: 10px;
+  }
+
+  .mini-calendar-weekdays {
+    margin-bottom: 8px;
+    font-size: 0.78rem;
+  }
+
+  .mini-calendar-days-grid {
+    gap: 4px 2px;
+  }
+
+  .mini-calendar-days-grid .calendar-day-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .workspace-upcoming-widget {
+    padding: 12px 10px;
+    border-radius: 14px;
+  }
+
+  .workspace-left-column {
+    gap: 12px;
+  }
+
+  .analytics-charts-grid,
+  .analytics-tables-deck {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .analytics-table-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .analytics-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  .analytics-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 @media (max-width: 640px) {
   .workspace-main-dashboard {
-    gap: 14px;
+    gap: 10px;
     overflow-x: hidden;
   }
 
   .workspace-timeline-column {
-    padding: 16px 12px;
-    border-radius: 16px;
+    padding: 10px 8px;
+    border-radius: 12px;
   }
 
   .workspace-timeline-header-bar {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
   .timeline-date-title {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     text-align: center;
   }
 
@@ -6369,40 +6530,46 @@ html.dark .timeline-event-card .event-card-time,
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    gap: 6px;
+    gap: 4px;
   }
 
   .timeline-nav-btn {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
     flex-shrink: 0;
   }
 
   .timeline-today-btn {
     flex-shrink: 0;
-    padding: 6px 12px;
-    font-size: 0.82rem;
+    padding: 5px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
   }
 
   .timeline-new-booking-btn {
     flex: 1;
     justify-content: center;
-    padding: 7px 12px;
-    font-size: 0.82rem;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
   }
 
   .workspace-timeline-container {
-    --timeline-time-col-width: 52px;
+    --timeline-time-col-width: 46px;
+    --timeline-event-gutter: 3px;
+    --timeline-event-gap: 2px;
     max-height: 520px;
     overflow-x: hidden;
+    padding-inline-end: 2px;
   }
 
   .timeline-hour-slot {
-    gap: 10px;
+    gap: 6px;
   }
 
   .timeline-time-label {
-    font-size: 0.76rem;
+    font-size: 0.7rem;
   }
 
   .timeline-events-canvas {
@@ -6413,6 +6580,7 @@ html.dark .timeline-event-card .event-card-time,
   .timeline-event-card {
     padding: 4px 8px;
     border-radius: 8px;
+    border-inline-start-width: 4px;
   }
 
   .timeline-event-card-inner {
@@ -6465,13 +6633,13 @@ html.dark .timeline-event-card .event-card-time,
 
   .workspace-stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .workspace-stat-card {
-    padding: 12px 10px;
-    border-radius: 14px;
-    gap: 8px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    gap: 6px;
     min-width: 0;
   }
 
@@ -6525,11 +6693,270 @@ html.dark .timeline-event-card .event-card-time,
     line-height: 1.25;
   }
 
+  .workspace-mini-calendar-card {
+    padding: 10px 8px;
+    border-radius: 12px;
+  }
+
+  .mini-calendar-header {
+    margin-bottom: 8px;
+  }
+
+  .mini-calendar-title {
+    font-size: 0.88rem;
+  }
+
+  .mini-calendar-weekdays {
+    margin-bottom: 6px;
+    font-size: 0.74rem;
+  }
+
+  .mini-calendar-days-grid {
+    gap: 3px 2px;
+  }
+
+  .mini-calendar-days-grid .calendar-day-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+  }
+
+  .workspace-upcoming-widget {
+    padding: 10px 8px;
+    border-radius: 12px;
+  }
+
+  .workspace-left-column {
+    gap: 10px;
+  }
+
   .analytics-insights-deck,
   .analytics-charts-grid,
   .analytics-tables-deck {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+
+  .analytics-chart-card,
+  .analytics-table-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+  }
+
+  .chart-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .chart-card-title {
+    font-size: 0.92rem;
+  }
+
+  .chart-card-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .chart-toggles {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .analytics-table-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .analytics-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  .analytics-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .analytics-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+
+  .analytics-search-box {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .svg-chart-container {
+    height: 180px;
+  }
+
+  .donut-chart-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .donut-svg-box {
+    width: 120px;
+    height: 120px;
+  }
+
+  .donut-legend-list {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .overview-data-table-wrap {
+    margin-inline: -14px;
+    border-radius: 0;
+    border-inline: none;
+  }
+
+  .overview-data-table th,
+  .overview-data-table td {
+    padding: 8px 10px;
+    font-size: 0.76rem;
+  }
+
+  .table-cust-avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.68rem;
+  }
+
+  .table-cust-cell {
+    gap: 6px;
+  }
+
+  .table-cust-name {
+    font-size: 0.78rem;
+  }
+
+  .table-cust-sub {
+    font-size: 0.66rem;
+  }
+
+  .top-services-list {
+    gap: 10px;
+  }
+
+  .insight-label {
+    font-size: 0.72rem;
+  }
+
+  .insight-value {
+    font-size: 1rem;
+  }
+
+  .analytics-insight-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .peak-hour-row {
+    grid-template-columns: 56px 1fr 28px;
+    gap: 6px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-main-dashboard {
+    gap: 8px;
+  }
+
+  .workspace-timeline-column {
+    padding: 8px 6px;
+    border-radius: 12px;
+  }
+
+  .workspace-timeline-header-bar {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-date-title {
+    font-size: 0.88rem;
+  }
+
+  .workspace-timeline-container {
+    --timeline-time-col-width: 42px;
+    --timeline-event-gutter: 2px;
+    --timeline-event-gap: 2px;
+    padding-inline-end: 0px;
+  }
+
+  .timeline-hour-slot {
+    gap: 4px;
+  }
+
+  .timeline-time-label {
+    font-size: 0.66rem;
+  }
+
+  .timeline-event-card {
+    padding: 3px 6px;
+    border-radius: 6px;
+    border-inline-start-width: 3px;
+  }
+
+  .timeline-event-name,
+  .timeline-event-card .event-card-name {
+    font-size: 0.72rem;
+  }
+
+  .timeline-event-service,
+  .timeline-event-card .event-card-service {
+    font-size: 0.64rem;
+  }
+
+  .workspace-mini-calendar-card {
+    padding: 8px 6px;
+    border-radius: 12px;
+  }
+
+  .mini-calendar-header {
+    margin-bottom: 6px;
+  }
+
+  .mini-calendar-title {
+    font-size: 0.84rem;
+  }
+
+  .mini-calendar-weekdays {
+    margin-bottom: 4px;
+    font-size: 0.7rem;
+  }
+
+  .mini-calendar-days-grid {
+    gap: 2px 1px;
+  }
+
+  .mini-calendar-days-grid .calendar-day-cell {
+    width: 25px;
+    height: 25px;
+    font-size: 0.72rem;
+  }
+
+  .workspace-upcoming-widget {
+    padding: 8px 6px;
+    border-radius: 12px;
+  }
+
+  .workspace-stats-grid {
+    gap: 6px;
+  }
+
+  .workspace-stat-card {
+    padding: 8px 6px;
+    border-radius: 10px;
+    gap: 4px;
   }
 }
 
@@ -15714,4 +16141,146 @@ html.dark .blog-card:hover {
 .blog-cta-btn:hover * {
   color: var(--secondary) !important;
   stroke: var(--secondary) !important;
+}
+
+.schedules-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+@media (max-width: 640px) {
+  .schedules-tab-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* =========================================================
+   INTEGRATIONS DIRECTORY FILTER TABS SLIDER
+   ========================================================= */
+.integrations-tabs-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 8px 24px 18px 24px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.integrations-tabs-slider::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.integrations-tab-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  border-radius: 9999px !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  padding: 7px 16px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-secondary) !important;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.integrations-tab-pill:hover {
+  background: var(--surface-hover, var(--bg-card-hover, #f3f4f6)) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-hover, var(--primary)) !important;
+  transform: translateY(-1px);
+}
+
+.integrations-tab-pill.active {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 3px 10px rgba(194, 98, 8, 0.28);
+}
+
+.integrations-tab-pill.active:hover {
+  background: var(--primary-hover, var(--primary)) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.integrations-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-weight: 700;
+  background: var(--bg-muted, rgba(0, 0, 0, 0.06));
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.integrations-tab-pill.active .integrations-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+html.dark .integrations-tab-pill,
+[data-theme="dark"] .integrations-tab-pill,
+.dark .integrations-tab-pill {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #edf2f3 !important;
+}
+
+html.dark .integrations-tab-pill:hover,
+[data-theme="dark"] .integrations-tab-pill:hover,
+.dark .integrations-tab-pill:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark .integrations-tab-pill.active,
+[data-theme="dark"] .integrations-tab-pill.active,
+.dark .integrations-tab-pill.active {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border-color: var(--primary) !important;
+}
+
+html.dark .integrations-tab-count,
+[data-theme="dark"] .integrations-tab-count,
+.dark .integrations-tab-count {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 640px) {
+  .integrations-tabs-slider {
+    padding: 6px 14px 14px 14px;
+    margin: 0 -14px;
+    width: calc(100% + 28px);
+    gap: 8px;
+  }
+
+  .integrations-tab-pill {
+    font-size: 0.8rem !important;
+    padding: 6px 13px !important;
+  }
 }

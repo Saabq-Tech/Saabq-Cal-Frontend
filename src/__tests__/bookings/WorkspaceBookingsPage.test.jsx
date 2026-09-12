@@ -29,7 +29,12 @@ vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
     user: {
       is_owner: true,
-      permissions: ["booking_read", "booking_write"],
+      permissions: [
+        "booking_read",
+        "booking_create",
+        "booking_update",
+        "booking_delete",
+      ],
       workspace: {
         has_active_subscription: true,
         active_capabilities: ["BOOKING"],

@@ -61,7 +61,11 @@ export default function WorkspaceLayout() {
   const _canViewPermission = (module) =>
     isOwner ||
     userPermissions.includes(`${module}_read`) ||
-    userPermissions.includes(`${module}_write`);
+    userPermissions.includes(`${module}_create`) ||
+    userPermissions.includes(`${module}_update`) ||
+    userPermissions.includes(`${module}_delete`) ||
+    userPermissions.includes(`${module}_write`) ||
+    userPermissions.includes(`${module}_manage`);
   const hasActiveSub = user?.workspace?.has_active_subscription ?? true;
   const isWorkspaceActive = user?.workspace?.status === "active";
   const _workspaceStatus = user?.workspace?.status || "pending";
@@ -238,10 +242,7 @@ export default function WorkspaceLayout() {
           </nav>
         </aside>
 
-        <div
-          key={location.pathname}
-          className="workspace-dashboard-content animate-fade-in-up"
-        >
+        <div key={location.pathname} className="workspace-dashboard-content">
           {/* Settings sub-tabs on mobile: placed right under the workspace tabs, before banners and anything else */}
           {isSettingsOpen && (
             <div className="settings-subtab-strip">

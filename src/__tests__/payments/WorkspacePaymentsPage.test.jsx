@@ -27,7 +27,15 @@ vi.mock("../../api/client", async () => {
 
 vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { is_owner: true, permissions: ["payment_read", "payment_write"] },
+    user: {
+      is_owner: true,
+      permissions: [
+        "payment_read",
+        "payment_create",
+        "payment_update",
+        "payment_delete",
+      ],
+    },
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,
 }));
@@ -91,9 +99,9 @@ describe("WorkspacePaymentsPage Component", () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText("1500 SAR")).toBeInTheDocument();
-      expect(screen.getByText("2000 SAR")).toBeInTheDocument();
-      expect(screen.getByText("500 SAR")).toBeInTheDocument();
+      expect(screen.getByText(/1,500/)).toBeInTheDocument();
+      expect(screen.getByText(/2,000/)).toBeInTheDocument();
+      expect(screen.getByText(/^500\s/)).toBeInTheDocument();
     });
   });
 
@@ -180,10 +188,10 @@ describe("WorkspacePaymentsPage Component", () => {
     fireEvent.click(screen.getAllByText(/التفاصيل \/ الإيصال/i)[0]);
 
     await waitFor(() => {
-      expect(screen.getByText(/اعتماد والدفع/i)).toBeInTheDocument();
+      expect(screen.getByText(/اعتماد وتأكيد الدفع/i)).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText(/اعتماد والدفع/i));
+    fireEvent.click(screen.getByText(/اعتماد وتأكيد الدفع/i));
 
     await waitFor(() => {
       expect(client.post).toHaveBeenCalledWith(

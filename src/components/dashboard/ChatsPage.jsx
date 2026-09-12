@@ -872,27 +872,63 @@ export default function ChatsPage() {
                 >
                   {t("noChatsFoundDesc")}
                 </p>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleStartNewChat}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    padding: "10px 22px",
-                    borderRadius: "12px",
-                    color: "#ffffff",
-                    fontWeight: 600,
-                    fontSize: "0.88rem",
-                    boxShadow: "0 4px 12px rgba(17, 100, 106, 0.25)",
-                    margin: "0 auto",
-                  }}
-                >
-                  <Icon name="plus" size={15} style={{ display: "block" }} />
-                  <span style={{ color: "#ffffff" }}>{t("startNewChat")}</span>
-                </button>
+                {userType === "customer" ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleStartNewChat}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      padding: "10px 22px",
+                      borderRadius: "12px",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.88rem",
+                      boxShadow: "0 4px 12px rgba(17, 100, 106, 0.25)",
+                      margin: "0 auto",
+                    }}
+                  >
+                    <Icon name="plus" size={15} style={{ display: "block" }} />
+                    <span style={{ color: "#ffffff" }}>
+                      {t("startNewChat")}
+                    </span>
+                  </button>
+                ) : (
+                  <PermissionCheck
+                    anyOf={["chat_create", "chat_update", "chat_write"]}
+                  >
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleStartNewChat}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        padding: "10px 22px",
+                        borderRadius: "12px",
+                        color: "#ffffff",
+                        fontWeight: 600,
+                        fontSize: "0.88rem",
+                        boxShadow: "0 4px 12px rgba(17, 100, 106, 0.25)",
+                        margin: "0 auto",
+                      }}
+                    >
+                      <Icon
+                        name="plus"
+                        size={15}
+                        style={{ display: "block" }}
+                      />
+                      <span style={{ color: "#ffffff" }}>
+                        {t("startNewChat")}
+                      </span>
+                    </button>
+                  </PermissionCheck>
+                )}
               </div>
             ) : (
               filteredConversations.map((conv, idx) => {
@@ -1277,7 +1313,7 @@ export default function ChatsPage() {
                   </div>
                 ) : (
                   <PermissionCheck
-                    permission="chat_write"
+                    anyOf={["chat_create", "chat_update", "chat_write"]}
                     fallback={
                       <div
                         style={{
@@ -1377,7 +1413,7 @@ export default function ChatsPage() {
                 </form>
               ) : (
                 <PermissionCheck
-                  permission="chat_write"
+                  anyOf={["chat_create", "chat_update", "chat_write"]}
                   fallback={
                     <div
                       style={{

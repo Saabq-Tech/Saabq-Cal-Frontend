@@ -9,10 +9,19 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
 import RichTextEditor from "../../../components/common/RichTextEditor";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceTemplatesPage({ embedded = false }) {
   const { user } = useAuth();
   const { isRTL } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canCreateBookings,
+    canUpdateBookings,
+    canDeleteBookings,
+    canUpdateSettings,
+  } = usePermissions();
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +43,9 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
   const [deletingId, setDeletingId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canEdit =
-    isOwner ||
-    userPermissions.includes("workspace_write") ||
-    userPermissions.includes("booking_write");
+  const canCreate = isOwner || canCreateBookings || canUpdateSettings;
+  const canUpdate = isOwner || canUpdateBookings || canUpdateSettings;
+  const canDelete = isOwner || canDeleteBookings || canUpdateSettings;
 
   const workspaceTypeId =
     user?.workspace?.workspace_type_id || user?.workspace_type_id || null;
@@ -52,7 +56,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       const res = await client.get(endpoints.workspaceTemplates);
       setTemplates(res.data?.data || []);
     } catch {
-      toast.error(isRTL ? "فشل تحميل قوالب العمل" : "Failed to load templates");
+      toast.error(isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates");
     } finally {
       setLoading(false);
     }
@@ -108,12 +112,12 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           payload,
         );
         toast.success(
-          isRTL ? "تم تحديث القالب بنجاح" : "Template updated successfully",
+          isRTL ? "اتحدث القالب بنجاح" : "Template updated successfully",
         );
       } else {
         await client.post(endpoints.workspaceTemplates, payload);
         toast.success(
-          isRTL ? "تم إنشاء القالب بنجاح" : "Template created successfully",
+          isRTL ? "اتعمل القالب بنجاح" : "Template created successfully",
         );
       }
 
@@ -122,7 +126,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل حفظ القالب" : "Failed to save template"),
+          (isRTL ? "حصلت مشكلة في حفظ القالب" : "Failed to save template"),
       );
     } finally {
       setSaving(false);
@@ -135,14 +139,14 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       setDeleting(true);
       await client.delete(endpoints.workspaceTemplateItem(deletingId));
       toast.success(
-        isRTL ? "تم حذف القالب بنجاح" : "Template deleted successfully",
+        isRTL ? "اتحذف القالب بنجاح" : "Template deleted successfully",
       );
       setDeletingId(null);
       loadTemplates();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل حذف القالب" : "Failed to delete template"),
+          (isRTL ? "حصلت مشكلة في حذف القالب" : "Failed to delete template"),
       );
     } finally {
       setDeleting(false);
@@ -198,12 +202,12 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             }}
           >
             {isRTL
-              ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية"
+              ? "إدارة القوالب الجاهزة عشان تستخدمها على طول وأنت بتكتب التقارير والملخصات"
               : "Manage ready-to-use templates for reports and consultation summaries"}
           </p>
         </div>
 
-        {canEdit && (
+        {canCreate && (
           <button
             type="button"
             className="btn btn-primary btn-sm"
@@ -236,7 +240,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             className="form-control"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={isRTL ? "البحث في القوالب..." : "Search templates..."}
+            placeholder={isRTL ? "دور في القوالب..." : "Search templates..."}
             style={{
               paddingInlineStart: 38,
               height: 40,
@@ -288,10 +292,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           <h4 style={{ margin: 0, fontWeight: 700, color: "var(--heading)" }}>
             {search
               ? isRTL
-                ? "لا توجد قوالب تطابق البحث"
+                ? "مفيش قوالب مطابقة لبحثك"
                 : "No templates match your search"
               : isRTL
-                ? "لا توجد قوالب مضافة بعد"
+                ? "مفيش قوالب مضافة لسه"
                 : "No templates added yet"}
           </h4>
           <p
@@ -303,17 +307,17 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             }}
           >
             {isRTL
-              ? "أنشئ قوالب نموذجية (مثل تقرير الجلسة، ملخص الاستشارة) لتسهيل وتسريع عمل فريقك."
+              ? "اعمل قوالب جاهزة (زي تقرير الجلسة، ملخص الاستشارة) عشان تسرّع وتسهّل شغل فريقك."
               : "Create standardized templates (such as session reports or consultation summaries) to streamline your team's workflow."}
           </p>
-          {canEdit && !search && (
+          {canCreate && !search && (
             <button
               type="button"
               className="btn btn-primary btn-sm"
               onClick={openCreateModal}
               style={{ marginTop: 8 }}
             >
-              {isRTL ? "إنشاء أول قالب الآن" : "Create First Template"}
+              {isRTL ? "اعمل أول قالب دلوقتي" : "Create First Template"}
             </button>
           )}
         </div>
@@ -416,38 +420,42 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                   {isRTL ? "معاينة" : "Preview"}
                 </button>
 
-                {canEdit && (
+                {(canUpdate || canDelete) && (
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => openEditModal(item)}
-                      style={{
-                        fontSize: "0.78rem",
-                        padding: "5px 10px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 5,
-                      }}
-                    >
-                      <Icon name="edit" size={13} />
-                      {isRTL ? "تعديل" : "Edit"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm"
-                      onClick={() => setDeletingId(item.id)}
-                      style={{
-                        fontSize: "0.78rem",
-                        padding: "5px 10px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 5,
-                      }}
-                    >
-                      <Icon name="trash" size={13} />
-                      {isRTL ? "حذف" : "Delete"}
-                    </button>
+                    {canUpdate && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => openEditModal(item)}
+                        style={{
+                          fontSize: "0.78rem",
+                          padding: "5px 10px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <Icon name="edit" size={13} />
+                        {isRTL ? "تعديل" : "Edit"}
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => setDeletingId(item.id)}
+                        style={{
+                          fontSize: "0.78rem",
+                          padding: "5px 10px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <Icon name="trash" size={13} />
+                        {isRTL ? "حذف" : "Delete"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -483,8 +491,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 maxHeight: "92vh",
                 overflowY: "auto",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                display: "flex",
-                flexDirection: "column",
+                display: "block",
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -495,6 +502,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                   justifyContent: "space-between",
                   padding: "16px 20px",
                   borderBottom: "1px solid var(--border-light)",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 <h3
@@ -528,12 +537,12 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 onSubmit={handleSave}
                 style={{
                   padding: 20,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
+                  display: "block",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
-                <div>
+                <div style={{ marginBottom: 16 }}>
                   <label
                     className="form-label"
                     style={{
@@ -551,14 +560,14 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                     onChange={(e) => setName(e.target.value)}
                     placeholder={
                       isRTL
-                        ? "مثال: تقرير استشارة عام / ملخص موعد"
+                        ? "مثال: تقرير استشارة عام / ملخص ميعاد"
                         : "e.g. Consultation Report / Appointment Summary"
                     }
                     required
                   />
                 </div>
 
-                <div>
+                <div style={{ marginBottom: 16 }}>
                   <label
                     className="form-label"
                     style={{
@@ -576,13 +585,13 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder={
                       isRTL
-                        ? "وصف لاستخدام هذا القالب"
+                        ? "وصف لاستخدام القالب ده"
                         : "Brief description for this template"
                     }
                   />
                 </div>
 
-                <div>
+                <div style={{ marginBottom: 16 }}>
                   <label
                     className="form-label"
                     style={{
@@ -602,13 +611,20 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                     minHeight="260px"
                     placeholder={
                       isRTL
-                        ? "اكتب أو صمم هيكل القالب..."
+                        ? "اكتب أو صمم شكل القالب..."
                         : "Design template content..."
                     }
                   />
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 16,
+                  }}
+                >
                   <input
                     type="checkbox"
                     id="template_is_default"
@@ -675,33 +691,20 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       {previewTemplate &&
         createPortal(
           <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.65)",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 999999,
-              padding: 16,
-            }}
+            className="modal-backdrop"
             onClick={() => setPreviewTemplate(null)}
           >
             <div
-              style={{
-                background: "var(--surface)",
-                borderRadius: "var(--radius-lg)",
-                width: "100%",
-                maxWidth: 700,
-                maxHeight: "85vh",
-                overflowY: "auto",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-                display: "flex",
-                flexDirection: "column",
-              }}
+              className="modal-dialog card"
               onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: 720,
+                width: "100%",
+                maxHeight: "90vh",
+                display: "block",
+                padding: 0,
+                overflow: "hidden",
+              }}
             >
               <div
                 style={{
@@ -715,7 +718,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: "1.05rem",
+                    fontSize: "1.1rem",
                     fontWeight: 800,
                     color: "var(--heading)",
                   }}
@@ -724,35 +727,36 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 </h3>
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-icon btn-ghost btn-sm"
                   onClick={() => setPreviewTemplate(null)}
-                  style={{ padding: "4px 8px" }}
                 >
-                  ✕
+                  <Icon name="x" size={18} />
                 </button>
               </div>
 
-              <div style={{ padding: 20 }}>
+              <div
+                style={{
+                  padding: 24,
+                  overflowY: "auto",
+                  flex: 1,
+                }}
+              >
                 <div
-                  className="prose"
                   dangerouslySetInnerHTML={{ __html: previewTemplate.content }}
                   style={{
-                    minHeight: 100,
-                    padding: 16,
-                    background: "var(--surface-alt)",
-                    borderRadius: "var(--radius-md)",
-                    border: "1px solid var(--border-light)",
+                    fontSize: "0.92rem",
                     lineHeight: 1.7,
+                    color: "var(--text-main)",
                   }}
                 />
               </div>
 
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
                   padding: "12px 20px",
                   borderTop: "1px solid var(--border-light)",
+                  display: "flex",
+                  justifyContent: "flex-end",
                 }}
               >
                 <button
@@ -768,38 +772,50 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           document.body,
         )}
 
-      {/* DELETE CONFIRMATION MODAL */}
-      {deletingId &&
+      {/* CONFIRM DELETE MODAL */}
+      {Boolean(deletingId) &&
         createPortal(
           <div
+            className="modal-backdrop"
+            onClick={() => setDeletingId(null)}
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.65)",
+              background: "rgba(0, 0, 0, 0.6)",
               backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              zIndex: 999999,
+              zIndex: 9999,
               padding: 16,
             }}
-            onClick={() => !deleting && setDeletingId(null)}
           >
             <div
+              className="card"
+              onClick={(e) => e.stopPropagation()}
               style={{
-                background: "var(--surface)",
-                borderRadius: "var(--radius-lg)",
+                maxWidth: 440,
                 width: "100%",
-                maxWidth: 420,
                 padding: 24,
-                boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
               }}
-              onClick={(e) => e.stopPropagation()}
             >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: "rgba(239, 68, 68, 0.12)",
+                  color: "#ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="trash" size={24} />
+              </div>
               <h3
                 style={{
                   margin: 0,
@@ -819,7 +835,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 }}
               >
                 {isRTL
-                  ? "هل أنت متأكد من رغبتك في حذف هذا القالب؟ لن تتأثر التقارير والملخصات التي تم إنشاؤها مسبقاً باستخدامه."
+                  ? "متأكد إنك عايز تحذف القالب ده؟ مش هتتأثر التقارير والملخصات اللي اتعملت بيه قبل كده."
                   : "Are you sure you want to delete this template? Existing reports and summaries created using it will not be affected."}
               </p>
               <div

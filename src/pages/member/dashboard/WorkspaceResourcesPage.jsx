@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
@@ -7,21 +6,26 @@ import ResourcesTab from "./workspace-settings/ResourcesTab";
 import SEO from "../../../components/ui/SEO";
 import { TableSkeleton } from "../../../components/ui/Skeleton";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceResourcesPage() {
-  const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadResources,
+    canCreateResources,
+    canUpdateResources,
+    canDeleteResources,
+  } = usePermissions();
 
   const [resources, setResources] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead = isOwner || userPermissions.includes("resource_read");
-  const canEdit = isOwner || userPermissions.includes("resource_write");
+  const canRead = isOwner || canReadResources;
+  const canEdit =
+    isOwner || canCreateResources || canUpdateResources || canDeleteResources;
 
   const loadingRef = useRef(false);
   const loadData = async () => {
@@ -62,24 +66,24 @@ export default function WorkspaceResourcesPage() {
           endpoints.workspaceResourceItem(resourceId),
           resourceForm,
         );
-        toast.success(t("resourceUpdatedSuccess") || "تم تحديث المورد بنجاح");
+        toast.success(t("resourceUpdatedSuccess") || "اتحدث المورد بنجاح");
       } else {
         await client.post(endpoints.workspaceResources, resourceForm);
-        toast.success(t("resourceAddedSuccess") || "تم إضافة المورد بنجاح");
+        toast.success(t("resourceAddedSuccess") || "اتضاف المورد بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ في حفظ المورد");
+      toast.error(err.response?.data?.message || "حصل خطأ في حفظ المورد");
     }
   };
 
   const handleDeleteResource = async (id) => {
     try {
       await client.delete(endpoints.workspaceResourceItem(id));
-      toast.success(t("resourceDeletedSuccess") || "تم حذف المورد بنجاح");
+      toast.success(t("resourceDeletedSuccess") || "اتحذف المورد بنجاح");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ في حذف المورد");
+      toast.error(err.response?.data?.message || "حصل خطأ في حذف المورد");
     }
   };
 
@@ -96,6 +100,9 @@ export default function WorkspaceResourcesPage() {
           resources={resources}
           stats={stats}
           canEdit={canEdit}
+          canCreate={canCreateResources}
+          canUpdate={canUpdateResources}
+          canDelete={canDeleteResources}
           onSaveResource={handleSaveResource}
           onDeleteResource={handleDeleteResource}
         />

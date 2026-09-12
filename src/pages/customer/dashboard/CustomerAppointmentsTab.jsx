@@ -11,6 +11,7 @@ import UserAvatar from "../../../components/ui/UserAvatar";
 import { extractTranslatableText } from "../../../utils/text";
 import { useAuth } from "../../../context/AuthContext";
 import { getPublicAssetUrl } from "../../../utils/url";
+import { formatCurrency } from "../../../utils/currency";
 
 export default function CustomerAppointmentsTab() {
   const { user } = useAuth();
@@ -1327,8 +1328,14 @@ export default function CustomerAppointmentsTab() {
                           style={{ color: "var(--primary)" }}
                         />
                         <span>
-                          {appt.snapshot.price}{" "}
-                          {appt.snapshot.currency || "SAR"}
+                          {formatCurrency(
+                            appt.snapshot.price,
+                            appt.snapshot.currency ||
+                              appt.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </span>
                       </div>
                     )}
@@ -1967,10 +1974,16 @@ export default function CustomerAppointmentsTab() {
                         <span
                           style={{ fontWeight: 700, color: "var(--heading)" }}
                         >
-                          {selectedAppointment.snapshot?.price ||
-                            selectedAppointment.service?.price ||
-                            0}{" "}
-                          {selectedAppointment.snapshot?.currency || "SAR"}
+                          {formatCurrency(
+                            selectedAppointment.snapshot?.price ||
+                              selectedAppointment.service?.price ||
+                              0,
+                            selectedAppointment.snapshot?.currency ||
+                              selectedAppointment.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </span>
                       </div>
                     </div>
@@ -2518,10 +2531,16 @@ export default function CustomerAppointmentsTab() {
                             color: "var(--heading)",
                           }}
                         >
-                          {selectedAppointment.snapshot?.price ||
-                            selectedAppointment.service?.price ||
-                            0}{" "}
-                          {selectedAppointment.snapshot?.currency || "SAR"}
+                          {formatCurrency(
+                            selectedAppointment.snapshot?.price ||
+                              selectedAppointment.service?.price ||
+                              0,
+                            selectedAppointment.snapshot?.currency ||
+                              selectedAppointment.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </strong>
                       </div>
                       <div

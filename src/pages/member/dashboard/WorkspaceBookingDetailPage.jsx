@@ -17,6 +17,9 @@ export default function WorkspaceBookingDetailPage() {
     : [];
   const canEdit =
     isOwner ||
+    userPermissions.includes("booking_create") ||
+    userPermissions.includes("booking_update") ||
+    userPermissions.includes("booking_delete") ||
     userPermissions.includes("booking_write") ||
     userPermissions.includes("bookings_write");
 

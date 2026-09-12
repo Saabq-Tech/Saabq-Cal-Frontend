@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
 import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import { getCurrencySymbol } from "../../../utils/currency";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 
 const HOUR_HEIGHT = 82; // pixels per hour
@@ -17,6 +19,13 @@ export default function MemberOverviewTab() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
+  const {
+    isOwner,
+    canReadBookings,
+    canCreateBookings,
+    canReadCustomers,
+    canReadPayments,
+  } = usePermissions();
 
   // Dynamic workspace customer label
   const ws = user?.workspace;
@@ -33,18 +42,9 @@ export default function MemberOverviewTab() {
     return t("navCustomers") || (lang === "ar" ? "العملاء" : "Customers");
   })();
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canReadBookings =
-    isOwner ||
-    userPermissions.includes("booking_read") ||
-    userPermissions.includes("bookings_read");
-  const canReadCustomers =
-    isOwner ||
-    userPermissions.includes("customer_read") ||
-    userPermissions.includes("customers_read");
+  const custIcon =
+    ws?.customer_icon || workspaceSettings?.customer_icon || "users";
+
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
   const [bookings, setBookings] = useState([]);
@@ -245,13 +245,20 @@ export default function MemberOverviewTab() {
     let confirmedCount = 0;
     let cancelledCount = 0;
     let monthRevenue = 0;
-    let currency = "SAR";
+    let currency =
+      workspaceSettings?.currency ||
+      workspaceSettings?.currency_code ||
+      user?.workspace?.currency ||
+      user?.workspace?.currency_code ||
+      "SAR";
 
     bookings.forEach((b) => {
       const startsAt = b.starts_at ? new Date(b.starts_at) : null;
       const dateStr = b.starts_at ? getDateKey(b.starts_at) : null;
       const price = parseFloat(b.snapshot?.price ?? b.service?.price);
-      if (b.snapshot?.currency) currency = b.snapshot.currency;
+      if (!currency && b.snapshot?.currency) {
+        currency = b.snapshot.currency;
+      }
 
       if (dateStr === todayStr) {
         todayCount += 1;
@@ -307,7 +314,7 @@ export default function MemberOverviewTab() {
       rawRevenue: monthRevenue,
       currency,
     };
-  }, [bookings, customerTotal, getDateKey]);
+  }, [bookings, customerTotal, getDateKey, workspaceSettings, user]);
 
   // Master map of bookings by date key: "YYYY-MM-DD"
   const bookingsByDay = useMemo(() => {
@@ -696,211 +703,229 @@ export default function MemberOverviewTab() {
       {/* 8 Organized & Colored Executive Stat Cards */}
       <div className="workspace-stats-grid">
         {/* 1. Total Revenue (Emerald Green Theme) */}
-        <div className="workspace-stat-card stat-emerald">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="credit-card" size={18} />
+        {(canReadPayments || isOwner) && (
+          <div className="workspace-stat-card stat-emerald">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="credit-card" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "الإيرادات" : "Total Revenue"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "الإيرادات" : "Total Revenue"}
-              </div>
+              <span className="stat-pill">
+                {stats.rawRevenue > 0
+                  ? lang === "ar"
+                    ? "هذا الشهر"
+                    : "This month"
+                  : lang === "ar"
+                    ? "الشهر الحالي"
+                    : "Current month"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {stats.rawRevenue > 0
-                ? lang === "ar"
-                  ? "هذا الشهر"
-                  : "This month"
-                : lang === "ar"
-                  ? "الشهر الحالي"
-                  : "Current month"}
-            </span>
+            <div className="workspace-stat-number revenue-number">
+              <span>{stats.revenue}</span>
+              <span className="currency-unit">
+                {getCurrencySymbol(stats.currency, lang === "ar")}
+              </span>
+            </div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "إجمالي دخل الحجوزات"
+                  : "Gross completed revenue"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number revenue-number">
-            <span>{stats.revenue}</span>
-            <span className="currency-unit">
-              {lang === "ar" ? "ر.س" : stats.currency}
-            </span>
-          </div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "إجمالي دخل الحجوزات"
-                : "Gross completed revenue"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 2. Total Bookings (Royal Blue Theme) */}
-        <div className="workspace-stat-card stat-blue">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="calendar" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-blue">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="calendar" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
-              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "سجلات نشطة" : "Active"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "سجلات نشطة" : "Active"}
-            </span>
+            <div className="workspace-stat-number">{stats.totalBookings}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "كافة الحجوزات المسجلة"
+                  : "All recorded bookings"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.totalBookings}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "كافة الحجوزات المسجلة"
-                : "All recorded bookings"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 3. Today's Schedule (Sky Cyan Theme) */}
-        <div className="workspace-stat-card stat-cyan">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="clock" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-cyan">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="clock" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
-              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "اليوم" : "Today"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "اليوم" : "Today"}
-            </span>
+            <div className="workspace-stat-number">{stats.todayCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar" ? "مواعيد مجدولة لليوم" : "Scheduled for today"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.todayCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar" ? "مواعيد مجدولة لليوم" : "Scheduled for today"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 4. This Week's Appointments (Indigo Theme) */}
-        <div className="workspace-stat-card stat-indigo">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="sparkles" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-indigo">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="sparkles" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
-              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "7 أيام" : "7 Days"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "7 أيام" : "7 Days"}
-            </span>
+            <div className="workspace-stat-number">{stats.weekCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "حجوزات الأسبوع الجاري"
+                  : "Current week volume"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.weekCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar" ? "حجوزات الأسبوع الجاري" : "Current week volume"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 5. Completed Bookings (Mint / Teal Theme) */}
-        <div className="workspace-stat-card stat-teal">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="check" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-teal">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="check" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
-              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "تمت بنجاح" : "Serviced"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "تمت بنجاح" : "Serviced"}
-            </span>
+            <div className="workspace-stat-number">{stats.completedCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "خدمات تم تقديمها للعملاء"
+                  : "Successfully completed"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.completedCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "خدمات تم تقديمها للعملاء"
-                : "Successfully completed"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 6. Pending Confirmation (Warm Amber Theme) */}
-        <div className="workspace-stat-card stat-amber">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="alert-triangle" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-amber">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="alert-triangle" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
-              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
-            </span>
+            <div className="workspace-stat-number">{stats.pendingCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "حجوزات بانتظار الاعتماد"
+                  : "Awaiting confirmation"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.pendingCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "حجوزات بانتظار الاعتماد"
-                : "Awaiting confirmation"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 7. Completion Rate (Purple Theme) */}
-        <div className="workspace-stat-card stat-purple">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="bar-chart" size={18} />
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-purple">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="bar-chart" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
+                </div>
               </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
+              <span className="stat-pill">{stats.completionRate}%</span>
+            </div>
+            <div className="workspace-stat-number">{stats.completionRate}%</div>
+            <div className="stat-card-footer">
+              <div className="stat-progress-bar">
+                <div
+                  className="stat-progress-fill"
+                  style={{
+                    width: `${stats.completionRate}%`,
+                    background: "linear-gradient(90deg, #a855f7, #9333ea)",
+                  }}
+                />
               </div>
             </div>
-            <span className="stat-pill">{stats.completionRate}%</span>
           </div>
-          <div className="workspace-stat-number">{stats.completionRate}%</div>
-          <div className="stat-card-footer">
-            <div className="stat-progress-bar">
-              <div
-                className="stat-progress-fill"
-                style={{
-                  width: `${stats.completionRate}%`,
-                  background: "linear-gradient(90deg, #a855f7, #9333ea)",
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* 8. Active Clients / Patients (Rose Theme) */}
-        <div className="workspace-stat-card stat-rose">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="users" size={18} />
+        {canReadCustomers && (
+          <div className="workspace-stat-card stat-rose">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name={custIcon} size={18} />
+                </div>
+                <div className="workspace-stat-label">{custPlural}</div>
               </div>
-              <div className="workspace-stat-label">{custPlural}</div>
+              <span className="stat-pill">
+                {lang === "ar" ? "قاعدة العملاء" : "Clients"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "قاعدة العملاء" : "Clients"}
-            </span>
+            <div className="workspace-stat-number">{stats.customerCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "إجمالي المسجلين في المنشأة"
+                  : "Total registered clients"}
+              </span>
+            </div>
           </div>
-          <div className="workspace-stat-number">{stats.customerCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "إجمالي المسجلين في المنشأة"
-                : "Total registered clients"}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Two Column Workspace Grid: Right Column (Timeline) & Left Column (Calendar + Upcoming) */}
@@ -937,14 +962,16 @@ export default function MemberOverviewTab() {
                 <Icon name="chevron-left" size={16} />
               </button>
 
-              <button
-                type="button"
-                className="timeline-new-booking-btn"
-                onClick={() => setShowCreateModal(true)}
-              >
-                <span>+</span>
-                <span>{lang === "ar" ? "موعد جديد" : "New Booking"}</span>
-              </button>
+              {canCreateBookings && (
+                <button
+                  type="button"
+                  className="timeline-new-booking-btn"
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  <span>+</span>
+                  <span>{lang === "ar" ? "موعد جديد" : "New Booking"}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -967,15 +994,22 @@ export default function MemberOverviewTab() {
                   style={{
                     top: `${slot.hour * HOUR_HEIGHT}px`,
                     height: `${HOUR_HEIGHT}px`,
+                    cursor: canCreateBookings ? "pointer" : "default",
                   }}
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => canCreateBookings && setShowCreateModal(true)}
                   title={
-                    lang === "ar" ? "اضغط لإضافة موعد" : "Click to add booking"
+                    canCreateBookings
+                      ? lang === "ar"
+                        ? "اضغط لإضافة موعد"
+                        : "Click to add booking"
+                      : undefined
                   }
                 >
                   <span className="timeline-time-label">{slot.label}</span>
                   <div className="timeline-grid-line" />
-                  <span className="timeline-slot-add-hint">+</span>
+                  {canCreateBookings && (
+                    <span className="timeline-slot-add-hint">+</span>
+                  )}
                 </div>
               ))}
 
@@ -1006,8 +1040,8 @@ export default function MemberOverviewTab() {
                       style={{
                         top: `${evt.topPx + 2}px`,
                         height: `${evt.heightPx}px`,
-                        insetInlineStart: `calc(var(--timeline-time-col-width, 74px) + (100% - var(--timeline-time-col-width, 74px) - 10px) * (${evt.laneIndex || 0} / ${evt.numLanes || 1}))`,
-                        width: `calc((100% - var(--timeline-time-col-width, 74px) - 10px) / ${evt.numLanes || 1} - 8px)`,
+                        insetInlineStart: `calc(var(--timeline-time-col-width, 74px) + (100% - var(--timeline-time-col-width, 74px) - var(--timeline-event-gutter, 8px)) * (${evt.laneIndex || 0} / ${evt.numLanes || 1}))`,
+                        width: `calc((100% - var(--timeline-time-col-width, 74px) - var(--timeline-event-gutter, 8px)) / ${evt.numLanes || 1} - var(--timeline-event-gap, 6px))`,
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1173,14 +1207,18 @@ export default function MemberOverviewTab() {
                 </div>
               )}
             </div>
-            <div className="upcoming-widget-footer">
-              <Link
-                to="/member/workspace/bookings"
-                className="upcoming-view-all-link"
-              >
-                {lang === "ar" ? "عرض جميع المواعيد" : "View All Appointments"}
-              </Link>
-            </div>
+            {canReadBookings && (
+              <div className="upcoming-widget-footer">
+                <Link
+                  to="/member/workspace/bookings"
+                  className="upcoming-view-all-link"
+                >
+                  {lang === "ar"
+                    ? "عرض جميع المواعيد"
+                    : "View All Appointments"}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1242,21 +1280,23 @@ export default function MemberOverviewTab() {
               )}
             </div>
             <div className="event-detail-actions">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  const bId = selectedEventModal?.rawBooking?.id;
-                  setSelectedEventModal(null);
-                  if (bId) {
-                    navigate(`/member/workspace/bookings/${bId}`);
-                  } else {
-                    navigate("/member/workspace/bookings");
-                  }
-                }}
-              >
-                {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
-              </button>
+              {canReadBookings && (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    const bId = selectedEventModal?.rawBooking?.id;
+                    setSelectedEventModal(null);
+                    if (bId) {
+                      navigate(`/member/workspace/bookings/${bId}`);
+                    } else {
+                      navigate("/member/workspace/bookings");
+                    }
+                  }}
+                >
+                  {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"

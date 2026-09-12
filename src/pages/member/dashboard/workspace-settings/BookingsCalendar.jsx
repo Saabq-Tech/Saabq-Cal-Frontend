@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../../../context/AuthContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import client, { endpoints } from "../../../../api/client";
@@ -8,6 +9,7 @@ import UserAvatar from "../../../../components/ui/UserAvatar";
 
 export default function BookingsCalendar({ onSelectBooking }) {
   const { user } = useAuth();
+  const { isOwner, canReadBookings } = usePermissions();
   const { t, isRTL, lang } = useLanguage();
   const { customerSingular } = useCustomerLabel();
 
@@ -16,11 +18,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canSeeOthers = isOwner || userPermissions.includes("bookings_read");
+  const canSeeOthers = isOwner || canReadBookings;
 
   const loadCalendarBookings = async (date) => {
     try {
@@ -438,6 +436,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
                 borderRadius: "var(--radius-lg)",
                 border: "1px solid var(--border)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+                maxWidth: "100%",
+                overflow: "hidden",
+                boxSizing: "border-box",
               }}
             >
               <div
@@ -632,6 +633,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
 
         .workspace-bookings-calendar {
           width: 100%;
+          max-width: 100%;
+          overflow: hidden;
+          box-sizing: border-box;
         }
 
         .cal-header-bar {
@@ -1008,19 +1012,66 @@ export default function BookingsCalendar({ onSelectBooking }) {
           }
 
           .cal-selected-day-drawer {
-            padding: 14px 10px !important;
+            padding: 12px 8px !important;
+            overflow: hidden;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+
+          .cal-selected-day-drawer > div:first-child {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+
+          .cal-selected-day-drawer > div:first-child h3 {
+            font-size: 0.92rem !important;
+            flex-wrap: wrap;
+            line-height: 1.4;
           }
 
           .booking-list-item {
-            padding: 10px 12px !important;
+            padding: 10px 8px !important;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+          }
+
+          .booking-list-item-main {
+            gap: 8px !important;
+            min-width: 0;
+            overflow: hidden;
           }
 
           .booking-list-customer-name {
-            font-size: 0.88rem !important;
+            font-size: 0.86rem !important;
+          }
+
+          .booking-list-service-title {
+            font-size: 0.78rem !important;
+          }
+
+          .booking-list-item-meta {
+            flex-shrink: 0;
           }
 
           .booking-list-time {
             font-size: 0.78rem !important;
+          }
+
+          .cal-legend-bar {
+            padding: 10px 12px !important;
+            gap: 10px !important;
+            font-size: 0.76rem !important;
+          }
+
+          .cal-legend-item {
+            gap: 5px !important;
+          }
+
+          .cal-legend-indicator {
+            width: 8px !important;
+            height: 8px !important;
           }
         }
 
@@ -1054,7 +1105,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
         /* Booking details drawer list */
         .booking-list-item {
           display: flex;
-          justifyContent: space-between;
+          justify-content: space-between;
           align-items: center;
           background: var(--surface);
           padding: 12px 16px;
@@ -1063,6 +1114,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
           cursor: pointer;
           transition: all 0.15s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          max-width: 100%;
+          box-sizing: border-box;
+          overflow: hidden;
         }
         .booking-list-item:hover {
           transform: translateY(-1px);

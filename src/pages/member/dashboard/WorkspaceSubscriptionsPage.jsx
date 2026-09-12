@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
@@ -7,10 +6,18 @@ import SubscriptionTab from "./workspace-settings/SubscriptionTab";
 import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceSubscriptionsPage() {
-  const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadSubscriptions: _canReadSubscriptions,
+    canCreateSubscriptions,
+    canUpdateSubscriptions,
+    canDeleteSubscriptions,
+  } = usePermissions();
 
   const [subscriptionInfo, setSubscriptionInfo] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -18,11 +25,11 @@ export default function WorkspaceSubscriptionsPage() {
   const [plansError, setPlansError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canEdit = isOwner || userPermissions.includes("settings_write");
+  const canEdit =
+    isOwner ||
+    canCreateSubscriptions ||
+    canUpdateSubscriptions ||
+    canDeleteSubscriptions;
 
   const loadData = async () => {
     try {
@@ -36,7 +43,7 @@ export default function WorkspaceSubscriptionsPage() {
           setPlansError(
             err.response?.data?.message ||
               t("plansLoadFailed") ||
-              "فشل تحميل الخطط",
+              "فشل تحميل الباقات",
           );
           return null;
         }),
@@ -75,14 +82,16 @@ export default function WorkspaceSubscriptionsPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success(
-        res.data?.message || t("upgradeSuccess") || "تم ترقية الاشتراك بنجاح",
+        res.data?.message ||
+          t("upgradeSuccess") ||
+          "اتحدثت باقة الاشتراك بنجاح",
       );
       loadData();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
           t("upgradeFailed") ||
-          "فشلت عملية ترقية الاشتراك",
+          "حصل خطأ في ترقية الباقة",
       );
     }
   };
@@ -95,14 +104,14 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("cancelSubscriptionSuccess") ||
-          "تم إلغاء الاشتراك بنجاح",
+          "اتلغى الاشتراك بنجاح",
       );
       loadData();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
           t("cancelSubscriptionFailed") ||
-          "فشل إلغاء الاشتراك",
+          "حصل خطأ في إلغاء الاشتراك",
       );
     }
   };
@@ -115,14 +124,14 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("pauseSubscriptionSuccess") ||
-          "تم إيقاف الاشتراك مؤقتاً بنجاح",
+          "اتوقف الاشتراك مؤقتاً بنجاح",
       );
       loadData();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
           t("pauseSubscriptionFailed") ||
-          "فشل إيقاف الاشتراك",
+          "حصل خطأ في إيقاف الاشتراك",
       );
     }
   };
@@ -133,14 +142,14 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("resumeSubscriptionSuccess") ||
-          "تم استئناف الاشتراك بنجاح",
+          "اتشغل الاشتراك تاني بنجاح",
       );
       loadData();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
           t("resumeSubscriptionFailed") ||
-          "فشل استئناف الاشتراك",
+          "حصل خطأ في استئناف الاشتراك",
       );
     }
   };
@@ -161,6 +170,9 @@ export default function WorkspaceSubscriptionsPage() {
           plansLoading={plansLoading}
           plansError={plansError}
           canEdit={canEdit}
+          canCreate={canCreateSubscriptions}
+          canUpdate={canUpdateSubscriptions}
+          canDelete={canDeleteSubscriptions}
           onUpgrade={handleUpgrade}
           onCancel={handleCancel}
           onPause={handlePause}

@@ -7,10 +7,16 @@ import Icon from "../../../../components/common/Icon";
 export default function MembersTab({
   membersList,
   rolesList,
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onSaveMember,
   onDeleteMember,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -107,18 +113,10 @@ export default function MembersTab({
               "إدارة فريق العمل، الأدوار، والصلاحيات الممنوحة لكل عضو"}
           </p>
         </div>
-        {canEdit ? (
+        {allowCreate && (
           <button className="btn btn-primary btn-sm" onClick={handleOpenInvite}>
             + {t("inviteMember") || "دعوة عضو جديد"}
           </button>
-        ) : (
-          <span
-            className="profile-badge unverified"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-          >
-            <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
-          </span>
         )}
       </div>
 
@@ -171,7 +169,7 @@ export default function MembersTab({
               >
                 {t("statusHeader") || "الحالة"}
               </th>
-              {canEdit && (
+              {(allowUpdate || allowDelete) && (
                 <th
                   style={{
                     padding: "14px 16px",
@@ -260,7 +258,7 @@ export default function MembersTab({
                       : t("statusInactiveBadge") || "غير نشط"}
                   </span>
                 </td>
-                {canEdit && (
+                {(allowUpdate || allowDelete) && (
                   <td
                     data-label={t("actionsHeader") || "الإجراءات"}
                     style={{ padding: "14px 16px", textAlign: "end" }}
@@ -273,14 +271,16 @@ export default function MembersTab({
                           gap: 8,
                         }}
                       >
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => handleOpenEdit(m)}
-                        >
-                          {t("edit") || "تعديل"}
-                        </button>
-                        {onDeleteMember && (
+                        {allowUpdate && (
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => handleOpenEdit(m)}
+                          >
+                            {t("edit") || "تعديل"}
+                          </button>
+                        )}
+                        {allowDelete && onDeleteMember && (
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm"

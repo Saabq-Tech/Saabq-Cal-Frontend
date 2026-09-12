@@ -9,27 +9,26 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 
+import { usePermissions } from "../../../hooks/usePermissions";
+
 export default function WorkspaceRolesPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadRoles,
+    canCreateRoles,
+    canUpdateRoles,
+    canDeleteRoles,
+  } = usePermissions();
 
   const [rolesList, setRolesList] = useState([]);
   const [availablePermissions, setAvailablePermissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("role_read") ||
-    userPermissions.includes("roles_read");
-  const canEdit =
-    isOwner ||
-    userPermissions.includes("role_write") ||
-    userPermissions.includes("roles_write");
+  const canRead = isOwner || canReadRoles;
+  const canEdit = isOwner || canCreateRoles || canUpdateRoles || canDeleteRoles;
 
   const isCapAllowed = checkWorkspaceCapability(user, "TEAM_MEMBERS");
 
@@ -81,28 +80,28 @@ export default function WorkspaceRolesPage() {
           `${endpoints.workspaceRoles}/${roleForm.editing_id}`,
           payload,
         );
-        toast.success(t("roleUpdatedSuccess") || "تم تحديث الدور بنجاح");
+        toast.success(t("roleUpdatedSuccess") || "اتحدث الدور بنجاح");
       } else {
         await client.post(endpoints.workspaceRoles, payload);
-        toast.success(t("roleCreatedSuccess") || "تم إنشاء الدور المخصص بنجاح");
+        toast.success(t("roleCreatedSuccess") || "اتعمل الدور المخصص بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشل حفظ الدور");
+      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الدور");
     }
   };
 
   const handleDeleteRole = async (role) => {
     if (role.is_system) {
-      toast.error(t("cannotDeleteProtectedRole") || "لا يمكن حذف دور محمي");
+      toast.error(t("cannotDeleteProtectedRole") || "مينفعش تحذف دور محمي");
       return;
     }
     try {
       await client.delete(`${endpoints.workspaceRoles}/${role.id}`);
-      toast.success(t("roleDeletedSuccess") || "تم حذف الدور بنجاح");
+      toast.success(t("roleDeletedSuccess") || "اتحذف الدور بنجاح");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشل حذف الدور");
+      toast.error(err.response?.data?.message || "حصل خطأ في حذف الدور");
     }
   };
 
@@ -121,6 +120,9 @@ export default function WorkspaceRolesPage() {
             rolesList={rolesList}
             availablePermissions={availablePermissions}
             canEdit={canEdit}
+            canCreate={canCreateRoles}
+            canUpdate={canUpdateRoles}
+            canDelete={canDeleteRoles}
             onSaveRole={handleSaveRole}
             onDeleteRole={handleDeleteRole}
           />

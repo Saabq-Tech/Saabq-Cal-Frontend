@@ -10,12 +10,18 @@ export default function SubscriptionTab({
   plans = [],
   plansLoading = false,
   plansError = null,
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onUpgrade,
   onCancel,
   onPause: _onPause,
   onResume: _onResume,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const _allowDelete = canDelete !== undefined ? canDelete : canEdit;
   const { t } = useLanguage();
   const toast = useToast();
 
@@ -319,7 +325,7 @@ export default function SubscriptionTab({
               "متابعة حالة الاشتراك الحالي، ميعاد التجديد، وإمكانية الترقية لباقات أعلى"}
           </p>
         </div>
-        {canEdit && (
+        {(allowCreate || allowUpdate) && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {statusStr !== "pending" && (
               <button
@@ -392,7 +398,7 @@ export default function SubscriptionTab({
             {t("noSubscriptionDesc") ||
               "قم باختيار وتفعيل باقتك للبدء في استخدام جميع مميزات مساحة العمل."}
           </p>
-          {canEdit && (
+          {(allowCreate || allowUpdate) && (
             <button
               className="btn btn-primary btn-sm"
               onClick={() => setIsUpgradeModalOpen(true)}
@@ -455,7 +461,7 @@ export default function SubscriptionTab({
                     </span>
                   </div>
                 </div>
-                {canEdit && (
+                {(allowCreate || allowUpdate) && (
                   <button
                     className="btn btn-primary btn-sm"
                     onClick={() => setIsProofModalOpen(true)}
