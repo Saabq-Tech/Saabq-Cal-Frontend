@@ -475,7 +475,7 @@ export default function CustomerAppointmentsTab() {
             <section class="report-box">
               <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
               <div class="report-content">
-                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مفيش نص متسجل للتقرير." : "No report content recorded."}</p>`}
+                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
               </div>
             </section>
 
@@ -662,7 +662,7 @@ export default function CustomerAppointmentsTab() {
     if (!paymentId) {
       toast.error(
         isRTL
-          ? "ملقيناش سجل دفع للميعاد ده"
+          ? "لم نجد سجل دفع لهذا الموعد"
           : "No payment record found for this appointment",
       );
       return;
@@ -1080,7 +1080,7 @@ export default function CustomerAppointmentsTab() {
                 marginBottom: 6,
               }}
             >
-              {t("noCustomerAppointments") || "معندكش مواعيد دلوقتي"}
+              {t("noCustomerAppointments") || "ليس لديك مواعيد حالياً"}
             </h3>
             <p
               style={{
@@ -2648,7 +2648,7 @@ export default function CustomerAppointmentsTab() {
                           }}
                         >
                           {isRTL
-                            ? "مفيش صورة إيصال سداد مرفقة مع الميعاد ده"
+                            ? "لا توجد صورة إيصال سداد مرفقة مع هذا الموعد"
                             : "No receipt image attached with this booking"}
                         </span>
                       </div>
@@ -2903,7 +2903,7 @@ export default function CustomerAppointmentsTab() {
                 }}
               >
                 {isRTL
-                  ? "إنت متأكد إنك عايز تلغي الميعاد ده؟"
+                  ? "هل أنت متأكد من رغبتك في إلغاء هذا الموعد؟"
                   : "Are you sure you want to cancel this appointment?"}
               </p>
 

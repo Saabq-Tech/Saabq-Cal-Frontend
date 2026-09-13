@@ -1246,7 +1246,7 @@ export default function WorkspacePaymentsPage() {
                       style={{ fontSize: "0.84rem", color: "var(--muted)" }}
                     >
                       {isRTL
-                        ? "مفيش ملف إيصال دفع مرفوع"
+                        ? "لا يوجد ملف إيصال دفع مرفوع"
                         : "No receipt file attached"}
                     </span>
                   </div>
@@ -1279,7 +1279,7 @@ export default function WorkspacePaymentsPage() {
                         className="form-input"
                         placeholder={
                           isRTL
-                            ? "مثال: رقم الحساب أو إيصال التحويل مش مظبوط"
+                            ? "مثال: رقم الحساب أو إيصال التحويل غير صحيح"
                             : "Reason for rejection..."
                         }
                         value={rejectReason}

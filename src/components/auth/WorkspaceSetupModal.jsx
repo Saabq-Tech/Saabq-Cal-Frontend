@@ -47,12 +47,12 @@ export default function WorkspaceSetupModal({
         <div className="modal-header">
           <div>
             <h2 id="modal-setup-title" className="modal-title">
-              {t("setupWorkspaceTitle", "إعداد مساحة العمل بتاعتك")}
+              {t("setupWorkspaceTitle", "إعداد مساحة العمل الخاصة بك")}
             </h2>
             <p id="modal-setup-desc" className="modal-subtitle">
               {t(
                 "setupWorkspaceDesc",
-                "من فضلك اكتب اسم وتفاصيل مساحة العمل عشان تكمّل تسجيل الدخول بحساب Google.",
+                "يرجى كتابة اسم وتفاصيل مساحة العمل لإكمال تسجيل الدخول بحساب Google.",
               )}
             </p>
           </div>

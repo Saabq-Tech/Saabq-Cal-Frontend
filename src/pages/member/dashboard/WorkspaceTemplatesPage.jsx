@@ -117,7 +117,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       } else {
         await client.post(endpoints.workspaceTemplates, payload);
         toast.success(
-          isRTL ? "اتعمل القالب بنجاح" : "Template created successfully",
+          isRTL ? "تم إنشاء القالب بنجاح" : "Template created successfully",
         );
       }
 
@@ -139,7 +139,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       setDeleting(true);
       await client.delete(endpoints.workspaceTemplateItem(deletingId));
       toast.success(
-        isRTL ? "اتحذف القالب بنجاح" : "Template deleted successfully",
+        isRTL ? "تم حذف القالب بنجاح" : "Template deleted successfully",
       );
       setDeletingId(null);
       loadTemplates();
@@ -218,7 +218,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             }}
           >
             {isRTL
-              ? "إدارة القوالب الجاهزة عشان تستخدمها على طول وأنت بتكتب التقارير والملخصات"
+              ? "إدارة القوالب الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات"
               : "Manage ready-to-use templates for reports and consultation summaries"}
           </p>
         </div>
@@ -338,10 +338,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           <h4 style={{ margin: 0, fontWeight: 700, color: "var(--heading)" }}>
             {search
               ? isRTL
-                ? "مفيش قوالب مطابقة لبحثك"
+                ? "لا توجد قوالب مطابقة لبحثك"
                 : "No templates match your search"
               : isRTL
-                ? "مفيش قوالب مضافة لسه"
+                ? "لا توجد قوالب مضافة حتى الآن"
                 : "No templates added yet"}
           </h4>
           <p
@@ -353,7 +353,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             }}
           >
             {isRTL
-              ? "اعمل قوالب جاهزة (زي تقرير الجلسة، ملخص الاستشارة) عشان تسرّع وتسهّل شغل فريقك."
+              ? "أنشئ قوالب جاهزة (مثل تقرير الجلسة، ملخص الاستشارة) لتسريع وتسهيل عمل فريقك."
               : "Create standardized templates (such as session reports or consultation summaries) to streamline your team's workflow."}
           </p>
           {canCreate && !search && (
@@ -363,7 +363,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
               onClick={openCreateModal}
               style={{ marginTop: 8 }}
             >
-              {isRTL ? "اعمل أول قالب دلوقتي" : "Create First Template"}
+              {isRTL ? "أنشئ أول قالب الآن" : "Create First Template"}
             </button>
           )}
         </div>
@@ -918,7 +918,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 }}
               >
                 {isRTL
-                  ? "متأكد إنك عايز تحذف القالب ده؟ مش هتتأثر التقارير والملخصات اللي اتعملت بيه قبل كده."
+                  ? "هل أنت متأكد من رغبتك في حذف هذا القالب؟ لن تتأثر التقارير والملخصات التي تم إنشاؤها مسبقاً."
                   : "Are you sure you want to delete this template? Existing reports and summaries created using it will not be affected."}
               </p>
               <div

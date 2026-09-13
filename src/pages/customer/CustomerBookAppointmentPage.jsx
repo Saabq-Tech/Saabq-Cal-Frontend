@@ -122,7 +122,7 @@ export default function CustomerBookAppointmentPage() {
       if (!selectedService) {
         toast.error(
           isRTL
-            ? "من فضلك اختار الخدمة الأول عشان تكمّل"
+            ? "يرجى اختيار الخدمة أولاً للمتابعة"
             : "Please select a service first to proceed",
         );
         return;
@@ -132,7 +132,7 @@ export default function CustomerBookAppointmentPage() {
       if (!selectedDate || !selectedSlot) {
         toast.error(
           isRTL
-            ? "من فضلك حدد اليوم والوقت المتاح عشان تكمّل"
+            ? "يرجى تحديد اليوم والوقت المتاح للمتابعة"
             : "Please select date and slot to proceed",
         );
         return;
@@ -222,7 +222,7 @@ export default function CustomerBookAppointmentPage() {
             setSelectedService(null);
             setDisabledNotice(
               isRTL
-                ? "عذراً، الخدمة المطلوبة مش متاحة للحجز أونلاين دلوقتي. من فضلك اختار خدمة من الخدمات المتاحة تحت."
+                ? "عذراً، الخدمة المطلوبة غير متاحة للحجز عبر الإنترنت حالياً. يرجى اختيار إحدى الخدمات المتاحة أدناه."
                 : "Sorry, the requested service is currently not available for online booking. Please select an available service below.",
             );
           }
@@ -351,9 +351,7 @@ export default function CustomerBookAppointmentPage() {
 
     if (!turnstileToken) {
       toast.error(
-        isRTL
-          ? "من فضلك اتأكد من اختبار الكابتشا"
-          : "Please verify the CAPTCHA",
+        isRTL ? "يرجى التحقق من اختبار الكابتشا" : "Please verify the CAPTCHA",
       );
       return;
     }
@@ -420,7 +418,7 @@ export default function CustomerBookAppointmentPage() {
       ) {
         toast.error(
           isRTL
-            ? "من فضلك ارفع إيصال التحويل عشان تكمّل الحجز"
+            ? "يرجى إرفاق إيصال التحويل لإكمال الحجز"
             : "Please upload payment receipt to complete booking",
         );
         setSubmitting(false);
@@ -500,7 +498,7 @@ export default function CustomerBookAppointmentPage() {
       console.error("Booking failed:", err);
       const serverMsg = err.response?.data?.message;
       let userMsg = isRTL
-        ? "حجز الميعاد منجحش، جرب تاني"
+        ? "تعذر حجز الموعد، يرجى المحاولة مرة أخرى"
         : "Failed to book appointment";
 
       if (serverMsg) {
@@ -2879,7 +2877,7 @@ export default function CustomerBookAppointmentPage() {
                 ) : (
                   <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
                     {isRTL
-                      ? "من فضلك حدد خدمة عشان تشوف التفاصيل."
+                      ? "يرجى تحديد خدمة للاطلاع على التفاصيل."
                       : "Please select a service."}
                   </p>
                 )}

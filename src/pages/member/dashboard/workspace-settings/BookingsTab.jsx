@@ -267,7 +267,7 @@ export default function BookingsTab({
             style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
           >
             <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
+            {t("readOnlyNotice") || "للعرض فقط (بدون تعديل)"}
           </span>
         )}
       </div>
@@ -382,7 +382,7 @@ export default function BookingsTab({
               color: "var(--heading)",
             }}
           >
-            {t("noBookingsFound") || "مفيش مواعيد أو حجوزات متسجلة دلوقتي"}
+            {t("noBookingsFound") || "لا توجد مواعيد أو حجوزات مسجلة حالياً"}
           </h4>
           <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
             {t("noBookingsDesc") ||

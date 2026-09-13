@@ -452,7 +452,8 @@ export default function IntegrationsSettingsPage() {
   const handleDisconnectGoogle = () => {
     openConfirm(
       t("googleIntegrationTitle") || "حساب جوجل المترابط",
-      t("googleDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط حساب جوجل؟",
+      t("googleDisconnectConfirm") ||
+        "هل أنت متأكد من رغبتك في إلغاء ربط حساب Google؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await disconnectGoogleIntegration();
@@ -628,7 +629,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("webhooksTitle") || "Webhooks API",
       t("webhookDisconnectConfirm") ||
-        "إنت متأكد إنك عايز تلغي رابط الـ Webhook؟",
+        "هل أنت متأكد من رغبتك في إلغاء ربط الـ Webhook؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteWebhookIntegration();
@@ -654,7 +655,7 @@ export default function IntegrationsSettingsPage() {
       !telegramBotToken &&
       !telegramIntegration?.has_bot_token
     ) {
-      toast.error(t("botTokenLabel") || "من فضلك اكتب التوكن بتاع البوت");
+      toast.error(t("botTokenLabel") || "يرجى إدخال رمز (Token) البوت");
       return;
     }
 
@@ -700,7 +701,8 @@ export default function IntegrationsSettingsPage() {
   const handleDeleteTelegramSettings = () => {
     openConfirm(
       t("telegramTitle") || "إعدادات Telegram",
-      t("telegramDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط Telegram؟",
+      t("telegramDisconnectConfirm") ||
+        "هل أنت متأكد من رغبتك في إلغاء ربط Telegram؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteTelegramIntegration();
@@ -785,7 +787,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("emailSettingsTitle") || "إعدادات البريد الإلكتروني",
       t("emailDisconnectConfirm") ||
-        "إنت متأكد إنك عايز تلغي ربط البريد الإلكتروني؟",
+        "هل أنت متأكد من رغبتك في إلغاء ربط البريد الإلكتروني؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteEmailIntegration();
@@ -1318,7 +1320,7 @@ export default function IntegrationsSettingsPage() {
                   >
                     <Icon name="alert-triangle" size={16} />
                     {t("noGoogleConnectedNotice") ||
-                      "مفيش أي حساب جوجل اتربط لحد دلوقتي. اضغط على الزرار تحت عشان تربطه بأمان."}
+                      "لم يتم ربط أي حساب Google حتى الآن. انقر على الزر أدناه للربط بأمان."}
                   </span>
                 </div>
               )}
@@ -1704,7 +1706,7 @@ export default function IntegrationsSettingsPage() {
                     }}
                   >
                     {t("createSheetAutoDesc") ||
-                      "مفيش شيت مرتبط دلوقتي. اعمل شيت جديد مجهز بكل الحقول الـ 26 والتنسيق المعتمد بضغطة واحدة."}
+                      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة."}
                   </p>
                   {canEditIntegrations && (
                     <button
@@ -1894,7 +1896,7 @@ export default function IntegrationsSettingsPage() {
               <div className="form-group" style={{ marginBottom: 20 }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
                   {t("spreadsheetIdLabel") ||
-                    "معرّف ملف Google Sheet بتاعك (مستند مخصص)"}
+                    "معرّف ملف Google Sheets الخاص بك (مستند مخصص)"}
                 </label>
                 <input
                   type={showSheetId ? "text" : "password"}
@@ -2170,7 +2172,7 @@ export default function IntegrationsSettingsPage() {
                           }}
                         >
                           {t("telegramDefaultBotDesc") ||
-                            "مش محتاج تعمل بوت مخصوص — هتحتاج بس الـ Chat ID بتاعك."}
+                            "لا تحتاج لإنشاء بوت مخصص — ستحتاج فقط إلى معرف المحادثة (Chat ID) الخاص بك."}
                         </div>
                       </div>
                     </label>
@@ -2196,7 +2198,7 @@ export default function IntegrationsSettingsPage() {
                       }}
                     >
                       {t("telegramDefaultBotNotice") ||
-                        "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
+                        "ستصلك إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. اضغط على الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً بدون أي نسخ أو لصق."}
                     </p>
                     <a
                       href="https://t.me/Saabq_cal_Bot"
@@ -2570,7 +2572,7 @@ export default function IntegrationsSettingsPage() {
                             fontStyle: "italic",
                           }}
                         >
-                          {t("noServicesFound") || "مفيش خدمات متاحة دلوقتي"}
+                          {t("noServicesFound") || "لا توجد خدمات متاحة حالياً"}
                         </div>
                       )}
                     </div>

@@ -1241,7 +1241,7 @@ export default function RichTextEditor({
                   >
                     <p style={{ margin: 0, fontWeight: 700 }}>
                       {isRTL
-                        ? "مفيش قوالب محفوظة لسه"
+                        ? "لا توجد قوالب محفوظة حتى الآن"
                         : "No templates saved yet"}
                     </p>
                   </div>

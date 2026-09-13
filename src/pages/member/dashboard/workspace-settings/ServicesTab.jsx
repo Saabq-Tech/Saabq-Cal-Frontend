@@ -418,7 +418,7 @@ export default function ServicesTab({
           >
             <Icon name="lock" size={12} />
             {t("readOnlyNotice") ||
-              (isRTL ? "للعرض بس (من غير تعديل)" : "Read-only mode")}
+              (isRTL ? "للعرض فقط (بدون تعديل)" : "Read-only mode")}
           </span>
         )}
       </div>
@@ -459,7 +459,7 @@ export default function ServicesTab({
           >
             {t("noServicesFound") ||
               (isRTL
-                ? "مفيش خدمات مضافة دلوقتي في مساحة العمل"
+                ? "لا توجد خدمات مضافة حالياً في مساحة العمل"
                 : "No services found in this workspace")}
           </h4>
           <p
@@ -713,7 +713,7 @@ export default function ServicesTab({
                     {descDisplay ||
                       t("noServiceDescription") ||
                       (isRTL
-                        ? "مفيش وصف تفصيلي مضاف للخدمة دي."
+                        ? "لا يوجد وصف تفصيلي مضاف لهذه الخدمة."
                         : "No detailed description provided for this service.")}
                   </p>
 
@@ -2995,7 +2995,7 @@ export default function ServicesTab({
                     }}
                   >
                     {t("telegramDefaultBotNotice") ||
-                      "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
+                      "ستصلك إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. اضغط على الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً بدون أي نسخ أو لصق."}
                   </p>
                   <a
                     href="https://t.me/Saabq_cal_Bot"

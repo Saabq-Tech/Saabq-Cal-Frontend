@@ -506,7 +506,7 @@ export default function BookingDetailsPage({
   const handleDeleteSummary = async () => {
     if (
       !window.confirm(
-        isRTL ? "إنت متأكد إنك عايز تحذف التقرير؟" : "Delete report?",
+        isRTL ? "هل أنت متأكد من رغبتك في حذف التقرير؟" : "Delete report?",
       )
     ) {
       return;
@@ -965,7 +965,7 @@ export default function BookingDetailsPage({
             <section class="report-box">
               <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
               <div class="report-content">
-                ${reportContent || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مفيش نص متسجل للتقرير." : "No report content recorded."}</p>`}
+                ${reportContent || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
               </div>
             </section>
 
@@ -1337,7 +1337,7 @@ export default function BookingDetailsPage({
               }}
             >
               {isRTL
-                ? "مفيش روشتة أو ملخص استشارة اتسجل للميعاد ده لحد دلوقتي."
+                ? "لا توجد وصفة طبية أو ملخص استشارة مسجل لهذا الموعد حتى الآن."
                 : "No prescription or consultation summary has been recorded for this appointment yet."}
             </div>
           )
@@ -2155,7 +2155,7 @@ export default function BookingDetailsPage({
                     color: "#059669",
                   }}
                 >
-                  الميعاد ده اكتمل بنجاح، ومينفعش تعدل فيه أو تلغيه أو تحويل
+                  اكتمل هذا الموعد بنجاح، ولا يمكن تعديله أو إلغاؤه أو تحويله
                   للانتظار بعد الانتهاء.
                 </div>
               </div>
@@ -2209,7 +2209,7 @@ export default function BookingDetailsPage({
                   color: "#dc2626",
                 }}
               >
-                الميعاد ده ملغي دلوقتي، ومينفعش تعدل فيه.
+                هذا الموعد ملغى حالياً، ولا يمكن تعديله.
               </div>
             </div>
           ) : (

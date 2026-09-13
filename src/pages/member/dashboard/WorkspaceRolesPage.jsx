@@ -83,7 +83,7 @@ export default function WorkspaceRolesPage() {
         toast.success(t("roleUpdatedSuccess") || "اتحدث الدور بنجاح");
       } else {
         await client.post(endpoints.workspaceRoles, payload);
-        toast.success(t("roleCreatedSuccess") || "اتعمل الدور المخصص بنجاح");
+        toast.success(t("roleCreatedSuccess") || "تم إنشاء الدور المخصص بنجاح");
       }
       loadData();
     } catch (err) {
@@ -93,12 +93,12 @@ export default function WorkspaceRolesPage() {
 
   const handleDeleteRole = async (role) => {
     if (role.is_system) {
-      toast.error(t("cannotDeleteProtectedRole") || "مينفعش تحذف دور محمي");
+      toast.error(t("cannotDeleteProtectedRole") || "لا يمكن حذف دور محمي");
       return;
     }
     try {
       await client.delete(`${endpoints.workspaceRoles}/${role.id}`);
-      toast.success(t("roleDeletedSuccess") || "اتحذف الدور بنجاح");
+      toast.success(t("roleDeletedSuccess") || "تم حذف الدور بنجاح");
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "حصل خطأ في حذف الدور");

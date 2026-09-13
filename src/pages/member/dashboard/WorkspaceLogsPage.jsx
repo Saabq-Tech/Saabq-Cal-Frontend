@@ -209,7 +209,7 @@ export default function WorkspaceLogsPage() {
         setMeta(res.data?.meta || null);
       } catch (err) {
         if (err.response?.status !== 403) {
-          toast.error(t("logsLoadFailed") || "معرفناش نحمل سجل النشاطات");
+          toast.error(t("logsLoadFailed") || "تعذر تحميل سجل الأنشطة");
         }
       } finally {
         setLogsLoading(false);
@@ -858,7 +858,7 @@ export default function WorkspaceLogsPage() {
                         }}
                       >
                         {lang === "ar"
-                          ? "مفيش مواعيد متسجلة لحساب ساعات الذروة"
+                          ? "لا توجد مواعيد مسجلة لحساب ساعات الذروة"
                           : "No bookings recorded for peak hours"}
                       </div>
                     ) : (
@@ -1163,7 +1163,7 @@ export default function WorkspaceLogsPage() {
                       }}
                     >
                       {lang === "ar"
-                        ? "مفيش بيانات حجوزات أو إيرادات في الفترة دي"
+                        ? "لا توجد بيانات حجوزات أو إيرادات في هذه الفترة"
                         : "No booking or revenue data for this period"}
                     </div>
                   )}
@@ -1254,7 +1254,7 @@ export default function WorkspaceLogsPage() {
                       />
                       <div>
                         {lang === "ar"
-                          ? "مفيش خدمات محجوزة لحد دلوقتي"
+                          ? "لا توجد خدمات محجوزة حتى الآن"
                           : "No booked services recorded yet"}
                       </div>
                     </div>
@@ -1433,7 +1433,7 @@ export default function WorkspaceLogsPage() {
                             }}
                           >
                             {lang === "ar"
-                              ? "مفيش مواعيد مطابقة للفلترة الحالية"
+                              ? "لا توجد مواعيد مطابقة للفلترة الحالية"
                               : "No appointments match your filter"}
                           </td>
                         </tr>

@@ -403,7 +403,7 @@ export default function WorkspaceApiIntegrationPage() {
             <Icon name="lock" size={32} />
           </div>
           <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: 8 }}>
-            {t("apiIntegrationDisabledTitle") || "الربط البرمجي مش متاح"}
+            {t("apiIntegrationDisabledTitle") || "الربط البرمجي غير متاح"}
           </h2>
           <p
             style={{
@@ -708,7 +708,7 @@ export default function WorkspaceApiIntegrationPage() {
               />
               <span>
                 {pingResult.success
-                  ? `${t("pingSuccess") || "الاتصال شغال بنجاح!"} (زمن الاستجابة: ${pingResult.latency}ms)`
+                  ? `${t("pingSuccess") || "الاتصال يعمل بنجاح!"} (زمن الاستجابة: ${pingResult.latency}ms)`
                   : `${t("pingFailed") || "الاتصال منجحش:"} ${pingResult.error}`}
               </span>
             </div>

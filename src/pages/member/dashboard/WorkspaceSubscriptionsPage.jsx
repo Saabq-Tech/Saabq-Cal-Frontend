@@ -104,7 +104,7 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("cancelSubscriptionSuccess") ||
-          "اتلغى الاشتراك بنجاح",
+          "تم إلغاء الاشتراك بنجاح",
       );
       loadData();
     } catch (err) {
@@ -142,7 +142,7 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("resumeSubscriptionSuccess") ||
-          "اتشغل الاشتراك تاني بنجاح",
+          "تم استئناف الاشتراك بنجاح",
       );
       loadData();
     } catch (err) {

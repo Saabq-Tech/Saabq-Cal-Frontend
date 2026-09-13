@@ -675,7 +675,7 @@ export default function RolesTab({
                     margin: 0,
                   }}
                 >
-                  {roleDescStr || "مفيش وصف للدور ده."}
+                  {roleDescStr || "لا يوجد وصف لهذا الدور."}
                 </p>
                 <div
                   style={{

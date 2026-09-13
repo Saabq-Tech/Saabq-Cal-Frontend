@@ -148,21 +148,6 @@ export default function WorkspaceLayout() {
       {/* Two-column dashboard grid */}
       <div className="workspace-dashboard-grid">
         <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
-          {/* Workspace Vibe Brand Badge */}
-          <div className={`workspace-sidebar-vibe-header vibe-${vibe.key}`}>
-            <div className="workspace-sidebar-vibe-icon-wrap">
-              <Icon name={vibe.badgeIcon} size={18} />
-            </div>
-            <div className="workspace-sidebar-vibe-info">
-              <span className="workspace-sidebar-vibe-type">
-                {vibe.dashboardBadge}
-              </span>
-              <span className="workspace-sidebar-vibe-name">
-                {user?.workspace?.name}
-              </span>
-            </div>
-          </div>
-
           <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
             {availableTabs.map((wsTab) => {
               const isCapAllowed =

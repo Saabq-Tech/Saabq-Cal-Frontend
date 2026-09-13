@@ -92,7 +92,7 @@ export default function WorkspaceServicesPage() {
   const handleDeleteService = async (serviceId) => {
     try {
       await client.delete(endpoints.workspaceServiceItem(serviceId));
-      toast.success(t("serviceDeletedSuccess") || "اتحذفت الخدمة بنجاح");
+      toast.success(t("serviceDeletedSuccess") || "تم حذف الخدمة بنجاح");
       loadServices();
     } catch (err) {
       toast.error(err.response?.data?.message || "حصل خطأ في حذف الخدمة");

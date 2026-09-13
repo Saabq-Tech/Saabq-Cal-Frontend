@@ -80,7 +80,7 @@ export default function WorkspaceResourcesPage() {
   const handleDeleteResource = async (id) => {
     try {
       await client.delete(endpoints.workspaceResourceItem(id));
-      toast.success(t("resourceDeletedSuccess") || "اتحذف المورد بنجاح");
+      toast.success(t("resourceDeletedSuccess") || "تم حذف المورد بنجاح");
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "حصل خطأ في حذف المورد");

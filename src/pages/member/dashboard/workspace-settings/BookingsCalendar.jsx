@@ -578,7 +578,7 @@ export default function BookingsCalendar({ onSelectBooking }) {
                   }}
                 >
                   {isRTL
-                    ? "مفيش مواعيد متسجلة في اليوم ده"
+                    ? "لا توجد مواعيد مسجلة في هذا اليوم"
                     : "No appointments scheduled for this day"}
                 </div>
               )}

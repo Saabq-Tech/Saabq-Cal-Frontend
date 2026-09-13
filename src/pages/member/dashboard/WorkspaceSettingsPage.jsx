@@ -331,7 +331,7 @@ export default function WorkspaceSettingsPage() {
     if (!canEdit) {
       toast.error(
         t("unauthorizedSettingsEdit") ||
-          "معندكش صلاحية تعديل إعدادات مساحة العمل",
+          "ليس لديك صلاحية لتعديل إعدادات مساحة العمل",
       );
       return;
     }

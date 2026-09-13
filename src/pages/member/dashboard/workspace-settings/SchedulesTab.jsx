@@ -414,7 +414,7 @@ export default function SchedulesTab({
     }
 
     const confirmMsg =
-      t("confirmDeleteSchedule") || "إنت متأكد إنك عايز تحذف الجدول ده؟";
+      t("confirmDeleteSchedule") || "هل أنت متأكد من رغبتك في حذف هذا الجدول؟";
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -734,7 +734,7 @@ export default function SchedulesTab({
             }}
           >
             {t("noSchedulesFound") ||
-              "مفيش جداول عمل أو ساعات توفر مضافة دلوقتي"}
+              "لا توجد جداول عمل أو ساعات توفر مضافة حالياً"}
           </h4>
           <p
             style={{
@@ -1633,7 +1633,7 @@ export default function SchedulesTab({
                     fontSize: "0.86rem",
                   }}
                 >
-                  {t("noExceptionsFound") || "مفيش استثناءات"}
+                  {t("noExceptionsFound") || "لا توجد استثناءات"}
                 </div>
               ) : (
                 activeSchedule.exceptions.map((ex) => (

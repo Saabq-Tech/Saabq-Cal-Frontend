@@ -85,7 +85,7 @@ export default function WorkspaceMembersPage() {
   const handleDeleteMember = async (member) => {
     try {
       await client.delete(endpoints.workspaceMemberItem(member.id));
-      toast.success(t("memberDeletedSuccess") || "اتحذف العضو من مساحة العمل");
+      toast.success(t("memberDeletedSuccess") || "تم حذف العضو من مساحة العمل");
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "حصل خطأ في حذف العضو");
