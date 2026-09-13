@@ -12,7 +12,11 @@ import {
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
 import { stripHtml } from "../../utils/htmlUtils";
-import { applyWorkspaceBranding } from "../../utils/theme";
+import {
+  applyWorkspaceBranding,
+  applyWorkspaceVibeTheme,
+} from "../../utils/theme";
+import { getWorkspaceVibe } from "../../utils/workspaceVibe";
 
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
@@ -23,6 +27,10 @@ export default function WorkspaceProfilePage() {
   const isBookMode = searchParams.has("book");
 
   const [workspace, setWorkspace] = useState(null);
+  const vibe = useMemo(
+    () => getWorkspaceVibe(workspace, isRTL ? "ar" : "en"),
+    [workspace, isRTL],
+  );
   const [services, setServices] = useState([]);
   const [specialistRoles, setSpecialistRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,28 +100,35 @@ export default function WorkspaceProfilePage() {
       });
   }, [idOrSlug]);
 
-  // Apply workspace custom colors to CSS variables dynamically & sync upper browser theme-color
+  // Apply workspace custom colors & industry vibe dynamically
   useEffect(() => {
     if (workspace) {
       applyWorkspaceBranding(
         workspace.primary_color,
         workspace.secondary_color,
         workspace.hover_color,
+        vibe.key,
       );
+      applyWorkspaceVibeTheme(vibe.key);
       return () => {
         const storedUser = localStorage.getItem("saabq_user");
         let prevWs = null;
         try {
           prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
         } catch {}
+        const prevVibe = prevWs
+          ? getWorkspaceVibe(prevWs, isRTL ? "ar" : "en").key
+          : null;
         applyWorkspaceBranding(
           prevWs?.primary_color || null,
           prevWs?.secondary_color || null,
           prevWs?.hover_color || null,
+          prevVibe,
         );
+        applyWorkspaceVibeTheme(prevVibe);
       };
     }
-  }, [workspace]);
+  }, [workspace, vibe.key, isRTL]);
 
   // Smooth scroll helper
   const scrollToSection = useCallback((sectionId) => {
@@ -306,7 +321,8 @@ export default function WorkspaceProfilePage() {
 
   return (
     <main
-      className="main-content"
+      className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
+      data-workspace-vibe={vibe.key}
       style={{ background: "var(--background)", minHeight: "100vh" }}
     >
       <SEO
@@ -449,11 +465,12 @@ export default function WorkspaceProfilePage() {
                   </span>
                 )}
 
-                {workspace.workspace_type?.name && (
-                  <span className="workspace-hero-type-badge">
-                    {workspace.workspace_type.name}
-                  </span>
-                )}
+                <span
+                  className={`workspace-hero-type-badge vibe-badge vibe-${vibe.key}`}
+                >
+                  <Icon name={vibe.badgeIcon} size={15} />
+                  <span>{vibe.badge}</span>
+                </span>
               </div>
 
               <button
@@ -679,8 +696,8 @@ export default function WorkspaceProfilePage() {
                 >
                   <Icon name="calendar" size={20} />
                   <span>
-                    {t("bookAppointment") ||
-                      (isRTL ? "حجز موعد الآن" : "Book Now")}
+                    {vibe.bookAction ||
+                      (isRTL ? "حجز موعد الآن" : "Book Appointment Now")}
                   </span>
                 </button>
               </div>
@@ -817,6 +834,27 @@ export default function WorkspaceProfilePage() {
                 </div>
               )}
             </div>
+
+            {/* Industry Vibe Highlights & Perks Bar */}
+            <div className={`workspace-vibe-perks-container vibe-${vibe.key}`}>
+              <div className="workspace-vibe-perks-grid">
+                {vibe.perks.map((perk, idx) => (
+                  <div key={idx} className="workspace-vibe-perk-item">
+                    <span className="workspace-vibe-perk-icon">
+                      <Icon name={perk.icon} size={18} />
+                    </span>
+                    <div className="workspace-vibe-perk-info">
+                      <strong className="workspace-vibe-perk-title">
+                        {perk.title}
+                      </strong>
+                      <span className="workspace-vibe-perk-desc">
+                        {perk.desc}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -864,8 +902,11 @@ export default function WorkspaceProfilePage() {
                   letterSpacing: "0.5px",
                 }}
               >
-                <Icon name="briefcase" size={16} />
-                <span>{isRTL ? "قائمة الخدمات" : "Service List"}</span>
+                <Icon name={vibe.badgeIcon || "briefcase"} size={16} />
+                <span>
+                  {vibe.serviceTermPlural ||
+                    (isRTL ? "قائمة الخدمات" : "Service List")}
+                </span>
               </div>
               <h2
                 style={{
@@ -875,8 +916,12 @@ export default function WorkspaceProfilePage() {
                   color: "var(--text)",
                 }}
               >
-                {t("offeredServices") ||
-                  (isRTL ? "الخدمات والأسعار المتاحة" : "Services & Pricing")}
+                {vibe.serviceTermPlural
+                  ? isRTL
+                    ? `${vibe.serviceTermPlural} والأسعار المتاحة`
+                    : `${vibe.serviceTermPlural} & Pricing`
+                  : t("offeredServices") ||
+                    (isRTL ? "الخدمات والأسعار المتاحة" : "Services & Pricing")}
               </h2>
               <p
                 style={{
@@ -1016,7 +1061,8 @@ export default function WorkspaceProfilePage() {
                           >
                             <Icon name="clock" size={14} />
                             <span>
-                              {srv.duration_minutes} {t("durationMinutes")}
+                              {vibe.durationLabel}: {srv.duration_minutes}{" "}
+                              {t("durationMinutes")}
                             </span>
                           </span>
                         )}
@@ -1077,7 +1123,8 @@ export default function WorkspaceProfilePage() {
                     >
                       <Icon name="calendar" size={18} />
                       <span>
-                        {t("bookAppointment") ||
+                        {vibe.bookAction ||
+                          t("bookAppointment") ||
                           (isRTL ? "حجز موعد" : "Book Appointment")}
                       </span>
                     </Link>
@@ -1144,8 +1191,11 @@ export default function WorkspaceProfilePage() {
                   letterSpacing: "0.5px",
                 }}
               >
-                <Icon name="users" size={16} />
-                <span>{isRTL ? "خبراء الفريق" : "Our Team"}</span>
+                <Icon name={vibe.badgeIcon || "users"} size={16} />
+                <span>
+                  {vibe.specialistTitle ||
+                    (isRTL ? "خبراء الفريق" : "Our Team")}
+                </span>
               </div>
               <h2
                 style={{
@@ -1156,8 +1206,8 @@ export default function WorkspaceProfilePage() {
                 }}
               >
                 {isRTL
-                  ? "فريق المتخصصين والخبراء"
-                  : "Specialists & Team Members"}
+                  ? `فريق ${vibe.specialistTitle || "المتخصصين والخبراء"}`
+                  : `${vibe.specialistTitle || "Specialists & Team Members"}`}
               </h2>
               <p
                 style={{

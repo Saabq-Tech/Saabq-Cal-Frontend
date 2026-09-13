@@ -10,6 +10,7 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import { getCurrencySymbol } from "../../../utils/currency";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 
 const HOUR_HEIGHT = 82; // pixels per hour
@@ -27,8 +28,9 @@ export default function MemberOverviewTab() {
     canReadPayments,
   } = usePermissions();
 
-  // Dynamic workspace customer label
+  // Dynamic workspace customer label & industry vibe
   const ws = user?.workspace;
+  const vibe = useMemo(() => getWorkspaceVibe(ws, lang), [ws, lang]);
   const custSingular = (() => {
     const f = ws?.customer_label_singular;
     if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
@@ -697,8 +699,39 @@ export default function MemberOverviewTab() {
   }
 
   return (
-    <div className="workspace-main-dashboard animate-fade-in-up">
+    <div
+      className={`workspace-main-dashboard vibe-${vibe.key} animate-fade-in-up`}
+    >
       <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
+
+      {/* Workspace Industry Vibe Welcome Banner */}
+      <div className={`workspace-vibe-dashboard-banner vibe-${vibe.key}`}>
+        <div className="workspace-vibe-dashboard-banner-content">
+          <div className="workspace-vibe-dashboard-greeting">
+            <span className="workspace-vibe-pill">
+              <Icon name={vibe.badgeIcon} size={15} />
+              <span>{vibe.badge}</span>
+            </span>
+            <h1 className="workspace-vibe-welcome-title">
+              {vibe.dashboardGreetingPrefix} {user?.name ? user.name : ""}
+            </h1>
+            <p className="workspace-vibe-welcome-desc">{vibe.tagline}</p>
+          </div>
+          {canCreateBookings && (
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="btn btn-primary workspace-vibe-quick-action"
+            >
+              <Icon name="calendar" size={16} />
+              <span>
+                {vibe.bookAction ||
+                  (lang === "ar" ? "إضافة موعد" : "New Booking")}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* 8 Organized & Colored Executive Stat Cards */}
       <div className="workspace-stats-grid">
@@ -749,7 +782,8 @@ export default function MemberOverviewTab() {
                   <Icon name="calendar" size={18} />
                 </div>
                 <div className="workspace-stat-label">
-                  {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
+                  {vibe.totalBookingsLabel ||
+                    (lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings")}
                 </div>
               </div>
               <span className="stat-pill">
@@ -759,9 +793,10 @@ export default function MemberOverviewTab() {
             <div className="workspace-stat-number">{stats.totalBookings}</div>
             <div className="stat-card-footer">
               <span>
-                {lang === "ar"
-                  ? "كافة الحجوزات المسجلة"
-                  : "All recorded bookings"}
+                {vibe.totalBookingsDesc ||
+                  (lang === "ar"
+                    ? "كافة الحجوزات المسجلة"
+                    : "All recorded bookings")}
               </span>
             </div>
           </div>
@@ -776,7 +811,8 @@ export default function MemberOverviewTab() {
                   <Icon name="clock" size={18} />
                 </div>
                 <div className="workspace-stat-label">
-                  {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
+                  {vibe.todayStatsLabel ||
+                    (lang === "ar" ? "مواعيد اليوم" : "Today's Schedule")}
                 </div>
               </div>
               <span className="stat-pill">
@@ -786,7 +822,10 @@ export default function MemberOverviewTab() {
             <div className="workspace-stat-number">{stats.todayCount}</div>
             <div className="stat-card-footer">
               <span>
-                {lang === "ar" ? "مواعيد مجدولة لليوم" : "Scheduled for today"}
+                {vibe.todayStatsDesc ||
+                  (lang === "ar"
+                    ? "مواعيد مجدولة لليوم"
+                    : "Scheduled for today")}
               </span>
             </div>
           </div>

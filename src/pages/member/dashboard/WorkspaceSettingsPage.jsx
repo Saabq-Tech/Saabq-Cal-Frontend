@@ -482,19 +482,41 @@ export default function WorkspaceSettingsPage() {
   };
 
   return (
-    <div>
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
+        boxSizing: "border-box",
+      }}
+    >
       <SEO title={t("settings")} noindex />
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
       {subSettingsTab === "templates" ? (
-        <div key={subSettingsTab} className="animate-tab-card">
+        <div
+          key={subSettingsTab}
+          className="animate-tab-card"
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
+        >
           <WorkspaceTemplatesPage embedded />
         </div>
       ) : (
         <div
           key={subSettingsTab}
           className="card animate-tab-card"
-          style={{ padding: 24 }}
+          style={{
+            padding: 24,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
         >
           {loading ? (
             <TabSettingsSkeleton />

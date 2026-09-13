@@ -165,9 +165,9 @@ function MainLayout({ children }) {
         الانتقال إلى المحتوى الرئيسي / Skip to main content
       </a>
       <Navbar />
-      <main id="main-content" tabIndex="-1">
+      <div id="main-content" tabIndex="-1">
         {children}
-      </main>
+      </div>
       <Footer />
       <MobileTabBar />
     </div>

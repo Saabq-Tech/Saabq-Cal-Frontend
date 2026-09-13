@@ -2053,6 +2053,9 @@ export const translations = {
       "مثال: نرغب في ربط نظام الحجوزات في متجرنا https://example.com لمزامنة المواعيد مباشرة...",
     passwordPlaceholder: "كلمة مرور حسابك",
     backToDashboard: "العودة إلى لوحة التحكم",
+    formatBlock: "تنسيق الفقرة",
+    whatsApp: "واتساب",
+    book: "حجز",
   },
   en: {
     installApp: "Install App",
@@ -4160,5 +4163,8 @@ export const translations = {
       "e.g. We want to integrate bookings on our store https://example.com directly...",
     passwordPlaceholder: "Your account password",
     backToDashboard: "Back to Dashboard",
+    formatBlock: "Paragraph Format",
+    whatsApp: "WhatsApp",
+    book: "Book",
   },
 };

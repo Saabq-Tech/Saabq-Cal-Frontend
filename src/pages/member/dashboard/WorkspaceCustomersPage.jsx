@@ -55,6 +55,17 @@ export default function WorkspaceCustomersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
   const [viewMode, setViewMode] = useState("table"); // 'table' | 'cards'
+  const [isMobileView, setIsMobileView] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 768px)").matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = (e) => setIsMobileView(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -634,53 +645,55 @@ export default function WorkspaceCustomersPage() {
             <option value="oldest">{t("sortByOldest") || "الأقدم"}</option>
           </select>
 
-          {/* View Mode Toggle */}
-          <div
-            style={{
-              display: "flex",
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              overflow: "hidden",
-              background: "var(--surface-alt)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              title="Table View"
+          {/* View Mode Toggle (Desktop only) */}
+          {!isMobileView && (
+            <div
               style={{
-                padding: "8px 12px",
-                border: "none",
-                background:
-                  viewMode === "table" ? "var(--primary)" : "transparent",
-                color:
-                  viewMode === "table" ? "#ffffff" : "var(--text-secondary)",
-                cursor: "pointer",
                 display: "flex",
-                alignItems: "center",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                overflow: "hidden",
+                background: "var(--surface-alt)",
               }}
             >
-              <Icon name="clipboard-list" size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              title="Cards View"
-              style={{
-                padding: "8px 12px",
-                border: "none",
-                background:
-                  viewMode === "cards" ? "var(--primary)" : "transparent",
-                color:
-                  viewMode === "cards" ? "#ffffff" : "var(--text-secondary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Icon name="home" size={18} />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                title="Table View"
+                style={{
+                  padding: "8px 12px",
+                  border: "none",
+                  background:
+                    viewMode === "table" ? "var(--primary)" : "transparent",
+                  color:
+                    viewMode === "table" ? "#ffffff" : "var(--text-secondary)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Icon name="clipboard-list" size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("cards")}
+                title="Cards View"
+                style={{
+                  padding: "8px 12px",
+                  border: "none",
+                  background:
+                    viewMode === "cards" ? "var(--primary)" : "transparent",
+                  color:
+                    viewMode === "cards" ? "#ffffff" : "var(--text-secondary)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Icon name="home" size={18} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -765,6 +778,439 @@ export default function WorkspaceCustomersPage() {
               </span>
             </button>
           )}
+        </div>
+      ) : isMobileView ? (
+        /* Mobile Dedicated Customer Cards View */
+        <div
+          className="customers-mobile-cards-list"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          {customers.map((cust) => {
+            const pivot = cust.workspace_customer || {};
+            const status = pivot.status || cust.status || "active";
+            const isVip = status === "vip";
+            const bookingsCount =
+              cust.appointments_count ?? pivot.total_appointments ?? 0;
+
+            const statusStyles = {
+              active: {
+                bg: "rgba(16, 185, 129, 0.12)",
+                color: "#10b981",
+                label: t("filterStatusActive") || "نشط",
+              },
+              vip: {
+                bg: "rgba(245, 158, 11, 0.12)",
+                color: "#d97706",
+                label: "VIP",
+              },
+              blocked: {
+                bg: "rgba(239, 68, 68, 0.12)",
+                color: "#ef4444",
+                label: t("filterStatusBlocked") || "محظور",
+              },
+              lead: {
+                bg: "rgba(59, 130, 246, 0.12)",
+                color: "#3b82f6",
+                label: t("filterStatusLead") || "محتمل",
+              },
+              inactive: {
+                bg: "var(--surface-alt)",
+                color: "var(--text-secondary)",
+                label: t("filterStatusInactive") || "غير نشط",
+              },
+            };
+            const currentBadge = statusStyles[status] || statusStyles.active;
+
+            return (
+              <div
+                key={cust.id}
+                onClick={() =>
+                  navigate(`/member/workspace/customers/${cust.id}`)
+                }
+                className="customer-mobile-card glass-card"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-lg, 16px)",
+                  padding: 16,
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+                }}
+              >
+                {/* Header: Avatar, Name, VIP, Gender, Reference, Status */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      minWidth: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 46,
+                        height: 46,
+                        borderRadius: "50%",
+                        background: isVip
+                          ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                          : "linear-gradient(135deg, var(--primary), var(--primary-hover, #0389A5))",
+                        color: "#ffffff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        fontSize: "1.05rem",
+                        flexShrink: 0,
+                        boxShadow: isVip
+                          ? "0 0 12px rgba(245, 158, 11, 0.35)"
+                          : "0 2px 8px rgba(2, 105, 130, 0.2)",
+                      }}
+                    >
+                      {cust.name ? cust.name.charAt(0).toUpperCase() : "C"}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "0.98rem",
+                          color: "var(--heading)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cust.name}
+                        </span>
+                        {isVip && (
+                          <span
+                            style={{
+                              fontSize: "0.68rem",
+                              padding: "2px 6px",
+                              borderRadius: 10,
+                              background: "var(--badge-warning-bg)",
+                              color: "var(--badge-warning-color)",
+                              border: "1px solid var(--badge-warning-border)",
+                              fontWeight: 800,
+                              lineHeight: 1,
+                            }}
+                          >
+                            VIP
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "var(--text-secondary)",
+                          marginTop: 3,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span>
+                          {cust.gender === "female"
+                            ? t("genderFemale") || "أنثى"
+                            : t("genderMale") || "ذكر"}
+                        </span>
+                        {cust.date_of_birth && (
+                          <span>• {cust.date_of_birth}</span>
+                        )}
+                        {pivot.customer_reference && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 3,
+                              padding: "1px 6px",
+                              borderRadius: 4,
+                              background: "var(--surface-alt)",
+                              border: "1px solid var(--border)",
+                              color: "var(--primary)",
+                              fontWeight: 700,
+                              fontSize: "0.72rem",
+                            }}
+                          >
+                            #{pivot.customer_reference}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Badge */}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      padding: "5px 10px",
+                      borderRadius: 14,
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      background: currentBadge.bg,
+                      color: currentBadge.color,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: "currentColor",
+                      }}
+                    />
+                    {currentBadge.label}
+                  </span>
+                </div>
+
+                {/* Contact Box */}
+                {(cust.phone || cust.email) && (
+                  <div
+                    style={{
+                      background: "var(--surface-alt)",
+                      borderRadius: "var(--radius-md, 10px)",
+                      padding: "10px 12px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {cust.phone && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 8,
+                        }}
+                      >
+                        <a
+                          href={`tel:${cust.phone}`}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            color: "var(--heading)",
+                            fontSize: "0.86rem",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                          }}
+                        >
+                          <Icon
+                            name="phone"
+                            size={14}
+                            style={{ color: "var(--primary)" }}
+                          />
+                          <span dir="ltr">{cust.phone}</span>
+                        </a>
+
+                        {getWhatsAppUrl(cust.phone) && (
+                          <a
+                            href={getWhatsAppUrl(cust.phone)}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              padding: "3px 8px",
+                              borderRadius: 12,
+                              background: "#25d366",
+                              color: "#ffffff",
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              textDecoration: "none",
+                              boxShadow: "0 2px 6px rgba(37, 211, 102, 0.3)",
+                            }}
+                          >
+                            <Icon name="message-circle" size={12} />
+                            <span>{t("whatsApp") || "واتساب"}</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {cust.email && (
+                      <a
+                        href={`mailto:${cust.email}`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          color: "var(--text-secondary)",
+                          fontSize: "0.82rem",
+                          textDecoration: "none",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <Icon name="mail" size={14} style={{ flexShrink: 0 }} />
+                        <span
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {cust.email}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer: Appointments count & Action buttons */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingTop: 10,
+                    borderTop: "1px solid var(--border-light, #f1f5f9)",
+                    gap: 8,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      padding: "4px 10px",
+                      borderRadius: 12,
+                      background:
+                        bookingsCount > 0
+                          ? "rgba(2, 105, 130, 0.08)"
+                          : "var(--surface-alt)",
+                      color:
+                        bookingsCount > 0
+                          ? "var(--primary)"
+                          : "var(--text-secondary)",
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Icon name="calendar" size={13} />
+                    <span>
+                      {bookingsCount} {t("navBookings") || "مواعيد"}
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    {canCreateBookings && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleQuickBook(cust, e)}
+                        className="btn btn-secondary btn-sm"
+                        title={t("bookAppointmentForCustomer") || "حجز موعد"}
+                        style={{
+                          padding: "6px 9px",
+                          borderRadius: 8,
+                          fontSize: "0.78rem",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="calendar-plus" size={13} />
+                        <span>{t("book") || "حجز"}</span>
+                      </button>
+                    )}
+
+                    <Link
+                      to={`/member/workspace/customers/${cust.id}`}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        fontSize: "0.78rem",
+                        fontWeight: 700,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <span>{t("viewCustomerProfile") || "الملف"}</span>
+                      <Icon
+                        name={lang === "ar" ? "chevron-left" : "chevron-right"}
+                        size={13}
+                      />
+                    </Link>
+
+                    {canUpdateCustomers && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleOpenEdit(cust, e)}
+                        className="btn btn-secondary btn-sm"
+                        title={t("editCustomerBtn") || "تعديل"}
+                        style={{
+                          padding: "6px 9px",
+                          borderRadius: 8,
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        <Icon name="edit-2" size={13} />
+                      </button>
+                    )}
+
+                    {canDeleteCustomers && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCustomer(cust);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="btn btn-secondary btn-sm"
+                        title={t("deleteCustomerBtn") || "حذف"}
+                        style={{
+                          padding: "6px 9px",
+                          borderRadius: 8,
+                          color: "#ef4444",
+                        }}
+                      >
+                        <Icon name="trash-2" size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       ) : viewMode === "table" ? (
         /* Table View */
@@ -880,7 +1326,10 @@ export default function WorkspaceCustomersPage() {
                     className="customer-table-row"
                   >
                     {/* Customer Info & Avatar */}
-                    <td style={{ padding: "14px 18px" }}>
+                    <td
+                      data-label={customerSingular}
+                      style={{ padding: "14px 18px" }}
+                    >
                       <div
                         style={{
                           display: "flex",
@@ -956,7 +1405,10 @@ export default function WorkspaceCustomersPage() {
                     </td>
 
                     {/* File / Reference Number */}
-                    <td style={{ padding: "14px 18px" }}>
+                    <td
+                      data-label={t("customerFileNo") || "رقم الملف / المرجع"}
+                      style={{ padding: "14px 18px" }}
+                    >
                       {pivot.customer_reference ? (
                         <span
                           style={{
@@ -989,6 +1441,7 @@ export default function WorkspaceCustomersPage() {
 
                     {/* Contact Info & Direct Shortcuts */}
                     <td
+                      data-label={t("contactInfo") || "معلومات التواصل"}
                       style={{ padding: "14px 18px" }}
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -1068,7 +1521,10 @@ export default function WorkspaceCustomersPage() {
                     </td>
 
                     {/* Bookings Count */}
-                    <td style={{ padding: "14px 18px", textAlign: "center" }}>
+                    <td
+                      data-label={t("totalBookingsCount") || "المواعيد"}
+                      style={{ padding: "14px 18px", textAlign: "center" }}
+                    >
                       <span
                         style={{
                           display: "inline-flex",
@@ -1095,7 +1551,10 @@ export default function WorkspaceCustomersPage() {
                     </td>
 
                     {/* Status Badge */}
-                    <td style={{ padding: "14px 18px", textAlign: "center" }}>
+                    <td
+                      data-label={t("status") || "الحالة"}
+                      style={{ padding: "14px 18px", textAlign: "center" }}
+                    >
                       <span
                         style={{
                           display: "inline-flex",
@@ -1145,6 +1604,7 @@ export default function WorkspaceCustomersPage() {
 
                     {/* Action Buttons */}
                     <td
+                      data-label={t("actions") || "الإجراءات"}
                       style={{ padding: "14px 18px", textAlign: "center" }}
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -1228,7 +1688,7 @@ export default function WorkspaceCustomersPage() {
           </table>
         </div>
       ) : (
-        /* Grid Card View */
+        /* Grid Card View (Desktop) */
         <div
           style={{
             display: "grid",
@@ -1355,15 +1815,45 @@ export default function WorkspaceCustomersPage() {
                         style={{
                           display: "flex",
                           alignItems: "center",
+                          justifyContent: "space-between",
                           gap: 6,
                         }}
                       >
-                        <Icon
-                          name="phone"
-                          size={14}
-                          style={{ color: "var(--primary)" }}
-                        />
-                        <span dir="ltr">{cust.phone}</span>
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <Icon
+                            name="phone"
+                            size={14}
+                            style={{ color: "var(--primary)" }}
+                          />
+                          <span dir="ltr">{cust.phone}</span>
+                        </div>
+                        {getWhatsAppUrl(cust.phone) && (
+                          <a
+                            href={getWhatsAppUrl(cust.phone)}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            title="WhatsApp"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: 22,
+                              height: 22,
+                              borderRadius: "50%",
+                              background: "#25d366",
+                              color: "#ffffff",
+                            }}
+                          >
+                            <Icon name="message-circle" size={13} />
+                          </a>
+                        )}
                       </div>
                     )}
                     {cust.email && (
@@ -1413,13 +1903,16 @@ export default function WorkspaceCustomersPage() {
                     <strong>{bookingsCount}</strong>{" "}
                     {t("navBookings") || "مواعيد"}
                   </span>
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                  >
                     {canCreateBookings && (
                       <button
                         type="button"
                         onClick={(e) => handleQuickBook(cust, e)}
                         className="btn btn-secondary"
                         style={{ padding: "5px 10px", fontSize: "0.76rem" }}
+                        title={t("bookAppointmentForCustomer") || "حجز موعد"}
                       >
                         <Icon name="calendar" size={13} />
                       </button>
@@ -1431,6 +1924,36 @@ export default function WorkspaceCustomersPage() {
                     >
                       {t("viewCustomerProfile") || "الملف"}
                     </Link>
+                    {canUpdateCustomers && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleOpenEdit(cust, e)}
+                        className="btn btn-secondary"
+                        style={{ padding: "5px 8px", fontSize: "0.76rem" }}
+                        title={t("editCustomerBtn") || "تعديل"}
+                      >
+                        <Icon name="edit-2" size={13} />
+                      </button>
+                    )}
+                    {canDeleteCustomers && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCustomer(cust);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: "5px 8px",
+                          fontSize: "0.76rem",
+                          color: "#ef4444",
+                        }}
+                        title={t("deleteCustomerBtn") || "حذف"}
+                      >
+                        <Icon name="trash-2" size={13} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

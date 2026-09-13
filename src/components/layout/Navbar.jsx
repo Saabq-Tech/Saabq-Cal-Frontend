@@ -167,7 +167,7 @@ export default function Navbar() {
       dark ? "dark" : "light",
     );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
-    updateMetaThemeColor(localStorage.getItem("saabq_primary_color"));
+    updateMetaThemeColor();
   }, [dark]);
 
   // Lock scroll when mobile drawer is open

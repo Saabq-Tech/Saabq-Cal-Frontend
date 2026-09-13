@@ -17,18 +17,60 @@ export function hexToRgba(hex, alpha = 0.12) {
 
 export function updateMetaThemeColor(color) {
   try {
-    let meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "theme-color");
-      document.head.appendChild(meta);
-    }
     const isDark = document.documentElement.classList.contains("dark");
-    if (color && /^#[0-9A-Fa-f]{3,8}$/.test(color)) {
-      meta.setAttribute("content", color);
-    } else {
-      meta.setAttribute("content", isDark ? "#022a35" : "#026982");
+    let targetColor = color;
+
+    if (
+      !targetColor ||
+      typeof targetColor !== "string" ||
+      !/^#[0-9A-Fa-f]{3,8}$/.test(targetColor)
+    ) {
+      // Prioritize secondary/bar color (matching mobile tab bar), then primary
+      const s = localStorage.getItem("saabq_secondary_color");
+      const p = localStorage.getItem("saabq_primary_color");
+      if (s && /^#[0-9A-Fa-f]{3,8}$/.test(s)) {
+        targetColor = s;
+      } else if (p && /^#[0-9A-Fa-f]{3,8}$/.test(p)) {
+        targetColor = p;
+      } else {
+        const storedUser = localStorage.getItem("saabq_user");
+        if (storedUser) {
+          try {
+            const parsed = JSON.parse(storedUser);
+            if (parsed?.workspace) {
+              targetColor =
+                parsed.workspace.secondary_color ||
+                parsed.workspace.primary_color ||
+                null;
+            }
+          } catch {}
+        }
+      }
     }
+
+    if (!targetColor || !/^#[0-9A-Fa-f]{3,8}$/.test(targetColor)) {
+      targetColor = isDark ? "#022a35" : "#026982";
+    }
+
+    // Force mobile Android Chrome / WebKit to re-evaluate the status bar color
+    const existingMetas = document.querySelectorAll('meta[name="theme-color"]');
+    existingMetas.forEach((el) => el.remove());
+
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", targetColor);
+    document.head.appendChild(meta);
+
+    // Also sync msapplication-navbutton-color
+    let msMeta = document.querySelector(
+      'meta[name="msapplication-navbutton-color"]',
+    );
+    if (!msMeta) {
+      msMeta = document.createElement("meta");
+      msMeta.setAttribute("name", "msapplication-navbutton-color");
+      document.head.appendChild(msMeta);
+    }
+    msMeta.setAttribute("content", targetColor);
   } catch {
     // Ignore DOM errors
   }
@@ -41,15 +83,37 @@ export function applyWorkspaceBranding(
 ) {
   const root = document.documentElement;
 
-  if (primaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(primaryColor)) {
-    root.style.setProperty("--primary", primaryColor);
-    root.style.setProperty("--primary-color", primaryColor);
-    root.style.setProperty("--primary-light", primaryColor);
-    root.style.setProperty("--primary-subtle", hexToRgba(primaryColor, 0.14));
-    root.style.setProperty("--sb-accent", primaryColor);
-    root.style.setProperty("--sb-accent-subtle", hexToRgba(primaryColor, 0.14));
-    root.style.setProperty("--sb-active-shadow", hexToRgba(primaryColor, 0.2));
-    localStorage.setItem("saabq_primary_color", primaryColor);
+  // Harmonize workspace color tokens so bars and actions don't clash
+  const validPrimary =
+    primaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(primaryColor)
+      ? primaryColor
+      : null;
+  const validSecondary =
+    secondaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(secondaryColor)
+      ? secondaryColor
+      : null;
+
+  const effectivePrimary = validPrimary || validSecondary;
+  const effectiveSecondary = validSecondary || validPrimary;
+
+  if (effectivePrimary) {
+    root.style.setProperty("--primary", effectivePrimary);
+    root.style.setProperty("--primary-color", effectivePrimary);
+    root.style.setProperty("--primary-light", effectivePrimary);
+    root.style.setProperty(
+      "--primary-subtle",
+      hexToRgba(effectivePrimary, 0.14),
+    );
+    root.style.setProperty("--sb-accent", effectivePrimary);
+    root.style.setProperty(
+      "--sb-accent-subtle",
+      hexToRgba(effectivePrimary, 0.14),
+    );
+    root.style.setProperty(
+      "--sb-active-shadow",
+      hexToRgba(effectivePrimary, 0.2),
+    );
+    localStorage.setItem("saabq_primary_color", effectivePrimary);
   } else {
     root.style.removeProperty("--primary");
     root.style.removeProperty("--primary-color");
@@ -61,15 +125,15 @@ export function applyWorkspaceBranding(
     localStorage.removeItem("saabq_primary_color");
   }
 
-  if (secondaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(secondaryColor)) {
-    root.style.setProperty("--secondary", secondaryColor);
-    root.style.setProperty("--secondary-color", secondaryColor);
-    root.style.setProperty("--accent", secondaryColor);
+  if (effectiveSecondary) {
+    root.style.setProperty("--secondary", effectiveSecondary);
+    root.style.setProperty("--secondary-color", effectiveSecondary);
+    root.style.setProperty("--accent", effectiveSecondary);
     root.style.setProperty(
       "--secondary-subtle",
-      hexToRgba(secondaryColor, 0.14),
+      hexToRgba(effectiveSecondary, 0.14),
     );
-    localStorage.setItem("saabq_secondary_color", secondaryColor);
+    localStorage.setItem("saabq_secondary_color", effectiveSecondary);
   } else {
     root.style.removeProperty("--secondary");
     root.style.removeProperty("--secondary-color");
@@ -94,8 +158,24 @@ export function applyWorkspaceBranding(
     localStorage.removeItem("saabq_hover_color");
   }
 
-  // Dynamically update upper browser theme color / mobile status bar
-  updateMetaThemeColor(primaryColor);
+  // Dynamically update upper browser theme color / mobile status bar to match workspace bar frame
+  updateMetaThemeColor(effectiveSecondary || effectivePrimary);
+
+  if (arguments.length > 3 && arguments[3]) {
+    applyWorkspaceVibeTheme(arguments[3]);
+  }
+}
+
+export function applyWorkspaceVibeTheme(vibeKey) {
+  try {
+    if (vibeKey && typeof vibeKey === "string") {
+      document.documentElement.setAttribute("data-workspace-vibe", vibeKey);
+      localStorage.setItem("saabq_workspace_vibe", vibeKey);
+    } else {
+      document.documentElement.removeAttribute("data-workspace-vibe");
+      localStorage.removeItem("saabq_workspace_vibe");
+    }
+  } catch {}
 }
 
 export function initWorkspaceBranding() {
@@ -103,8 +183,9 @@ export function initWorkspaceBranding() {
     let p = localStorage.getItem("saabq_primary_color");
     let s = localStorage.getItem("saabq_secondary_color");
     let h = localStorage.getItem("saabq_hover_color");
+    let v = localStorage.getItem("saabq_workspace_vibe");
 
-    if (!p || !s || !h) {
+    if (!p || !s || !h || !v) {
       const storedUser = localStorage.getItem("saabq_user");
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
@@ -114,6 +195,10 @@ export function initWorkspaceBranding() {
           h = h || parsed.workspace.hover_color;
         }
       }
+    }
+
+    if (v) {
+      applyWorkspaceVibeTheme(v);
     }
 
     if (p || s || h) {

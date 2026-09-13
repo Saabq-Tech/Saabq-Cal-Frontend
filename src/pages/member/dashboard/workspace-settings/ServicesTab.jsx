@@ -8,6 +8,7 @@ import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import ConfirmationModal from "./ConfirmationModal";
 import { getCurrencySymbol } from "../../../../utils/currency";
+import { getWorkspaceVibe } from "../../../../utils/workspaceVibe";
 
 const defaultFormState = {
   id: null,
@@ -53,6 +54,7 @@ export default function ServicesTab({
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+  const vibe = getWorkspaceVibe(user?.workspace, isRTL ? "ar" : "en");
   const {
     isOwner: hookIsOwner,
     canCreateServices,
@@ -356,17 +358,39 @@ export default function ServicesTab({
         }}
       >
         <div>
-          <h2
+          <div
             style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
             }}
           >
-            {t("workspaceServices") ||
-              (isRTL ? "إدارة خدمات المساحة" : "Workspace Services Management")}
-          </h2>
+            <h2
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+                margin: 0,
+              }}
+            >
+              {vibe.serviceTermPlural ||
+                (isRTL
+                  ? "إدارة خدمات المساحة"
+                  : "Workspace Services Management")}
+            </h2>
+            <span
+              className={`badge vibe-badge vibe-${vibe.key}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Icon name={vibe.badgeIcon} size={13} />
+              <span>{vibe.badge}</span>
+            </span>
+          </div>
           <p
             style={{
               fontSize: "0.86rem",
@@ -383,8 +407,9 @@ export default function ServicesTab({
         {canCreate ? (
           <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
             +{" "}
-            {t("addService") ||
-              (isRTL ? "إضافة خدمة جديدة" : "Add New Service")}
+            {isRTL
+              ? `إضافة ${vibe.serviceTerm} جديدة`
+              : `Add New ${vibe.serviceTerm}`}
           </button>
         ) : (
           <span

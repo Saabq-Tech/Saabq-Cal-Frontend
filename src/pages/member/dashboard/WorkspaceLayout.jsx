@@ -12,11 +12,13 @@ import {
   canViewWorkspaceTab,
   getWorkspaceSettingsSubTabs,
 } from "../../../config/dashboardNav";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const location = useLocation();
+  const vibe = getWorkspaceVibe(user?.workspace, lang);
 
   const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
 
@@ -139,10 +141,28 @@ export default function WorkspaceLayout() {
   }
 
   return (
-    <div className="workspace-dashboard-shell animate-page-enter">
+    <div
+      className={`workspace-dashboard-shell vibe-${vibe.key} animate-page-enter`}
+      data-workspace-vibe={vibe.key}
+    >
       {/* Two-column dashboard grid */}
       <div className="workspace-dashboard-grid">
         <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
+          {/* Workspace Vibe Brand Badge */}
+          <div className={`workspace-sidebar-vibe-header vibe-${vibe.key}`}>
+            <div className="workspace-sidebar-vibe-icon-wrap">
+              <Icon name={vibe.badgeIcon} size={18} />
+            </div>
+            <div className="workspace-sidebar-vibe-info">
+              <span className="workspace-sidebar-vibe-type">
+                {vibe.dashboardBadge}
+              </span>
+              <span className="workspace-sidebar-vibe-name">
+                {user?.workspace?.name}
+              </span>
+            </div>
+          </div>
+
           <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
             {availableTabs.map((wsTab) => {
               const isCapAllowed =

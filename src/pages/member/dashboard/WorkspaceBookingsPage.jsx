@@ -12,6 +12,7 @@ import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import Icon from "../../../components/common/Icon";
 
 import { usePermissions } from "../../../hooks/usePermissions";
@@ -19,7 +20,8 @@ import { usePermissions } from "../../../hooks/usePermissions";
 export default function WorkspaceBookingsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const vibe = getWorkspaceVibe(user?.workspace, lang);
   const toast = useToast();
   const {
     isOwner,
@@ -77,7 +79,10 @@ export default function WorkspaceBookingsPage() {
 
   return (
     <CapabilityGate capabilityCode="BOOKING">
-      <div className="card workspace-bookings-card">
+      <div
+        className={`card workspace-bookings-card vibe-${vibe.key}`}
+        data-workspace-vibe={vibe.key}
+      >
         <SEO title={t("bookings") || "المواعيد"} noindex />
         {selectedBookingId ? (
           <BookingDetailsPage
@@ -125,7 +130,11 @@ export default function WorkspaceBookingsPage() {
                   }}
                 >
                   <Icon name="plus" size={14} />
-                  <span>{t("bookNewAppointment") || "حجز موعد جديد"}</span>
+                  <span>
+                    {vibe.bookAction ||
+                      t("bookNewAppointment") ||
+                      "حجز موعد جديد"}
+                  </span>
                 </button>
               )}
             </div>

@@ -163,7 +163,17 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 20,
+        width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
+        boxSizing: "border-box",
+      }}
+    >
       {!embedded && (
         <SEO
           title={
@@ -178,18 +188,22 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           flexWrap: "wrap",
           gap: 12,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
-        <div>
+        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
           <h2
             style={{
               fontSize: "1.25rem",
               fontWeight: 800,
               margin: 0,
               color: "var(--heading)",
+              wordBreak: "break-word",
             }}
           >
             {isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"}
@@ -199,6 +213,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
               fontSize: "0.85rem",
               color: "var(--muted)",
               margin: "4px 0 0",
+              wordBreak: "break-word",
+              lineHeight: 1.5,
             }}
           >
             {isRTL
@@ -212,7 +228,13 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             type="button"
             className="btn btn-primary btn-sm"
             onClick={openCreateModal}
-            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              whiteSpace: "nowrap",
+            }}
           >
             <Icon name="plus" size={16} />
             {isRTL ? "+ إضافة قالب جديد" : "+ Add Template"}
@@ -221,8 +243,25 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       </div>
 
       {/* SEARCH BAR */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1, maxWidth: 400 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            flex: 1,
+            maxWidth: 400,
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           <span
             style={{
               position: "absolute",
@@ -245,6 +284,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
               paddingInlineStart: 38,
               height: 40,
               fontSize: "0.88rem",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           />
         </div>
@@ -255,8 +296,11 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 16,
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <SkeletonRect height={160} />
@@ -273,6 +317,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             flexDirection: "column",
             alignItems: "center",
             gap: 12,
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <div
@@ -325,8 +371,13 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 16,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
           }}
         >
           {filteredTemplates.map((item) => (
@@ -337,11 +388,16 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                padding: 18,
+                padding: "16px",
                 border: "1px solid var(--border-light)",
                 borderRadius: "var(--radius-lg)",
                 background: "var(--surface)",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                width: "100%",
+                maxWidth: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                overflow: "hidden",
               }}
             >
               <div>
@@ -352,14 +408,18 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                     justifyContent: "space-between",
                     gap: 10,
                     marginBottom: 8,
+                    minWidth: 0,
                   }}
                 >
                   <h4
                     style={{
-                      fontSize: "1rem",
+                      fontSize: "0.98rem",
                       fontWeight: 700,
                       margin: 0,
                       color: "var(--heading)",
+                      wordBreak: "break-word",
+                      minWidth: 0,
+                      flex: 1,
                     }}
                   >
                     {item.name}
@@ -371,6 +431,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                         fontSize: "0.72rem",
                         padding: "3px 8px",
                         whiteSpace: "nowrap",
+                        flexShrink: 0,
                       }}
                     >
                       {isRTL ? "افتراضي" : "Default"}
@@ -385,6 +446,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                       color: "var(--muted)",
                       margin: "0 0 12px",
                       lineHeight: 1.5,
+                      wordBreak: "break-word",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {item.description}
@@ -402,6 +465,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                   marginTop: 14,
                   gap: 8,
                   flexWrap: "wrap",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 <button
@@ -413,7 +478,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                     padding: "5px 10px",
                     display: "inline-flex",
                     alignItems: "center",
+                    justifyContent: "center",
                     gap: 5,
+                    flex: "1 1 auto",
+                    minWidth: "fit-content",
                   }}
                 >
                   <Icon name="eye" size={13} />
@@ -421,7 +489,15 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 </button>
 
                 {(canUpdate || canDelete) && (
-                  <div style={{ display: "flex", gap: 6 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      flex: "1 1 auto",
+                      justifyContent: "flex-end",
+                      flexWrap: "wrap",
+                    }}
+                  >
                     {canUpdate && (
                       <button
                         type="button"
@@ -432,7 +508,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                           padding: "5px 10px",
                           display: "inline-flex",
                           alignItems: "center",
+                          justifyContent: "center",
                           gap: 5,
+                          flex: "1 1 auto",
+                          minWidth: "fit-content",
                         }}
                       >
                         <Icon name="edit" size={13} />
@@ -449,7 +528,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                           padding: "5px 10px",
                           display: "inline-flex",
                           alignItems: "center",
+                          justifyContent: "center",
                           gap: 5,
+                          flex: "1 1 auto",
+                          minWidth: "fit-content",
                         }}
                       >
                         <Icon name="trash" size={13} />
@@ -474,10 +556,12 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
               background: "rgba(0, 0, 0, 0.65)",
               backdropFilter: "blur(4px)",
               WebkitBackdropFilter: "blur(4px)",
+              display: "flex",
               alignItems: "center",
               justifyContent: "center",
               zIndex: 999999,
               padding: 16,
+              boxSizing: "border-box",
             }}
             onClick={() => !saving && setShowModal(false)}
           >

@@ -14,7 +14,11 @@ import LazyImage from "../../components/ui/LazyImage";
 import { BookingFormSkeleton } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
-import { applyWorkspaceBranding } from "../../utils/theme";
+import {
+  applyWorkspaceBranding,
+  applyWorkspaceVibeTheme,
+} from "../../utils/theme";
+import { getWorkspaceVibe } from "../../utils/workspaceVibe";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 const MONTH_NAMES_AR = [
@@ -72,6 +76,7 @@ export default function CustomerBookAppointmentPage() {
     searchParams.get("member") || searchParams.get("member_id");
 
   const [workspace, setWorkspace] = useState(null);
+  const vibe = getWorkspaceVibe(workspace, isRTL ? "ar" : "en");
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [disabledNotice, setDisabledNotice] = useState("");
@@ -515,28 +520,35 @@ export default function CustomerBookAppointmentPage() {
     }
   };
 
-  // Apply workspace custom colors to CSS variables & sync upper browser theme-color
+  // Apply workspace custom colors & vibe to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
       applyWorkspaceBranding(
         workspace.primary_color,
         workspace.secondary_color,
         workspace.hover_color,
+        vibe.key,
       );
+      applyWorkspaceVibeTheme(vibe.key);
       return () => {
         const storedUser = localStorage.getItem("saabq_user");
         let prevWs = null;
         try {
           prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
         } catch {}
+        const prevVibe = prevWs
+          ? getWorkspaceVibe(prevWs, isRTL ? "ar" : "en").key
+          : null;
         applyWorkspaceBranding(
           prevWs?.primary_color || null,
           prevWs?.secondary_color || null,
           prevWs?.hover_color || null,
+          prevVibe,
         );
+        applyWorkspaceVibeTheme(prevVibe);
       };
     }
-  }, [workspace]);
+  }, [workspace, vibe.key, isRTL]);
 
   if (loading) {
     return (
@@ -608,7 +620,8 @@ export default function CustomerBookAppointmentPage() {
 
   return (
     <main
-      className="main-content"
+      className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
+      data-workspace-vibe={vibe.key}
       style={{
         background: "var(--background)",
         minHeight: "calc(100vh - 70px)",
@@ -717,6 +730,35 @@ export default function CustomerBookAppointmentPage() {
               );
             })()}
           </div>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 12,
+            }}
+          >
+            <span
+              className={`badge vibe-badge vibe-${vibe.key}`}
+              style={{
+                background: "rgba(255, 255, 255, 0.2)",
+                color: "#ffffff",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                padding: "6px 14px",
+                borderRadius: 999,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontWeight: 700,
+                fontSize: "0.85rem",
+              }}
+            >
+              <Icon name={vibe.badgeIcon} size={15} />
+              <span>{vibe.badge}</span>
+            </span>
+          </div>
+
           <h1
             style={{
               fontSize: "2.2rem",
@@ -727,8 +769,8 @@ export default function CustomerBookAppointmentPage() {
             }}
           >
             {isRTL
-              ? `حجز موعد في ${workspace.name}`
-              : `Book Appointment at ${workspace.name}`}
+              ? `حجز ${vibe.serviceTerm} في ${workspace.name}`
+              : `Book ${vibe.serviceTerm} at ${workspace.name}`}
           </h1>
           <p
             style={{
@@ -960,14 +1002,18 @@ export default function CustomerBookAppointmentPage() {
                     }}
                   >
                     {[
-                      { step: 1, title: isRTL ? "الخدمة" : "Service" },
+                      {
+                        step: 1,
+                        title:
+                          vibe.serviceTerm || (isRTL ? "الخدمة" : "Service"),
+                      },
                       {
                         step: 2,
                         title: isRTL ? "اليوم والوقت" : "Date & Time",
                       },
                       {
                         step: 3,
-                        title: isRTL ? "تفاصيل الحجز" : "Details & Questions",
+                        title: isRTL ? "بيانات الحجز" : "Booking Details",
                       },
                     ].map((s, i) => {
                       const isActive = currentStep === s.step;
@@ -1045,7 +1091,10 @@ export default function CustomerBookAppointmentPage() {
                           marginBottom: 16,
                         }}
                       >
-                        1. {isRTL ? "اختر الخدمة المطلوبة" : "Select Service"}
+                        1.{" "}
+                        {isRTL
+                          ? `اختر ${vibe.serviceTerm}`
+                          : `Select ${vibe.serviceTerm}`}
                       </h3>
 
                       {disabledNotice && (
@@ -1660,11 +1709,13 @@ export default function CustomerBookAppointmentPage() {
                               type: "text",
                             },
                             notes: {
-                              ar: "ملاحظات أو طلبات خاصة",
-                              en: "Notes / Special Requests",
+                              ar: vibe.notesLabel || "ملاحظات أو طلبات خاصة",
+                              en: vibe.notesLabel || "Notes / Special Requests",
                               placeholderAr:
+                                vibe.notesPlaceholder ||
                                 "أدخل أي تفاصيل تود مشاركتها قبل الموعد...",
-                              placeholderEn: "Enter any notes...",
+                              placeholderEn:
+                                vibe.notesPlaceholder || "Enter any notes...",
                               type: "textarea",
                             },
                             terms_and_conditions: {

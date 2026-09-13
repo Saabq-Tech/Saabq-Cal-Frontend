@@ -7,10 +7,10 @@
 export function checkWorkspaceCapability(user, capabilityCode) {
   if (!user || !user.workspace) return false;
 
-  // External REST API integration can be disabled by admin for this workspace
+  // External REST API integration is disabled by default for all workspaces
   if (
     capabilityCode === "REST_API" &&
-    user.workspace.api_integration_enabled === false
+    !user.workspace.api_integration_enabled
   ) {
     return false;
   }
@@ -45,6 +45,6 @@ export function checkWorkspaceCapability(user, capabilityCode) {
  */
 export function isApiIntegrationEnabled(user) {
   if (!user || !user.workspace) return false;
-  if (user.workspace.api_integration_enabled === false) return false;
+  if (!user.workspace.api_integration_enabled) return false;
   return checkWorkspaceCapability(user, "REST_API");
 }
