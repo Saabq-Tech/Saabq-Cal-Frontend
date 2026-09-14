@@ -325,6 +325,11 @@ export default function SchedulesTab({
   const [savingWeeklyRules, setSavingWeeklyRules] = useState(false);
   const [savingValidity, setSavingValidity] = useState(false);
 
+  // Copy slots to other days state
+  const [copyDropdownDay, setCopyDropdownDay] = useState(null);
+  const [copyTargetDays, setCopyTargetDays] = useState([]);
+  const copyDropdownRef = useRef(null);
+
   // --- Handlers ---
   const handleOpenCreateModal = () => {
     setModalForm({
@@ -513,6 +518,54 @@ export default function SchedulesTab({
         return s;
       }),
     );
+  };
+
+  // Copy day times to other days – click-outside handler
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        copyDropdownRef.current &&
+        !copyDropdownRef.current.contains(e.target)
+      ) {
+        setCopyDropdownDay(null);
+        setCopyTargetDays([]);
+      }
+    };
+    if (copyDropdownDay !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [copyDropdownDay]);
+
+  const handleToggleCopyTarget = (dayKey) => {
+    setCopyTargetDays((prev) =>
+      prev.includes(dayKey)
+        ? prev.filter((k) => k !== dayKey)
+        : [...prev, dayKey],
+    );
+  };
+
+  const handleApplyCopySlots = (fromDayKey) => {
+    if (copyTargetDays.length === 0) return;
+    const sourceSlots = activeSchedule?.weekly_hours?.[fromDayKey] || [];
+    setSchedulesList((prev) =>
+      prev.map((s) => {
+        if (s.id === selectedScheduleId) {
+          const newWeeklyHours = { ...(s.weekly_hours || {}) };
+          copyTargetDays.forEach((targetDay) => {
+            newWeeklyHours[targetDay] = sourceSlots.map((slot) => ({
+              ...slot,
+            }));
+          });
+          return { ...s, weekly_hours: newWeeklyHours };
+        }
+        return s;
+      }),
+    );
+    setCopyDropdownDay(null);
+    setCopyTargetDays([]);
+    toast.success(t("slotsCopiedSuccess") || "تم نسخ الأوقات بنجاح");
   };
 
   const handleSaveWeeklyRules = async () => {
@@ -1240,20 +1293,102 @@ export default function SchedulesTab({
                         )}
                       </div>
 
-                      {/* Action: Add Slot */}
+                      {/* Actions: Add Slot & Copy to Days */}
                       {allowUpdate && isDayEnabled && (
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => handleAddSlot(d.key)}
+                        <div
                           style={{
-                            fontSize: "0.78rem",
-                            color: "var(--primary)",
-                            fontWeight: 700,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
                           }}
                         >
-                          {t("addTimeSlotBtn") || "+ إضافة فترة"}
-                        </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => handleAddSlot(d.key)}
+                            style={{
+                              fontSize: "0.78rem",
+                              color: "var(--primary)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {t("addTimeSlotBtn") || "+ إضافة فترة"}
+                          </button>
+                          <div
+                            style={{ position: "relative" }}
+                            ref={
+                              copyDropdownDay === d.key ? copyDropdownRef : null
+                            }
+                          >
+                            <button
+                              type="button"
+                              className="btn-copy-slots-trigger"
+                              onClick={() => {
+                                if (copyDropdownDay === d.key) {
+                                  setCopyDropdownDay(null);
+                                  setCopyTargetDays([]);
+                                } else {
+                                  setCopyDropdownDay(d.key);
+                                  setCopyTargetDays([]);
+                                }
+                              }}
+                              title={
+                                t("copySlotsToDays") || "نسخ للأيام الأخرى"
+                              }
+                            >
+                              <Icon name="copy" size={15} />
+                            </button>
+                            {copyDropdownDay === d.key && (
+                              <div className="copy-slots-dropdown">
+                                <div className="copy-slots-dropdown-header">
+                                  {t("copySlotsToDays") || "نسخ للأيام الأخرى"}
+                                </div>
+                                <div className="copy-slots-dropdown-list">
+                                  {daysList
+                                    .filter((dd) => dd.key !== d.key)
+                                    .map((dd) => (
+                                      <label
+                                        key={dd.key}
+                                        className="copy-slots-dropdown-item"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={copyTargetDays.includes(
+                                            dd.key,
+                                          )}
+                                          onChange={() =>
+                                            handleToggleCopyTarget(dd.key)
+                                          }
+                                          style={{
+                                            accentColor: "var(--primary)",
+                                            width: 16,
+                                            height: 16,
+                                            cursor: "pointer",
+                                          }}
+                                        />
+                                        <span>{dd.label}</span>
+                                      </label>
+                                    ))}
+                                </div>
+                                <div className="copy-slots-dropdown-actions">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => handleApplyCopySlots(d.key)}
+                                    disabled={copyTargetDays.length === 0}
+                                    style={{
+                                      fontSize: "0.78rem",
+                                      fontWeight: 700,
+                                      padding: "6px 16px",
+                                    }}
+                                  >
+                                    {t("applyCopyBtn") || "تطبيق"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
                   );

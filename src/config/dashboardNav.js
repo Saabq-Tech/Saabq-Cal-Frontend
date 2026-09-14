@@ -159,7 +159,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "booking_delete",
         "booking_write",
       ],
-      capability: null,
+      capability: "LOGS",
     },
     {
       id: "settings",

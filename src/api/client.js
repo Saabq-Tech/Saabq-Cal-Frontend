@@ -155,6 +155,7 @@ export const endpoints = {
   // Workspace Management Endpoints (Member only)
   workspaceServices: "/workspace-members/workspace/services",
   workspaceServiceItem: (id) => `/workspace-members/workspace/services/${id}`,
+  workspaceServiceSlots: (id) => `/workspace-members/workspace/services/${id}/slots`,
   workspaceSchedules: "/workspace-members/workspace/schedules",
   workspaceScheduleItem: (id) => `/workspace-members/workspace/schedules/${id}`,
   workspaceMembers: "/workspace-members/workspace/members",

@@ -22,12 +22,15 @@ export default function WorkspaceLogsPage() {
   const toast = useToast();
 
   const ws = user?.workspace;
-  const canReadLogs = isOwner || canReadSettings;
+  const canReadAnalytics =
+    isOwner || canReadBookings || checkWorkspaceCapability(user, "REPORTS");
+  const canReadLogs =
+    isOwner || canReadSettings || checkWorkspaceCapability(user, "LOGS");
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
   // Tabs: "analytics" (Reports & Analytics) vs "logs" (Audit & Activity Logs)
   const [activeTab, setActiveTab] = useState(() => {
-    if (!isOwner && !canReadBookings && canReadLogs) return "logs";
+    if (!isOwner && !canReadAnalytics && canReadLogs) return "logs";
     return "analytics";
   });
 
@@ -587,7 +590,7 @@ export default function WorkspaceLogsPage() {
             display: "inline-flex",
           }}
         >
-          {(isOwner || canReadBookings) && (
+          {(isOwner || canReadAnalytics) && (
             <button
               type="button"
               className={`analytics-tab-btn ${activeTab === "analytics" ? "active" : ""}`}

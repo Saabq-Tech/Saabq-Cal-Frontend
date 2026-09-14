@@ -4302,8 +4302,8 @@ html.dark {
   border-inline-end: 1px solid var(--border);
   padding: 16px 14px;
   position: sticky;
-  top: var(--navbar-height, 72px);
-  height: calc(100vh - var(--navbar-height, 72px));
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -17732,4 +17732,138 @@ html.dark .vibe-banner-default,
 [data-workspace-vibe="services"] .workspace-service-card:hover {
   border-color: rgba(14, 165, 233, 0.6) !important;
   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Copy Slots to Other Days – Dropdown
+   ═══════════════════════════════════════════════════════ */
+.btn-copy-slots-trigger {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-md, 8px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-slots-trigger:hover {
+  background: var(--primary-lighter, rgba(17, 100, 106, 0.1));
+  color: var(--primary);
+}
+
+.copy-slots-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 100;
+  min-width: 210px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-light, #e5e7eb);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0;
+  animation: copyDropdownFadeIn 0.15s ease;
+}
+
+html[dir="rtl"] .copy-slots-dropdown {
+  right: 0;
+}
+
+html:not([dir="rtl"]) .copy-slots-dropdown {
+  left: 0;
+}
+
+html.dark .copy-slots-dropdown {
+  background: var(--surface, #1e1e1e);
+  border-color: var(--border, #333);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes copyDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.copy-slots-dropdown-header {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--heading, #111);
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border-light, #f0f0f0);
+}
+
+html.dark .copy-slots-dropdown-header {
+  color: var(--heading, #e5e5e5);
+  border-bottom-color: var(--border, #333);
+}
+
+.copy-slots-dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.copy-slots-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text, #333);
+}
+
+.copy-slots-dropdown-item:hover {
+  background: var(--surface-alt, #f9fafb);
+}
+
+html.dark .copy-slots-dropdown-item {
+  color: var(--text, #ccc);
+}
+
+html.dark .copy-slots-dropdown-item:hover {
+  background: var(--surface-alt, #2a2a2a);
+}
+
+.copy-slots-dropdown-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--border-light, #f0f0f0);
+}
+
+html.dark .copy-slots-dropdown-actions {
+  border-top-color: var(--border, #333);
+}
+
+@media (max-width: 640px) {
+  .copy-slots-dropdown {
+    min-width: 180px;
+    right: 0;
+    left: auto;
+  }
+
+  html[dir="rtl"] .copy-slots-dropdown {
+    left: 0;
+    right: auto;
+  }
 }
