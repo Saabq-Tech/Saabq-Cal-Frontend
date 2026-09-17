@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const srcDir = path.join(projectRoot, 'src');
 const translationsFile = path.join(srcDir, 'translations', 'translations.js');
+const workspaceVibeFile = path.join(srcDir, 'utils', 'workspaceVibe.js');
 
 // ANSI escape codes for styling console output
 const colors = {
@@ -95,7 +96,9 @@ async function runCheck() {
   // --- Step 2: Scan Codebase for t('key') Usages ---
   logHeader("Step 2: Scanning Codebase for t('key') Usages");
 
-  const allFiles = getAllFiles(srcDir).filter((f) => f !== translationsFile);
+  const allFiles = getAllFiles(srcDir).filter(
+    (f) => f !== translationsFile && f !== workspaceVibeFile
+  );
   const usedKeys = new Map(); // key -> [{ file, line }]
   for (const filePath of allFiles) {
     const relativePath = path.relative(projectRoot, filePath);

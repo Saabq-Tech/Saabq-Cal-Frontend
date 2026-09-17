@@ -9,11 +9,19 @@ import {
   ServiceCardSkeleton,
 } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
+import {
+  applyWorkspaceBranding,
+  applyWorkspaceVibeTheme,
+} from "../../utils/theme";
+import { getWorkspaceVibe } from "../../utils/workspaceVibe";
 import { formatCurrency } from "../../utils/currency";
+<<<<<<< HEAD
 import {
   applyWorkspaceBranding,
   resetWorkspaceBranding,
 } from "../../utils/theme";
+=======
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 export default function CustomerSpecialistPage() {
   const { idOrSlug, specialistId } = useParams();
@@ -22,6 +30,7 @@ export default function CustomerSpecialistPage() {
   const [workspace, setWorkspace] = useState(null);
   const [services, setServices] = useState([]);
   const [specialist, setSpecialist] = useState(null);
+  const vibe = getWorkspaceVibe(workspace, isRTL ? "ar" : "en");
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
@@ -96,15 +105,41 @@ export default function CustomerSpecialistPage() {
       });
   }, [idOrSlug, specialistId]);
 
-  // Apply workspace custom colors to CSS variables & sync upper browser theme-color
+  // Apply workspace custom colors & vibe to CSS variables
   useEffect(() => {
     if (workspace) {
+<<<<<<< HEAD
       applyWorkspaceBranding(workspace);
       return () => {
         resetWorkspaceBranding();
+=======
+      applyWorkspaceBranding(
+        workspace.primary_color,
+        workspace.secondary_color,
+        workspace.hover_color,
+        vibe.key,
+      );
+      applyWorkspaceVibeTheme(vibe.key);
+      return () => {
+        const storedUser = localStorage.getItem("saabq_user");
+        let prevWs = null;
+        try {
+          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
+        } catch {}
+        const prevVibe = prevWs
+          ? getWorkspaceVibe(prevWs, isRTL ? "ar" : "en").key
+          : null;
+        applyWorkspaceBranding(
+          prevWs?.primary_color || null,
+          prevWs?.secondary_color || null,
+          prevWs?.hover_color || null,
+          prevVibe,
+        );
+        applyWorkspaceVibeTheme(prevVibe);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       };
     }
-  }, [workspace]);
+  }, [workspace, vibe.key, isRTL]);
 
   if (loading) {
     return (
@@ -201,7 +236,10 @@ export default function CustomerSpecialistPage() {
   };
 
   return (
-    <main className="main-content">
+    <main
+      className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
+      data-workspace-vibe={vibe.key}
+    >
       <SEO
         title={workspace.name}
         description={
@@ -325,8 +363,18 @@ export default function CustomerSpecialistPage() {
                     {isRTL ? "الحجز مفعل" : "Booking Active"}
                   </span>
                 ) : (
-                  <span className="badge badge-warning">
-                    {isRTL ? "الحجز موقوف" : "Booking Paused"}
+                  <span
+                    className={`badge vibe-badge vibe-${vibe.key}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Icon name={vibe.badgeIcon} size={14} />
+                    <span>
+                      {specialist?.title || vibe.specialistRoleDefault}
+                    </span>
                   </span>
                 )}
               </div>
@@ -642,7 +690,7 @@ export default function CustomerSpecialistPage() {
             style={{ textStyle: "inherit", marginBottom: 24 }}
           >
             <h2 style={{ fontSize: "1.6rem", fontWeight: 800 }}>
-              {t("offeredServices")}
+              {vibe.serviceTermPlural || t("offeredServices")}
             </h2>
             <p style={{ color: "var(--text-secondary)" }}>
               {isRTL
@@ -737,7 +785,10 @@ export default function CustomerSpecialistPage() {
                       >
                         {formatCurrency(
                           srv.price,
-                          srv.currency_detail || srv.currency,
+                          srv.currencyRelation ||
+                            srv.currency_detail ||
+                            srv.currency ||
+                            specialist?.workspace?.currency,
                           isRTL,
                           t("freeService"),
                         )}

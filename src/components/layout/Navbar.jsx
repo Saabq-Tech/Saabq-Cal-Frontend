@@ -110,7 +110,7 @@ export default function Navbar() {
 
           sections.forEach((id) => {
             const el = document.getElementById(id);
-            if (el) {
+            if (el && el.offsetParent !== null) {
               const top = el.offsetTop;
               if (scrollPos >= top) {
                 current = id;
@@ -171,6 +171,7 @@ export default function Navbar() {
       dark ? "dark" : "light",
     );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
+<<<<<<< HEAD
 
     if (isWorkspaceRoute(location.pathname)) {
       const saved = getSavedWorkspaceBranding();
@@ -190,6 +191,10 @@ export default function Navbar() {
       updateMetaThemeColor(dark ? "#034d60" : "#033d4b");
     }
   }, [dark, location.pathname]);
+=======
+    updateMetaThemeColor();
+  }, [dark]);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
   // Lock scroll when mobile drawer is open
   useEffect(() => {

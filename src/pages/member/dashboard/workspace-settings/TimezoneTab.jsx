@@ -6,11 +6,12 @@ export default function TimezoneTab({
   timezoneForm,
   setTimezoneForm,
   timezones = [],
+  currencies = [],
   onSave,
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -49,10 +50,50 @@ export default function TimezoneTab({
     raw: tz,
   }));
 
+  const currList =
+    Array.isArray(currencies) && currencies.length > 0
+      ? currencies
+      : [
+          {
+            id: 1,
+            code: "SAR",
+            name: { ar: "ريال سعودي", en: "Saudi Riyal" },
+            symbol_native: isRTL ? "ر.س" : "SAR",
+          },
+          {
+            id: 2,
+            code: "EGP",
+            name: { ar: "جنيه مصري", en: "Egyptian Pound" },
+            symbol_native: isRTL ? "ج.م" : "EGP",
+          },
+          {
+            id: 3,
+            code: "USD",
+            name: { ar: "دولار أمريكي", en: "US Dollar" },
+            symbol_native: "$",
+          },
+        ];
+
+  const currencyOptions = currList.map((c) => {
+    const cName =
+      typeof c.name === "object"
+        ? isRTL
+          ? c.name?.ar || c.name?.en
+          : c.name?.en || c.name?.ar
+        : c.name;
+    const sym = c.symbol_native || c.symbol || c.code;
+    return {
+      value: c.id,
+      label: `${c.code} - ${cName} (${sym})`,
+      id: c.id,
+      raw: c,
+    };
+  });
+
   return (
     <form className="card-body" onSubmit={handleSubmit}>
       <h3 style={{ fontSize: "1.1rem", marginBottom: 16 }}>
-        {t("workspaceTimezone") || "إعدادات التوقيت والتاريخ"}
+        {t("workspaceTimezone") || "إعدادات التوقيت والتاريخ والعملة"}
       </h3>
 
       <div className="form-row">
@@ -81,6 +122,36 @@ export default function TimezoneTab({
 
         <div className="form-group">
           <label className="form-label">
+            {t("currency") ||
+              (isRTL
+                ? "العملة الافتراضية للمساحة"
+                : "Workspace Default Currency")}
+          </label>
+          <SearchableSelect
+            value={timezoneForm.currency_id}
+            options={currencyOptions}
+            placeholder={
+              t("selectCurrency") ||
+              (isRTL ? "-- اختر عملة مساحة العمل --" : "-- Select Currency --")
+            }
+            searchPlaceholder={
+              t("searchCurrencies") ||
+              (isRTL ? "بحث في العملات..." : "Search currencies...")
+            }
+            disabled={!canEdit}
+            onChange={(selectedVal) => {
+              setTimezoneForm({
+                ...timezoneForm,
+                currency_id: selectedVal,
+              });
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">
             {t("timeFormat") || "صيغة الوقت"}
           </label>
           <select
@@ -99,9 +170,7 @@ export default function TimezoneTab({
             </option>
           </select>
         </div>
-      </div>
 
-      <div className="form-row">
         <div className="form-group">
           <label className="form-label">
             {t("weekStart") || "بداية الأسبوع"}

@@ -486,7 +486,7 @@ export default function MemberLoginPage() {
       </form>
 
       <div className="auth-footer">
-        {t("dontHaveAccount", "معندكش حساب؟")}{" "}
+        {t("dontHaveAccount", "ليس لديك حساب؟")}{" "}
         <Link to="/member/register">{t("signUp", "إنشاء حساب")}</Link>
       </div>
 

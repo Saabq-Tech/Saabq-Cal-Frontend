@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useAuth } from "../../../../context/AuthContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import ConfirmationModal from "./ConfirmationModal";
+<<<<<<< HEAD
 import { getLimitInfo } from "../../../../utils/planLimits";
 import {
   PlanLimitBanner,
@@ -13,6 +15,10 @@ import {
 } from "../../../../components/common/PlanLimitAlert";
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+=======
+import { getCurrencySymbol } from "../../../../utils/currency";
+import { getWorkspaceVibe } from "../../../../utils/workspaceVibe";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 const defaultFormState = {
   id: null,
@@ -49,13 +55,39 @@ export default function ServicesTab({
   services = [],
   members = [],
   schedules = [],
-  canEdit,
+  canEdit: propCanEdit,
+  canCreate: propCanCreate,
+  canUpdate: propCanUpdate,
+  canDelete: propCanDelete,
   onSaveService,
   onDeleteService,
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+<<<<<<< HEAD
   const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
+=======
+  const vibe = getWorkspaceVibe(user?.workspace, isRTL ? "ar" : "en");
+  const {
+    isOwner: hookIsOwner,
+    canCreateServices,
+    canUpdateServices,
+    canDeleteServices,
+  } = usePermissions();
+
+  const isOwner = hookIsOwner || user?.is_owner === true;
+  const canCreate =
+    propCanCreate !== undefined ? propCanCreate : isOwner || canCreateServices;
+  const canUpdate =
+    propCanUpdate !== undefined ? propCanUpdate : isOwner || canUpdateServices;
+  const canDelete =
+    propCanDelete !== undefined ? propCanDelete : isOwner || canDeleteServices;
+  const _canEdit =
+    propCanEdit !== undefined
+      ? propCanEdit
+      : canCreate || canUpdate || canDelete;
+
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isTelegramInstructionModalOpen, setIsTelegramInstructionModalOpen] =
@@ -71,12 +103,15 @@ export default function ServicesTab({
     onConfirm: null,
   });
 
+<<<<<<< HEAD
   const isOwner = user?.is_owner === true;
   const servicesList = Array.isArray(services) ? services : [];
 
+=======
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const canDeleteService = (s) => {
-    if (!canEdit || !s) return false;
-    if (isOwner) return true;
+    if (!s) return false;
+    if (isOwner || canDelete) return true;
     if (
       s.workspace_member_id &&
       Number(s.workspace_member_id) === Number(user?.id)
@@ -153,11 +188,28 @@ export default function ServicesTab({
   const limitInfo = getLimitInfo(user, "services", servicesList.length);
 
   const handleOpenCreate = () => {
+<<<<<<< HEAD
     if (limitInfo.isReached) {
       setIsLimitModalOpen(true);
       return;
     }
     setForm(defaultFormState);
+=======
+    const defaultCurr =
+      user?.workspace?.currency?.code ||
+      user?.workspace?.currency_code ||
+      (availableCurrencies && availableCurrencies.length > 0
+        ? availableCurrencies[0].code
+        : "SAR");
+    const matchedCurr = availableCurrencies?.find(
+      (c) => c.code?.toUpperCase() === defaultCurr?.toUpperCase(),
+    );
+    setForm({
+      ...defaultFormState,
+      currency: defaultCurr,
+      currency_id: matchedCurr?.id || null,
+    });
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     setIsModalOpen(true);
   };
 
@@ -323,6 +375,7 @@ export default function ServicesTab({
 
   return (
     <div className="card-body">
+<<<<<<< HEAD
       <PlanLimitBanner type="services" limitInfo={limitInfo} />
 
       <PlanLimitModal
@@ -410,6 +463,84 @@ export default function ServicesTab({
           },
         ]}
       />
+=======
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 20,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+                margin: 0,
+              }}
+            >
+              {vibe.serviceTermPlural ||
+                (isRTL
+                  ? "إدارة خدمات المساحة"
+                  : "Workspace Services Management")}
+            </h2>
+            <span
+              className={`badge vibe-badge vibe-${vibe.key}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Icon name={vibe.badgeIcon} size={13} />
+              <span>{vibe.badge}</span>
+            </span>
+          </div>
+          <p
+            style={{
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+              margin: "4px 0 0",
+            }}
+          >
+            {t("workspaceServicesDesc") ||
+              (isRTL
+                ? "إضافة وتحديث جميع بيانات وقواعد وإعدادات الخدمات المتاحة للحجز."
+                : "Manage customer services, pricing, and durations")}
+          </p>
+        </div>
+        {canCreate ? (
+          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
+            +{" "}
+            {isRTL
+              ? `إضافة ${vibe.serviceTerm} جديدة`
+              : `Add New ${vibe.serviceTerm}`}
+          </button>
+        ) : (
+          <span
+            className="profile-badge unverified"
+            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+          >
+            <Icon name="lock" size={12} />
+            {t("readOnlyNotice") ||
+              (isRTL ? "للعرض فقط (بدون تعديل)" : "Read-only mode")}
+          </span>
+        )}
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* Services Grid */}
       {servicesList.length === 0 ? (
@@ -447,7 +578,7 @@ export default function ServicesTab({
           >
             {t("noServicesFound") ||
               (isRTL
-                ? "مفيش خدمات مضافة دلوقتي في مساحة العمل"
+                ? "لا توجد خدمات مضافة حالياً في مساحة العمل"
                 : "No services found in this workspace")}
           </h4>
           <p
@@ -466,7 +597,7 @@ export default function ServicesTab({
                   ? "قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد."
                   : "Add your first service to allow customers to select and book appointments.")}
           </p>
-          {canEdit && (
+          {canCreate && (
             <button
               className="btn btn-primary btn-sm"
               onClick={handleOpenCreate}
@@ -484,14 +615,13 @@ export default function ServicesTab({
             const isFeatured = s.is_featured ?? false;
             const duration = s.duration_minutes || s.duration || 30;
             const price = s.price ?? 0;
-            const rawCurr = s.currency;
-            const currencySymbol =
-              typeof rawCurr === "object" && rawCurr !== null
-                ? rawCurr.symbol_native ||
-                  rawCurr.symbol ||
-                  rawCurr.code ||
-                  "SAR"
-                : rawCurr || "SAR";
+            const rawCurr =
+              s.currencyRelation ||
+              s.currency ||
+              user?.workspace?.currency ||
+              user?.workspace?.currency_code ||
+              "SAR";
+            const currencySymbol = getCurrencySymbol(rawCurr, isRTL);
 
             const nameDisplay =
               typeof s.name === "object"
@@ -706,7 +836,7 @@ export default function ServicesTab({
                     {descDisplay ||
                       t("noServiceDescription") ||
                       (isRTL
-                        ? "مفيش وصف تفصيلي مضاف للخدمة دي."
+                        ? "لا يوجد وصف تفصيلي مضاف لهذه الخدمة."
                         : "No detailed description provided for this service.")}
                   </p>
 
@@ -983,7 +1113,7 @@ export default function ServicesTab({
                       </span>
                     )}
 
-                    {canEdit && (
+                    {canUpdate && (
                       <button
                         type="button"
                         className="btn btn-primary btn-sm"
@@ -2996,7 +3126,7 @@ export default function ServicesTab({
                     }}
                   >
                     {t("telegramDefaultBotNotice") ||
-                      "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
+                      "ستصلك إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. اضغط على الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً بدون أي نسخ أو لصق."}
                   </p>
                   <a
                     href="https://t.me/Saabq_cal_Bot"

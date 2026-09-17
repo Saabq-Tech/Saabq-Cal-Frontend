@@ -12,9 +12,45 @@
 
           var theme = localStorage.getItem('saabq_theme');
           var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (theme === 'dark' || (!theme && prefersDark)) {
+          var isDark = theme === 'dark' || (!theme && prefersDark);
+          if (isDark) {
             document.documentElement.classList.add('dark');
           }
+
+          var p = localStorage.getItem('saabq_primary_color');
+          var s = localStorage.getItem('saabq_secondary_color');
+          if (!p && !s) {
+            var storedUser = localStorage.getItem('saabq_user');
+            if (storedUser) {
+              var parsed = JSON.parse(storedUser);
+              if (parsed && parsed.workspace) {
+                p = parsed.workspace.primary_color || null;
+                s = parsed.workspace.secondary_color || null;
+              }
+            }
+          }
+
+          var root = document.documentElement;
+          if (p && /^#[0-9A-Fa-f]{3,8}$/.test(p)) {
+            root.style.setProperty('--primary', p);
+            root.style.setProperty('--primary-color', p);
+            root.style.setProperty('--primary-light', p);
+            root.style.setProperty('--sb-accent', p);
+          }
+          if (s && /^#[0-9A-Fa-f]{3,8}$/.test(s)) {
+            root.style.setProperty('--secondary', s);
+            root.style.setProperty('--secondary-color', s);
+            root.style.setProperty('--accent', s);
+          }
+
+          var targetThemeColor = s || p || (isDark ? '#022a35' : '#026982');
+          var metaTheme = document.querySelector('meta[name="theme-color"]');
+          if (!metaTheme) {
+            metaTheme = document.createElement('meta');
+            metaTheme.setAttribute('name', 'theme-color');
+            document.head.appendChild(metaTheme);
+          }
+          metaTheme.setAttribute('content', targetThemeColor);
         } catch (e) {}
       })();
     </script>

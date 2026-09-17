@@ -11,6 +11,7 @@ import UserAvatar from "../../../components/ui/UserAvatar";
 import { extractTranslatableText } from "../../../utils/text";
 import { useAuth } from "../../../context/AuthContext";
 import { getPublicAssetUrl } from "../../../utils/url";
+import { formatCurrency } from "../../../utils/currency";
 
 function getWorkspaceCustomerLabel(ws, isRTL, fallback) {
   const lbl = ws?.customer_label_singular;
@@ -487,7 +488,7 @@ export default function CustomerAppointmentsTab() {
             <section class="report-box">
               <div class="report-box-title">${isRTL ? "محتوى التقرير والتوصيات" : "Report Details & Recommendations"}</div>
               <div class="report-content">
-                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "مفيش نص متسجل للتقرير." : "No report content recorded."}</p>`}
+                ${summary || `<p style="color:#94a3b8;font-style:italic;">${isRTL ? "لا يوجد نص مسجل للتقرير." : "No report content recorded."}</p>`}
               </div>
             </section>
 
@@ -674,7 +675,7 @@ export default function CustomerAppointmentsTab() {
     if (!paymentId) {
       toast.error(
         isRTL
-          ? "ملقيناش سجل دفع للميعاد ده"
+          ? "لم نجد سجل دفع لهذا الموعد"
           : "No payment record found for this appointment",
       );
       return;
@@ -1092,7 +1093,7 @@ export default function CustomerAppointmentsTab() {
                 marginBottom: 6,
               }}
             >
-              {t("noCustomerAppointments") || "معندكش مواعيد دلوقتي"}
+              {t("noCustomerAppointments") || "ليس لديك مواعيد حالياً"}
             </h3>
             <p
               style={{
@@ -1340,8 +1341,14 @@ export default function CustomerAppointmentsTab() {
                           style={{ color: "var(--primary)" }}
                         />
                         <span>
-                          {appt.snapshot.price}{" "}
-                          {appt.snapshot.currency || "SAR"}
+                          {formatCurrency(
+                            appt.snapshot.price,
+                            appt.snapshot.currency ||
+                              appt.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </span>
                       </div>
                     )}
@@ -1980,10 +1987,16 @@ export default function CustomerAppointmentsTab() {
                         <span
                           style={{ fontWeight: 700, color: "var(--heading)" }}
                         >
-                          {selectedAppointment.snapshot?.price ||
-                            selectedAppointment.service?.price ||
-                            0}{" "}
-                          {selectedAppointment.snapshot?.currency || "SAR"}
+                          {formatCurrency(
+                            selectedAppointment.snapshot?.price ||
+                              selectedAppointment.service?.price ||
+                              0,
+                            selectedAppointment.snapshot?.currency ||
+                              selectedAppointment.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </span>
                       </div>
                     </div>
@@ -2531,10 +2544,16 @@ export default function CustomerAppointmentsTab() {
                             color: "var(--heading)",
                           }}
                         >
-                          {selectedAppointment.snapshot?.price ||
-                            selectedAppointment.service?.price ||
-                            0}{" "}
-                          {selectedAppointment.snapshot?.currency || "SAR"}
+                          {formatCurrency(
+                            selectedAppointment.snapshot?.price ||
+                              selectedAppointment.service?.price ||
+                              0,
+                            selectedAppointment.snapshot?.currency ||
+                              selectedAppointment.workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </strong>
                       </div>
                       <div
@@ -2642,7 +2661,7 @@ export default function CustomerAppointmentsTab() {
                           }}
                         >
                           {isRTL
-                            ? "مفيش صورة إيصال سداد مرفقة مع الميعاد ده"
+                            ? "لا توجد صورة إيصال سداد مرفقة مع هذا الموعد"
                             : "No receipt image attached with this booking"}
                         </span>
                       </div>
@@ -2897,7 +2916,7 @@ export default function CustomerAppointmentsTab() {
                 }}
               >
                 {isRTL
-                  ? "إنت متأكد إنك عايز تلغي الميعاد ده؟"
+                  ? "هل أنت متأكد من رغبتك في إلغاء هذا الموعد؟"
                   : "Are you sure you want to cancel this appointment?"}
               </p>
 

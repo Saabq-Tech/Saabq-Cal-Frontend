@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import Icon from "../../../../components/common/Icon";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 
@@ -8,10 +9,28 @@ export default function BookingFormFieldsTab({
   setFormFieldsForm: _setFormFieldsForm,
   onSave,
   saving,
-  canEdit,
+  canEdit: propCanEdit,
 }) {
+<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
   const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
+=======
+  const { t } = useLanguage();
+  const {
+    isOwner,
+    canCreateBookingForms,
+    canUpdateBookingForms,
+    canDeleteBookingForms,
+    canUpdateSettings,
+  } = usePermissions();
+
+  const canEdit =
+    propCanEdit !== undefined
+      ? propCanEdit
+      : isOwner || canUpdateBookingForms || canUpdateSettings;
+  const canCreateQuestion = isOwner || canCreateBookingForms || canEdit;
+  const canDeleteQuestion = isOwner || canDeleteBookingForms || canEdit;
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
   // Standard system field statuses (required | optional | disabled)
   const [fieldStatuses, setFieldStatuses] = useState(() => {
@@ -640,7 +659,7 @@ export default function BookingFormFieldsTab({
                 </p>
               </div>
 
-              {canEdit && (
+              {canCreateQuestion && (
                 <button
                   type="button"
                   onClick={addCustomQuestion}
@@ -809,29 +828,31 @@ export default function BookingFormFieldsTab({
                       </button>
 
                       {/* Trash Delete Icon Button */}
-                      <button
-                        type="button"
-                        onClick={() => deleteQuestion(q.id)}
-                        title={t("deleteQuestionBtn") || "حذف السؤال"}
-                        style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: "50%",
-                          border: "1px solid #fecdd3",
-                          background: "#fef2f2",
-                          color: "#e11d48",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          flexShrink: 0,
-                          padding: 0,
-                          lineHeight: 1,
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        <Icon name="trash" size={16} />
-                      </button>
+                      {canDeleteQuestion && (
+                        <button
+                          type="button"
+                          onClick={() => deleteQuestion(q.id)}
+                          title={t("deleteQuestionBtn") || "حذف السؤال"}
+                          style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: "50%",
+                            border: "1px solid #fecdd3",
+                            background: "#fef2f2",
+                            color: "#e11d48",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            flexShrink: 0,
+                            padding: 0,
+                            lineHeight: 1,
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <Icon name="trash" size={16} />
+                        </button>
+                      )}
                     </div>
                   </div>
 

@@ -3,12 +3,15 @@ import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
 import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import { getCurrencySymbol } from "../../../utils/currency";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import UserAvatar from "../../../components/ui/UserAvatar";
@@ -20,27 +23,41 @@ export default function MemberOverviewTab() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
+  const {
+    isOwner,
+    canReadBookings,
+    canCreateBookings,
+    canReadCustomers,
+    canReadPayments,
+  } = usePermissions();
 
-  // Dynamic workspace customer label
+  // Dynamic workspace customer label & industry vibe
   const ws = user?.workspace;
+<<<<<<< HEAD
   const {
     isCustom,
     customerSingular: custSingular,
     customerPlural: custPlural,
   } = useCustomerLabel(ws);
+=======
+  const vibe = useMemo(() => getWorkspaceVibe(ws, lang), [ws, lang]);
+  const custSingular = (() => {
+    const f = ws?.customer_label_singular;
+    if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
+    return t("customerSingle") || "عميل";
+  })();
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canReadBookings =
-    isOwner ||
-    userPermissions.includes("booking_read") ||
-    userPermissions.includes("bookings_read");
-  const canReadCustomers =
-    isOwner ||
-    userPermissions.includes("customer_read") ||
-    userPermissions.includes("customers_read");
+  const custPlural = (() => {
+    const f = ws?.customer_label_plural;
+    if (f)
+      return typeof f === "object" ? f[lang] || f.ar || f.en || "العملاء" : f;
+    return t("navCustomers") || (lang === "ar" ? "العملاء" : "Customers");
+  })();
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+
+  const custIcon =
+    ws?.customer_icon || workspaceSettings?.customer_icon || "users";
+
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
   const [bookings, setBookings] = useState([]);
@@ -342,13 +359,20 @@ export default function MemberOverviewTab() {
     let confirmedCount = 0;
     let cancelledCount = 0;
     let monthRevenue = 0;
-    let currency = "SAR";
+    let currency =
+      workspaceSettings?.currency ||
+      workspaceSettings?.currency_code ||
+      user?.workspace?.currency ||
+      user?.workspace?.currency_code ||
+      "SAR";
 
     bookings.forEach((b) => {
       const startsAt = b.starts_at ? new Date(b.starts_at) : null;
       const dateStr = b.starts_at ? getDateKey(b.starts_at) : null;
       const price = parseFloat(b.snapshot?.price ?? b.service?.price);
-      if (b.snapshot?.currency) currency = b.snapshot.currency;
+      if (!currency && b.snapshot?.currency) {
+        currency = b.snapshot.currency;
+      }
 
       if (dateStr === todayStr) {
         todayCount += 1;
@@ -376,54 +400,35 @@ export default function MemberOverviewTab() {
       }
     });
 
-    const hasRealBookings = bookings.length > 0;
-    const totalBookings = hasRealBookings ? bookings.length : 10;
-    const compCount =
-      completedCount > 0 ? completedCount : hasRealBookings ? 0 : 6;
-    const pendCount = pendingCount > 0 ? pendingCount : hasRealBookings ? 0 : 3;
-    const confCount =
-      confirmedCount > 0 ? confirmedCount : hasRealBookings ? 0 : 1;
-    const cancCount =
-      cancelledCount > 0 ? cancelledCount : hasRealBookings ? 0 : 0;
-
-    const activeDenominator = compCount + pendCount + confCount;
+    const totalBookings = bookings.length;
+    const activeDenominator = completedCount + pendingCount + confirmedCount;
     const completionRate =
       activeDenominator > 0
-        ? Math.round((compCount / activeDenominator) * 100)
-        : 85;
+        ? Math.round((completedCount / activeDenominator) * 100)
+        : 0;
     const avgValue =
-      compCount > 0
-        ? Math.round(monthRevenue / compCount)
-        : monthRevenue > 0
+      completedCount > 0
+        ? Math.round(monthRevenue / completedCount)
+        : totalBookings > 0 && monthRevenue > 0
           ? Math.round(monthRevenue / totalBookings)
-          : 220;
+          : 0;
 
     return {
       totalBookings,
-      todayCount: todayCount > 0 ? todayCount : hasRealBookings ? 0 : 1,
-      weekCount: weekCount > 0 ? weekCount : hasRealBookings ? 0 : 1,
-      pendingCount: pendCount,
-      completedCount: compCount,
-      confirmedCount: confCount,
-      cancelledCount: cancCount,
+      todayCount,
+      weekCount,
+      pendingCount,
+      completedCount,
+      confirmedCount,
+      cancelledCount,
       completionRate,
       avgValue,
-      customerCount:
-        customerTotal !== null && customerTotal > 0
-          ? customerTotal
-          : customerTotal === 0
-            ? 0
-            : 13,
-      revenue:
-        monthRevenue > 0
-          ? monthRevenue.toLocaleString("en-US")
-          : hasRealBookings
-            ? "0"
-            : "4,400",
-      rawRevenue: monthRevenue > 0 ? monthRevenue : hasRealBookings ? 0 : 4400,
+      customerCount: customerTotal !== null ? customerTotal : 0,
+      revenue: monthRevenue.toLocaleString("en-US"),
+      rawRevenue: monthRevenue,
       currency,
     };
-  }, [bookings, customerTotal, getDateKey]);
+  }, [bookings, customerTotal, getDateKey, workspaceSettings, user]);
 
   // Master map of bookings by date key: "YYYY-MM-DD"
   const bookingsByDay = useMemo(() => {
@@ -702,51 +707,11 @@ export default function MemberOverviewTab() {
       return positionedEvents;
     }
 
-    // If workspace has real bookings, an empty day should have no bookings
-    if (bookings.length > 0) {
-      return [];
-    }
-
-    // Fallback sample cards only when workspace has ZERO bookings overall
-    const d1Start = new Date(selectedDate);
-    d1Start.setHours(9, 0, 0, 0);
-    const d1End = new Date(selectedDate);
-    d1End.setHours(9, 45, 0, 0);
-
-    const d2Start = new Date(selectedDate);
-    d2Start.setHours(11, 0, 0, 0);
-    const d2End = new Date(selectedDate);
-    d2End.setHours(12, 15, 0, 0);
-
-    return [
-      {
-        id: "sample-1",
-        name: lang === "ar" ? "سارة محمد" : "Sarah Mohammed",
-        time: `${formatTime(d1Start, is24Hour)} – ${formatTime(d1End, is24Hour)}`,
-        service: lang === "ar" ? "استشارة" : "Consultation",
-        variant: "green",
-        topPx: ((9 * 60) / 60) * HOUR_HEIGHT,
-        heightPx: Math.max(54, (45 / 60) * HOUR_HEIGHT - 4),
-        laneIndex: 0,
-        numLanes: 1,
-      },
-      {
-        id: "sample-2",
-        name: lang === "ar" ? "محمد الأمين" : "Mohammed Al-Amin",
-        time: `${formatTime(d2Start, is24Hour)} – ${formatTime(d2End, is24Hour)}`,
-        service: lang === "ar" ? "جلسة متابعة" : "Follow-up Session",
-        variant: "blue",
-        topPx: ((11 * 60) / 60) * HOUR_HEIGHT,
-        heightPx: Math.max(54, (75 / 60) * HOUR_HEIGHT - 4),
-        laneIndex: 0,
-        numLanes: 1,
-      },
-    ];
+    // No bookings for selected day
+    return [];
   }, [
-    bookings,
     bookingsByDay,
     selectedDateKey,
-    selectedDate,
     getText,
     lang,
     custSingular,
@@ -793,33 +758,8 @@ export default function MemberOverviewTab() {
         };
       });
 
-    if (realUpcoming.length > 0) return realUpcoming;
-
-    const s1 = new Date();
-    s1.setHours(9, 30, 0, 0);
-    const s2 = new Date();
-    s2.setHours(11, 0, 0, 0);
-    const s3 = new Date();
-    s3.setHours(13, 30, 0, 0);
-
-    return [
-      {
-        id: "u-1",
-        time: formatTime(s1, is24Hour),
-        name: lang === "ar" ? "ربيع عبدالله" : "Rabie Abdullah",
-      },
-      {
-        id: "u-2",
-        time: formatTime(s2, is24Hour),
-        name: lang === "ar" ? "خالد الشهري" : "Khaled Al-Shehri",
-      },
-      {
-        id: "u-3",
-        time: formatTime(s3, is24Hour),
-        name: lang === "ar" ? "مركز التطوير" : "Development Center",
-      },
-    ];
-  }, [bookings, lang, custSingular, formatTime, is24Hour]);
+    return realUpcoming;
+  }, [bookings, custSingular, formatTime, is24Hour]);
 
   // Generate complete 24 hours of the day
   const hoursList = useMemo(() => {
@@ -871,9 +811,12 @@ export default function MemberOverviewTab() {
   }
 
   return (
-    <div className="workspace-main-dashboard animate-fade-in-up">
+    <div
+      className={`workspace-main-dashboard vibe-${vibe.key} animate-fade-in-up`}
+    >
       <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
 
+<<<<<<< HEAD
       {/* Welcome Banner with Integrated Live Clock & Member Info */}
       <div className="workspace-welcome-banner">
         <div className="workspace-welcome-info">
@@ -933,6 +876,35 @@ export default function MemberOverviewTab() {
             </button>
           </div>
         )}
+=======
+      {/* Workspace Industry Vibe Welcome Banner */}
+      <div className={`workspace-vibe-dashboard-banner vibe-${vibe.key}`}>
+        <div className="workspace-vibe-dashboard-banner-content">
+          <div className="workspace-vibe-dashboard-greeting">
+            <span className="workspace-vibe-pill">
+              <Icon name={vibe.badgeIcon} size={15} />
+              <span>{vibe.badge}</span>
+            </span>
+            <h1 className="workspace-vibe-welcome-title">
+              {vibe.dashboardGreetingPrefix} {user?.name ? user.name : ""}
+            </h1>
+            <p className="workspace-vibe-welcome-desc">{vibe.tagline}</p>
+          </div>
+          {canCreateBookings && (
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="btn btn-primary workspace-vibe-quick-action"
+            >
+              <Icon name="calendar" size={16} />
+              <span>
+                {vibe.bookAction ||
+                  (lang === "ar" ? "إضافة موعد" : "New Booking")}
+              </span>
+            </button>
+          )}
+        </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       </div>
 
       {/* 8 Balanced Executive Stat Cards (4x2 Matrix) */}
@@ -940,15 +912,49 @@ export default function MemberOverviewTab() {
         {/* ROW 1: Financials & Daily Operations */}
 
         {/* 1. Total Revenue (Emerald Green Theme) */}
+<<<<<<< HEAD
         <div className="workspace-stat-card stat-emerald">
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="credit-card" size={18} />
+=======
+        {(canReadPayments || isOwner) && (
+          <div className="workspace-stat-card stat-emerald">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="credit-card" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "الإيرادات" : "Total Revenue"}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {stats.rawRevenue > 0
+                  ? lang === "ar"
+                    ? "هذا الشهر"
+                    : "This month"
+                  : lang === "ar"
+                    ? "الشهر الحالي"
+                    : "Current month"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "+14% هذا الشهر" : "+14% this month"}
-            </span>
+            <div className="workspace-stat-number revenue-number">
+              <span>{stats.revenue}</span>
+              <span className="currency-unit">
+                {getCurrencySymbol(stats.currency, lang === "ar")}
+              </span>
+            </div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "إجمالي دخل الحجوزات"
+                  : "Gross completed revenue"}
+              </span>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+            </div>
           </div>
+<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "الإيرادات" : "Total Revenue"}
           </div>
@@ -972,11 +978,38 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="calendar" size={18} />
+=======
+        )}
+
+        {/* 2. Total Bookings (Royal Blue Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-blue">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="calendar" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {vibe.totalBookingsLabel ||
+                    (lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings")}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "سجلات نشطة" : "Active"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "سجلات نشطة" : "Active"}
-            </span>
+            <div className="workspace-stat-number">{stats.totalBookings}</div>
+            <div className="stat-card-footer">
+              <span>
+                {vibe.totalBookingsDesc ||
+                  (lang === "ar"
+                    ? "كافة الحجوزات المسجلة"
+                    : "All recorded bookings")}
+              </span>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+            </div>
           </div>
+<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
           </div>
@@ -995,11 +1028,38 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="clock" size={18} />
+=======
+        )}
+
+        {/* 3. Today's Schedule (Sky Cyan Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-cyan">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="clock" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {vibe.todayStatsLabel ||
+                    (lang === "ar" ? "مواعيد اليوم" : "Today's Schedule")}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "اليوم" : "Today"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "اليوم" : "Today"}
-            </span>
+            <div className="workspace-stat-number">{stats.todayCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {vibe.todayStatsDesc ||
+                  (lang === "ar"
+                    ? "مواعيد مجدولة لليوم"
+                    : "Scheduled for today")}
+              </span>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+            </div>
           </div>
+<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
           </div>
@@ -1016,11 +1076,90 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="alert-triangle" size={18} />
+=======
+        )}
+
+        {/* 4. This Week's Appointments (Indigo Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-indigo">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="sparkles" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "7 أيام" : "7 Days"}
+              </span>
             </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
-            </span>
+            <div className="workspace-stat-number">{stats.weekCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "حجوزات الأسبوع الجاري"
+                  : "Current week volume"}
+              </span>
+            </div>
           </div>
+        )}
+
+        {/* 5. Completed Bookings (Mint / Teal Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-teal">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="check" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "تمت بنجاح" : "Serviced"}
+              </span>
+            </div>
+            <div className="workspace-stat-number">{stats.completedCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "خدمات تم تقديمها للعملاء"
+                  : "Successfully completed"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* 6. Pending Confirmation (Warm Amber Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-amber">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="alert-triangle" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
+                </div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
+              </span>
+            </div>
+            <div className="workspace-stat-number">{stats.pendingCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "حجوزات بانتظار الاعتماد"
+                  : "Awaiting confirmation"}
+              </span>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+            </div>
+          </div>
+<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
           </div>
@@ -1120,9 +1259,38 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="bar-chart" size={18} />
+=======
+        )}
+
+        {/* 7. Completion Rate (Purple Theme) */}
+        {canReadBookings && (
+          <div className="workspace-stat-card stat-purple">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name="bar-chart" size={18} />
+                </div>
+                <div className="workspace-stat-label">
+                  {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
+                </div>
+              </div>
+              <span className="stat-pill">{stats.completionRate}%</span>
             </div>
-            <span className="stat-pill">{stats.completionRate}%</span>
+            <div className="workspace-stat-number">{stats.completionRate}%</div>
+            <div className="stat-card-footer">
+              <div className="stat-progress-bar">
+                <div
+                  className="stat-progress-fill"
+                  style={{
+                    width: `${stats.completionRate}%`,
+                    background: "linear-gradient(90deg, #a855f7, #9333ea)",
+                  }}
+                />
+              </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+            </div>
           </div>
+<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
           </div>
@@ -1139,6 +1307,34 @@ export default function MemberOverviewTab() {
             </div>
           </div>
         </div>
+=======
+        )}
+
+        {/* 8. Active Clients / Patients (Rose Theme) */}
+        {canReadCustomers && (
+          <div className="workspace-stat-card stat-rose">
+            <div className="stat-card-header">
+              <div className="stat-header-left">
+                <div className="stat-icon-wrap">
+                  <Icon name={custIcon} size={18} />
+                </div>
+                <div className="workspace-stat-label">{custPlural}</div>
+              </div>
+              <span className="stat-pill">
+                {lang === "ar" ? "قاعدة العملاء" : "Clients"}
+              </span>
+            </div>
+            <div className="workspace-stat-number">{stats.customerCount}</div>
+            <div className="stat-card-footer">
+              <span>
+                {lang === "ar"
+                  ? "إجمالي المسجلين في المنشأة"
+                  : "Total registered clients"}
+              </span>
+            </div>
+          </div>
+        )}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       </div>
 
       {/* Two Column Workspace Grid: Right Column (Timeline) & Left Column (Calendar + Upcoming) */}
@@ -1175,14 +1371,16 @@ export default function MemberOverviewTab() {
                 <Icon name="chevron-left" size={16} />
               </button>
 
-              <button
-                type="button"
-                className="timeline-new-booking-btn"
-                onClick={() => setShowCreateModal(true)}
-              >
-                <span>+</span>
-                <span>{lang === "ar" ? "موعد جديد" : "New Booking"}</span>
-              </button>
+              {canCreateBookings && (
+                <button
+                  type="button"
+                  className="timeline-new-booking-btn"
+                  onClick={() => setShowCreateModal(true)}
+                >
+                  <span>+</span>
+                  <span>{lang === "ar" ? "موعد جديد" : "New Booking"}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -1205,15 +1403,22 @@ export default function MemberOverviewTab() {
                   style={{
                     top: `${slot.hour * HOUR_HEIGHT}px`,
                     height: `${HOUR_HEIGHT}px`,
+                    cursor: canCreateBookings ? "pointer" : "default",
                   }}
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={() => canCreateBookings && setShowCreateModal(true)}
                   title={
-                    lang === "ar" ? "اضغط لإضافة موعد" : "Click to add booking"
+                    canCreateBookings
+                      ? lang === "ar"
+                        ? "اضغط لإضافة موعد"
+                        : "Click to add booking"
+                      : undefined
                   }
                 >
                   <span className="timeline-time-label">{slot.label}</span>
                   <div className="timeline-grid-line" />
-                  <span className="timeline-slot-add-hint">+</span>
+                  {canCreateBookings && (
+                    <span className="timeline-slot-add-hint">+</span>
+                  )}
                 </div>
               ))}
 
@@ -1244,8 +1449,8 @@ export default function MemberOverviewTab() {
                       style={{
                         top: `${evt.topPx + 2}px`,
                         height: `${evt.heightPx}px`,
-                        insetInlineStart: `calc(var(--timeline-time-col-width, 74px) + (100% - var(--timeline-time-col-width, 74px) - 10px) * (${evt.laneIndex || 0} / ${evt.numLanes || 1}))`,
-                        width: `calc((100% - var(--timeline-time-col-width, 74px) - 10px) / ${evt.numLanes || 1} - 8px)`,
+                        insetInlineStart: `calc(var(--timeline-time-col-width, 74px) + (100% - var(--timeline-time-col-width, 74px) - var(--timeline-event-gutter, 8px)) * (${evt.laneIndex || 0} / ${evt.numLanes || 1}))`,
+                        width: `calc((100% - var(--timeline-time-col-width, 74px) - var(--timeline-event-gutter, 8px)) / ${evt.numLanes || 1} - var(--timeline-event-gap, 6px))`,
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1382,28 +1587,47 @@ export default function MemberOverviewTab() {
               {lang === "ar" ? "المواعيد القادمة" : "Upcoming Appointments"}
             </div>
             <div className="upcoming-widget-list">
-              {upcomingList.map((item) => (
+              {upcomingList.length > 0 ? (
+                upcomingList.map((item) => (
+                  <div
+                    key={item.id}
+                    className="upcoming-widget-item"
+                    onClick={() => {
+                      if (item.rawBooking) setSelectedEventModal(item);
+                    }}
+                    style={{ cursor: item.rawBooking ? "pointer" : "default" }}
+                  >
+                    <span className="upcoming-time">{item.time}</span>
+                    <span className="upcoming-name">{item.name}</span>
+                  </div>
+                ))
+              ) : (
                 <div
-                  key={item.id}
-                  className="upcoming-widget-item"
-                  onClick={() => {
-                    if (item.rawBooking) setSelectedEventModal(item);
+                  style={{
+                    padding: "20px 12px",
+                    textAlign: "center",
+                    color: "var(--muted)",
+                    fontSize: "0.82rem",
                   }}
-                  style={{ cursor: item.rawBooking ? "pointer" : "default" }}
                 >
-                  <span className="upcoming-time">{item.time}</span>
-                  <span className="upcoming-name">{item.name}</span>
+                  {lang === "ar"
+                    ? "لا توجد مواعيد قادمة"
+                    : "No upcoming appointments"}
                 </div>
-              ))}
+              )}
             </div>
-            <div className="upcoming-widget-footer">
-              <Link
-                to="/member/workspace/bookings"
-                className="upcoming-view-all-link"
-              >
-                {lang === "ar" ? "عرض جميع المواعيد" : "View All Appointments"}
-              </Link>
-            </div>
+            {canReadBookings && (
+              <div className="upcoming-widget-footer">
+                <Link
+                  to="/member/workspace/bookings"
+                  className="upcoming-view-all-link"
+                >
+                  {lang === "ar"
+                    ? "عرض جميع المواعيد"
+                    : "View All Appointments"}
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1490,9 +1714,41 @@ export default function MemberOverviewTab() {
                 </button>
               </div>
             </div>
+<<<<<<< HEAD
           </div>,
           document.body,
         )}
+=======
+            <div className="event-detail-actions">
+              {canReadBookings && (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    const bId = selectedEventModal?.rawBooking?.id;
+                    setSelectedEventModal(null);
+                    if (bId) {
+                      navigate(`/member/workspace/bookings/${bId}`);
+                    } else {
+                      navigate("/member/workspace/bookings");
+                    }
+                  }}
+                >
+                  {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setSelectedEventModal(null)}
+              >
+                {lang === "ar" ? "إغلاق" : "Close"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* Real Create Booking Modal Integration */}
       {showCreateModal && (

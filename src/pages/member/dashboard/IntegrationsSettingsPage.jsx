@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import SEO from "../../../components/ui/SEO";
@@ -105,8 +106,23 @@ export default function IntegrationsSettingsPage() {
     testEmailIntegration,
   } = useAuth();
 
+<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
   const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
+=======
+  const {
+    isOwner,
+    canReadIntegrations: _canReadIntegrations,
+    canCreateIntegrations,
+    canUpdateIntegrations,
+    canDeleteIntegrations,
+  } = usePermissions();
+  const canEditIntegrations =
+    isOwner || canUpdateIntegrations || canCreateIntegrations;
+  const canDelete = isOwner || canDeleteIntegrations;
+
+  const { t } = useLanguage();
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -443,7 +459,8 @@ export default function IntegrationsSettingsPage() {
   const handleDisconnectGoogle = () => {
     openConfirm(
       t("googleIntegrationTitle") || "حساب جوجل المترابط",
-      t("googleDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط حساب جوجل؟",
+      t("googleDisconnectConfirm") ||
+        "هل أنت متأكد من رغبتك في إلغاء ربط حساب Google؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await disconnectGoogleIntegration();
@@ -619,7 +636,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("webhooksTitle") || "Webhooks API",
       t("webhookDisconnectConfirm") ||
-        "إنت متأكد إنك عايز تلغي رابط الـ Webhook؟",
+        "هل أنت متأكد من رغبتك في إلغاء ربط الـ Webhook؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteWebhookIntegration();
@@ -645,7 +662,7 @@ export default function IntegrationsSettingsPage() {
       !telegramBotToken &&
       !telegramIntegration?.has_bot_token
     ) {
-      toast.error(t("botTokenLabel") || "من فضلك اكتب التوكن بتاع البوت");
+      toast.error(t("botTokenLabel") || "يرجى إدخال رمز (Token) البوت");
       return;
     }
 
@@ -691,7 +708,8 @@ export default function IntegrationsSettingsPage() {
   const handleDeleteTelegramSettings = () => {
     openConfirm(
       t("telegramTitle") || "إعدادات Telegram",
-      t("telegramDisconnectConfirm") || "إنت متأكد إنك عايز تلغي ربط Telegram؟",
+      t("telegramDisconnectConfirm") ||
+        "هل أنت متأكد من رغبتك في إلغاء ربط Telegram؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteTelegramIntegration();
@@ -776,7 +794,7 @@ export default function IntegrationsSettingsPage() {
     openConfirm(
       t("emailSettingsTitle") || "إعدادات البريد الإلكتروني",
       t("emailDisconnectConfirm") ||
-        "إنت متأكد إنك عايز تلغي ربط البريد الإلكتروني؟",
+        "هل أنت متأكد من رغبتك في إلغاء ربط البريد الإلكتروني؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
         const res = await deleteEmailIntegration();
@@ -958,6 +976,7 @@ export default function IntegrationsSettingsPage() {
         }
       />
 
+<<<<<<< HEAD
       {/* Integrations Main Container */}
       <div className="workspace-page-container">
         {/* Filter Tabs */}
@@ -969,34 +988,54 @@ export default function IntegrationsSettingsPage() {
             overflowX: "auto",
           }}
         >
+=======
+        {/* Filter Tabs Slider */}
+        <div className="integrations-tabs-slider no-scrollbar">
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           {[
-            { id: "all", label: t("allApplications") || "كافة التطبيقات" },
-            { id: "google", label: t("googleServicesTab") || "خدمات Google" },
+            {
+              id: "all",
+              label: t("allApplications") || "كافة التطبيقات",
+              icon: "grid",
+              count: integrationsList.length,
+            },
+            {
+              id: "google",
+              label: t("googleServicesTab") || "خدمات Google",
+              icon: "globe",
+              count: integrationsList.filter((i) => i.category === "google")
+                .length,
+            },
             {
               id: "automation",
               label: t("automationAndWebhooksTab") || "الأتمتة والـ Webhooks",
+              icon: "zap",
+              count: integrationsList.filter((i) => i.category === "automation")
+                .length,
             },
             {
               id: "notifications",
               label: t("notificationsTab") || "الإشعارات",
+              icon: "bell",
+              count: integrationsList.filter(
+                (i) => i.category === "notifications",
+              ).length,
             },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`btn btn-sm ${activeTab === tab.id ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                borderRadius: 20,
-                fontSize: "0.82rem",
-                padding: "6px 16px",
-                marginTop: 10,
-                fontWeight: activeTab === tab.id ? 700 : 500,
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                className={`integrations-tab-pill ${isActive ? "active" : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <Icon name={tab.icon} size={14} />
+                <span>{tab.label}</span>
+                <span className="integrations-tab-count">{tab.count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1150,7 +1189,15 @@ export default function IntegrationsSettingsPage() {
                   {t("openSheet") || "فتح الشيت"}
                 </a>
               )}
-              <PermissionCheck permission="integration_manage">
+              <PermissionCheck
+                permission={[
+                  "integration_read",
+                  "integration_create",
+                  "integration_update",
+                  "integration_delete",
+                  "integration_manage",
+                ]}
+              >
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -1274,33 +1321,35 @@ export default function IntegrationsSettingsPage() {
                   >
                     <Icon name="alert-triangle" size={16} />
                     {t("noGoogleConnectedNotice") ||
-                      "مفيش أي حساب جوجل اتربط لحد دلوقتي. اضغط على الزرار تحت عشان تربطه بأمان."}
+                      "لم يتم ربط أي حساب Google حتى الآن. انقر على الزر أدناه للربط بأمان."}
                   </span>
                 </div>
               )}
 
               <div className="modal-actions">
-                {googleIntegration ? (
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm"
-                    onClick={handleDisconnectGoogle}
-                    disabled={loading}
-                  >
-                    {t("disconnectGoogleBtn") || "إلغاء ربط حساب Google"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleStartGoogleOAuth}
-                    disabled={loading}
-                    style={{ gap: 6 }}
-                  >
-                    <Icon name="globe" size={14} />
-                    {t("connectGoogleNow") || "ربط حساب Google الآن"}
-                  </button>
-                )}
+                {googleIntegration
+                  ? canDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={handleDisconnectGoogle}
+                        disabled={loading}
+                      >
+                        {t("disconnectGoogleBtn") || "إلغاء ربط حساب Google"}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleStartGoogleOAuth}
+                        disabled={loading}
+                        style={{ gap: 6 }}
+                      >
+                        <Icon name="globe" size={14} />
+                        {t("connectGoogleNow") || "ربط حساب Google الآن"}
+                      </button>
+                    )}
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -1378,6 +1427,7 @@ export default function IntegrationsSettingsPage() {
                 <ToggleSwitch
                   checked={calendarSync}
                   onChange={(e) => setCalendarSync(e.target.checked)}
+                  disabled={!canEditIntegrations}
                 />
               </div>
 
@@ -1390,6 +1440,7 @@ export default function IntegrationsSettingsPage() {
                   className="form-input"
                   value={calendarId}
                   onChange={(e) => setCalendarId(e.target.value)}
+                  disabled={!canEditIntegrations}
                   placeholder="primary or your-email@gmail.com"
                 />
                 <span
@@ -1412,27 +1463,29 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveCalendarSettings}
-                    disabled={loading}
-                  >
-                    {t("saveSettings")}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={() => {
-                      setActiveModalId(null);
-                      handleStartGoogleOAuth();
-                    }}
-                  >
-                    {t("connectGoogle")}
-                  </button>
-                )}
+                {googleIntegration
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveCalendarSettings}
+                        disabled={loading}
+                      >
+                        {t("saveSettings")}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setActiveModalId(null);
+                          handleStartGoogleOAuth();
+                        }}
+                      >
+                        {t("connectGoogle")}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,
@@ -1513,6 +1566,7 @@ export default function IntegrationsSettingsPage() {
                 <ToggleSwitch
                   checked={autoMeet}
                   onChange={(e) => setAutoMeet(e.target.checked)}
+                  disabled={!canEditIntegrations}
                 />
               </div>
 
@@ -1524,27 +1578,29 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveMeetSettings}
-                    disabled={loading}
-                  >
-                    {t("saveChanges") || "حفظ التغييرات"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={() => {
-                      setActiveModalId(null);
-                      handleStartGoogleOAuth();
-                    }}
-                  >
-                    {t("connectGoogle") || "ربط حساب جوجل"}
-                  </button>
-                )}
+                {googleIntegration
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveMeetSettings}
+                        disabled={loading}
+                      >
+                        {t("saveChanges") || "حفظ التغييرات"}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setActiveModalId(null);
+                          handleStartGoogleOAuth();
+                        }}
+                      >
+                        {t("connectGoogle") || "ربط حساب جوجل"}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,
@@ -1619,6 +1675,7 @@ export default function IntegrationsSettingsPage() {
                 <ToggleSwitch
                   checked={sheetsSync}
                   onChange={(e) => setSheetsSync(e.target.checked)}
+                  disabled={!canEditIntegrations}
                 />
               </div>
 
@@ -1654,40 +1711,42 @@ export default function IntegrationsSettingsPage() {
                     }}
                   >
                     {t("createSheetAutoDesc") ||
-                      "مفيش شيت مرتبط دلوقتي. اعمل شيت جديد مجهز بكل الحقول الـ 26 والتنسيق المعتمد بضغطة واحدة."}
+                      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة."}
                   </p>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleCreateGoogleSheet}
-                    disabled={isCreatingSheet || !googleIntegration}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "8px 18px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {isCreatingSheet ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm"
-                          style={{ width: 14, height: 14 }}
-                        />
-                        <span>
-                          {t("creatingSheet") || "جاري إنشاء الشيت..."}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Icon name="plus" size={15} />
-                        <span>
-                          {t("createSheetAuto") || "إنشاء جدول جديد تلقائياً"}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleCreateGoogleSheet}
+                      disabled={isCreatingSheet || !googleIntegration}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "8px 18px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {isCreatingSheet ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm"
+                            style={{ width: 14, height: 14 }}
+                          />
+                          <span>
+                            {t("creatingSheet") || "جاري إنشاء الشيت..."}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="plus" size={15} />
+                          <span>
+                            {t("createSheetAuto") || "إنشاء جدول جديد تلقائياً"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div
@@ -1712,54 +1771,60 @@ export default function IntegrationsSettingsPage() {
                       flexWrap: "wrap",
                     }}
                   >
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-sm"
-                      onClick={handleTestGoogleSheets}
-                      disabled={isTestingSheet || !googleIntegration}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontWeight: 700,
-                        fontSize: "0.85rem",
-                        padding: "7px 16px",
-                        borderRadius: 8,
-                        background: "var(--bg-card)",
-                        color: "var(--heading)",
-                        borderColor: "var(--border)",
-                      }}
-                    >
-                      {isTestingSheet ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm"
-                            style={{ width: 14, height: 14 }}
-                          />
-                          <span>
-                            {t("testingSheet") || "جاري اختبار الاتصال..."}
-                          </span>
-                        </>
-                      ) : (
-                        <span>
-                          {t("testSheetConnection") || "اختبار الاتصال بالشيت"}
-                        </span>
-                      )}
-                    </button>
+                    {canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        onClick={handleTestGoogleSheets}
+                        disabled={isTestingSheet || !googleIntegration}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontWeight: 700,
+                          fontSize: "0.85rem",
+                          padding: "7px 16px",
+                          borderRadius: 8,
+                          background: "var(--bg-card)",
+                          color: "var(--heading)",
+                          borderColor: "var(--border)",
+                        }}
+                      >
+                        {isTestingSheet ? (
+                          <>
+                            <span
+                              className="spinner-border spinner-border-sm"
+                              style={{ width: 14, height: 14 }}
+                            />
+                            <span>
+                              {t("testingSheet") || "جاري الاختبار..."}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="activity" size={14} />
+                            <span>
+                              {t("testGoogleSheetsBtn") ||
+                                "اختبار مزامنة الشيت"}
+                            </span>
+                          </>
+                        )}
+                      </button>
+                    )}
 
                     <a
                       href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="btn btn-ghost btn-sm"
                       style={{
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 6,
-                        fontWeight: 700,
-                        fontSize: "0.88rem",
+                        textDecoration: "none",
+                        fontSize: "0.85rem",
                         color: "var(--primary)",
-                        textDecoration: "underline",
-                        textUnderlineOffset: 3,
+                        fontWeight: 600,
                       }}
                     >
                       <Icon name="external-link" size={15} />
@@ -1786,27 +1851,29 @@ export default function IntegrationsSettingsPage() {
                     )}
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleCreateGoogleSheet}
-                    disabled={isCreatingSheet}
-                    style={{
-                      border: 0,
-                      background: "transparent",
-                      color: "var(--muted)",
-                      fontSize: "0.78rem",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                    }}
-                    title={
-                      t("recreateSheetAuto") ||
-                      "إعادة إنشاء جدول جديد بتنسيق النظام"
-                    }
-                  >
-                    {isCreatingSheet
-                      ? t("creatingSheet") || "جاري الإنشاء..."
-                      : t("recreateSheetAuto") || "إعادة إنشاء جدول جديد"}
-                  </button>
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      onClick={handleCreateGoogleSheet}
+                      disabled={isCreatingSheet}
+                      style={{
+                        border: 0,
+                        background: "transparent",
+                        color: "var(--muted)",
+                        fontSize: "0.78rem",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                      title={
+                        t("recreateSheetAuto") ||
+                        "إعادة إنشاء جدول جديد بتنسيق النظام"
+                      }
+                    >
+                      {isCreatingSheet
+                        ? t("creatingSheet") || "جاري الإنشاء..."
+                        : t("recreateSheetAuto") || "إعادة إنشاء جدول جديد"}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -1818,6 +1885,7 @@ export default function IntegrationsSettingsPage() {
                   className="form-select"
                   value={sheetLanguage}
                   onChange={(e) => setSheetLanguage(e.target.value)}
+                  disabled={!canEditIntegrations}
                 >
                   <option value="ar">
                     {isCustom
@@ -1841,7 +1909,7 @@ export default function IntegrationsSettingsPage() {
               <div className="form-group" style={{ marginBottom: 20 }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
                   {t("spreadsheetIdLabel") ||
-                    "معرّف ملف Google Sheet بتاعك (مستند مخصص)"}
+                    "معرّف ملف Google Sheets الخاص بك (مستند مخصص)"}
                 </label>
                 <input
                   type={showSheetId ? "text" : "password"}
@@ -1849,17 +1917,24 @@ export default function IntegrationsSettingsPage() {
                   placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
                   value={spreadsheetId}
                   onChange={(e) => setSpreadsheetId(e.target.value)}
+                  disabled={!canEditIntegrations}
                 />
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    marginTop: 4,
+                    alignItems: "center",
+                    marginTop: 6,
                   }}
                 >
-                  <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
-                    {t("autoSpreadsheetNotice") ||
-                      "اتركه فارغاً ليقوم النظام بإنشاء جدول تلقائي."}
+                  <span
+                    style={{
+                      fontSize: "0.78rem",
+                      color: "var(--muted)",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {t("spreadsheetIdHelpText")}
                   </span>
                   <button
                     type="button"
@@ -1918,27 +1993,29 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveSheetsSettings}
-                    disabled={loading}
-                  >
-                    {t("saveSettings") || "حفظ الضبط"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={() => {
-                      setActiveModalId(null);
-                      handleStartGoogleOAuth();
-                    }}
-                  >
-                    {t("connectGoogle") || "ربط حساب جوجل"}
-                  </button>
-                )}
+                {googleIntegration
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveSheetsSettings}
+                        disabled={loading}
+                      >
+                        {t("saveSettings") || "حفظ الضبط"}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          setActiveModalId(null);
+                          handleStartGoogleOAuth();
+                        }}
+                      >
+                        {t("connectGoogle") || "ربط حساب جوجل"}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,
@@ -1996,7 +2073,7 @@ export default function IntegrationsSettingsPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
                       gap: 10,
                     }}
                   >
@@ -2108,7 +2185,7 @@ export default function IntegrationsSettingsPage() {
                           }}
                         >
                           {t("telegramDefaultBotDesc") ||
-                            "مش محتاج تعمل بوت مخصوص — هتحتاج بس الـ Chat ID بتاعك."}
+                            "لا تحتاج لإنشاء بوت مخصص — ستحتاج فقط إلى معرف المحادثة (Chat ID) الخاص بك."}
                         </div>
                       </div>
                     </label>
@@ -2134,7 +2211,7 @@ export default function IntegrationsSettingsPage() {
                       }}
                     >
                       {t("telegramDefaultBotNotice") ||
-                        "إشعارات حجوزات المساحة دي هتوصلك عبر بوت Saabq Cal الافتراضي. اضغط على الزرار تحت عشان تفتح البوت وتختار الخدمة اللي عايز تربط الشات ده بإشعاراتها — الربط هيتم تلقائياً من غير أي نسخ أو لصق."}
+                        "ستصلك إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. اضغط على الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً بدون أي نسخ أو لصق."}
                     </p>
                     <a
                       href="https://t.me/Saabq_cal_Bot"
@@ -2145,7 +2222,13 @@ export default function IntegrationsSettingsPage() {
                         textDecoration: "none",
                         display: "inline-flex",
                         alignItems: "center",
+                        justifyContent: "center",
                         gap: 8,
+                        width: "100%",
+                        textAlign: "center",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
+                        padding: "10px 14px",
                       }}
                     >
                       <Icon name="telegram" size={16} />
@@ -2502,7 +2585,7 @@ export default function IntegrationsSettingsPage() {
                             fontStyle: "italic",
                           }}
                         >
-                          {t("noServicesFound") || "مفيش خدمات متاحة دلوقتي"}
+                          {t("noServicesFound") || "لا توجد خدمات متاحة حالياً"}
                         </div>
                       )}
                     </div>
@@ -2594,16 +2677,18 @@ export default function IntegrationsSettingsPage() {
               </div>
 
               <div className="modal-actions">
-                {telegramIntegration && telegramIntegration.is_connected && (
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm"
-                    onClick={handleDeleteTelegramSettings}
-                    disabled={loading}
-                  >
-                    {t("disconnectTelegram") || "إلغاء ربط Telegram"}
-                  </button>
-                )}
+                {telegramIntegration &&
+                  telegramIntegration.is_connected &&
+                  canDelete && (
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-sm"
+                      onClick={handleDeleteTelegramSettings}
+                      disabled={loading}
+                    >
+                      {t("disconnectTelegram") || "إلغاء ربط Telegram"}
+                    </button>
+                  )}
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -2611,14 +2696,16 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={handleSaveTelegramSettings}
-                  disabled={loading}
-                >
-                  {t("saveTelegramBtn") || "حفظ"}
-                </button>
+                {canEditIntegrations && (
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={handleSaveTelegramSettings}
+                    disabled={loading}
+                  >
+                    {t("saveTelegramBtn") || "حفظ"}
+                  </button>
+                )}
               </div>
             </div>
           </div>,
@@ -2692,6 +2779,7 @@ export default function IntegrationsSettingsPage() {
                   }
                   value={webhookUrl}
                   onChange={(e) => setWebhookUrl(e.target.value)}
+                  disabled={!canEditIntegrations}
                 />
               </div>
 
@@ -2733,7 +2821,7 @@ export default function IntegrationsSettingsPage() {
                       alignItems: "center",
                       gap: 10,
                       fontSize: "0.88rem",
-                      cursor: "pointer",
+                      cursor: canEditIntegrations ? "pointer" : "default",
                     }}
                   >
                     <input
@@ -2745,6 +2833,7 @@ export default function IntegrationsSettingsPage() {
                           [evt.id]: e.target.checked,
                         })
                       }
+                      disabled={!canEditIntegrations}
                       style={{
                         accentColor: "var(--primary)",
                         width: 16,
@@ -2757,7 +2846,7 @@ export default function IntegrationsSettingsPage() {
               </div>
 
               <div className="modal-actions">
-                {isWebhookConfigured && (
+                {isWebhookConfigured && canDelete && (
                   <button
                     type="button"
                     className="btn btn-danger btn-sm"
@@ -2774,14 +2863,16 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={handleSaveWebhookSettings}
-                  disabled={loading}
-                >
-                  {t("saveWebhookBtn") || "حفظ الـ Webhook"}
-                </button>
+                {canEditIntegrations && (
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={handleSaveWebhookSettings}
+                    disabled={loading}
+                  >
+                    {t("saveWebhookBtn") || "حفظ الـ Webhook"}
+                  </button>
+                )}
               </div>
             </div>
           </div>,
@@ -3246,22 +3337,26 @@ export default function IntegrationsSettingsPage() {
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {emailIntegration && emailIntegration.is_connected && (
                     <>
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={handleTestEmail}
-                        disabled={loading}
-                      >
-                        {t("testEmailBtn") || "تجربة الإرسال"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm"
-                        onClick={handleDeleteEmailSettings}
-                        disabled={loading}
-                      >
-                        {t("disconnect") || "إلغاء الربط"}
-                      </button>
+                      {canEditIntegrations && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handleTestEmail}
+                          disabled={loading}
+                        >
+                          {t("testEmailBtn") || "تجربة الإرسال"}
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={handleDeleteEmailSettings}
+                          disabled={loading}
+                        >
+                          {t("disconnect") || "إلغاء الربط"}
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -3274,22 +3369,24 @@ export default function IntegrationsSettingsPage() {
                   >
                     {t("cancel")}
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveEmailSettings}
-                    disabled={loading}
-                    style={{
-                      backgroundColor: "#0d685c",
-                      borderColor: "#0d685c",
-                      color: "#ffffff",
-                      padding: "8px 24px",
-                      borderRadius: 20,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {t("save") || "حفظ"}
-                  </button>
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleSaveEmailSettings}
+                      disabled={loading}
+                      style={{
+                        backgroundColor: "#0d685c",
+                        borderColor: "#0d685c",
+                        color: "#ffffff",
+                        padding: "8px 24px",
+                        borderRadius: 20,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {t("save") || "حفظ"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

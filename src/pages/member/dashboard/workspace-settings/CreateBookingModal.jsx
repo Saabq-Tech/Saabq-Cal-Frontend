@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import { usePermissions } from "../../../../hooks/usePermissions";
 import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
+<<<<<<< HEAD
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import { getLimitInfo } from "../../../../utils/planLimits";
 import { PlanLimitBanner } from "../../../../components/common/PlanLimitAlert";
+=======
+import { getCurrencySymbol } from "../../../../utils/currency";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
+  const { isOwner, canCreateBookings } = usePermissions();
   const { t, lang } = useLanguage();
   const toast = useToast();
   const { user } = useAuth();
@@ -42,7 +48,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [workspaceMemberId, setWorkspaceMemberId] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [startsAt, setStartsAt] = useState("");
+  const [slots, setSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [manualTimeMode, setManualTimeMode] = useState(false);
   const [status, setStatus] = useState("confirmed");
   const [notes, setNotes] = useState("");
   const [bypassRules, setBypassRules] = useState(false);
@@ -100,19 +111,15 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     );
   };
 
-  const getDefaultDateTime = () => {
-    const d = new Date();
-    d.setHours(d.getHours() + 1);
-    d.setMinutes(0);
-    d.setSeconds(0);
-    const tzOffset = d.getTimezoneOffset() * 60000;
-    return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
-  };
-
   useEffect(() => {
     if (!isOpen) return;
 
-    setStartsAt(getDefaultDateTime());
+    const todayStr = new Date().toISOString().split("T")[0];
+    setSelectedDate(todayStr);
+    setSelectedSlot("");
+    setSlots([]);
+    setManualTimeMode(false);
+    setStartsAt("");
     setErrorMessage(null);
     setFieldErrors({});
     setServiceId("");
@@ -160,7 +167,61 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     fetchData();
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // Fetch available slots whenever service, date, or assigned member changes
+  useEffect(() => {
+    if (!isOpen || !serviceId || !selectedDate) {
+      setSlots([]);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchSlots = async () => {
+      setLoadingSlots(true);
+      try {
+        const params = { date: selectedDate };
+        if (workspaceMemberId) {
+          params.workspace_member_id = Number(workspaceMemberId);
+        }
+        const res = await client.get(endpoints.workspaceServiceSlots(serviceId), { params });
+        if (isMounted) {
+          const slotList = res.data?.data || [];
+          setSlots(slotList);
+          if (selectedSlot && !manualTimeMode) {
+            const match = slotList.find((s) => s.start_time === selectedSlot && (s.is_available || bypassRules));
+            if (!match) {
+              setSelectedSlot("");
+              setStartsAt("");
+            }
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error("Failed to load service slots:", err);
+          setSlots([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingSlots(false);
+        }
+      }
+    };
+
+    fetchSlots();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, serviceId, selectedDate, workspaceMemberId, bypassRules, manualTimeMode]);
+
+  const handleSlotSelect = (slot) => {
+    setSelectedSlot(slot.start_time);
+    setStartsAt(`${selectedDate} ${slot.start_time}:00`);
+    if (fieldErrors.starts_at) {
+      setFieldErrors((prev) => ({ ...prev, starts_at: null }));
+    }
+  };
+
+  if (!isOpen || (!isOwner && !canCreateBookings)) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,7 +233,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     }
 
     if (!startsAt) {
-      setErrorMessage(t("selectDatePrompt") || "من فضلك حدد ميعاد الحجز");
+      setErrorMessage(t("selectTimePrompt") || "يرجى اختيار وقت الموعد");
       return;
     }
 
@@ -187,14 +248,18 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
       return;
     }
 
-    if (customerMode === "new" && (!customerName || !customerEmail)) {
+    if (customerMode === "new" && !customerName.trim()) {
       setErrorMessage(
+<<<<<<< HEAD
         isCustom
           ? lang === "ar"
             ? `يرجى إدخال اسم ${custSingular} والبريد الإلكتروني`
             : `Please enter ${custSingular} name and email`
           : t("enterCustomerDetails") ||
               "من فضلك اكتب اسم العميل والبريد الإلكتروني",
+=======
+        t("enterCustomerNamePrompt") || `يرجى إدخال اسم ${custSingular}`,
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       );
       return;
     }
@@ -212,9 +277,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     if (customerMode === "existing") {
       payload.customer_id = Number(customerId);
     } else {
-      payload.customer_name = customerName;
-      payload.customer_email = customerEmail;
-      payload.customer_phone = customerPhone || null;
+      payload.customer_name = customerName.trim();
+      payload.customer_email = customerEmail.trim() || null;
+      payload.customer_phone = customerPhone.trim() || null;
     }
 
     try {
@@ -357,11 +422,18 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               </option>
               {services.map((s) => {
                 const sTitle = formatTranslatable(s.name || s.title);
+                const currSym = getCurrencySymbol(
+                  s.currency_detail ||
+                    s.currency ||
+                    workspace?.currency ||
+                    "SAR",
+                  lang === "ar",
+                );
                 return (
                   <option key={s.id} value={s.id}>
                     {sTitle} ({s.duration_minutes || s.duration || 30}{" "}
-                    {t("mins") || "دقيقة"} - {s.price || 0}{" "}
-                    {formatTranslatable(s.currency) || "SAR"})
+                    {t("mins") || (lang === "ar" ? "دقيقة" : "mins")} -{" "}
+                    {s.price || 0} {currSym})
                   </option>
                 );
               })}
@@ -374,8 +446,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               className="form-label"
               style={{ fontWeight: 700, fontSize: "0.86rem", marginBottom: 6 }}
             >
+<<<<<<< HEAD
               {isCustom ? custSingular : t("customerHeader") || custSingular}{" "}
               <span style={{ color: "#ef4444" }}>*</span>
+=======
+              {custSingular} <span style={{ color: "#ef4444" }}>*</span>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </label>
             <div
               style={{
@@ -528,25 +604,54 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                         fontWeight: 700,
                         fontSize: "0.82rem",
                         marginBottom: 4,
-                        display: "block",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      {t("email") || "البريد الإلكتروني"}{" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
+                      <span>{t("email") || "البريد الإلكتروني"}</span>
+                      <span
+                        style={{
+                          color: "var(--text-muted)",
+                          fontSize: "0.74rem",
+                          fontWeight: 500,
+                        }}
+                      >
+                        ({t("emailOptional") || "اختياري"})
+                      </span>
                     </label>
                     <input
                       type="email"
                       className="form-input"
-                      placeholder={t("email") || "البريد الإلكتروني"}
+                      placeholder={
+                        t("emailOptional") || "البريد الإلكتروني (اختياري)"
+                      }
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
-                      required={customerMode === "new"}
                       style={{
                         border: fieldErrors.customer_email
                           ? "1px solid #ef4444"
                           : undefined,
                       }}
                     />
+                    {!customerEmail && (
+                      <span
+                        style={{
+                          fontSize: "0.74rem",
+                          color: "var(--text-secondary)",
+                          marginTop: 4,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="info" size={12} />
+                        <span>
+                          {t("manualTempBookingNotice") ||
+                            "حجز يدوي لعميل مؤقت بدون إرسال بريد أو مزامنة تقويم"}
+                        </span>
+                      </span>
+                    )}
                     {renderFieldError("customer_email")}
                   </div>
                   <div>
@@ -580,7 +685,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
             )}
           </div>
 
-          {/* Member & Datetime Grid */}
+          {/* Member & Date Grid */}
           <div
             style={{
               display: "grid",
@@ -633,17 +738,197 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                   marginBottom: 6,
                 }}
               >
-                {t("bookingDateHeader") || "تاريخ ووقت الحجز"}{" "}
+                {t("bookingDateHeader") || "تاريخ الحجز"}{" "}
                 <span style={{ color: "red" }}>*</span>
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 className="form-input"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
+                value={selectedDate}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setSelectedSlot("");
+                  if (!manualTimeMode) {
+                    setStartsAt("");
+                  }
+                }}
                 required
               />
             </div>
+          </div>
+
+          {/* Service Available Slots Picker */}
+          <div
+            className="form-group"
+            style={{
+              padding: 12,
+              background: "var(--surface-alt)",
+              borderRadius: "var(--radius-md)",
+              border: fieldErrors.starts_at
+                ? "1px solid #ef4444"
+                : "1px solid var(--border-light)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <label
+                style={{
+                  fontWeight: 700,
+                  fontSize: "0.86rem",
+                  color: "var(--heading)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Icon name="clock" size={15} />
+                <span>{t("availableTimeSlots") || "الأوقات المتاحة للخدمة"}</span>
+                <span style={{ color: "red" }}>*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setManualTimeMode(!manualTimeMode)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--primary)",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+              >
+                {manualTimeMode
+                  ? t("availableSlotsMode") || "عرض الأوقات المتاحة"
+                  : t("manualTimeEntry") || "تحديد وقت يدوي"}
+              </button>
+            </div>
+
+            {manualTimeMode ? (
+              <div>
+                <input
+                  type="datetime-local"
+                  className="form-input"
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                  required
+                />
+              </div>
+            ) : !serviceId ? (
+              <div
+                style={{
+                  padding: 12,
+                  textAlign: "center",
+                  fontSize: "0.82rem",
+                  color: "var(--text-muted)",
+                }}
+              >
+                {t("selectServiceFirst") || "يرجى اختيار الخدمة أولاً لعرض الأوقات المتاحة"}
+              </div>
+            ) : loadingSlots ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "16px 8px",
+                  fontSize: "0.82rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <Icon name="loader" size={16} className="animate-spin" />
+                <span>{t("loadingSlots") || "جاري جلب الأوقات المتاحة..."}</span>
+              </div>
+            ) : slots.length === 0 ? (
+              <div
+                style={{
+                  padding: 12,
+                  textAlign: "center",
+                  fontSize: "0.82rem",
+                  color: "var(--text-secondary)",
+                  background: "var(--surface)",
+                  borderRadius: "var(--radius-sm, 6px)",
+                }}
+              >
+                {t("noSlotsAvailableOnDate") || "لا توجد أوقات متاحة في هذا اليوم"}
+              </div>
+            ) : (
+              <div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
+                    gap: 8,
+                    maxHeight: 160,
+                    overflowY: "auto",
+                    padding: 2,
+                  }}
+                >
+                  {slots.map((s) => {
+                    const isSelected = selectedSlot === s.start_time;
+                    const isAvail = s.is_available || bypassRules;
+                    return (
+                      <button
+                        key={s.start_time}
+                        type="button"
+                        disabled={!isAvail}
+                        onClick={() => handleSlotSelect(s)}
+                        style={{
+                          padding: "7px 4px",
+                          borderRadius: "var(--radius-sm, 6px)",
+                          border: isSelected
+                            ? "2px solid var(--primary)"
+                            : "1px solid var(--border-light)",
+                          background: isSelected
+                            ? "var(--primary)"
+                            : isAvail
+                              ? "var(--surface)"
+                              : "rgba(0, 0, 0, 0.04)",
+                          color: isSelected
+                            ? "#ffffff"
+                            : isAvail
+                              ? "var(--heading)"
+                              : "var(--text-muted)",
+                          fontSize: "0.8rem",
+                          fontWeight: isSelected ? 800 : 600,
+                          cursor: isAvail ? "pointer" : "not-allowed",
+                          opacity: isAvail ? 1 : 0.4,
+                          textDecoration: isAvail ? "none" : "line-through",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        {s.start_time}
+                      </button>
+                    );
+                  })}
+                </div>
+                {startsAt && selectedSlot && (
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="check" size={13} />
+                    <span>{startsAt}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            {renderFieldError("starts_at")}
           </div>
 
           {/* Status & Bypass Grid */}
@@ -680,6 +965,21 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 </option>
                 <option value="completed">
                   {t("statusCompleted") || "مكتمل"}
+                </option>
+                <option value="cancelled">
+                  {t("statusCancelled") || "ملغى"}
+                </option>
+                <option value="rejected">
+                  {t("statusRejected") || "مرفوض"}
+                </option>
+                <option value="no_show">
+                  {t("statusNoShow") || "لم يحضر"}
+                </option>
+                <option value="rescheduled">
+                  {t("statusRescheduled") || "معاد جدولته"}
+                </option>
+                <option value="expired">
+                  {t("statusExpired") || "منتهي الصلاحية"}
                 </option>
               </select>
             </div>

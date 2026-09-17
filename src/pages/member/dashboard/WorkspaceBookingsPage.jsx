@@ -12,14 +12,25 @@ import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import CapabilityGate from "../../../components/common/CapabilityGate";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import Icon from "../../../components/common/Icon";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+
+import { usePermissions } from "../../../hooks/usePermissions";
 
 export default function WorkspaceBookingsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const vibe = getWorkspaceVibe(user?.workspace, lang);
   const toast = useToast();
+  const {
+    isOwner,
+    canReadBookings,
+    canCreateBookings,
+    canUpdateBookings,
+    canDeleteBookings,
+  } = usePermissions();
 
   const [bookings, setBookings] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -29,18 +40,9 @@ export default function WorkspaceBookingsPage() {
   const [viewMode, setViewMode] = useState("calendar"); // 'list' or 'calendar'
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("booking_read") ||
-    userPermissions.includes("bookings_read");
+  const canRead = isOwner || canReadBookings;
   const canEdit =
-    isOwner ||
-    userPermissions.includes("booking_write") ||
-    userPermissions.includes("bookings_write");
+    isOwner || canCreateBookings || canUpdateBookings || canDeleteBookings;
 
   const isCapAllowed = checkWorkspaceCapability(user, "BOOKING");
 
@@ -86,7 +88,14 @@ export default function WorkspaceBookingsPage() {
 
   return (
     <CapabilityGate capabilityCode="BOOKING">
+<<<<<<< HEAD
       <div className="workspace-bookings-container animate-fade-in">
+=======
+      <div
+        className={`card workspace-bookings-card vibe-${vibe.key}`}
+        data-workspace-vibe={vibe.key}
+      >
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         <SEO title={t("bookings") || "المواعيد"} noindex />
 
         {selectedBookingId ? (
@@ -101,6 +110,7 @@ export default function WorkspaceBookingsPage() {
           </div>
         ) : (
           <>
+<<<<<<< HEAD
             <WorkspacePageHeader
               title={t("navBookings") || "إدارة المواعيد والحجوزات"}
               subtitle={
@@ -110,6 +120,33 @@ export default function WorkspaceBookingsPage() {
               icon="calendar"
               actions={
                 <div
+=======
+            <div className="workspace-bookings-top-toolbar">
+              <div className="bookings-view-toggle">
+                <button
+                  type="button"
+                  className={`btn btn-sm ${viewMode === "calendar" ? "btn-primary" : "btn-secondary"}`}
+                  onClick={() => setViewMode("calendar")}
+                  style={{ borderRadius: 20 }}
+                >
+                  {t("calendarView") || "عرض التقويم"}
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${viewMode === "list" ? "btn-primary" : "btn-secondary"}`}
+                  onClick={() => setViewMode("list")}
+                  style={{ borderRadius: 20 }}
+                >
+                  {t("listView") || "عرض القائمة"}
+                </button>
+              </div>
+
+              {canCreateBookings && (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm new-booking-trigger-btn"
+                  onClick={() => setShowCreateModal(true)}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -117,6 +154,7 @@ export default function WorkspaceBookingsPage() {
                     flexWrap: "wrap",
                   }}
                 >
+<<<<<<< HEAD
                   <div
                     className="bookings-view-toggle"
                     style={{
@@ -243,6 +281,48 @@ export default function WorkspaceBookingsPage() {
               onClose={() => setShowCreateModal(false)}
               onSuccess={() => loadBookings(page)}
             />
+=======
+                  <Icon name="plus" size={14} />
+                  <span>
+                    {vibe.bookAction ||
+                      t("bookNewAppointment") ||
+                      "حجز موعد جديد"}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {viewMode === "list" ? (
+              <BookingsTab
+                bookings={bookings}
+                meta={meta}
+                page={page}
+                onPageChange={handlePageChange}
+                onSelectBooking={(id) =>
+                  navigate(`/member/workspace/bookings/${id}`)
+                }
+                canEdit={canEdit}
+                canCreate={canCreateBookings}
+                canUpdate={canUpdateBookings}
+                canDelete={canDeleteBookings}
+                onReloadBookings={() => loadBookings(page)}
+              />
+            ) : (
+              <BookingsCalendar
+                onSelectBooking={(id) =>
+                  navigate(`/member/workspace/bookings/${id}`)
+                }
+              />
+            )}
+
+            {canCreateBookings && (
+              <CreateBookingModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onSuccess={() => loadBookings(page)}
+              />
+            )}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           </>
         )}
       </div>

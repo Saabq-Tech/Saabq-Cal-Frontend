@@ -8,12 +8,22 @@ import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageH
 export default function RolesTab({
   rolesList,
   availablePermissions,
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onSaveRole,
   onDeleteRole,
 }) {
+<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
   const { isCustom, customerPlural: custPlural } = useCustomerLabel();
+=======
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
+  const { t } = useLanguage();
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleLangTab, setRoleLangTab] = useState("ar");
   const [roleForm, setRoleForm] = useState({
@@ -25,23 +35,94 @@ export default function RolesTab({
   });
 
   const PERMISSION_KEYS = {
-    booking_write: "permBookingWrite",
     booking_read: "permBookingRead",
-    customer_write: "permCustomerWrite",
+    booking_create: "permBookingCreate",
+    booking_update: "permBookingUpdate",
+    booking_delete: "permBookingDelete",
+    booking_write: "permBookingWrite",
+
     customer_read: "permCustomerRead",
-    service_write: "permServiceWrite",
+    customer_create: "permCustomerCreate",
+    customer_update: "permCustomerUpdate",
+    customer_delete: "permCustomerDelete",
+    customer_write: "permCustomerWrite",
+
     service_read: "permServiceRead",
-    schedule_write: "permScheduleWrite",
+    service_create: "permServiceCreate",
+    service_update: "permServiceUpdate",
+    service_delete: "permServiceDelete",
+    service_write: "permServiceWrite",
+
+    resource_read: "permResourceRead",
+    resource_create: "permResourceCreate",
+    resource_update: "permResourceUpdate",
+    resource_delete: "permResourceDelete",
+    resource_write: "permResourceWrite",
+
     schedule_read: "permScheduleRead",
-    payment_write: "permPaymentWrite",
+    schedule_create: "permScheduleCreate",
+    schedule_update: "permScheduleUpdate",
+    schedule_delete: "permScheduleDelete",
+    schedule_write: "permScheduleWrite",
+
     payment_read: "permPaymentRead",
-    subscription_write: "permSubscriptionWrite",
+    payment_create: "permPaymentCreate",
+    payment_update: "permPaymentUpdate",
+    payment_delete: "permPaymentDelete",
+    payment_write: "permPaymentWrite",
+
     subscription_read: "permSubscriptionRead",
+    subscription_create: "permSubscriptionCreate",
+    subscription_update: "permSubscriptionUpdate",
+    subscription_delete: "permSubscriptionDelete",
+    subscription_write: "permSubscriptionWrite",
+
+    booking_form_read: "permBookingFormRead",
+    booking_form_create: "permBookingFormCreate",
+    booking_form_update: "permBookingFormUpdate",
+    booking_form_delete: "permBookingFormDelete",
     booking_form_write: "permBookingFormWrite",
+
+    branding_read: "permBrandingRead",
+    branding_update: "permBrandingUpdate",
     branding_write: "permBrandingWrite",
-    member_manage: "permMemberManage",
+
+    settings_read: "permSettingsRead",
+    settings_update: "permSettingsUpdate",
     settings_write: "permSettingsWrite",
+
+    member_read: "permMemberRead",
+    member_create: "permMemberCreate",
+    member_update: "permMemberUpdate",
+    member_delete: "permMemberDelete",
+    member_write: "permMemberWrite",
+    member_manage: "permMemberManage",
+
+    role_read: "permRoleRead",
+    role_create: "permRoleCreate",
+    role_update: "permRoleUpdate",
+    role_delete: "permRoleDelete",
+    role_write: "permRoleWrite",
+
     calendar_own: "permCalendarOwn",
+
+    chat_read: "permChatRead",
+    chat_create: "permChatCreate",
+    chat_update: "permChatUpdate",
+    chat_delete: "permChatDelete",
+    chat_write: "permChatWrite",
+
+    integration_read: "permIntegrationRead",
+    integration_create: "permIntegrationCreate",
+    integration_update: "permIntegrationUpdate",
+    integration_delete: "permIntegrationDelete",
+    integration_manage: "permIntegrationManage",
+
+    notification_read: "permNotificationRead",
+    notification_create: "permNotificationCreate",
+    notification_update: "permNotificationUpdate",
+    notification_delete: "permNotificationDelete",
+    notification_manage: "permNotificationManage",
   };
 
   const DEFAULT_CATEGORIES = [
@@ -49,12 +130,20 @@ export default function RolesTab({
       category: t("cat_bookings") || "الحجوزات",
       permissions: [
         {
-          value: "booking_write",
-          label: t("permBookingWrite") || "إضافة وتعديل الحجوزات",
-        },
-        {
           value: "booking_read",
           label: t("permBookingRead") || "عرض الحجوزات",
+        },
+        {
+          value: "booking_create",
+          label: t("permBookingCreate") || "إنشاء الحجوزات",
+        },
+        {
+          value: "booking_update",
+          label: t("permBookingUpdate") || "تعديل الحجوزات",
+        },
+        {
+          value: "booking_delete",
+          label: t("permBookingDelete") || "حذف وإلغاء الحجوزات",
         },
       ],
     },
@@ -62,6 +151,7 @@ export default function RolesTab({
       category: isCustom ? custPlural : t("cat_customers") || "العملاء",
       permissions: [
         {
+<<<<<<< HEAD
           value: "customer_write",
           label: isCustom
             ? isRTL
@@ -70,6 +160,8 @@ export default function RolesTab({
             : t("permCustomerWrite") || "إضافة وتعديل العملاء",
         },
         {
+=======
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           value: "customer_read",
           label: isCustom
             ? isRTL
@@ -77,28 +169,77 @@ export default function RolesTab({
               : `View ${custPlural}`
             : t("permCustomerRead") || "عرض العملاء",
         },
+        {
+          value: "customer_create",
+          label: t("permCustomerCreate") || "إضافة عملاء جدد",
+        },
+        {
+          value: "customer_update",
+          label: t("permCustomerUpdate") || "تعديل بيانات العملاء",
+        },
+        {
+          value: "customer_delete",
+          label: t("permCustomerDelete") || "حذف العملاء",
+        },
       ],
     },
     {
       category: t("cat_services") || "الخدمات",
       permissions: [
-        {
-          value: "service_write",
-          label: t("permServiceWrite") || "إضافة وتعديل الخدمات",
-        },
         { value: "service_read", label: t("permServiceRead") || "عرض الخدمات" },
+        {
+          value: "service_create",
+          label: t("permServiceCreate") || "إضافة خدمات جديدة",
+        },
+        {
+          value: "service_update",
+          label: t("permServiceUpdate") || "تعديل الخدمات",
+        },
+        {
+          value: "service_delete",
+          label: t("permServiceDelete") || "حذف الخدمات",
+        },
+      ],
+    },
+    {
+      category: t("cat_resources") || "الموارد",
+      permissions: [
+        {
+          value: "resource_read",
+          label: t("permResourceRead") || "عرض الموارد والمخزون",
+        },
+        {
+          value: "resource_create",
+          label: t("permResourceCreate") || "إضافة موارد جديدة",
+        },
+        {
+          value: "resource_update",
+          label: t("permResourceUpdate") || "تعديل الموارد",
+        },
+        {
+          value: "resource_delete",
+          label: t("permResourceDelete") || "حذف الموارد",
+        },
       ],
     },
     {
       category: t("cat_schedules") || "جداول العمل",
       permissions: [
         {
-          value: "schedule_write",
-          label: t("permScheduleWrite") || "تعديل جدول مواعيد العمل",
-        },
-        {
           value: "schedule_read",
           label: t("permScheduleRead") || "عرض جدول مواعيد العمل",
+        },
+        {
+          value: "schedule_create",
+          label: t("permScheduleCreate") || "إنشاء جداول مواعيد جديدة",
+        },
+        {
+          value: "schedule_update",
+          label: t("permScheduleUpdate") || "تعديل جدول مواعيد العمل",
+        },
+        {
+          value: "schedule_delete",
+          label: t("permScheduleDelete") || "حذف جداول مواعيد العمل",
         },
       ],
     },
@@ -106,20 +247,38 @@ export default function RolesTab({
       category: t("cat_payments") || "الدفع والمالية",
       permissions: [
         {
-          value: "payment_write",
-          label: t("permPaymentWrite") || "إدارة عمليات الدفع والمالية",
-        },
-        {
           value: "payment_read",
           label: t("permPaymentRead") || "عرض سجل عمليات الدفع",
         },
         {
-          value: "subscription_write",
-          label: t("permSubscriptionWrite") || "إدارة اشتراكات مساحة العمل",
+          value: "payment_create",
+          label: t("permPaymentCreate") || "إضافة عمليات دفع جديدة",
+        },
+        {
+          value: "payment_update",
+          label: t("permPaymentUpdate") || "تعديل وتأكيد عمليات الدفع",
+        },
+        {
+          value: "payment_delete",
+          label: t("permPaymentDelete") || "حذف واسترجاع عمليات الدفع",
         },
         {
           value: "subscription_read",
           label: t("permSubscriptionRead") || "عرض تفاصيل اشتراك مساحة العمل",
+        },
+        {
+          value: "subscription_create",
+          label:
+            t("permSubscriptionCreate") || "ترقية والاشتراك في باقات جديدة",
+        },
+        {
+          value: "subscription_update",
+          label:
+            t("permSubscriptionUpdate") || "تعديل وتجديد اشتراك مساحة العمل",
+        },
+        {
+          value: "subscription_delete",
+          label: t("permSubscriptionDelete") || "إلغاء اشتراك مساحة العمل",
         },
       ],
     },
@@ -127,29 +286,143 @@ export default function RolesTab({
       category: t("cat_settings") || "الإعدادات والهوية",
       permissions: [
         {
-          value: "booking_form_write",
-          label: t("permBookingFormWrite") || "تعديل نموذج الحجز والأسئلة",
+          value: "booking_form_read",
+          label: t("permBookingFormRead") || "عرض نموذج الحجز والأسئلة",
         },
         {
-          value: "branding_write",
-          label: t("permBrandingWrite") || "تعديل الهوية البصرية والشعار",
+          value: "booking_form_create",
+          label:
+            t("permBookingFormCreate") ||
+            "إضافة حقول وأسئلة جديدة لنموذج الحجز",
         },
         {
-          value: "settings_write",
-          label: t("permSettingsWrite") || "تعديل إعدادات مساحة العمل",
+          value: "booking_form_update",
+          label: t("permBookingFormUpdate") || "تعديل نموذج الحجز والأسئلة",
+        },
+        {
+          value: "booking_form_delete",
+          label: t("permBookingFormDelete") || "حذف أسئلة وحقول نموذج الحجز",
+        },
+        {
+          value: "branding_read",
+          label: t("permBrandingRead") || "عرض الهوية البصرية وشعار المساحة",
+        },
+        {
+          value: "branding_update",
+          label:
+            t("permBrandingUpdate") || "تعديل الهوية البصرية وشعار المساحة",
+        },
+        {
+          value: "settings_read",
+          label: t("permSettingsRead") || "عرض إعدادات مساحة العمل",
+        },
+        {
+          value: "settings_update",
+          label: t("permSettingsUpdate") || "تعديل إعدادات مساحة العمل",
         },
       ],
     },
     {
-      category: t("cat_members_calendar") || "الأعضاء والتقويم",
+      category: t("cat_members") || "الأعضاء والصلاحيات",
       permissions: [
         {
-          value: "member_manage",
-          label: t("permMemberManage") || "إدارة أعضاء مساحة العمل والصلاحيات",
+          value: "member_read",
+          label: t("permMemberRead") || "عرض أعضاء مساحة العمل",
+        },
+        {
+          value: "member_create",
+          label: t("permMemberCreate") || "دعوة وإضافة أعضاء جدد لمساحة العمل",
+        },
+        {
+          value: "member_update",
+          label: t("permMemberUpdate") || "تعديل بيانات وأدوار الأعضاء",
+        },
+        {
+          value: "member_delete",
+          label: t("permMemberDelete") || "حذف وإزالة أعضاء مساحة العمل",
+        },
+        {
+          value: "role_read",
+          label: t("permRoleRead") || "عرض الأدوار والصلاحيات",
+        },
+        {
+          value: "role_create",
+          label: t("permRoleCreate") || "إنشاء أدوار مخصصة جديدة",
+        },
+        {
+          value: "role_update",
+          label: t("permRoleUpdate") || "تعديل الأدوار والصلاحيات",
+        },
+        {
+          value: "role_delete",
+          label: t("permRoleDelete") || "حذف الأدوار المخصصة",
         },
         {
           value: "calendar_own",
           label: t("permCalendarOwn") || "إدارة وتقويم خاص بالعضو",
+        },
+      ],
+    },
+    {
+      category: t("cat_chat") || "المحادثات",
+      permissions: [
+        {
+          value: "chat_read",
+          label: t("permChatRead") || "عرض محادثات مساحة العمل",
+        },
+        {
+          value: "chat_create",
+          label: t("permChatCreate") || "بدء محادثات جديدة وإرسال رسائل",
+        },
+        {
+          value: "chat_update",
+          label: t("permChatUpdate") || "تعديل وتحديث حالة المحادثات",
+        },
+        {
+          value: "chat_delete",
+          label: t("permChatDelete") || "حذف وأرشفة محادثات مساحة العمل",
+        },
+      ],
+    },
+    {
+      category: t("cat_integrations_notifications") || "الربط والإشعارات",
+      permissions: [
+        {
+          value: "integration_read",
+          label:
+            t("permIntegrationRead") || "عرض إعدادات وتفاصيل الربط والتكامل",
+        },
+        {
+          value: "integration_create",
+          label:
+            t("permIntegrationCreate") || "ربط وتفعيل خدمات وتطبيقات جديدة",
+        },
+        {
+          value: "integration_update",
+          label:
+            t("permIntegrationUpdate") ||
+            "تعديل إعدادات الربط والتكامل ومفاتيح API",
+        },
+        {
+          value: "integration_delete",
+          label: t("permIntegrationDelete") || "فصل وإلغاء الربط والتكامل",
+        },
+        {
+          value: "notification_read",
+          label: t("permNotificationRead") || "عرض إعدادات وقوالب الإشعارات",
+        },
+        {
+          value: "notification_create",
+          label: t("permNotificationCreate") || "إنشاء قوالب وتنبيهات جديدة",
+        },
+        {
+          value: "notification_update",
+          label:
+            t("permNotificationUpdate") || "تعديل قوالب وتفضيلات الإشعارات",
+        },
+        {
+          value: "notification_delete",
+          label: t("permNotificationDelete") || "حذف قوالب الإشعارات",
         },
       ],
     },
@@ -316,6 +589,7 @@ export default function RolesTab({
 
   return (
     <div className="card-body">
+<<<<<<< HEAD
       {/* Header Section & KPI Stats */}
       <WorkspacePageHeader
         title={
@@ -390,6 +664,46 @@ export default function RolesTab({
           },
         ]}
       />
+=======
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 20,
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 800,
+              margin: 0,
+              color: "var(--heading)",
+            }}
+          >
+            {t("workspaceRoles") || "أدوار مساحة العمل والصلاحيات"}
+          </h2>
+          <p
+            style={{
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+              margin: "4px 0 0",
+            }}
+          >
+            {t("workspaceRolesDesc") ||
+              "إنشاء وتحديد الصلاحيات الخاصة لكل دور مخصص"}
+          </p>
+        </div>
+        {allowCreate && (
+          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
+            + {t("addRole") || "إضافة دور جديد"}
+          </button>
+        )}
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       <div
         style={{
@@ -460,7 +774,7 @@ export default function RolesTab({
                     margin: 0,
                   }}
                 >
-                  {roleDescStr || "مفيش وصف للدور ده."}
+                  {roleDescStr || "لا يوجد وصف لهذا الدور."}
                 </p>
                 <div
                   style={{
@@ -478,7 +792,7 @@ export default function RolesTab({
                 </div>
               </div>
 
-              {canEdit && !r.is_protected && (
+              {(allowUpdate || allowDelete) && !r.is_protected && (
                 <div
                   style={{
                     display: "flex",
@@ -488,14 +802,16 @@ export default function RolesTab({
                     borderTop: "1px solid var(--border-light)",
                   }}
                 >
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => handleOpenEdit(r)}
-                  >
-                    {t("edit") || "تعديل"}
-                  </button>
-                  {onDeleteRole && (
+                  {allowUpdate && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => handleOpenEdit(r)}
+                    >
+                      {t("edit") || "تعديل"}
+                    </button>
+                  )}
+                  {allowDelete && onDeleteRole && (
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm"

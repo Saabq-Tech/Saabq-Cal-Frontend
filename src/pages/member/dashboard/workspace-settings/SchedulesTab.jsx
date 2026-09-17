@@ -10,9 +10,15 @@ import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageH
 export default function SchedulesTab({
   schedules,
   startOfWeek = "sunday",
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onRefresh,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
   const { t, lang } = useLanguage();
   const toast = useToast();
 
@@ -320,6 +326,7 @@ export default function SchedulesTab({
   const [savingWeeklyRules, setSavingWeeklyRules] = useState(false);
   const [savingValidity, setSavingValidity] = useState(false);
 
+<<<<<<< HEAD
   // Schedule Copy Slots State
   const [copyState, setCopyState] = useState({
     isOpen: false,
@@ -489,6 +496,12 @@ export default function SchedulesTab({
     );
     setCopyState((prev) => ({ ...prev, isOpen: false, saving: false }));
   };
+=======
+  // Copy slots to other days state
+  const [copyDropdownDay, setCopyDropdownDay] = useState(null);
+  const [copyTargetDays, setCopyTargetDays] = useState([]);
+  const copyDropdownRef = useRef(null);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
   // --- Handlers ---
   const handleOpenCreateModal = () => {
@@ -579,7 +592,7 @@ export default function SchedulesTab({
     }
 
     const confirmMsg =
-      t("confirmDeleteSchedule") || "إنت متأكد إنك عايز تحذف الجدول ده؟";
+      t("confirmDeleteSchedule") || "هل أنت متأكد من رغبتك في حذف هذا الجدول؟";
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -596,7 +609,7 @@ export default function SchedulesTab({
 
   // Weekly Hours Multi-slot Handlers
   const handleToggleDay = (dayKey) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -617,7 +630,7 @@ export default function SchedulesTab({
   };
 
   const handleAddSlot = (dayKey) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -636,7 +649,7 @@ export default function SchedulesTab({
   };
 
   const handleRemoveSlot = (dayKey, slotIdx) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -656,7 +669,7 @@ export default function SchedulesTab({
   };
 
   const handleSlotChange = (dayKey, slotIdx, field, value) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowUpdate || !activeSchedule) return;
     setSchedulesList((prev) =>
       prev.map((s) => {
         if (s.id === selectedScheduleId) {
@@ -678,6 +691,54 @@ export default function SchedulesTab({
         return s;
       }),
     );
+  };
+
+  // Copy day times to other days – click-outside handler
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        copyDropdownRef.current &&
+        !copyDropdownRef.current.contains(e.target)
+      ) {
+        setCopyDropdownDay(null);
+        setCopyTargetDays([]);
+      }
+    };
+    if (copyDropdownDay !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [copyDropdownDay]);
+
+  const handleToggleCopyTarget = (dayKey) => {
+    setCopyTargetDays((prev) =>
+      prev.includes(dayKey)
+        ? prev.filter((k) => k !== dayKey)
+        : [...prev, dayKey],
+    );
+  };
+
+  const handleApplyCopySlots = (fromDayKey) => {
+    if (copyTargetDays.length === 0) return;
+    const sourceSlots = activeSchedule?.weekly_hours?.[fromDayKey] || [];
+    setSchedulesList((prev) =>
+      prev.map((s) => {
+        if (s.id === selectedScheduleId) {
+          const newWeeklyHours = { ...(s.weekly_hours || {}) };
+          copyTargetDays.forEach((targetDay) => {
+            newWeeklyHours[targetDay] = sourceSlots.map((slot) => ({
+              ...slot,
+            }));
+          });
+          return { ...s, weekly_hours: newWeeklyHours };
+        }
+        return s;
+      }),
+    );
+    setCopyDropdownDay(null);
+    setCopyTargetDays([]);
+    toast.success(t("slotsCopiedSuccess") || "تم نسخ الأوقات بنجاح");
   };
 
   const handleSaveWeeklyRules = async () => {
@@ -783,7 +844,7 @@ export default function SchedulesTab({
   };
 
   const handleDeleteException = async (exId) => {
-    if (!canEdit || !activeSchedule) return;
+    if (!allowDelete || !activeSchedule) return;
     try {
       await client.delete(
         `${endpoints.workspaceSchedules}/${activeSchedule.id}/overrides/${exId}`,
@@ -803,6 +864,7 @@ export default function SchedulesTab({
       className="card-body"
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
+<<<<<<< HEAD
       {/* 1. Standard Workspace Header & Stats */}
       <WorkspacePageHeader
         title={
@@ -822,6 +884,21 @@ export default function SchedulesTab({
               type="button"
               className="btn btn-primary"
               onClick={handleOpenCreateModal}
+=======
+      {/* 1. Header Toolbar & Schedule Switcher Bar */}
+      <div className="schedules-tab-header">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 4,
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -832,6 +909,7 @@ export default function SchedulesTab({
                 boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
               }}
             >
+<<<<<<< HEAD
               <Icon name="plus" size={18} />
               <span>
                 {t("newScheduleBtn") ||
@@ -873,6 +951,44 @@ export default function SchedulesTab({
           },
         ]}
       />
+=======
+              <Icon name="clock" size={18} />
+            </div>
+            <h2
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 800,
+                margin: 0,
+                color: "var(--heading)",
+              }}
+            >
+              {t("workspaceSchedules") || "الجداول والتوفر"}
+            </h2>
+          </div>
+          <p
+            style={{
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+              margin: 0,
+            }}
+          >
+            {t("workspaceSchedulesDesc") ||
+              "ضبط أوقات وأيام العمل الفعالة لكل أسبوع، فترات الصلاحية، والاستثناءات المخصصة"}
+          </p>
+        </div>
+
+        {allowCreate && (
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={handleOpenCreateModal}
+            style={{ gap: 6 }}
+          >
+            <Icon name="plus" size={14} />
+            {t("newScheduleBtn") || "جدول جديد"}
+          </button>
+        )}
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* 2. Schedule Selector Tabs */}
       {schedulesList.length === 0 ? (
@@ -909,7 +1025,7 @@ export default function SchedulesTab({
             }}
           >
             {t("noSchedulesFound") ||
-              "مفيش جداول عمل أو ساعات توفر مضافة دلوقتي"}
+              "لا توجد جداول عمل أو ساعات توفر مضافة حالياً"}
           </h4>
           <p
             style={{
@@ -921,7 +1037,7 @@ export default function SchedulesTab({
             {t("noSchedulesDesc") ||
               "قم بإنشاء جدول العمل الأول لمساحتك لتحديد أيام وساعات العمل المتاحة."}
           </p>
-          {canEdit && (
+          {allowCreate && (
             <button
               className="btn btn-primary btn-sm"
               onClick={handleOpenCreateModal}
@@ -1135,7 +1251,7 @@ export default function SchedulesTab({
                   })()}
                 </div>
 
-                {activeSchedule && canEdit && (
+                {activeSchedule && (allowUpdate || allowDelete) && (
                   <div
                     style={{
                       display: "flex",
@@ -1143,97 +1259,105 @@ export default function SchedulesTab({
                       gap: 8,
                     }}
                   >
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={handleOpenEditModal}
-                      style={{
-                        fontSize: "0.82rem",
-                        fontWeight: 600,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Icon name="edit" size={13} />
-                      {t("editScheduleNameBtn") || "تعديل"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={handleDeleteSchedule}
-                      disabled={activeSchedule.is_default}
-                      style={{
-                        fontSize: "0.82rem",
-                        fontWeight: 600,
-                        color: activeSchedule.is_default
-                          ? "var(--muted)"
-                          : "#ef4444",
-                        opacity: activeSchedule.is_default ? 0.5 : 1,
-                        cursor: activeSchedule.is_default
-                          ? "not-allowed"
-                          : "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Icon name="trash" size={13} />
-                      {t("deleteScheduleBtn") || "حذف"}
-                    </button>
+                    {allowUpdate && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleOpenEditModal}
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 600,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="edit" size={13} />
+                        {t("editScheduleNameBtn") || "تعديل"}
+                      </button>
+                    )}
+                    {allowDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleDeleteSchedule}
+                        disabled={activeSchedule.is_default}
+                        style={{
+                          fontSize: "0.82rem",
+                          fontWeight: 600,
+                          color: activeSchedule.is_default
+                            ? "var(--muted)"
+                            : "#ef4444",
+                          opacity: activeSchedule.is_default ? 0.5 : 1,
+                          cursor: activeSchedule.is_default
+                            ? "not-allowed"
+                            : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Icon name="trash" size={13} />
+                        {t("deleteScheduleBtn") || "حذف"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
             </div>
 
             {/* Desktop / Tablet Actions */}
-            {activeSchedule && canEdit && (
+            {activeSchedule && (allowUpdate || allowDelete) && (
               <div className="schedule-top-bar-actions schedule-desktop-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleOpenEditModal}
-                  title={t("editScheduleModalTitle") || "تعديل بيانات الجدول"}
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon name="edit" size={13} />
-                  {t("editScheduleNameBtn") || "تعديل"}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={handleDeleteSchedule}
-                  disabled={activeSchedule.is_default}
-                  title={
-                    activeSchedule.is_default
-                      ? t("cannotDeleteDefaultSchedule") ||
-                        "لا يمكن حذف الجدول الافتراضي لمساحة العمل"
-                      : t("deleteScheduleBtn") || "حذف الجدول"
-                  }
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 600,
-                    color: activeSchedule.is_default
-                      ? "var(--muted)"
-                      : "#ef4444",
-                    opacity: activeSchedule.is_default ? 0.5 : 1,
-                    cursor: activeSchedule.is_default
-                      ? "not-allowed"
-                      : "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon name="trash" size={13} />
-                  {t("deleteScheduleBtn") || "حذف"}
-                </button>
+                {allowUpdate && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleOpenEditModal}
+                    title={t("editScheduleModalTitle") || "تعديل بيانات الجدول"}
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="edit" size={13} />
+                    {t("editScheduleNameBtn") || "تعديل"}
+                  </button>
+                )}
+                {allowDelete && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleDeleteSchedule}
+                    disabled={activeSchedule.is_default}
+                    title={
+                      activeSchedule.is_default
+                        ? t("cannotDeleteDefaultSchedule") ||
+                          "لا يمكن حذف الجدول الافتراضي لمساحة العمل"
+                        : t("deleteScheduleBtn") || "حذف الجدول"
+                    }
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 600,
+                      color: activeSchedule.is_default
+                        ? "var(--muted)"
+                        : "#ef4444",
+                      opacity: activeSchedule.is_default ? 0.5 : 1,
+                      cursor: activeSchedule.is_default
+                        ? "not-allowed"
+                        : "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="trash" size={13} />
+                    {t("deleteScheduleBtn") || "حذف"}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -1282,12 +1406,12 @@ export default function SchedulesTab({
                           type="checkbox"
                           checked={isDayEnabled}
                           onChange={() => handleToggleDay(d.key)}
-                          disabled={!canEdit}
+                          disabled={!allowUpdate}
                           style={{
                             accentColor: "var(--primary)",
                             width: 18,
                             height: 18,
-                            cursor: canEdit ? "pointer" : "default",
+                            cursor: allowUpdate ? "pointer" : "default",
                           }}
                         />
                         <span
@@ -1329,7 +1453,7 @@ export default function SchedulesTab({
                                     e.target.value,
                                   )
                                 }
-                                disabled={!canEdit}
+                                disabled={!allowUpdate}
                               />
                               <span
                                 style={{
@@ -1352,10 +1476,10 @@ export default function SchedulesTab({
                                     e.target.value,
                                   )
                                 }
-                                disabled={!canEdit}
+                                disabled={!allowUpdate}
                               />
 
-                              {canEdit && (
+                              {allowUpdate && (
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveSlot(d.key, sIdx)}
@@ -1390,6 +1514,7 @@ export default function SchedulesTab({
                         )}
                       </div>
 
+<<<<<<< HEAD
                       {/* Action: Copy Slots & Add Slot */}
                       {canEdit && isDayEnabled && (
                         <div className="schedule-day-actions">
@@ -1409,6 +1534,20 @@ export default function SchedulesTab({
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm schedule-add-slot-btn"
+=======
+                      {/* Actions: Add Slot & Copy to Days */}
+                      {allowUpdate && isDayEnabled && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                             onClick={() => handleAddSlot(d.key)}
                             style={{
                               fontSize: "0.78rem",
@@ -1418,13 +1557,90 @@ export default function SchedulesTab({
                           >
                             {t("addTimeSlotBtn") || "+ إضافة فترة"}
                           </button>
+<<<<<<< HEAD
+=======
+                          <div
+                            style={{ position: "relative" }}
+                            ref={
+                              copyDropdownDay === d.key ? copyDropdownRef : null
+                            }
+                          >
+                            <button
+                              type="button"
+                              className="btn-copy-slots-trigger"
+                              onClick={() => {
+                                if (copyDropdownDay === d.key) {
+                                  setCopyDropdownDay(null);
+                                  setCopyTargetDays([]);
+                                } else {
+                                  setCopyDropdownDay(d.key);
+                                  setCopyTargetDays([]);
+                                }
+                              }}
+                              title={
+                                t("copySlotsToDays") || "نسخ للأيام الأخرى"
+                              }
+                            >
+                              <Icon name="copy" size={15} />
+                            </button>
+                            {copyDropdownDay === d.key && (
+                              <div className="copy-slots-dropdown">
+                                <div className="copy-slots-dropdown-header">
+                                  {t("copySlotsToDays") || "نسخ للأيام الأخرى"}
+                                </div>
+                                <div className="copy-slots-dropdown-list">
+                                  {daysList
+                                    .filter((dd) => dd.key !== d.key)
+                                    .map((dd) => (
+                                      <label
+                                        key={dd.key}
+                                        className="copy-slots-dropdown-item"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={copyTargetDays.includes(
+                                            dd.key,
+                                          )}
+                                          onChange={() =>
+                                            handleToggleCopyTarget(dd.key)
+                                          }
+                                          style={{
+                                            accentColor: "var(--primary)",
+                                            width: 16,
+                                            height: 16,
+                                            cursor: "pointer",
+                                          }}
+                                        />
+                                        <span>{dd.label}</span>
+                                      </label>
+                                    ))}
+                                </div>
+                                <div className="copy-slots-dropdown-actions">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => handleApplyCopySlots(d.key)}
+                                    disabled={copyTargetDays.length === 0}
+                                    style={{
+                                      fontSize: "0.78rem",
+                                      fontWeight: 700,
+                                      padding: "6px 16px",
+                                    }}
+                                  >
+                                    {t("applyCopyBtn") || "تطبيق"}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                         </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-              {canEdit && (
+              {allowUpdate && (
                 <div
                   style={{
                     display: "flex",
@@ -1524,7 +1740,7 @@ export default function SchedulesTab({
                       valid_from: e.target.value,
                     })
                   }
-                  disabled={!canEdit}
+                  disabled={!allowUpdate}
                 />
               </div>
 
@@ -1542,12 +1758,12 @@ export default function SchedulesTab({
                       valid_until: e.target.value,
                     })
                   }
-                  disabled={!canEdit}
+                  disabled={!allowUpdate}
                 />
               </div>
             </div>
 
-            {canEdit && (
+            {allowUpdate && (
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <button
                   type="button"
@@ -1617,7 +1833,7 @@ export default function SchedulesTab({
             </p>
 
             {/* Inline Add Exception Form */}
-            {canEdit && (
+            {allowUpdate && (
               <form
                 onSubmit={handleAddException}
                 style={{
@@ -1798,7 +2014,7 @@ export default function SchedulesTab({
                     fontSize: "0.86rem",
                   }}
                 >
-                  {t("noExceptionsFound") || "مفيش استثناءات"}
+                  {t("noExceptionsFound") || "لا توجد استثناءات"}
                 </div>
               ) : (
                 activeSchedule.exceptions.map((ex) => (
@@ -1900,7 +2116,7 @@ export default function SchedulesTab({
                       </div>
                     </div>
 
-                    {canEdit && (
+                    {allowDelete && (
                       <button
                         type="button"
                         onClick={() => handleDeleteException(ex.id)}

@@ -4,22 +4,34 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import { useToast } from "../../../context/ToastContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
+import ModalPortal from "../../../components/common/ModalPortal";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
+<<<<<<< HEAD
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
+=======
+import { formatCurrency } from "../../../utils/currency";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
   const { user } = useAuth();
   const { t, lang, isRTL } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canUpdateCustomers,
+    canDeleteCustomers: _canDeleteCustomers,
+    canCreateBookings,
+    canReadPayments,
+  } = usePermissions();
+
+  const canWrite = isOwner || canUpdateCustomers;
+  const canBook = isOwner || canCreateBookings;
 
   const workspace = user?.workspace;
-  const isOwner = user?.is_owner === true;
-  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canWrite = isOwner || permissions.includes("customer_write");
-  const canBook = isOwner || permissions.includes("booking_write");
 
   // Dynamic Workspace Customer Terminology & Icon via Hook
   const {
@@ -583,7 +595,7 @@ export default function WorkspaceCustomerProfilePage() {
               </a>
             )}
 
-            {canBook && (
+            {canCreateBookings && (
               <button
                 type="button"
                 onClick={() => setIsBookingModalOpen(true)}
@@ -602,7 +614,7 @@ export default function WorkspaceCustomerProfilePage() {
               </button>
             )}
 
-            {canWrite && (
+            {canUpdateCustomers && (
               <button
                 type="button"
                 onClick={handleOpenEdit}
@@ -757,7 +769,15 @@ export default function WorkspaceCustomerProfilePage() {
               marginTop: 4,
             }}
           >
-            {stats.total_spent ?? 0} {workspace?.currency?.code || "EGP"}
+            {formatCurrency(
+              stats.total_spent ?? 0,
+              stats.currency_detail ||
+                stats.currency ||
+                workspace?.currency ||
+                "SAR",
+              isRTL,
+              "0",
+            )}
           </div>
         </div>
 
@@ -865,7 +885,7 @@ export default function WorkspaceCustomerProfilePage() {
             </h3>
           </div>
 
-          {canWrite && (
+          {canUpdateCustomers && (
             <button
               type="button"
               className="btn btn-secondary"
@@ -1470,36 +1490,38 @@ export default function WorkspaceCustomerProfilePage() {
           <span>{t("tabWorkspaceData") || "الملاحظات والبيانات الداخلية"}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("financial")}
-          style={{
-            padding: "12px 4px",
-            background: "none",
-            border: "none",
-            borderBottom:
-              activeTab === "financial"
-                ? "3px solid var(--primary)"
-                : "3px solid transparent",
-            color:
-              activeTab === "financial"
-                ? "var(--primary)"
-                : "var(--text-secondary)",
-            fontWeight: activeTab === "financial" ? 800 : 600,
-            fontSize: "0.96rem",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginBottom: -2,
-            transition: "all 0.15s ease",
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Icon name="credit-card" size={18} />
-          <span>{t("tabFinancial") || "المدفوعات والفواتير"}</span>
-        </button>
+        {(canReadPayments || isOwner) && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("financial")}
+            style={{
+              padding: "12px 4px",
+              background: "none",
+              border: "none",
+              borderBottom:
+                activeTab === "financial"
+                  ? "3px solid var(--primary)"
+                  : "3px solid transparent",
+              color:
+                activeTab === "financial"
+                  ? "var(--primary)"
+                  : "var(--text-secondary)",
+              fontWeight: activeTab === "financial" ? 800 : 600,
+              fontSize: "0.96rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: -2,
+              transition: "all 0.15s ease",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Icon name="credit-card" size={18} />
+            <span>{t("tabFinancial") || "المدفوعات والفواتير"}</span>
+          </button>
+        )}
       </div>
 
       {/* Tab 1: Timeline & Appointments */}
@@ -1785,10 +1807,14 @@ export default function WorkspaceCustomerProfilePage() {
                             color: "var(--heading)",
                           }}
                         >
-                          {apt.price_snapshot ?? apt.service?.price ?? 0}{" "}
-                          {apt.currency_snapshot ||
-                            workspace?.currency?.code ||
-                            "EGP"}
+                          {formatCurrency(
+                            apt.price_snapshot ?? apt.service?.price ?? 0,
+                            apt.currency_snapshot ||
+                              workspace?.currency ||
+                              "SAR",
+                            isRTL,
+                            "0",
+                          )}
                         </div>
                       </div>
 
@@ -2373,6 +2399,7 @@ export default function WorkspaceCustomerProfilePage() {
       )}
 
       {/* Edit Customer Modal */}
+<<<<<<< HEAD
       {isEditModalOpen &&
         createPortal(
           <div
@@ -2387,6 +2414,37 @@ export default function WorkspaceCustomerProfilePage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
+=======
+      {isEditModalOpen && (
+        <ModalPortal>
+          <div
+            className="modal-overlay animate-fade-in"
+            onClick={() => setIsEditModalOpen(false)}
+          >
+            <div
+              className="modal-container glass-card animate-scale-in"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-lg, 16px)",
+                width: "100%",
+                maxWidth: 580,
+                maxHeight: "90vh",
+                overflowY: "auto",
+                padding: 24,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 20,
+                }}
+              >
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div
                     style={{
@@ -2402,6 +2460,7 @@ export default function WorkspaceCustomerProfilePage() {
                   >
                     <Icon name="edit-2" size={20} />
                   </div>
+<<<<<<< HEAD
                   <h3 className="modal-title">{editCustomerBtn}</h3>
                 </div>
                 <button
@@ -2410,6 +2469,32 @@ export default function WorkspaceCustomerProfilePage() {
                   onClick={() => setIsEditModalOpen(false)}
                 >
                   <Icon name="x" size={18} />
+=======
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: "1.2rem",
+                      fontWeight: 800,
+                      color: "var(--heading)",
+                    }}
+                  >
+                    {(t("editPrefix") || "تعديل بيانات") +
+                      " " +
+                      customerSingular}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  <Icon name="x" size={20} />
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                 </button>
               </div>
 
@@ -2418,7 +2503,10 @@ export default function WorkspaceCustomerProfilePage() {
                   e.preventDefault();
                   handleSaveCustomer();
                 }}
+<<<<<<< HEAD
                 className="modal-body"
+=======
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               >
                 <div
                   className="form-row"
@@ -2618,7 +2706,14 @@ export default function WorkspaceCustomerProfilePage() {
                       <option value="active">
                         {t("filterStatusActive") || "نشط"}
                       </option>
+<<<<<<< HEAD
                       <option value="vip">{vipCustomer}</option>
+=======
+                      <option value="vip">
+                        {t("filterStatusVip") ||
+                          `${customerSingular} مميز (VIP)`}
+                      </option>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                       <option value="lead">
                         {t("filterStatusLead") || "محتمل / جديد"}
                       </option>
@@ -2633,7 +2728,19 @@ export default function WorkspaceCustomerProfilePage() {
                 </div>
 
                 {/* Action Buttons */}
+<<<<<<< HEAD
                 <div className="modal-actions" style={{ marginTop: 16 }}>
+=======
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                    marginTop: 16,
+                  }}
+                >
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -2654,9 +2761,15 @@ export default function WorkspaceCustomerProfilePage() {
                 </div>
               </form>
             </div>
+<<<<<<< HEAD
           </div>,
           document.body,
         )}
+=======
+          </div>
+        </ModalPortal>
+      )}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* Quick Booking Modal */}
       {isBookingModalOpen && customer && (

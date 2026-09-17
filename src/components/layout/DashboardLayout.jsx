@@ -17,10 +17,7 @@ export default function DashboardLayout() {
         <div className="workspace-dashboard-grid">
           <DashboardSidebar variant="dashboard" />
 
-          <div
-            key={location.pathname}
-            className="workspace-dashboard-content animate-fade-in-up"
-          >
+          <div key={location.pathname} className="workspace-dashboard-content">
             <GoogleNotConnectedBanner />
             <Outlet />
           </div>
@@ -40,7 +37,7 @@ export default function DashboardLayout() {
 
           <div
             key={location.pathname}
-            className="dashboard-content animate-fade-in-up"
+            className="dashboard-content"
             style={{ flex: 1, minWidth: 0 }}
           >
             <Outlet />

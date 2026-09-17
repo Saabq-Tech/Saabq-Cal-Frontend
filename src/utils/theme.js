@@ -17,13 +17,8 @@ export function hexToRgba(hex, alpha = 0.12) {
 
 export function updateMetaThemeColor(color) {
   try {
-    let meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "theme-color");
-      document.head.appendChild(meta);
-    }
     const isDark = document.documentElement.classList.contains("dark");
+<<<<<<< HEAD
     if (
       color &&
       typeof color === "string" &&
@@ -32,7 +27,61 @@ export function updateMetaThemeColor(color) {
       meta.setAttribute("content", color.trim());
     } else {
       meta.setAttribute("content", isDark ? "#034d60" : "#033d4b");
+=======
+    let targetColor = color;
+
+    if (
+      !targetColor ||
+      typeof targetColor !== "string" ||
+      !/^#[0-9A-Fa-f]{3,8}$/.test(targetColor)
+    ) {
+      // Prioritize secondary/bar color (matching mobile tab bar), then primary
+      const s = localStorage.getItem("saabq_secondary_color");
+      const p = localStorage.getItem("saabq_primary_color");
+      if (s && /^#[0-9A-Fa-f]{3,8}$/.test(s)) {
+        targetColor = s;
+      } else if (p && /^#[0-9A-Fa-f]{3,8}$/.test(p)) {
+        targetColor = p;
+      } else {
+        const storedUser = localStorage.getItem("saabq_user");
+        if (storedUser) {
+          try {
+            const parsed = JSON.parse(storedUser);
+            if (parsed?.workspace) {
+              targetColor =
+                parsed.workspace.secondary_color ||
+                parsed.workspace.primary_color ||
+                null;
+            }
+          } catch {}
+        }
+      }
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     }
+
+    if (!targetColor || !/^#[0-9A-Fa-f]{3,8}$/.test(targetColor)) {
+      targetColor = isDark ? "#022a35" : "#026982";
+    }
+
+    // Force mobile Android Chrome / WebKit to re-evaluate the status bar color
+    const existingMetas = document.querySelectorAll('meta[name="theme-color"]');
+    existingMetas.forEach((el) => el.remove());
+
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", targetColor);
+    document.head.appendChild(meta);
+
+    // Also sync msapplication-navbutton-color
+    let msMeta = document.querySelector(
+      'meta[name="msapplication-navbutton-color"]',
+    );
+    if (!msMeta) {
+      msMeta = document.createElement("meta");
+      msMeta.setAttribute("name", "msapplication-navbutton-color");
+      document.head.appendChild(msMeta);
+    }
+    msMeta.setAttribute("content", targetColor);
   } catch {
     // Ignore DOM errors
   }
@@ -163,6 +212,7 @@ export function applyWorkspaceBranding(
 ) {
   const root = document.documentElement;
 
+<<<<<<< HEAD
   // Support passing either (primary, secondary, hover, extended) or single workspace branding object
   let branding = {};
   if (primaryOrObject && typeof primaryOrObject === "object") {
@@ -189,6 +239,39 @@ export function applyWorkspaceBranding(
     root.style.setProperty("--sb-accent-subtle", hexToRgba(primaryColor, 0.14));
     root.style.setProperty("--sb-active-shadow", hexToRgba(primaryColor, 0.2));
     localStorage.setItem("saabq_primary_color", primaryColor);
+=======
+  // Harmonize workspace color tokens so bars and actions don't clash
+  const validPrimary =
+    primaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(primaryColor)
+      ? primaryColor
+      : null;
+  const validSecondary =
+    secondaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(secondaryColor)
+      ? secondaryColor
+      : null;
+
+  const effectivePrimary = validPrimary || validSecondary;
+  const effectiveSecondary = validSecondary || validPrimary;
+
+  if (effectivePrimary) {
+    root.style.setProperty("--primary", effectivePrimary);
+    root.style.setProperty("--primary-color", effectivePrimary);
+    root.style.setProperty("--primary-light", effectivePrimary);
+    root.style.setProperty(
+      "--primary-subtle",
+      hexToRgba(effectivePrimary, 0.14),
+    );
+    root.style.setProperty("--sb-accent", effectivePrimary);
+    root.style.setProperty(
+      "--sb-accent-subtle",
+      hexToRgba(effectivePrimary, 0.14),
+    );
+    root.style.setProperty(
+      "--sb-active-shadow",
+      hexToRgba(effectivePrimary, 0.2),
+    );
+    localStorage.setItem("saabq_primary_color", effectivePrimary);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   } else {
     root.style.removeProperty("--primary");
     root.style.removeProperty("--primary-color");
@@ -200,6 +283,7 @@ export function applyWorkspaceBranding(
     localStorage.removeItem("saabq_primary_color");
   }
 
+<<<<<<< HEAD
   if (isHex(branding.secondary_color)) {
     root.style.setProperty("--secondary", branding.secondary_color);
     root.style.setProperty("--secondary-color", branding.secondary_color);
@@ -209,6 +293,17 @@ export function applyWorkspaceBranding(
       hexToRgba(branding.secondary_color, 0.14),
     );
     localStorage.setItem("saabq_secondary_color", branding.secondary_color);
+=======
+  if (effectiveSecondary) {
+    root.style.setProperty("--secondary", effectiveSecondary);
+    root.style.setProperty("--secondary-color", effectiveSecondary);
+    root.style.setProperty("--accent", effectiveSecondary);
+    root.style.setProperty(
+      "--secondary-subtle",
+      hexToRgba(effectiveSecondary, 0.14),
+    );
+    localStorage.setItem("saabq_secondary_color", effectiveSecondary);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   } else {
     root.style.removeProperty("--secondary");
     root.style.removeProperty("--secondary-color");
@@ -236,6 +331,7 @@ export function applyWorkspaceBranding(
     localStorage.removeItem("saabq_hover_color");
   }
 
+<<<<<<< HEAD
   // Inject full CSS variables (brand, light, and dark) via dynamic style element
   injectWorkspaceBrandingStyle(branding);
 
@@ -343,10 +439,31 @@ export function isWorkspaceRoute(pathname) {
   }
 
   return false;
+=======
+  // Dynamically update upper browser theme color / mobile status bar to match workspace bar frame
+  updateMetaThemeColor(effectiveSecondary || effectivePrimary);
+
+  if (arguments.length > 3 && arguments[3]) {
+    applyWorkspaceVibeTheme(arguments[3]);
+  }
+}
+
+export function applyWorkspaceVibeTheme(vibeKey) {
+  try {
+    if (vibeKey && typeof vibeKey === "string") {
+      document.documentElement.setAttribute("data-workspace-vibe", vibeKey);
+      localStorage.setItem("saabq_workspace_vibe", vibeKey);
+    } else {
+      document.documentElement.removeAttribute("data-workspace-vibe");
+      localStorage.removeItem("saabq_workspace_vibe");
+    }
+  } catch {}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 }
 
 export function initWorkspaceBranding() {
   try {
+<<<<<<< HEAD
     const currentPath =
       typeof window !== "undefined" ? window.location.pathname : "";
 
@@ -359,13 +476,40 @@ export function initWorkspaceBranding() {
         if (saved) {
           applyWorkspaceBranding(saved);
           return;
+=======
+    let p = localStorage.getItem("saabq_primary_color");
+    let s = localStorage.getItem("saabq_secondary_color");
+    let h = localStorage.getItem("saabq_hover_color");
+    let v = localStorage.getItem("saabq_workspace_vibe");
+
+    if (!p || !s || !h || !v) {
+      const storedUser = localStorage.getItem("saabq_user");
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.workspace) {
+          p = p || parsed.workspace.primary_color;
+          s = s || parsed.workspace.secondary_color;
+          h = h || parsed.workspace.hover_color;
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         }
       }
       return;
     }
 
+<<<<<<< HEAD
     // Public pages (homepage, blog, workspaces explorer, etc.) use default system colors
     resetWorkspaceBranding();
+=======
+    if (v) {
+      applyWorkspaceVibeTheme(v);
+    }
+
+    if (p || s || h) {
+      applyWorkspaceBranding(p, s, h);
+    } else {
+      updateMetaThemeColor(null);
+    }
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   } catch (e) {
     console.warn("Workspace branding initialization error:", e);
   }

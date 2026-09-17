@@ -5,7 +5,6 @@ import { useToast } from "../../context/ToastContext";
 import client, { endpoints } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import { getPublicAssetUrl } from "../../utils/url";
-import Icon from "./Icon";
 
 export default function RichTextEditor({
   value = "",
@@ -16,6 +15,7 @@ export default function RichTextEditor({
   enableTemplates = false,
   enableKeywords = false,
   enablePrint = false,
+  _workspaceTypeId = null,
   templates: propTemplates = null,
   keywords: propKeywords = null,
   onSelectTemplate,
@@ -29,16 +29,71 @@ export default function RichTextEditor({
   const textareaRef = useRef(null);
   const savedRangeRef = useRef(null);
   const fileInputRef = useRef(null);
+<<<<<<< HEAD
   const internalUpdateRef = useRef(false);
+=======
+  const colorPickerRef = useRef(null);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
   const [isCodeView, setIsCodeView] = useState(false);
   const [htmlContent, setHtmlContent] = useState(value || "");
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [activeColor, setActiveColor] = useState("inherit");
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const [activeFormats, setActiveFormats] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    strikeThrough: false,
+    justifyRight: false,
+    justifyCenter: false,
+    justifyLeft: false,
+    insertUnorderedList: false,
+    insertOrderedList: false,
+  });
+
   const [showTableModal, setShowTableModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [tableRows, setTableRows] = useState(3);
   const [tableCols, setTableCols] = useState(3);
+
+  // Close color picker on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        colorPickerRef.current &&
+        !colorPickerRef.current.contains(event.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+    if (showColorPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showColorPicker]);
+
+  const updateActiveFormats = useCallback(() => {
+    if (disabled || isCodeView) return;
+    try {
+      setActiveFormats({
+        bold: document.queryCommandState("bold"),
+        italic: document.queryCommandState("italic"),
+        underline: document.queryCommandState("underline"),
+        strikeThrough: document.queryCommandState("strikeThrough"),
+        justifyRight: document.queryCommandState("justifyRight"),
+        justifyCenter: document.queryCommandState("justifyCenter"),
+        justifyLeft: document.queryCommandState("justifyLeft"),
+        insertUnorderedList: document.queryCommandState("insertUnorderedList"),
+        insertOrderedList: document.queryCommandState("insertOrderedList"),
+      });
+    } catch {
+      // ignore in environments without DOM selection
+    }
+  }, [disabled, isCodeView]);
 
   // Templates & Keywords Modals & State
   const [showTemplatesModal, setShowTemplatesModal] = useState(false);
@@ -629,7 +684,11 @@ export default function RichTextEditor({
     }
     document.execCommand(command, false, value);
     handleInput();
+<<<<<<< HEAD
     saveSelection();
+=======
+    updateActiveFormats();
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   };
 
   const handleFormatBlock = (e) => {
@@ -727,29 +786,24 @@ export default function RichTextEditor({
   };
 
   const colors = [
-    { label: "Default", value: "inherit" },
-    { label: "Primary", value: "var(--primary, #0a9099)" },
-    { label: "Dark", value: "#1e293b" },
-    { label: "Red", value: "#ef4444" },
-    { label: "Blue", value: "#3b82f6" },
-    { label: "Green", value: "#10b981" },
-    { label: "Amber", value: "#f59e0b" },
-    { label: "Purple", value: "#8b5cf6" },
+    { label: isRTL ? "تلقائي" : "Default", value: "inherit" },
+    { label: isRTL ? "الأساسي" : "Primary", value: "#0a9099" },
+    { label: isRTL ? "داكن" : "Dark", value: "#0f172a" },
+    { label: isRTL ? "رمادي" : "Gray", value: "#64748b" },
+    { label: isRTL ? "أحمر" : "Red", value: "#ef4444" },
+    { label: isRTL ? "برتقالي" : "Amber", value: "#f59e0b" },
+    { label: isRTL ? "أخضر" : "Green", value: "#10b981" },
+    { label: isRTL ? "أزرق" : "Blue", value: "#3b82f6" },
+    { label: isRTL ? "بنفسجي" : "Purple", value: "#8b5cf6" },
+    { label: isRTL ? "وردي" : "Pink", value: "#ec4899" },
   ];
 
   return (
     <div
       className="rich-text-editor-container"
       style={{
-        border: "1.5px solid var(--border, #cbd5e1)",
-        borderRadius: "var(--radius-md, 12px)",
-        background: "var(--surface, #ffffff)",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
         opacity: disabled ? 0.7 : 1,
         pointerEvents: disabled ? "none" : "auto",
-        marginBottom: "22px",
       }}
     >
       {/* Hidden File Input for Image Upload */}
@@ -761,149 +815,39 @@ export default function RichTextEditor({
         onChange={handleImageUpload}
       />
 
-      {/* Toolbar */}
+      {/* Modern Responsive Toolbar */}
       <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 4,
-          padding: "8px 10px",
-          background: "var(--surface-alt)",
-          borderBottom: "1px solid var(--border)",
-        }}
+        className={`rte-toolbar ${isMobileExpanded ? "rte-toolbar-expanded" : ""}`}
       >
-        {/* Format Block Dropdown */}
-        <select
-          className="form-select"
-          onChange={handleFormatBlock}
-          disabled={isCodeView}
-          style={{
-            width: "auto",
-            height: 32,
-            padding: "2px 8px",
-            fontSize: "0.8rem",
-            borderRadius: 6,
-          }}
-        >
-          <option value="P">
-            {t("paragraph") || "فقرة عادية (Paragraph)"}
-          </option>
-          <option value="H1">{t("heading1") || "عنوان كبير (H1)"}</option>
-          <option value="H2">{t("heading2") || "عنوان متوسط (H2)"}</option>
-          <option value="H3">{t("heading3") || "عنوان فرعي (H3)"}</option>
-          <option value="BLOCKQUOTE">{t("quote") || "اقتباس (Quote)"}</option>
-        </select>
-
-        <div
-          style={{
-            height: 20,
-            width: 1,
-            background: "var(--border-light, #cbd5e1)",
-            margin: "0 4px",
-          }}
-        />
-
-        {/* Text Formatting Buttons */}
-        <button
-          type="button"
-          className="btn-toolbar"
-          title={t("bold") || "عريض (Bold)"}
-          onClick={() => executeCommand("bold")}
-          disabled={isCodeView}
-          style={btnStyle}
-        >
-          <strong>B</strong>
-        </button>
-
-        <button
-          type="button"
-          className="btn-toolbar"
-          title={t("italic") || "مائل (Italic)"}
-          onClick={() => executeCommand("italic")}
-          disabled={isCodeView}
-          style={btnStyle}
-        >
-          <em>I</em>
-        </button>
-
-        <button
-          type="button"
-          className="btn-toolbar"
-          title={t("underline") || "تحته خط (Underline)"}
-          onClick={() => executeCommand("underline")}
-          disabled={isCodeView}
-          style={btnStyle}
-        >
-          <u>U</u>
-        </button>
-
-        <button
-          type="button"
-          className="btn-toolbar"
-          title={t("strikethrough") || "يتوسطه خط (Strike)"}
-          onClick={() => executeCommand("strikeThrough")}
-          disabled={isCodeView}
-          style={btnStyle}
-        >
-          <s>S</s>
-        </button>
-
-        {/* Text Color Dropdown */}
-        <div style={{ position: "relative" }}>
-          <button
-            type="button"
-            className="btn-toolbar"
-            title={t("textColor") || "لون النص (Text Color)"}
-            onClick={() => setShowColorPicker(!showColorPicker)}
+        {/* Group 1: Format Block Dropdown */}
+        <div className="rte-group">
+          <select
+            className="rte-select"
+            onChange={handleFormatBlock}
             disabled={isCodeView}
-            style={btnStyle}
+            aria-label={
+              t("formatBlock") || (isRTL ? "تنسيق الفقرة" : "Paragraph Format")
+            }
           >
-            <span style={{ fontWeight: 800, color: "var(--primary, #0a9099)" }}>
-              A
-            </span>
-          </button>
-          {showColorPicker && (
-            <div
-              style={{
-                position: "absolute",
-                top: "100%",
-                left: isRTL ? "auto" : 0,
-                right: isRTL ? 0 : "auto",
-                zIndex: 20,
-                background: "#fff",
-                border: "1px solid #cbd5e1",
-                borderRadius: 8,
-                padding: 6,
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 6,
-                boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
-              }}
-            >
-              {colors.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => {
-                    executeCommand("foreColor", c.value);
-                    setShowColorPicker(false);
-                  }}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    background: c.value === "inherit" ? "#fff" : c.value,
-                    border: "1px solid #cbd5e1",
-                    cursor: "pointer",
-                  }}
-                  title={c.label}
-                />
-              ))}
-            </div>
-          )}
+            <option value="P">
+              {t("paragraph") || (isRTL ? "فقرة عادية" : "Paragraph")}
+            </option>
+            <option value="H1">
+              {t("heading1") || (isRTL ? "عنوان رئيسي (H1)" : "Heading 1")}
+            </option>
+            <option value="H2">
+              {t("heading2") || (isRTL ? "عنوان فرعي (H2)" : "Heading 2")}
+            </option>
+            <option value="H3">
+              {t("heading3") || (isRTL ? "عنوان صغير (H3)" : "Heading 3")}
+            </option>
+            <option value="BLOCKQUOTE">
+              {t("quote") || (isRTL ? "اقتباس (Quote)" : "Quote")}
+            </option>
+          </select>
         </div>
 
+<<<<<<< HEAD
         <div
           style={{
             height: 20,
@@ -1073,29 +1017,30 @@ export default function RichTextEditor({
               saveSelection();
               setShowTemplatesModal(true);
             }}
+=======
+        {/* Group 2: Inline Text Formatting */}
+        <div className="rte-group">
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.bold ? "active" : ""}`}
+            title={t("bold") || (isRTL ? "عريض (Bold)" : "Bold")}
+            onClick={() => executeCommand("bold")}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             disabled={isCodeView}
-            style={{
-              ...btnStyle,
-              background: "rgba(13, 148, 136, 0.12)",
-              color: "#0f766e",
-              fontWeight: 700,
-              fontSize: "0.76rem",
-              padding: "4px 9px",
-              borderRadius: 6,
-              border: "1px solid rgba(13, 148, 136, 0.3)",
-              gap: 4,
-            }}
           >
+<<<<<<< HEAD
             <span>📄</span>
             <span>
               {t("readyTemplates") || (isRTL ? "قوالب جاهزة" : "Templates")}
             </span>
+=======
+            <BoldIcon />
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           </button>
-        )}
 
-        {enableKeywords && (
           <button
             type="button"
+<<<<<<< HEAD
             className="btn-toolbar"
             title={
               t("workspaceKeywordsTitle") ||
@@ -1105,29 +1050,26 @@ export default function RichTextEditor({
               saveSelection();
               setShowKeywordsModal(true);
             }}
+=======
+            className={`rte-btn ${activeFormats.italic ? "active" : ""}`}
+            title={t("italic") || (isRTL ? "مائل (Italic)" : "Italic")}
+            onClick={() => executeCommand("italic")}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             disabled={isCodeView}
-            style={{
-              ...btnStyle,
-              background: "rgba(59, 130, 246, 0.12)",
-              color: "#2563eb",
-              fontWeight: 700,
-              fontSize: "0.76rem",
-              padding: "4px 9px",
-              borderRadius: 6,
-              border: "1px solid rgba(59, 130, 246, 0.3)",
-              gap: 4,
-            }}
           >
+<<<<<<< HEAD
             <span>🏷️</span>
             <span>
               {t("keywords") || (isRTL ? "كلمات مفتاحية" : "Keywords")}
             </span>
+=======
+            <ItalicIcon />
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           </button>
-        )}
 
-        {enablePrint && (
           <button
             type="button"
+<<<<<<< HEAD
             className="btn-toolbar"
             title={
               t("printContent") || (isRTL ? "طباعة المحتوى" : "Print Content")
@@ -1157,50 +1099,311 @@ export default function RichTextEditor({
           onClick={() => {
             if (isCodeView && editorRef.current) {
               editorRef.current.innerHTML = htmlContent;
+=======
+            className={`rte-btn ${activeFormats.underline ? "active" : ""}`}
+            title={
+              t("underline") || (isRTL ? "تسطير (Underline)" : "Underline")
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             }
-            setIsCodeView(!isCodeView);
-          }}
-          style={{
-            ...btnStyle,
-            background: isCodeView ? "var(--primary, #0a9099)" : "transparent",
-            color: isCodeView ? "#fff" : "inherit",
-            fontWeight: 700,
-            fontSize: "0.76rem",
-            padding: "4px 8px",
-          }}
-        >
-          &lt;/&gt; {isCodeView ? t("visual") || "مرئي" : "HTML"}
-        </button>
+            onClick={() => executeCommand("underline")}
+            disabled={isCodeView}
+          >
+            <UnderlineIcon />
+          </button>
+
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.strikeThrough ? "active" : ""}`}
+            title={
+              t("strikethrough") ||
+              (isRTL ? "يتوسطه خط (Strike)" : "Strikethrough")
+            }
+            onClick={() => executeCommand("strikeThrough")}
+            disabled={isCodeView}
+          >
+            <StrikethroughIcon />
+          </button>
+
+          {/* Text Color Picker Popover */}
+          <div className="rte-color-picker-wrap" ref={colorPickerRef}>
+            <button
+              type="button"
+              className={`rte-btn ${showColorPicker ? "active" : ""}`}
+              title={t("textColor") || (isRTL ? "لون النص" : "Text Color")}
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              disabled={isCodeView}
+            >
+              <TextColorIcon currentColor={activeColor} />
+            </button>
+            {showColorPicker && (
+              <div className="rte-color-popover">
+                <div className="rte-color-grid">
+                  {colors.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      className="rte-color-dot"
+                      onClick={() => {
+                        executeCommand("foreColor", c.value);
+                        setActiveColor(c.value);
+                        setShowColorPicker(false);
+                      }}
+                      style={{
+                        background:
+                          c.value === "inherit" ? "transparent" : c.value,
+                        border:
+                          c.value === "inherit"
+                            ? "1.5px dashed var(--text-muted, #94a3b8)"
+                            : "1.5px solid rgba(0,0,0,0.1)",
+                      }}
+                      title={c.label}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Group 3: Text Alignment */}
+        <div className="rte-group">
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.justifyRight ? "active" : ""}`}
+            title={t("alignRight") || (isRTL ? "محاذاة لليمين" : "Align Right")}
+            onClick={() => executeCommand("justifyRight")}
+            disabled={isCodeView}
+          >
+            <AlignRightIcon />
+          </button>
+
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.justifyCenter ? "active" : ""}`}
+            title={
+              t("alignCenter") || (isRTL ? "محاذاة للوسط" : "Align Center")
+            }
+            onClick={() => executeCommand("justifyCenter")}
+            disabled={isCodeView}
+          >
+            <AlignCenterIcon />
+          </button>
+
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.justifyLeft ? "active" : ""}`}
+            title={t("alignLeft") || (isRTL ? "محاذاة لليسار" : "Align Left")}
+            onClick={() => executeCommand("justifyLeft")}
+            disabled={isCodeView}
+          >
+            <AlignLeftIcon />
+          </button>
+        </div>
+
+        {/* Group 4: Lists & Dividers */}
+        <div className="rte-group">
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.insertUnorderedList ? "active" : ""}`}
+            title={t("bulletList") || (isRTL ? "قائمة نقطية" : "Bullet List")}
+            onClick={() => executeCommand("insertUnorderedList")}
+            disabled={isCodeView}
+          >
+            <BulletListIcon />
+          </button>
+
+          <button
+            type="button"
+            className={`rte-btn ${activeFormats.insertOrderedList ? "active" : ""}`}
+            title={t("numberList") || (isRTL ? "قائمة رقمية" : "Numbered List")}
+            onClick={() => executeCommand("insertOrderedList")}
+            disabled={isCodeView}
+          >
+            <NumberListIcon />
+          </button>
+
+          <button
+            type="button"
+            className="rte-btn"
+            title={
+              t("horizontalRule") || (isRTL ? "فاصل أفقي" : "Horizontal Rule")
+            }
+            onClick={() => executeCommand("insertHorizontalRule")}
+            disabled={isCodeView}
+          >
+            <DividerIcon />
+          </button>
+
+          <button
+            type="button"
+            className="rte-btn"
+            title={
+              t("clearFormat") || (isRTL ? "مسح التنسيق" : "Clear Formatting")
+            }
+            onClick={() => executeCommand("removeFormat")}
+            disabled={isCodeView}
+          >
+            <ClearFormatIcon />
+          </button>
+        </div>
+
+        {/* Group 5: Inserts (Media, Link, Table) */}
+        <div className="rte-group">
+          <button
+            type="button"
+            className="rte-btn"
+            title={
+              t("uploadImage") ||
+              (isRTL ? "إدراج صورة من الجهاز" : "Upload Image")
+            }
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isCodeView}
+          >
+            <ImageIcon />
+          </button>
+
+          <button
+            type="button"
+            className="rte-btn"
+            title={
+              t("imageUrl") ||
+              (isRTL ? "إدراج صورة عبر رابط" : "Insert Image by URL")
+            }
+            onClick={handleInsertImageUrl}
+            disabled={isCodeView}
+          >
+            <ImageLinkIcon />
+          </button>
+
+          <button
+            type="button"
+            className="rte-btn"
+            title={t("insertTable") || (isRTL ? "إدراج جدول" : "Insert Table")}
+            onClick={() => setShowTableModal(true)}
+            disabled={isCodeView}
+          >
+            <TableIcon />
+          </button>
+
+          <button
+            type="button"
+            className="rte-btn"
+            title={t("insertLink") || (isRTL ? "إدراج رابط" : "Insert Link")}
+            onClick={() => setShowLinkModal(true)}
+            disabled={isCodeView}
+          >
+            <LinkIcon />
+          </button>
+        </div>
+
+        {/* Group 6: Special Action Pills (Templates & Keywords) */}
+        {(enableTemplates || enableKeywords) && (
+          <div className="rte-group-pills">
+            {enableTemplates && (
+              <button
+                type="button"
+                className="rte-badge-teal"
+                title={isRTL ? "اختيار قالب جاهز" : "Select Template"}
+                onClick={() => setShowTemplatesModal(true)}
+                disabled={isCodeView}
+              >
+                <TemplateIcon />
+                <span>{isRTL ? "قوالب جاهزة" : "Templates"}</span>
+              </button>
+            )}
+
+            {enableKeywords && (
+              <button
+                type="button"
+                className="rte-badge-blue"
+                title={isRTL ? "إدراج كلمات مفتاحية" : "Insert Keywords"}
+                onClick={() => setShowKeywordsModal(true)}
+                disabled={isCodeView}
+              >
+                <TagIcon />
+                <span>{isRTL ? "كلمات مفتاحية" : "Keywords"}</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="rte-toolbar-spacer" />
+
+        {/* Group 7: Utility & Responsive Toggle */}
+        <div className="rte-group rte-group-end">
+          {enablePrint && (
+            <button
+              type="button"
+              className="rte-btn"
+              title={isRTL ? "طباعة المحتوى مع الترويسة" : "Print Content"}
+              onClick={handlePrint}
+              disabled={isCodeView}
+            >
+              <PrinterIcon />
+            </button>
+          )}
+
+          <button
+            type="button"
+            className={`rte-badge-code ${isCodeView ? "active" : ""}`}
+            title={
+              isCodeView
+                ? t("visualView") || (isRTL ? "العرض المرئي" : "Visual View")
+                : t("codeView") || (isRTL ? "عرض كود HTML" : "HTML Code")
+            }
+            onClick={() => {
+              if (isCodeView && editorRef.current) {
+                editorRef.current.innerHTML = htmlContent;
+              }
+              setIsCodeView(!isCodeView);
+            }}
+          >
+            <CodeIcon />
+            <span>{isCodeView ? (isRTL ? "مرئي" : "Visual") : "HTML"}</span>
+          </button>
+
+          {/* Mobile Expand/Collapse Toggle */}
+          <button
+            type="button"
+            className="rte-btn rte-mobile-toggle"
+            title={
+              isMobileExpanded
+                ? isRTL
+                  ? "تصغير شريط الأدوات"
+                  : "Collapse Toolbar"
+                : isRTL
+                  ? "عرض جميع الأدوات"
+                  : "Show All Tools"
+            }
+            onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+          >
+            <ExpandIcon isExpanded={isMobileExpanded} />
+          </button>
+        </div>
       </div>
 
       {/* Editor Main Content Area */}
       {isCodeView ? (
         <textarea
+<<<<<<< HEAD
           ref={textareaRef}
           className="form-textarea"
+=======
+          className="rte-code-textarea"
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           value={htmlContent}
           onChange={handleCodeChange}
-          style={{
-            minHeight,
-            fontFamily: "monospace",
-            fontSize: "0.86rem",
-            border: "none",
-            borderRadius: 0,
-            padding: 12,
-            background: "#0f172a",
-            color: "#38bdf8",
-            width: "100%",
-            boxSizing: "border-box",
-            resize: "vertical",
-          }}
+          style={{ minHeight }}
           placeholder={placeholder || "<h1>Title</h1><p>Content...</p>"}
         />
       ) : (
         <div
           ref={editorRef}
+          className="rte-content-area"
           contentEditable={!disabled}
           suppressContentEditableWarning={true}
           onInput={handleInput}
+<<<<<<< HEAD
           onBlur={() => {
             handleInput();
             saveSelection();
@@ -1230,6 +1433,14 @@ export default function RichTextEditor({
             userSelect: "text",
             WebkitUserSelect: "text",
           }}
+=======
+          onBlur={handleInput}
+          onKeyUp={updateActiveFormats}
+          onMouseUp={updateActiveFormats}
+          data-placeholder={placeholder}
+          style={{ minHeight }}
+          dangerouslySetInnerHTML={{ __html: value || "" }}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         />
       )}
 
@@ -1516,10 +1727,16 @@ export default function RichTextEditor({
                     }}
                   >
                     <p style={{ margin: 0, fontWeight: 700 }}>
+<<<<<<< HEAD
                       {t("noSavedTemplates") ||
                         (isRTL
                           ? "لا توجد قوالب محفوظة بعد"
                           : "No templates saved yet")}
+=======
+                      {isRTL
+                        ? "لا توجد قوالب محفوظة حتى الآن"
+                        : "No templates saved yet"}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                     </p>
                   </div>
                 ) : (
@@ -2167,15 +2384,439 @@ export default function RichTextEditor({
   );
 }
 
-const btnStyle = {
-  background: "transparent",
-  border: "1px solid transparent",
-  borderRadius: 4,
-  padding: "4px 6px",
-  cursor: "pointer",
-  fontSize: "0.84rem",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "var(--heading)",
-};
+// Beautiful, crisp vector icons for rich text editor
+function BoldIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+      <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+    </svg>
+  );
+}
+
+function ItalicIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="19" y1="4" x2="10" y2="4" />
+      <line x1="14" y1="20" x2="5" y2="20" />
+      <line x1="15" y1="4" x2="9" y2="20" />
+    </svg>
+  );
+}
+
+function UnderlineIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 3v7a6 6 0 0 0 12 0V3" />
+      <line x1="4" y1="21" x2="20" y2="21" />
+    </svg>
+  );
+}
+
+function StrikethroughIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 4H9a3 3 0 0 0-2.83 4" />
+      <path d="M14 12a4 4 0 0 1 0 8H6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+    </svg>
+  );
+}
+
+function TextColorIcon({ currentColor }) {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m4 19 7-14 7 14" />
+      <path d="M6.5 14h11" />
+      <rect
+        x="3"
+        y="20"
+        width="18"
+        height="3"
+        rx="1.5"
+        fill={
+          currentColor === "inherit" ? "var(--primary, #0a9099)" : currentColor
+        }
+        stroke="none"
+      />
+    </svg>
+  );
+}
+
+function AlignRightIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="21" y1="6" x2="3" y2="6" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+      <line x1="21" y1="18" x2="5" y2="18" />
+    </svg>
+  );
+}
+
+function AlignCenterIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="10" x2="6" y2="10" />
+      <line x1="21" y1="6" x2="3" y2="6" />
+      <line x1="21" y1="14" x2="3" y2="14" />
+      <line x1="18" y1="18" x2="6" y2="18" />
+    </svg>
+  );
+}
+
+function AlignLeftIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="21" y1="6" x2="3" y2="6" />
+      <line x1="15" y1="12" x2="3" y2="12" />
+      <line x1="19" y1="18" x2="3" y2="18" />
+    </svg>
+  );
+}
+
+function BulletListIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="9" y1="6" x2="20" y2="6" />
+      <line x1="9" y1="12" x2="20" y2="12" />
+      <line x1="9" y1="18" x2="20" y2="18" />
+      <circle cx="4" cy="6" r="1.5" fill="currentColor" />
+      <circle cx="4" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="4" cy="18" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function NumberListIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="10" y1="6" x2="21" y2="6" />
+      <line x1="10" y1="12" x2="21" y2="12" />
+      <line x1="10" y1="18" x2="21" y2="18" />
+      <path d="M4 6h1v4" />
+      <path d="M4 10h2" />
+      <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+    </svg>
+  );
+}
+
+function DividerIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="3" y1="12" x2="21" y2="12" strokeWidth="2.5" />
+      <line x1="3" y1="6" x2="21" y2="6" strokeDasharray="2 3" opacity="0.6" />
+      <line
+        x1="3"
+        y1="18"
+        x2="21"
+        y2="18"
+        strokeDasharray="2 3"
+        opacity="0.6"
+      />
+    </svg>
+  );
+}
+
+function ClearFormatIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+      <path d="M22 21H7" />
+      <path d="m5 11 9 9" />
+    </svg>
+  );
+}
+
+function ImageIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  );
+}
+
+function ImageLinkIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="14" height="14" x="2" y="2" rx="2" />
+      <circle cx="6.5" cy="6.5" r="1" fill="currentColor" />
+      <path d="M12 15l2 2 4-4" />
+      <path d="M10 17H6" />
+      <path d="M14 11h2" />
+    </svg>
+  );
+}
+
+function TableIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M3 15h18" />
+      <path d="M9 3v18" />
+      <path d="M15 3v18" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function TemplateIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M9 21V9" />
+    </svg>
+  );
+}
+
+function TagIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+      <circle cx="7" cy="7" r=".8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function PrinterIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect width="12" height="8" x="6" y="14" />
+    </svg>
+  );
+}
+
+function CodeIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  );
+}
+
+function ExpandIcon({ isExpanded }) {
+  if (isExpanded) {
+    return (
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <polyline points="18 15 12 9 6 15" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}

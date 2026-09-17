@@ -370,7 +370,7 @@ export default function CustomerOverviewTab() {
           {stats.upcomingList.length === 0 ? (
             <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
               {isRTL
-                ? "مفيش مواعيد جاية دلوقتي."
+                ? "لا توجد مواعيد قادمة حالياً."
                 : "No upcoming appointments yet."}
             </p>
           ) : (

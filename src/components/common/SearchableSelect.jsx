@@ -268,7 +268,7 @@ export default function SearchableSelect({
                   textAlign: "center",
                 }}
               >
-                مفيش نتائج متطابقة
+                لا توجد نتائج متطابقة
               </div>
             )}
           </div>

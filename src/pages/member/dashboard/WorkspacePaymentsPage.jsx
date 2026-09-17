@@ -1,18 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import SEO from "../../../components/ui/SEO";
 import Icon from "../../../components/common/Icon";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
+<<<<<<< HEAD
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+=======
+import { getCurrencySymbol } from "../../../utils/currency";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 export default function WorkspacePaymentsPage() {
-  useAuth();
+  const { user } = useAuth();
+  const { isOwner, canReadPayments, canUpdatePayments } = usePermissions();
   const { t, isRTL } = useLanguage();
   const toast = useToast();
+
+  const wsCurrency =
+    user?.workspace?.currency ||
+    user?.workspace?.currency_code ||
+    user?.workspace?.currency_symbol ||
+    "SAR";
 
   const [payments, setPayments] = useState([]);
   const [walletData, setWalletData] = useState(null);
@@ -96,9 +108,11 @@ export default function WorkspacePaymentsPage() {
   );
 
   useEffect(() => {
-    fetchWallet();
-    fetchPayments(page);
-  }, [fetchWallet, fetchPayments, page]);
+    if (isOwner || canReadPayments) {
+      fetchWallet();
+      fetchPayments(page);
+    }
+  }, [fetchWallet, fetchPayments, page, isOwner, canReadPayments]);
 
   const handleVerify = async (payment) => {
     setActionLoading(true);
@@ -108,7 +122,7 @@ export default function WorkspacePaymentsPage() {
       );
       toast.success(
         res.data?.message ||
-          (isRTL ? "تم الاعتماد بنجاح" : "Payment verified successfully"),
+          (isRTL ? "اتعتمد الدفع بنجاح" : "Payment verified successfully"),
       );
       setSelectedPayment(null);
       fetchWallet();
@@ -116,7 +130,7 @@ export default function WorkspacePaymentsPage() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل اعتماد الدفع" : "Failed to verify payment"),
+          (isRTL ? "حصلت مشكلة في اعتماد الدفع" : "Failed to verify payment"),
       );
     } finally {
       setActionLoading(false);
@@ -126,7 +140,7 @@ export default function WorkspacePaymentsPage() {
   const handleReject = async (payment) => {
     if (!rejectReason.trim()) {
       toast.error(
-        isRTL ? "يرجى تقديم سبب الرفض" : "Please provide a rejection reason",
+        isRTL ? "من فضلك اكتب سبب الرفض" : "Please provide a rejection reason",
       );
       return;
     }
@@ -139,7 +153,7 @@ export default function WorkspacePaymentsPage() {
         },
       );
       toast.success(
-        res.data?.message || (isRTL ? "تم رفض الدفع" : "Payment rejected"),
+        res.data?.message || (isRTL ? "اترفض الدفع" : "Payment rejected"),
       );
       setSelectedPayment(null);
       setRejectReason("");
@@ -148,7 +162,7 @@ export default function WorkspacePaymentsPage() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "فشل رفض الدفع" : "Failed to reject payment"),
+          (isRTL ? "حصلت مشكلة في رفض الدفع" : "Failed to reject payment"),
       );
     } finally {
       setActionLoading(false);
@@ -166,14 +180,14 @@ export default function WorkspacePaymentsPage() {
         };
       case "verifying":
         return {
-          label: isRTL ? "قيد التحقق" : "Verifying",
+          label: isRTL ? "بيتراجع" : "Verifying",
           color: "var(--badge-info-color)",
           bg: "var(--badge-info-bg)",
           border: "var(--badge-info-border)",
         };
       case "pending":
         return {
-          label: isRTL ? "قيد الانتظار" : "Pending",
+          label: isRTL ? "مستني الدفع" : "Pending",
           color: "var(--badge-warning-color)",
           bg: "var(--badge-warning-bg)",
           border: "var(--badge-warning-border)",
@@ -214,6 +228,57 @@ export default function WorkspacePaymentsPage() {
     });
   };
 
+  if (!isOwner && !canReadPayments) {
+    return (
+      <div
+        className="card"
+        style={{ padding: "48px 24px", textAlign: "center" }}
+      >
+        <SEO
+          title={isRTL ? "سجل المدفوعات والمالية" : "Payments & Finance Log"}
+          noindex
+        />
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            backgroundColor: "rgba(239, 68, 68, 0.1)",
+            color: "#ef4444",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px",
+          }}
+        >
+          <Icon name="lock" size={28} />
+        </div>
+        <h3
+          style={{
+            fontSize: "1.15rem",
+            fontWeight: 800,
+            margin: "0 0 8px",
+            color: "var(--heading)",
+          }}
+        >
+          {isRTL ? "غير مصرح لك بعرض السجل المالي" : "Access Denied"}
+        </h3>
+        <p
+          style={{
+            fontSize: "0.88rem",
+            color: "var(--text-secondary)",
+            maxWidth: 440,
+            margin: "0 auto",
+          }}
+        >
+          {isRTL
+            ? "ليس لديك الصلاحيات الكافية للوصول إلى المدفوعات والتحويلات المالية في مساحة العمل هذه."
+            : "You do not have the required permissions to view payments and financial logs in this workspace."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="workspace-page-container">
       <SEO
@@ -221,6 +286,7 @@ export default function WorkspacePaymentsPage() {
         noindex
       />
 
+<<<<<<< HEAD
       {/* Top Standard Header with Wallet Stats */}
       <WorkspacePageHeader
         title={
@@ -290,6 +356,287 @@ export default function WorkspacePaymentsPage() {
           },
         ]}
       />
+=======
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 20,
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: 800,
+              margin: 0,
+              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon
+              name="credit-card"
+              size={22}
+              style={{ color: "var(--primary)" }}
+            />
+            {isRTL
+              ? "سجل المدفوعات والتحويلات المالية"
+              : "Payments & Finance Log"}
+          </h2>
+          <p
+            style={{
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+              margin: "4px 0 0",
+            }}
+          >
+            {isRTL
+              ? "متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي"
+              : "Monitor all payment transactions, transfer receipts, and verification statuses"}
+          </p>
+        </div>
+      </div>
+
+      {/* Workspace Safe / Wallet Summary Cards */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 16,
+          marginBottom: 24,
+        }}
+      >
+        {/* Net Safe Balance */}
+        <div
+          style={{
+            flex: "1 1 220px",
+            background:
+              "linear-gradient(135deg, rgba(13, 104, 92, 0.12) 0%, rgba(13, 104, 92, 0.04) 100%)",
+            border: "1px solid rgba(13, 104, 92, 0.25)",
+            borderRadius: 16,
+            padding: "18px 20px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0d685c" }}
+            >
+              {t("netBalanceLabel")}
+            </span>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 10,
+                background: "rgba(13, 104, 92, 0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#0d685c",
+              }}
+            >
+              <Icon name="credit-card" size={18} />
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: "1.45rem",
+              fontWeight: 900,
+              color: "var(--heading)",
+            }}
+          >
+            {walletLoading ? (
+              <SkeletonRect height={28} width={120} />
+            ) : (
+              `${(parseFloat(walletData?.net_balance) || 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`
+            )}
+          </div>
+        </div>
+
+        {/* Total Income (Credit) */}
+        <div
+          style={{
+            flex: "1 1 220px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: "18px 20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-success-color)",
+              }}
+            >
+              {t("totalCreditLabel")}
+            </span>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 800,
+                color: "var(--badge-success-color)",
+                background: "var(--badge-success-bg)",
+                border: "1px solid var(--badge-success-border)",
+                padding: "3px 8px",
+                borderRadius: 12,
+              }}
+            >
+              {t("creditBadge")}
+            </span>
+          </div>
+          <div
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-success-color)",
+            }}
+          >
+            {walletLoading ? (
+              <SkeletonRect height={28} width={100} />
+            ) : (
+              `${(parseFloat(walletData?.total_credit) || 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`
+            )}
+          </div>
+        </div>
+
+        {/* Total Expenses & Refunds (Debit) */}
+        <div
+          style={{
+            flex: "1 1 220px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: "18px 20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-danger-color)",
+              }}
+            >
+              {t("totalDebitLabel")}
+            </span>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 800,
+                color: "var(--badge-danger-color)",
+                background: "var(--badge-danger-bg)",
+                border: "1px solid var(--badge-danger-border)",
+                padding: "3px 8px",
+                borderRadius: 12,
+              }}
+            >
+              {t("debitBadge")}
+            </span>
+          </div>
+          <div
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-danger-color)",
+            }}
+          >
+            {walletLoading ? (
+              <SkeletonRect height={28} width={100} />
+            ) : (
+              `${(parseFloat(walletData?.total_debit) || 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`
+            )}
+          </div>
+        </div>
+
+        {/* Pending Verification */}
+        <div
+          style={{
+            flex: "1 1 220px",
+            background: "var(--bg-card)",
+            border: "1px solid var(--border)",
+            borderRadius: 16,
+            padding: "18px 20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                color: "var(--badge-warning-color)",
+              }}
+            >
+              {t("pendingVerificationLabel")}
+            </span>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 800,
+                color: "var(--badge-warning-color)",
+                background: "var(--badge-warning-bg)",
+                border: "1px solid var(--badge-warning-border)",
+                padding: "3px 8px",
+                borderRadius: 12,
+              }}
+            >
+              {walletData?.pending_count ?? 0}
+            </span>
+          </div>
+          <div
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              color: "var(--badge-warning-color)",
+            }}
+          >
+            {walletLoading ? (
+              <SkeletonRect height={28} width={100} />
+            ) : (
+              `${(parseFloat(walletData?.pending_balance) || 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`
+            )}
+          </div>
+        </div>
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* Responsive Filters Bar */}
       <div className="responsive-filters-bar">
@@ -520,7 +867,11 @@ export default function WorkspacePaymentsPage() {
                         }}
                       >
                         {isCredit ? "+" : "-"}
-                        {p.amount} {p.currency || "SAR"}
+                        {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
+                        {getCurrencySymbol(
+                          p.currency_detail || p.currency || wsCurrency,
+                          isRTL,
+                        )}
                       </td>
                       <td>
                         <span style={{ fontWeight: 600, display: "block" }}>
@@ -671,7 +1022,11 @@ export default function WorkspacePaymentsPage() {
                           fontWeight: 800,
                         }}
                       >
-                        {p.amount} {p.currency || "SAR"}
+                        {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
+                        {getCurrencySymbol(
+                          p.currency_detail || p.currency || wsCurrency,
+                          isRTL,
+                        )}
                       </strong>
                     </div>
                     <div>
@@ -826,8 +1181,15 @@ export default function WorkspacePaymentsPage() {
                     <strong
                       style={{ fontSize: "1.25rem", color: "var(--primary)" }}
                     >
-                      {selectedPayment.amount}{" "}
-                      {selectedPayment.currency || "SAR"}
+                      {(
+                        parseFloat(selectedPayment.amount) || 0
+                      ).toLocaleString()}{" "}
+                      {getCurrencySymbol(
+                        selectedPayment.currency_detail ||
+                          selectedPayment.currency ||
+                          wsCurrency,
+                        isRTL,
+                      )}
                     </strong>
                   </div>
                   <div>
@@ -960,46 +1322,47 @@ export default function WorkspacePaymentsPage() {
                       style={{ fontSize: "0.84rem", color: "var(--muted)" }}
                     >
                       {isRTL
-                        ? "لم يتم إرفاق ملف إيصال سداد"
+                        ? "لا يوجد ملف إيصال دفع مرفوع"
                         : "No receipt file attached"}
                     </span>
                   </div>
                 )}
 
-                {selectedPayment.status !== "paid" && (
-                  <div
-                    style={{
-                      borderTop: "1px solid var(--border-light)",
-                      paddingTop: 14,
-                      marginTop: 4,
-                    }}
-                  >
-                    <label
-                      className="form-label"
+                {selectedPayment.status !== "paid" &&
+                  (isOwner || canUpdatePayments) && (
+                    <div
                       style={{
-                        fontSize: "0.84rem",
-                        fontWeight: 700,
-                        marginBottom: 6,
-                        display: "block",
+                        borderTop: "1px solid var(--border-light)",
+                        paddingTop: 14,
+                        marginTop: 4,
                       }}
                     >
-                      {isRTL
-                        ? "سبب الرفض (في حالة عدم الاعتماد)"
-                        : "Rejection Reason (if rejecting)"}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder={
-                        isRTL
-                          ? "مثال: رقم الحساب أو إيصال التحويل غير مطبق"
-                          : "Reason for rejection..."
-                      }
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                    />
-                  </div>
-                )}
+                      <label
+                        className="form-label"
+                        style={{
+                          fontSize: "0.84rem",
+                          fontWeight: 700,
+                          marginBottom: 6,
+                          display: "block",
+                        }}
+                      >
+                        {isRTL
+                          ? "سبب الرفض (لو هترفض الإيصال)"
+                          : "Rejection Reason (if rejecting)"}
+                      </label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder={
+                          isRTL
+                            ? "مثال: رقم الحساب أو إيصال التحويل غير صحيح"
+                            : "Reason for rejection..."
+                        }
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                      />
+                    </div>
+                  )}
               </div>
 
               <div
@@ -1019,26 +1382,27 @@ export default function WorkspacePaymentsPage() {
                   {t("close") || (isRTL ? "إغلاق" : "Close")}
                 </button>
 
-                {selectedPayment.status !== "paid" && (
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleReject(selectedPayment)}
-                      disabled={actionLoading}
-                    >
-                      {isRTL ? "رفض الإيصال" : "Reject Payment"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() => handleVerify(selectedPayment)}
-                      disabled={actionLoading}
-                    >
-                      {isRTL ? "اعتماد والدفع" : "Verify & Approve"}
-                    </button>
-                  </div>
-                )}
+                {selectedPayment.status !== "paid" &&
+                  (isOwner || canUpdatePayments) && (
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleReject(selectedPayment)}
+                        disabled={actionLoading}
+                      >
+                        {isRTL ? "رفض الإيصال" : "Reject Payment"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleVerify(selectedPayment)}
+                        disabled={actionLoading}
+                      >
+                        {isRTL ? "اعتماد وتأكيد الدفع" : "Verify & Approve"}
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>,

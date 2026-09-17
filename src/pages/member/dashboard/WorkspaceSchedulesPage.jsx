@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import SchedulesTab from "./workspace-settings/SchedulesTab";
 import SEO from "../../../components/ui/SEO";
@@ -13,23 +14,21 @@ export default function WorkspaceSchedulesPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const {
+    isOwner,
+    canReadSchedules,
+    canCreateSchedules,
+    canUpdateSchedules,
+    canDeleteSchedules,
+  } = usePermissions();
 
   const [schedules, setSchedules] = useState([]);
   const [startOfWeek, setStartOfWeek] = useState("sunday");
   const [loading, setLoading] = useState(true);
 
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canRead =
-    isOwner ||
-    userPermissions.includes("schedule_read") ||
-    userPermissions.includes("schedules_read");
+  const canRead = isOwner || canReadSchedules;
   const canEdit =
-    isOwner ||
-    userPermissions.includes("schedule_write") ||
-    userPermissions.includes("schedules_write");
+    isOwner || canCreateSchedules || canUpdateSchedules || canDeleteSchedules;
 
   const isCapAllowed = checkWorkspaceCapability(user, "PER_MEMBER_CALENDAR");
 
@@ -81,6 +80,9 @@ export default function WorkspaceSchedulesPage() {
             schedules={schedules}
             startOfWeek={startOfWeek}
             canEdit={canEdit}
+            canCreate={canCreateSchedules}
+            canUpdate={canUpdateSchedules}
+            canDelete={canDeleteSchedules}
             onRefresh={loadSchedules}
           />
         )}

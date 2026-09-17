@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import { applyWorkspaceBranding } from "../../../utils/theme";
 import SEO from "../../../components/ui/SEO";
@@ -22,10 +23,18 @@ import WorkspaceTemplatesPage from "./WorkspaceTemplatesPage";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceSettingsPage() {
-  const { user, fetchProfile, updateWorkspaceState } = useAuth();
+  const { fetchProfile, updateWorkspaceState } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
   const [searchParams] = useSearchParams();
+  const {
+    isOwner,
+    canUpdateSettings,
+    canUpdateBranding,
+    canUpdateBookingForms,
+    canUpdatePayments,
+    canUpdateNotifications,
+  } = usePermissions();
 
   const subSettingsTab = searchParams.get("sub") || "basic";
 
@@ -33,19 +42,33 @@ export default function WorkspaceSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Permissions
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-  const canEdit = isOwner || userPermissions.includes("settings_write");
+  const canEditBasic = isOwner || canUpdateSettings;
+  const canEditBranding = isOwner || canUpdateBranding || canUpdateSettings;
+  const canEditTimezone = isOwner || canUpdateSettings;
+  const canEditSocial = isOwner || canUpdateSettings;
+  const canEditFormFields =
+    isOwner || canUpdateBookingForms || canUpdateSettings;
+  const canEditPayment = isOwner || canUpdatePayments || canUpdateSettings;
+  const canEditNotifications =
+    isOwner || canUpdateNotifications || canUpdateSettings;
+  const canEdit =
+    isOwner ||
+    canUpdateSettings ||
+    canUpdateBranding ||
+    canUpdateBookingForms ||
+    canUpdatePayments ||
+    canUpdateNotifications;
 
   // Forms
   const [basicForm, setBasicForm] = useState({
     name: "",
     email: "",
     phone: "",
+<<<<<<< HEAD
     description: "",
+=======
+    description: { ar: "", en: "" },
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     customer_label_singular: { ar: "", en: "" },
     customer_label_plural: { ar: "", en: "" },
     customer_icon: "users",
@@ -104,6 +127,7 @@ export default function WorkspaceSettingsPage() {
 
   // Options Lists from API
   const [timezones, setTimezones] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [workspaceTypes, setWorkspaceTypes] = useState([]);
   const [countries, setCountries] = useState([]);
 
@@ -140,19 +164,23 @@ export default function WorkspaceSettingsPage() {
       loadingRef.current = true;
       setLoading(true);
       try {
-        const [settingsRes, tmplRes, tzRes, typesRes, countriesRes] =
+        const [settingsRes, tmplRes, tzRes, currRes, typesRes, countriesRes] =
           await Promise.all([
             client.get(endpoints.workspaceSettings),
             client
               .get(endpoints.workspaceSettingsNotifications)
               .catch(() => null),
             client.get(endpoints.timezones).catch(() => null),
+            client.get(endpoints.currencies).catch(() => null),
             client.get(endpoints.workspaceTypes).catch(() => null),
             client.get(endpoints.countries).catch(() => null),
           ]);
 
         if (tzRes?.data?.data && Array.isArray(tzRes.data.data)) {
           setTimezones(tzRes.data.data);
+        }
+        if (currRes?.data?.data && Array.isArray(currRes.data.data)) {
+          setCurrencies(currRes.data.data);
         }
         if (typesRes?.data?.data && Array.isArray(typesRes.data.data)) {
           setWorkspaceTypes(typesRes.data.data);
@@ -173,14 +201,15 @@ export default function WorkspaceSettingsPage() {
             email: data.email || "",
             phone: data.phone || "",
             description:
-              typeof data.description === "object"
+              typeof data.description === "object" && data.description !== null
                 ? {
                     ar: data.description?.ar || "",
                     en: data.description?.en || "",
                   }
                 : { ar: data.description || "", en: "" },
             booking_short_intro:
-              typeof data.booking_short_intro === "object"
+              typeof data.booking_short_intro === "object" &&
+              data.booking_short_intro !== null
                 ? data.booking_short_intro?.ar ||
                   data.booking_short_intro?.en ||
                   ""
@@ -189,16 +218,26 @@ export default function WorkspaceSettingsPage() {
               typeof data.customer_label_singular === "object" &&
               data.customer_label_singular !== null
                 ? {
+<<<<<<< HEAD
                     ar: data.customer_label_singular.ar || "",
                     en: data.customer_label_singular.en || "",
+=======
+                    ar: data.customer_label_singular?.ar || "",
+                    en: data.customer_label_singular?.en || "",
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }
                 : { ar: data.customer_label_singular || "", en: "" },
             customer_label_plural:
               typeof data.customer_label_plural === "object" &&
               data.customer_label_plural !== null
                 ? {
+<<<<<<< HEAD
                     ar: data.customer_label_plural.ar || "",
                     en: data.customer_label_plural.en || "",
+=======
+                    ar: data.customer_label_plural?.ar || "",
+                    en: data.customer_label_plural?.en || "",
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }
                 : { ar: data.customer_label_plural || "", en: "" },
             customer_icon: data.customer_icon || "users",
@@ -253,6 +292,8 @@ export default function WorkspaceSettingsPage() {
               : data.timezone || "Asia/Riyadh";
           setTimezoneForm({
             timezone: tzStr,
+            timezone_id: data.timezone_id || data.timezone?.id || "",
+            currency_id: data.currency_id || data.currency?.id || "",
             date_format: data.date_format || "Y-m-d",
             time_format: timeFmt,
             start_of_week: startWeek,
@@ -323,7 +364,7 @@ export default function WorkspaceSettingsPage() {
     if (!canEdit) {
       toast.error(
         t("unauthorizedSettingsEdit") ||
-          "لا تملك صلاحية تعديل إعدادات مساحة العمل",
+          "ليس لديك صلاحية لتعديل إعدادات مساحة العمل",
       );
       return;
     }
@@ -331,43 +372,103 @@ export default function WorkspaceSettingsPage() {
     try {
       const res = await client.put(targetEndpoint, data);
       if (res.data?.data) {
-        setSettings(res.data.data);
+        const updatedData = res.data.data;
+        setSettings(updatedData);
+        setBasicForm((prev) => ({
+          ...prev,
+          name:
+            typeof updatedData.name === "object" && updatedData.name !== null
+              ? updatedData.name?.ar || updatedData.name?.en || ""
+              : updatedData.name || prev.name,
+          email: updatedData.email ?? prev.email,
+          phone: updatedData.phone ?? prev.phone,
+          description:
+            typeof updatedData.description === "object" &&
+            updatedData.description !== null
+              ? {
+                  ar: updatedData.description?.ar || "",
+                  en: updatedData.description?.en || "",
+                }
+              : prev.description,
+          customer_label_singular:
+            typeof updatedData.customer_label_singular === "object" &&
+            updatedData.customer_label_singular !== null
+              ? {
+                  ar: updatedData.customer_label_singular?.ar || "",
+                  en: updatedData.customer_label_singular?.en || "",
+                }
+              : typeof updatedData.customer_label_singular === "string"
+                ? {
+                    ar: updatedData.customer_label_singular,
+                    en: prev.customer_label_singular?.en || "",
+                  }
+                : prev.customer_label_singular,
+          customer_label_plural:
+            typeof updatedData.customer_label_plural === "object" &&
+            updatedData.customer_label_plural !== null
+              ? {
+                  ar: updatedData.customer_label_plural?.ar || "",
+                  en: updatedData.customer_label_plural?.en || "",
+                }
+              : typeof updatedData.customer_label_plural === "string"
+                ? {
+                    ar: updatedData.customer_label_plural,
+                    en: prev.customer_label_plural?.en || "",
+                  }
+                : prev.customer_label_plural,
+          customer_icon:
+            updatedData.customer_icon || prev.customer_icon || "users",
+          is_visible_in_explorer: updatedData.is_visible_in_explorer !== false,
+          slug: updatedData.slug || prev.slug,
+          status: updatedData.status || prev.status,
+          workspace_type_id:
+            updatedData.workspace_type_id ||
+            updatedData.workspace_type?.id ||
+            prev.workspace_type_id,
+          country_id:
+            updatedData.country_id ||
+            updatedData.country?.id ||
+            prev.country_id,
+          state_id:
+            updatedData.state_id || updatedData.state?.id || prev.state_id,
+          city_id: updatedData.city_id || updatedData.city?.id || prev.city_id,
+          website: updatedData.website ?? prev.website,
+        }));
         setBrandingForm((prev) => ({
           ...prev,
-          logo_url:
-            res.data.data.logo_url || res.data.data.logo || prev.logo_url,
+          logo_url: updatedData.logo_url || updatedData.logo || prev.logo_url,
           cover_url:
-            res.data.data.cover_url || res.data.data.cover || prev.cover_url,
-          gallery_urls: Array.isArray(res.data.data.gallery_urls)
-            ? res.data.data.gallery_urls
+            updatedData.cover_url || updatedData.cover || prev.cover_url,
+          gallery_urls: Array.isArray(updatedData.gallery_urls)
+            ? updatedData.gallery_urls
             : prev.gallery_urls,
-          feature_highlights: Array.isArray(res.data.data.feature_highlights)
-            ? res.data.data.feature_highlights
+          feature_highlights: Array.isArray(updatedData.feature_highlights)
+            ? updatedData.feature_highlights
             : prev.feature_highlights,
         }));
-        if (res.data.data.booking_questions) {
+        if (updatedData.booking_questions) {
           setFormFieldsForm((prev) => ({
             ...prev,
-            field_statuses: res.data.data.field_statuses || prev.field_statuses,
-            booking_questions: res.data.data.booking_questions,
-            custom_questions: res.data.data.booking_questions,
+            field_statuses: updatedData.field_statuses || prev.field_statuses,
+            booking_questions: updatedData.booking_questions,
+            custom_questions: updatedData.booking_questions,
           }));
         }
         if (updateWorkspaceState) {
-          updateWorkspaceState(res.data.data);
+          updateWorkspaceState(updatedData);
         }
       }
       toast.success(
         res.data?.message ||
           t("settingsUpdatedSuccess") ||
-          "تم حفظ الإعدادات بنجاح",
+          "اتحفظت الإعدادات بنجاح",
       );
       if (fetchProfile) {
         await fetchProfile();
       }
       applyWorkspaceBranding(data);
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشل حفظ الإعدادات");
+      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الإعدادات");
     } finally {
       setSaving(false);
     }
@@ -377,7 +478,7 @@ export default function WorkspaceSettingsPage() {
     if (!canEdit || settings?.allow_template_editing === false) {
       toast.error(
         t("templateEditingDisabledNotice") ||
-          "تعديل قوالب الإشعارات معطل لمساحة العمل من قبل الأدمن",
+          "تعديل قوالب الإشعارات موقوف لمساحة العمل دي من الأدمن",
       );
       return;
     }
@@ -396,17 +497,30 @@ export default function WorkspaceSettingsPage() {
       toast.success(
         res.data?.message ||
           t("settingsUpdatedSuccess") ||
-          "تم تحديث قالب الإشعار بنجاح",
+          "اتحدث قالب الإشعار بنجاح",
       );
     } catch (err) {
-      toast.error(err.response?.data?.message || "فشل تحديث قالب الإشعار");
+      toast.error(
+        err.response?.data?.message || "حصل خطأ في تحديث قالب الإشعار",
+      );
     } finally {
       setSaving(false);
     }
   };
 
   return (
+<<<<<<< HEAD
     <div className="workspace-settings-page animate-fade-in">
+=======
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
+        boxSizing: "border-box",
+      }}
+    >
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       <SEO title={t("settings")} noindex />
 
       {/* Top Unified Header */}
@@ -421,13 +535,33 @@ export default function WorkspaceSettingsPage() {
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
       {subSettingsTab === "templates" ? (
-        <div key={subSettingsTab} className="animate-tab-card">
+        <div
+          key={subSettingsTab}
+          className="animate-tab-card"
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
+        >
           <WorkspaceTemplatesPage embedded />
         </div>
       ) : (
         <div
           key={subSettingsTab}
+<<<<<<< HEAD
           className="animate-tab-card workspace-page-container"
+=======
+          className="card animate-tab-card"
+          style={{
+            padding: 24,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         >
           {loading ? (
             <TabSettingsSkeleton />
@@ -443,7 +577,7 @@ export default function WorkspaceSettingsPage() {
                     handleSaveSection(data, endpoints.workspaceSettingsBasic)
                   }
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditBasic}
                 />
               )}
               {subSettingsTab === "branding" && (
@@ -454,7 +588,7 @@ export default function WorkspaceSettingsPage() {
                     handleSaveSection(data, endpoints.workspaceSettingsBranding)
                   }
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditBranding}
                 />
               )}
               {subSettingsTab === "timezone" && (
@@ -462,9 +596,10 @@ export default function WorkspaceSettingsPage() {
                   timezoneForm={timezoneForm}
                   setTimezoneForm={setTimezoneForm}
                   timezones={timezones}
+                  currencies={currencies}
                   onSave={handleSaveSection}
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditTimezone}
                 />
               )}
               {subSettingsTab === "social" && (
@@ -475,7 +610,7 @@ export default function WorkspaceSettingsPage() {
                     handleSaveSection(data, endpoints.workspaceSettingsSocial)
                   }
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditSocial}
                 />
               )}
               {subSettingsTab === "form_fields" && (
@@ -489,7 +624,7 @@ export default function WorkspaceSettingsPage() {
                     )
                   }
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditFormFields}
                 />
               )}
               {subSettingsTab === "payment" && (
@@ -500,7 +635,7 @@ export default function WorkspaceSettingsPage() {
                     handleSaveSection(data, endpoints.workspaceSettingsPayment)
                   }
                   saving={saving}
-                  canEdit={canEdit}
+                  canEdit={canEditPayment}
                 />
               )}
               {subSettingsTab === "notifications" && (
@@ -516,7 +651,8 @@ export default function WorkspaceSettingsPage() {
                     onSave={handleSaveNotificationTemplate}
                     saving={saving}
                     canEdit={
-                      canEdit && settings?.allow_template_editing !== false
+                      canEditNotifications &&
+                      settings?.allow_template_editing !== false
                     }
                     allowTemplateEditing={
                       settings?.allow_template_editing !== false

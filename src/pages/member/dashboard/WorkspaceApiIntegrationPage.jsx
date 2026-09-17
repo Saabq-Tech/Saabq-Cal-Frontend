@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import SEO from "../../../components/ui/SEO";
@@ -12,6 +13,12 @@ import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHead
 
 export default function WorkspaceApiIntegrationPage() {
   const { user } = useAuth();
+  const {
+    isOwner,
+    canReadIntegrations,
+    canCreateIntegrations,
+    canUpdateIntegrations,
+  } = usePermissions();
   const { t, lang } = useLanguage();
   const toast = useToast();
   const navigate = useNavigate();
@@ -64,7 +71,7 @@ export default function WorkspaceApiIntegrationPage() {
   }, []);
 
   const loadApiIntegration = async () => {
-    if (!isApiIntegrationEnabled(user)) {
+    if (!isApiIntegrationEnabled(user) || (!isOwner && !canReadIntegrations)) {
       setLoading(false);
       return;
     }
@@ -397,7 +404,7 @@ export default function WorkspaceApiIntegrationPage() {
             <Icon name="lock" size={32} />
           </div>
           <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: 8 }}>
-            {t("apiIntegrationDisabledTitle") || "الربط البرمجي مش متاح"}
+            {t("apiIntegrationDisabledTitle") || "الربط البرمجي غير متاح"}
           </h2>
           <p
             style={{
@@ -409,6 +416,63 @@ export default function WorkspaceApiIntegrationPage() {
           >
             {t("apiIntegrationDisabledDesc") ||
               "ميزة الربط البرمجي الخارجي متعطلة لمساحة العمل دي من إدارة المنصة أو باقتك الحالية."}
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate("/member/workspace")}
+            style={{ borderRadius: 12, padding: "10px 24px", fontWeight: 700 }}
+          >
+            {t("backToDashboard") || "ارجع للوحة التحكم"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isOwner && !canReadIntegrations) {
+    return (
+      <div
+        className="workspace-dashboard-shell animate-fade-in"
+        dir={lang === "ar" ? "rtl" : "ltr"}
+        style={{ padding: "60px 28px", textAlign: "center" }}
+      >
+        <SEO
+          title={`${t("apiIntegrationTitle") || "REST API Integration"} - Saabq`}
+          noindex
+        />
+        <div style={{ maxWidth: 520, margin: "0 auto" }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              color: "#ef4444",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px",
+            }}
+          >
+            <Icon name="lock" size={32} />
+          </div>
+          <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: 8 }}>
+            {lang === "ar"
+              ? "غير مصرح لك بالوصول للربط البرمجي"
+              : "Access Denied"}
+          </h2>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              color: "var(--text-muted)",
+              lineHeight: 1.6,
+              marginBottom: 24,
+            }}
+          >
+            {lang === "ar"
+              ? "ليس لديك صلاحية قراءة أو إدارة واجهات الـ REST API في مساحة العمل هذه."
+              : "You do not have the required permissions to view or manage REST API integrations in this workspace."}
           </p>
           <button
             type="button"
@@ -450,6 +514,7 @@ export default function WorkspaceApiIntegrationPage() {
         description="Connect your business website and apps to your Saabq workspace via secure REST API."
       />
 
+<<<<<<< HEAD
       <div style={{ padding: "0 4px 40px" }}>
         {/* Unified Standard Header */}
         <WorkspacePageHeader
@@ -482,6 +547,62 @@ export default function WorkspaceApiIntegrationPage() {
                     fontSize: "0.82rem",
                     padding: "8px 16px",
                     borderRadius: "var(--radius-md, 10px)",
+=======
+      <div className="workspace-api-container">
+        {/* Header Title Bar */}
+        <div
+          className="workspace-api-header"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 16,
+            marginBottom: 24,
+            paddingBottom: 20,
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <div>
+            <div
+              className="mobile-nowrap"
+              style={{ display: "flex", alignItems: "center", gap: 12 }}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  backgroundColor: "rgba(32, 123, 89, 0.12)",
+                  color: "var(--primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Icon name="code" size={24} />
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h1
+                  style={{
+                    fontSize: "1.3rem",
+                    fontWeight: 800,
+                    margin: 0,
+                    lineHeight: 1.35,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {t("apiIntegrationTitle") ||
+                    "الربط البرمجي للمطورين (REST API)"}
+                </h1>
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--text-muted)",
+                    margin: "4px 0 0",
+                    lineHeight: 1.5,
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }}
                 >
                   <Icon name="download" size={14} />
@@ -510,32 +631,84 @@ export default function WorkspaceApiIntegrationPage() {
                   </span>
                 </button>
               </div>
+<<<<<<< HEAD
             )
           }
         />
+=======
+            </div>
+          </div>
 
-        {/* Tab Navigation */}
+          <div
+            className="workspace-api-header-actions"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
+            {isActive && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleDownloadPostman}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: "0.82rem",
+                }}
+              >
+                <Icon name="download" size={14} />
+                <span>{t("downloadPostman") || "نزّل كولكشن Postman"}</span>
+              </button>
+            )}
+
+            {isActive && (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleQuickPing}
+                disabled={isPinging}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: "0.82rem",
+                }}
+              >
+                <Icon name="activity" size={14} />
+                <span>
+                  {isPinging
+                    ? t("testing") || "جارِ الفحص..."
+                    : t("testConnection") || "فحص الاتصال اللحظي"}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+
+        {/* Tab Navigation Slider */}
         <div
+          className="no-scrollbar api-tabs-slider"
           style={{
             display: "flex",
             gap: 8,
             marginBottom: 24,
             borderBottom: "1px solid var(--border)",
-            paddingBottom: 10,
+            paddingBottom: 12,
             overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            flexWrap: "nowrap",
           }}
         >
           <button
             type="button"
-            className={`btn ${activeTab === "credentials" ? "btn-primary" : "btn-ghost"}`}
+            className={`api-tab-pill ${activeTab === "credentials" ? "active" : ""}`}
             onClick={() => setActiveTab("credentials")}
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
           >
             <Icon name="key" size={16} />
             <span>
@@ -545,15 +718,8 @@ export default function WorkspaceApiIntegrationPage() {
 
           <button
             type="button"
-            className={`btn ${activeTab === "playground" ? "btn-primary" : "btn-ghost"}`}
+            className={`api-tab-pill ${activeTab === "playground" ? "active" : ""}`}
             onClick={() => setActiveTab("playground")}
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
           >
             <Icon name="play" size={16} />
             <span>
@@ -563,15 +729,8 @@ export default function WorkspaceApiIntegrationPage() {
 
           <button
             type="button"
-            className={`btn ${activeTab === "docs" ? "btn-primary" : "btn-ghost"}`}
+            className={`api-tab-pill ${activeTab === "docs" ? "active" : ""}`}
             onClick={() => setActiveTab("docs")}
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
           >
             <Icon name="file-text" size={16} />
             <span>{t("apiDocsTab") || "مستندات الـ API والأكواد"}</span>
@@ -579,15 +738,8 @@ export default function WorkspaceApiIntegrationPage() {
 
           <button
             type="button"
-            className={`btn ${activeTab === "sync_guide" ? "btn-primary" : "btn-ghost"}`}
+            className={`api-tab-pill ${activeTab === "sync_guide" ? "active" : ""}`}
             onClick={() => setActiveTab("sync_guide")}
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
           >
             <Icon name="refresh-cw" size={16} />
             <span>{t("apiSyncGuideTab") || "دليل المزامنة التلقائية"}</span>
@@ -620,7 +772,7 @@ export default function WorkspaceApiIntegrationPage() {
               />
               <span>
                 {pingResult.success
-                  ? `${t("pingSuccess") || "الاتصال شغال بنجاح!"} (زمن الاستجابة: ${pingResult.latency}ms)`
+                  ? `${t("pingSuccess") || "الاتصال يعمل بنجاح!"} (زمن الاستجابة: ${pingResult.latency}ms)`
                   : `${t("pingFailed") || "الاتصال منجحش:"} ${pingResult.error}`}
               </span>
             </div>
@@ -691,21 +843,25 @@ export default function WorkspaceApiIntegrationPage() {
                   {t("unlockApiDesc") ||
                     "الربط البرمجي بيتيحلك تستقبل الحجوزات من موقعك الخاص، وتستعلم عن الخدمات والمواعيد المتاحة، مع مزامنة لحظية 100% مع لوحة تحكم سابق."}
                 </p>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => setShowRequestModal(true)}
-                  style={{
-                    fontSize: "0.9rem",
-                    fontWeight: 700,
-                    padding: "12px 28px",
-                  }}
-                >
-                  <Icon name="send" size={16} />
-                  <span>
-                    {t("requestApiAccessBtn") || "طلب تفعيل مفاتيح الـ API"}
-                  </span>
-                </button>
+                {(isOwner ||
+                  canCreateIntegrations ||
+                  canUpdateIntegrations) && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setShowRequestModal(true)}
+                    style={{
+                      fontSize: "0.9rem",
+                      fontWeight: 700,
+                      padding: "12px 28px",
+                    }}
+                  >
+                    <Icon name="send" size={16} />
+                    <span>
+                      {t("requestApiAccessBtn") || "طلب تفعيل مفاتيح الـ API"}
+                    </span>
+                  </button>
+                )}
               </div>
             )}
 
@@ -823,7 +979,7 @@ export default function WorkspaceApiIntegrationPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(320px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
                       gap: 20,
                     }}
                   >
@@ -987,22 +1143,24 @@ export default function WorkspaceApiIntegrationPage() {
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => setShowRegenerateModal(true)}
-                      style={{
-                        color: "#d97706",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                      }}
-                    >
-                      <Icon name="refresh-cw" size={13} />
-                      <span>
-                        {t("regenerateSecretBtn") ||
-                          "تدوير المفتاح السري (Rotate)"}
-                      </span>
-                    </button>
+                    {(isOwner || canUpdateIntegrations) && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setShowRegenerateModal(true)}
+                        style={{
+                          color: "#d97706",
+                          fontSize: "0.8rem",
+                          fontWeight: 700,
+                        }}
+                      >
+                        <Icon name="refresh-cw" size={13} />
+                        <span>
+                          {t("regenerateSecretBtn") ||
+                            "تدوير المفتاح السري (Rotate)"}
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -1041,7 +1199,7 @@ export default function WorkspaceApiIntegrationPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fill, minmax(280px, 1fr))",
+                        "repeat(auto-fill, minmax(min(100%, 240px), 1fr))",
                       gap: 14,
                     }}
                   >
@@ -1136,7 +1294,7 @@ export default function WorkspaceApiIntegrationPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(220px, 1fr))",
+                        "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
                       gap: 16,
                     }}
                   >
@@ -1257,7 +1415,8 @@ export default function WorkspaceApiIntegrationPage() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
                   gap: 16,
                   marginBottom: 20,
                 }}
@@ -1459,6 +1618,8 @@ export default function WorkspaceApiIntegrationPage() {
                     fontFamily: "monospace",
                     maxHeight: 380,
                     overflowY: "auto",
+                    overflowX: "auto",
+                    maxWidth: "100%",
                     direction: "ltr",
                     textAlign: "left",
                     color: "#a6e3a1",
@@ -1492,7 +1653,17 @@ export default function WorkspaceApiIntegrationPage() {
                 {t("selectCodeLang") || "لغة أمثلة الأكواد البرمجية:"}
               </div>
 
-              <div style={{ display: "flex", gap: 6 }}>
+              <div
+                className="no-scrollbar"
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  overflowX: "auto",
+                  WebkitOverflowScrolling: "touch",
+                  maxWidth: "100%",
+                  paddingBottom: 4,
+                }}
+              >
                 {[
                   { id: "curl", label: "cURL" },
                   { id: "js", label: "JavaScript (Fetch)" },
@@ -1504,7 +1675,12 @@ export default function WorkspaceApiIntegrationPage() {
                     type="button"
                     className={`btn btn-sm ${codeLang === item.id ? "btn-primary" : "btn-secondary"}`}
                     onClick={() => setCodeLang(item.id)}
-                    style={{ fontSize: "0.78rem", fontWeight: 700 }}
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
                   >
                     {item.label}
                   </button>
@@ -1562,12 +1738,15 @@ export default function WorkspaceApiIntegrationPage() {
 
               {/* Code Snippet */}
               <div
+                className="workspace-api-code-wrap"
                 style={{
                   backgroundColor: "#1e1e2e",
                   borderRadius: 12,
                   padding: 16,
                   direction: "ltr",
                   textAlign: "left",
+                  overflowX: "auto",
+                  maxWidth: "100%",
                 }}
               >
                 <pre
@@ -1576,6 +1755,7 @@ export default function WorkspaceApiIntegrationPage() {
                     fontFamily: "monospace",
                     fontSize: "0.8rem",
                     color: "#f5e0dc",
+                    overflowX: "auto",
                   }}
                 >
                   {codeLang === "curl" &&
@@ -1670,12 +1850,15 @@ print(response.json())`}
               </p>
 
               <div
+                className="workspace-api-code-wrap"
                 style={{
                   backgroundColor: "#1e1e2e",
                   borderRadius: 12,
                   padding: 16,
                   direction: "ltr",
                   textAlign: "left",
+                  overflowX: "auto",
+                  maxWidth: "100%",
                 }}
               >
                 <pre
@@ -1684,6 +1867,7 @@ print(response.json())`}
                     fontFamily: "monospace",
                     fontSize: "0.8rem",
                     color: "#f5e0dc",
+                    overflowX: "auto",
                   }}
                 >
                   {codeLang === "curl" &&
@@ -1766,12 +1950,15 @@ const services = await response.json();`}
               </p>
 
               <div
+                className="workspace-api-code-wrap"
                 style={{
                   backgroundColor: "#1e1e2e",
                   borderRadius: 12,
                   padding: 16,
                   direction: "ltr",
                   textAlign: "left",
+                  overflowX: "auto",
+                  maxWidth: "100%",
                 }}
               >
                 <pre
@@ -1780,6 +1967,7 @@ const services = await response.json();`}
                     fontFamily: "monospace",
                     fontSize: "0.8rem",
                     color: "#f5e0dc",
+                    overflowX: "auto",
                   }}
                 >
                   {codeLang === "curl" &&
@@ -1884,7 +2072,8 @@ res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", head
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
                   gap: 16,
                 }}
               >

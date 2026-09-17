@@ -12,14 +12,24 @@ export default function SubscriptionTab({
   plans = [],
   plansLoading = false,
   plansError = null,
-  canEdit,
+  canEdit = true,
+  canCreate,
+  canUpdate,
+  canDelete,
   onUpgrade,
   onCancel,
   onPause: _onPause,
   onResume: _onResume,
 }) {
+<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
   const { isCustom, customerPlural } = useCustomerLabel();
+=======
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const _allowDelete = canDelete !== undefined ? canDelete : canEdit;
+  const { t } = useLanguage();
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const toast = useToast();
 
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -290,6 +300,7 @@ export default function SubscriptionTab({
 
   return (
     <div className="card-body">
+<<<<<<< HEAD
       {/* Standard Workspace Header */}
       <WorkspacePageHeader
         title={
@@ -360,6 +371,65 @@ export default function SubscriptionTab({
           )
         }
       />
+=======
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 20,
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 800,
+              margin: 0,
+              color: "var(--heading)",
+            }}
+          >
+            {t("workspaceSubscription") || "اشتراك مساحة العمل والخطة الحالية"}
+          </h2>
+          <p
+            style={{
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+              margin: "4px 0 0",
+            }}
+          >
+            {t("subscriptionDesc") ||
+              "متابعة حالة الاشتراك الحالي، ميعاد التجديد، وإمكانية الترقية لباقات أعلى"}
+          </p>
+        </div>
+        {(allowCreate || allowUpdate) && (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {statusStr !== "pending" && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setIsUpgradeModalOpen(true)}
+                style={{ gap: 6 }}
+              >
+                <Icon name="rocket" size={14} />
+                {t("upgradePlan") || "ترقية الباقة"}
+              </button>
+            )}
+            {canUploadProof && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setIsProofModalOpen(true)}
+                style={{ gap: 6 }}
+              >
+                <Icon name="upload-cloud" size={14} />
+                {t("uploadProofBtn") || "إرفاق إيصال الدفع"}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {!subscriptionInfo ? (
         <div
@@ -408,7 +478,7 @@ export default function SubscriptionTab({
             {t("noSubscriptionDesc") ||
               "قم باختيار وتفعيل باقتك للبدء في استخدام جميع مميزات مساحة العمل."}
           </p>
-          {canEdit && (
+          {(allowCreate || allowUpdate) && (
             <button
               className="btn btn-primary btn-sm"
               onClick={() => setIsUpgradeModalOpen(true)}
@@ -471,7 +541,7 @@ export default function SubscriptionTab({
                     </span>
                   </div>
                 </div>
-                {canEdit && (
+                {(allowCreate || allowUpdate) && (
                   <button
                     className="btn btn-primary btn-sm"
                     onClick={() => setIsProofModalOpen(true)}

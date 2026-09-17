@@ -1,9 +1,14 @@
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import ConfirmationModal from "./ConfirmationModal";
+<<<<<<< HEAD
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
+=======
+import { formatCurrency } from "../../../../utils/currency";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 const defaultFormState = {
   id: null,
@@ -29,10 +34,22 @@ export default function ResourcesTab({
   resources = [],
   stats = null,
   canEdit = false,
+  canCreate,
+  canUpdate,
+  canDelete,
   onSaveResource,
   onDeleteResource,
 }) {
+  const allowCreate = canCreate !== undefined ? canCreate : canEdit;
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
+  const allowDelete = canDelete !== undefined ? canDelete : canEdit;
+  const { user } = useAuth();
   const { t, isRTL } = useLanguage();
+  const wsCurrency =
+    user?.workspace?.currency ||
+    user?.workspace?.currency_code ||
+    user?.workspace?.currency_symbol ||
+    "SAR";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
   const [searchTerm, setSearchTerm] = useState("");
@@ -177,7 +194,7 @@ export default function ResourcesTab({
       message:
         t("deleteResourceWarning") ||
         (isRTL
-          ? "إنت متأكد إنك عايز تحذف المورد ده؟ العملية دي مينفعش ترجع فيها."
+          ? "هل أنت متأكد من رغبتك في حذف هذا المورد؟ لا يمكن التراجع عن هذه العملية."
           : "Are you sure you want to delete this resource? This action cannot be undone."),
       isDanger: true,
       onConfirm: async () => {
@@ -188,16 +205,9 @@ export default function ResourcesTab({
     });
   };
 
-  const formatCurrency = (val) => {
-    const num = parseFloat(val) || 0;
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
   return (
     <div className="card-body">
+<<<<<<< HEAD
       {/* Top Section Header & KPI Stats */}
       <WorkspacePageHeader
         title={
@@ -217,6 +227,96 @@ export default function ResourcesTab({
               type="button"
               className="btn btn-primary"
               onClick={handleOpenCreate}
+=======
+      {/* Top Section Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 24,
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              fontSize: "1.3rem",
+              fontWeight: 800,
+              margin: 0,
+              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon name="package" size={22} color="var(--primary)" />
+            {t("workspaceResources") ||
+              (isRTL
+                ? "إدارة الموارد والمخزون"
+                : "Workspace Resources & Inventory")}
+          </h2>
+          <p
+            style={{
+              fontSize: "0.88rem",
+              color: "var(--text-secondary)",
+              margin: "4px 0 0",
+            }}
+          >
+            {t("workspaceResourcesDesc") ||
+              (isRTL
+                ? "إدارة ومتابعة معدات ومستلزمات مساحة العمل، الأسعار، حدود التنبيه الأدنى للكميات، والموردين."
+                : "Manage workspace assets, equipment, pricing, low-stock threshold limits, and suppliers.")}
+          </p>
+        </div>
+        {allowCreate && (
+          <button className="btn btn-primary" onClick={handleOpenCreate}>
+            <Icon name="plus" size={16} />
+            {t("addResource") ||
+              (isRTL ? "+ إضافة مورد جديد" : "+ Add New Resource")}
+          </button>
+        )}
+      </div>
+
+      {/* KPI Stats Overview Cards */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 16,
+          marginBottom: 24,
+        }}
+      >
+        <div
+          style={{
+            background: "var(--surface)",
+            padding: "16px 20px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--border-light)",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "12px",
+              background: "rgba(59, 130, 246, 0.1)",
+              color: "#3b82f6",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="layers" size={22} />
+          </div>
+          <div>
+            <div
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -232,6 +332,7 @@ export default function ResourcesTab({
                 {t("addResource") ||
                   (isRTL ? "إضافة مورد جديد" : "Add Resource")}
               </span>
+<<<<<<< HEAD
             </button>
           )
         }
@@ -259,6 +360,69 @@ export default function ResourcesTab({
             label: isRTL ? "تنبيهات انخفاض المخزون" : "Low Stock Alerts",
             value: calculatedStats.low_stock_count,
             valueColor:
+=======
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: "var(--surface)",
+            padding: "16px 20px",
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--border-light)",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+          }}
+        >
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "12px",
+              background: "rgba(16, 185, 129, 0.1)",
+              color: "#10b981",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="dollar-sign" size={22} />
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--text-secondary)",
+                fontWeight: 600,
+              }}
+            >
+              {t("totalValue") ||
+                (isRTL ? "القيمة الإجمالية للمخزون" : "Total Inventory Value")}
+            </div>
+            <div
+              style={{
+                fontSize: "1.35rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+              }}
+            >
+              {formatCurrency(
+                calculatedStats.total_inventory_value,
+                wsCurrency,
+                isRTL,
+                "0",
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            background:
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               calculatedStats.low_stock_count > 0
                 ? "#f59e0b"
                 : "var(--heading)",
@@ -454,7 +618,7 @@ export default function ResourcesTab({
             }}
           >
             {t("noResourcesFound") ||
-              (isRTL ? "مفيش موارد مضافة دلوقتي" : "No resources found")}
+              (isRTL ? "لا توجد موارد مضافة حالياً" : "No resources found")}
           </h4>
           <p
             style={{
@@ -683,11 +847,11 @@ export default function ResourcesTab({
                 >
                   <span style={{ color: "var(--text-secondary)" }}>
                     {t("unitPrice") || (isRTL ? "سعر الوحدة:" : "Unit Price:")}{" "}
-                    <b>${formatCurrency(unitPrice)}</b>
+                    <b>{formatCurrency(unitPrice, wsCurrency, isRTL, "0")}</b>
                   </span>
                   <span style={{ color: "var(--heading)", fontWeight: 800 }}>
-                    {t("totalValue") || (isRTL ? "الإجمالي:" : "Total:")} $
-                    {formatCurrency(totalVal)}
+                    {t("totalValue") || (isRTL ? "الإجمالي:" : "Total:")}{" "}
+                    {formatCurrency(totalVal, wsCurrency, isRTL, "0")}
                   </span>
                 </div>
 
@@ -767,7 +931,7 @@ export default function ResourcesTab({
                 </div>
 
                 {/* Actions */}
-                {canEdit && (
+                {(allowUpdate || allowDelete) && (
                   <div
                     style={{
                       display: "flex",
@@ -776,20 +940,24 @@ export default function ResourcesTab({
                       paddingTop: 10,
                     }}
                   >
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleOpenEdit(r)}
-                      style={{ flex: 1 }}
-                    >
-                      <Icon name="edit-2" size={14} />
-                      {t("edit") || (isRTL ? "تعديل" : "Edit")}
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleOpenDelete(r.id)}
-                    >
-                      <Icon name="trash-2" size={14} />
-                    </button>
+                    {allowUpdate && (
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleOpenEdit(r)}
+                        style={{ flex: 1 }}
+                      >
+                        <Icon name="edit-2" size={14} />
+                        {t("edit") || (isRTL ? "تعديل" : "Edit")}
+                      </button>
+                    )}
+                    {allowDelete && (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleOpenDelete(r.id)}
+                      >
+                        <Icon name="trash-2" size={14} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1092,7 +1260,12 @@ export default function ResourcesTab({
                         background: "var(--surface-alt)",
                         fontWeight: 800,
                       }}
-                      value={`$${formatCurrency((form.quantity || 0) * (form.unit_price || 0))}`}
+                      value={formatCurrency(
+                        (form.quantity || 0) * (form.unit_price || 0),
+                        wsCurrency,
+                        isRTL,
+                        "0",
+                      )}
                     />
                   </div>
                 </div>

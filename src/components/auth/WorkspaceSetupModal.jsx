@@ -47,12 +47,12 @@ export default function WorkspaceSetupModal({
         <div className="modal-header">
           <div>
             <h2 id="modal-setup-title" className="modal-title">
-              {t("setupWorkspaceTitle", "إعداد مساحة العمل بتاعتك")}
+              {t("setupWorkspaceTitle", "إعداد مساحة العمل الخاصة بك")}
             </h2>
             <p id="modal-setup-desc" className="modal-subtitle">
               {t(
                 "setupWorkspaceDesc",
-                "من فضلك اكتب اسم وتفاصيل مساحة العمل عشان تكمّل تسجيل الدخول بحساب Google.",
+                "يرجى كتابة اسم وتفاصيل مساحة العمل لإكمال تسجيل الدخول بحساب Google.",
               )}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function WorkspaceSetupModal({
               }
             >
               <option value="">
-                -- {t("selectWorkspaceType", "اختر نوع مساحة العمل")} --
+                -- {t("selectWorkspaceType", "اختار نوع مساحة العمل")} --
               </option>
               {workspaceTypes.map((type) => (
                 <option key={type.id} value={type.id}>
@@ -198,13 +198,13 @@ export default function WorkspaceSetupModal({
 
           <div className="form-group">
             <label htmlFor="ws-setup-phone" className="form-label">
-              {t("phoneNumber", "رقم الهاتف")}
+              {t("phoneNumber", "رقم التليفون")}
             </label>
             <input
               id="ws-setup-phone"
               type="tel"
               className={`form-input${getFieldError("phone") ? " is-invalid" : ""}`}
-              placeholder="05XXXXXXXX"
+              placeholder="01XXXXXXXXX"
               value={workspaceData.phone || ""}
               onChange={(e) => {
                 setWorkspaceData({ ...workspaceData, phone: e.target.value });
@@ -249,7 +249,7 @@ export default function WorkspaceSetupModal({
                   {t("saving", "جاري الحفظ...")}
                 </>
               ) : (
-                t("createWorkspaceAndContinue", "إنشاء مساحة العمل والمتابعة")
+                t("createWorkspaceAndContinue", "اعمل مساحة العمل وكمّل")
               )}
             </button>
           </div>

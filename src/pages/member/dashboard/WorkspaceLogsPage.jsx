@@ -1,42 +1,43 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
+import { usePermissions } from "../../../hooks/usePermissions";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
 import LogsTab from "./workspace-settings/LogsTab";
 import SEO from "../../../components/ui/SEO";
 import Icon from "../../../components/common/Icon";
+import ModalPortal from "../../../components/common/ModalPortal";
 import { TableSkeleton } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+<<<<<<< HEAD
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+=======
+import { getCurrencySymbol } from "../../../utils/currency";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 export default function WorkspaceLogsPage() {
   const { user } = useAuth();
+  const { isOwner, canReadSettings, canReadBookings, canReadCustomers } =
+    usePermissions();
   const { t, lang } = useLanguage();
   const toast = useToast();
 
   const ws = user?.workspace;
-  const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
-
-  const canReadLogs = isOwner || userPermissions.includes("settings_read");
-  const canReadBookings =
-    isOwner ||
-    userPermissions.includes("booking_read") ||
-    userPermissions.includes("bookings_read");
-  const canReadCustomers =
-    isOwner ||
-    userPermissions.includes("customer_read") ||
-    userPermissions.includes("customers_read");
+  const canReadAnalytics =
+    isOwner || canReadBookings || checkWorkspaceCapability(user, "REPORTS");
+  const canReadLogs =
+    isOwner || canReadSettings || checkWorkspaceCapability(user, "LOGS");
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
   // Tabs: "analytics" (Reports & Analytics) vs "logs" (Audit & Activity Logs)
-  const [activeTab, setActiveTab] = useState("analytics");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (!isOwner && !canReadAnalytics && canReadLogs) return "logs";
+    return "analytics";
+  });
 
   // Analytics state
   const [bookings, setBookings] = useState([]);
@@ -210,7 +211,7 @@ export default function WorkspaceLogsPage() {
         setMeta(res.data?.meta || null);
       } catch (err) {
         if (err.response?.status !== 403) {
-          toast.error(t("logsLoadFailed") || "فشل تحميل سجل النشاطات");
+          toast.error(t("logsLoadFailed") || "تعذر تحميل سجل الأنشطة");
         }
       } finally {
         setLogsLoading(false);
@@ -241,13 +242,20 @@ export default function WorkspaceLogsPage() {
     let confirmedCount = 0;
     let cancelledCount = 0;
     let monthRevenue = 0;
-    let currency = "SAR";
+    let currency =
+      workspaceSettings?.currency ||
+      workspaceSettings?.currency_code ||
+      ws?.currency ||
+      ws?.currency_code ||
+      "SAR";
 
     bookings.forEach((b) => {
       const startsAt = b.starts_at ? new Date(b.starts_at) : null;
       const dateStr = b.starts_at ? getDateKey(b.starts_at) : null;
       const price = parseFloat(b.snapshot?.price ?? b.service?.price);
-      if (b.snapshot?.currency) currency = b.snapshot.currency;
+      if (!currency && b.snapshot?.currency) {
+        currency = b.snapshot.currency;
+      }
 
       if (dateStr === todayStr) {
         todayCount += 1;
@@ -275,54 +283,40 @@ export default function WorkspaceLogsPage() {
       }
     });
 
-    const hasRealBookings = bookings.length > 0;
-    const totalBookings = hasRealBookings ? bookings.length : 10;
-    const compCount =
-      completedCount > 0 ? completedCount : hasRealBookings ? 0 : 6;
-    const pendCount = pendingCount > 0 ? pendingCount : hasRealBookings ? 0 : 3;
-    const confCount =
-      confirmedCount > 0 ? confirmedCount : hasRealBookings ? 0 : 1;
-    const cancCount =
-      cancelledCount > 0 ? cancelledCount : hasRealBookings ? 0 : 0;
+    const totalBookings = bookings.length;
+    const compCount = completedCount;
+    const pendCount = pendingCount;
+    const confCount = confirmedCount;
+    const cancCount = cancelledCount;
 
     const activeDenominator = compCount + pendCount + confCount;
     const completionRate =
       activeDenominator > 0
         ? Math.round((compCount / activeDenominator) * 100)
-        : 85;
+        : 0;
     const avgValue =
       compCount > 0
         ? Math.round(monthRevenue / compCount)
-        : monthRevenue > 0
+        : totalBookings > 0 && monthRevenue > 0
           ? Math.round(monthRevenue / totalBookings)
-          : 220;
+          : 0;
 
     return {
       totalBookings,
-      todayCount: todayCount > 0 ? todayCount : hasRealBookings ? 0 : 1,
-      weekCount: weekCount > 0 ? weekCount : hasRealBookings ? 0 : 1,
+      todayCount,
+      weekCount,
       pendingCount: pendCount,
       completedCount: compCount,
       confirmedCount: confCount,
       cancelledCount: cancCount,
       completionRate,
       avgValue,
-      customerCount:
-        customerTotal !== null && customerTotal > 0
-          ? customerTotal
-          : customerTotal === 0
-            ? 0
-            : 13,
-      revenue:
-        monthRevenue > 0
-          ? monthRevenue.toLocaleString("en-US")
-          : hasRealBookings
-            ? "0"
-            : "4,400",
-      rawRevenue: monthRevenue > 0 ? monthRevenue : hasRealBookings ? 0 : 4400,
+      customerCount: customerTotal !== null ? customerTotal : 0,
+      revenue: monthRevenue.toLocaleString("en-US"),
+      rawRevenue: monthRevenue,
       currency,
     };
-  }, [bookings, customerTotal, getDateKey]);
+  }, [bookings, customerTotal, getDateKey, workspaceSettings, ws]);
 
   // Group bookings by day key
   const bookingsByDay = useMemo(() => {
@@ -379,32 +373,8 @@ export default function WorkspaceLogsPage() {
       });
     }
 
-    const hasAny = days.some((d) => d.count > 0 || d.revenue > 0);
-    if (!hasAny && bookings.length === 0) {
-      const mockSamples = [
-        { count: 1, revenue: 450 },
-        { count: 2, revenue: 800 },
-        { count: 1, revenue: 350 },
-        { count: 3, revenue: 1200 },
-        { count: 2, revenue: 900 },
-        { count: 0, revenue: 0 },
-        { count: 1, revenue: 700 },
-        { count: 4, revenue: 1600 },
-        { count: 2, revenue: 850 },
-        { count: 3, revenue: 1100 },
-        { count: 1, revenue: 400 },
-        { count: 2, revenue: 750 },
-        { count: 5, revenue: 1900 },
-        { count: 3, revenue: 1250 },
-      ];
-      days.forEach((d, idx) => {
-        d.count = mockSamples[idx % mockSamples.length]?.count || 0;
-        d.revenue = mockSamples[idx % mockSamples.length]?.revenue || 0;
-      });
-    }
-
     return days;
-  }, [bookingsByDay, getDateKey, lang, t, bookings.length, trendPeriod]);
+  }, [bookingsByDay, getDateKey, lang, t, trendPeriod]);
 
   // Status segments for SVG Donut chart
   const statusSegments = useMemo(() => {
@@ -462,24 +432,8 @@ export default function WorkspaceLogsPage() {
       }
     });
 
-    let maxCount = Math.max(...Object.values(hoursMap), 1);
     const hasReal = Object.values(hoursMap).some((v) => v > 0);
-
-    if (!hasReal) {
-      const mockDist = {
-        9: 1,
-        10: 2,
-        11: 3,
-        12: 2,
-        15: 4,
-        16: 3,
-        17: 5,
-        18: 2,
-        19: 1,
-      };
-      Object.assign(hoursMap, mockDist);
-      maxCount = 5;
-    }
+    const maxCount = hasReal ? Math.max(...Object.values(hoursMap)) : 1;
 
     return Object.entries(hoursMap).map(([h, count]) => {
       const hourNum = parseInt(h, 10);
@@ -489,8 +443,8 @@ export default function WorkspaceLogsPage() {
         hour: hourNum,
         label: formatTime(d, is24Hour),
         count,
-        percentage: Math.round((count / maxCount) * 100),
-        isPeak: count === maxCount && count > 0,
+        percentage: hasReal ? Math.round((count / maxCount) * 100) : 0,
+        isPeak: hasReal && count === maxCount && count > 0,
       };
     });
   }, [bookings, formatTime, is24Hour]);
@@ -522,26 +476,7 @@ export default function WorkspaceLogsPage() {
       }));
     }
 
-    return [
-      {
-        name: lang === "ar" ? "استشارة أولية" : "Initial Consultation",
-        count: 6,
-        revenue: 2400,
-        pct: 60,
-      },
-      {
-        name: lang === "ar" ? "جلسة علاج ومتابعة" : "Follow-up Session",
-        count: 3,
-        revenue: 1500,
-        pct: 30,
-      },
-      {
-        name: lang === "ar" ? "فحص دوري" : "Periodic Checkup",
-        count: 1,
-        revenue: 500,
-        pct: 10,
-      },
-    ];
+    return [];
   }, [bookings, getText, lang]);
 
   // Filtered appointments for the detailed table
@@ -598,6 +533,7 @@ export default function WorkspaceLogsPage() {
         noindex
       />
 
+<<<<<<< HEAD
       {/* Standard Workspace Header & Tab Switcher */}
       <WorkspacePageHeader
         title={lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
@@ -618,6 +554,65 @@ export default function WorkspaceLogsPage() {
               display: "inline-flex",
             }}
           >
+=======
+      {/* Page Header & Navigation Tabs */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 16,
+          background: "var(--surface)",
+          padding: "20px 24px",
+          borderRadius: 16,
+          border: "1px solid var(--border)",
+          boxShadow: "var(--shadow-sm)",
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: "1.45rem",
+              fontWeight: 800,
+              color: "var(--heading)",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              margin: "0 0 6px",
+            }}
+          >
+            <Icon name="bar-chart" size={26} color="var(--primary)" />
+            <span>
+              {lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
+            </span>
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.88rem",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {lang === "ar"
+              ? "لوحة كاملة لمؤشرات الأداء والتحليل المالي ومتابعة النشاطات"
+              : "Comprehensive hub for operational metrics, financial trajectory, and audit trails"}
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div
+          className="analytics-tabs"
+          style={{
+            background: "var(--bg)",
+            border: "1px solid var(--border)",
+            padding: 4,
+            borderRadius: 12,
+            display: "inline-flex",
+          }}
+        >
+          {(isOwner || canReadAnalytics) && (
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             <button
               type="button"
               className={`analytics-tab-btn ${activeTab === "analytics" ? "active" : ""}`}
@@ -627,9 +622,14 @@ export default function WorkspaceLogsPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 18px",
+<<<<<<< HEAD
                 fontSize: "0.85rem",
                 fontWeight: 700,
                 borderRadius: 8,
+=======
+                fontSize: "0.88rem",
+                fontWeight: 700,
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               }}
             >
               <Icon name="bar-chart" size={16} />
@@ -639,7 +639,13 @@ export default function WorkspaceLogsPage() {
                   : "Analytics & Performance Hub"}
               </span>
             </button>
+<<<<<<< HEAD
 
+=======
+          )}
+
+          {(isOwner || canReadLogs) && (
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             <button
               type="button"
               className={`analytics-tab-btn ${activeTab === "logs" ? "active" : ""}`}
@@ -649,9 +655,14 @@ export default function WorkspaceLogsPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 18px",
+<<<<<<< HEAD
                 fontSize: "0.85rem",
                 fontWeight: 700,
                 borderRadius: 8,
+=======
+                fontSize: "0.88rem",
+                fontWeight: 700,
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               }}
             >
               <Icon name="shield" size={16} />
@@ -661,9 +672,15 @@ export default function WorkspaceLogsPage() {
                   : "Audit & Activity Logs"}
               </span>
             </button>
+<<<<<<< HEAD
           </div>
         }
       />
+=======
+          )}
+        </div>
+      </div>
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* ── TAB 1: Analytics & Performance Reports ── */}
       {activeTab === "analytics" &&
@@ -694,7 +711,7 @@ export default function WorkspaceLogsPage() {
                     <span
                       style={{ fontSize: "0.82rem", color: "var(--muted)" }}
                     >
-                      {stats.currency}
+                      {getCurrencySymbol(stats.currency, lang === "ar")}
                     </span>
                   </div>
                 </div>
@@ -732,13 +749,10 @@ export default function WorkspaceLogsPage() {
                 </div>
                 <div className="insight-body">
                   <div className="insight-label">
-                    {lang === "ar"
-                      ? "ساعة الذروة الأكثر طلباً"
-                      : "Peak Booking Hour"}
+                    {lang === "ar" ? "أكتر وقت عليه طلب" : "Peak Booking Hour"}
                   </div>
                   <div className="insight-value">
-                    {peakHoursData.find((p) => p.isPeak)?.label ||
-                      (lang === "ar" ? "04:00 م" : "04:00 PM")}
+                    {peakHoursData.find((p) => p.isPeak)?.label || "—"}
                   </div>
                 </div>
               </div>
@@ -770,36 +784,49 @@ export default function WorkspaceLogsPage() {
                 <div className="donut-chart-wrapper">
                   <div className="donut-svg-box">
                     <svg viewBox="0 0 160 160" width="100%" height="100%">
-                      {(() => {
-                        const radius = 55;
-                        const circumference = 2 * Math.PI * radius;
-                        let accumulatedOffset = 0;
+                      {stats.totalBookings === 0 ? (
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="55"
+                          fill="none"
+                          stroke="var(--border)"
+                          strokeWidth="18"
+                          opacity="0.4"
+                        />
+                      ) : (
+                        (() => {
+                          const radius = 55;
+                          const circumference = 2 * Math.PI * radius;
+                          let accumulatedOffset = 0;
 
-                        return statusSegments.map((seg) => {
-                          const strokeLength = (seg.pct / 100) * circumference;
-                          const dashArray = `${Math.max(0, strokeLength - 2)} ${circumference - strokeLength + 2}`;
-                          const dashOffset = -accumulatedOffset;
-                          accumulatedOffset += strokeLength;
+                          return statusSegments.map((seg) => {
+                            const strokeLength =
+                              (seg.pct / 100) * circumference;
+                            const dashArray = `${Math.max(0, strokeLength - 2)} ${circumference - strokeLength + 2}`;
+                            const dashOffset = -accumulatedOffset;
+                            accumulatedOffset += strokeLength;
 
-                          return (
-                            <circle
-                              key={seg.key}
-                              cx="80"
-                              cy="80"
-                              r={radius}
-                              fill="none"
-                              stroke={seg.color}
-                              strokeWidth="18"
-                              strokeDasharray={dashArray}
-                              strokeDashoffset={dashOffset}
-                              transform="rotate(-90 80 80)"
-                              style={{
-                                transition: "stroke-dasharray 0.6s ease",
-                              }}
-                            />
-                          );
-                        });
-                      })()}
+                            return (
+                              <circle
+                                key={seg.key}
+                                cx="80"
+                                cy="80"
+                                r={radius}
+                                fill="none"
+                                stroke={seg.color}
+                                strokeWidth="18"
+                                strokeDasharray={dashArray}
+                                strokeDashoffset={dashOffset}
+                                transform="rotate(-90 80 80)"
+                                style={{
+                                  transition: "stroke-dasharray 0.6s ease",
+                                }}
+                              />
+                            );
+                          });
+                        })()
+                      )}
                     </svg>
                     <div className="donut-center-text">
                       <div className="donut-center-value">
@@ -863,23 +890,38 @@ export default function WorkspaceLogsPage() {
                     <Icon name="clock" size={14} color="var(--primary)" />
                     <span>
                       {lang === "ar"
-                        ? "توزيع المواعيد على ساعات العمل"
+                        ? "توزيع المواعيد على ساعات الشغل"
                         : "Hourly Appointments Density"}
                     </span>
                   </div>
                   <div className="peak-hours-list">
-                    {peakHoursData.slice(0, 4).map((h) => (
-                      <div key={h.hour} className="peak-hour-row">
-                        <span className="peak-hour-label">{h.label}</span>
-                        <div className="peak-hour-track">
-                          <div
-                            className={`peak-hour-fill ${h.isPeak ? "is-peak" : ""}`}
-                            style={{ width: `${Math.max(8, h.percentage)}%` }}
-                          />
-                        </div>
-                        <span className="peak-hour-count">{h.count}</span>
+                    {bookings.length === 0 ? (
+                      <div
+                        style={{
+                          padding: "16px 8px",
+                          textAlign: "center",
+                          color: "var(--muted)",
+                          fontSize: "0.82rem",
+                        }}
+                      >
+                        {lang === "ar"
+                          ? "لا توجد مواعيد مسجلة لحساب ساعات الذروة"
+                          : "No bookings recorded for peak hours"}
                       </div>
-                    ))}
+                    ) : (
+                      peakHoursData.slice(0, 4).map((h) => (
+                        <div key={h.hour} className="peak-hour-row">
+                          <span className="peak-hour-label">{h.label}</span>
+                          <div className="peak-hour-track">
+                            <div
+                              className={`peak-hour-fill ${h.isPeak ? "is-peak" : ""}`}
+                              style={{ width: `${Math.max(8, h.percentage)}%` }}
+                            />
+                          </div>
+                          <span className="peak-hour-count">{h.count}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -898,7 +940,7 @@ export default function WorkspaceLogsPage() {
                     </div>
                     <div className="chart-card-subtitle">
                       {lang === "ar"
-                        ? "تتبع عدد الحجوزات والدخل اليومي للأيام الأخيرة"
+                        ? "متابعة عدد الحجوزات والدخل اليومي للأيام الأخيرة"
                         : "Daily booking velocity and revenue curve"}
                     </div>
                   </div>
@@ -915,7 +957,7 @@ export default function WorkspaceLogsPage() {
                       className={`chart-toggle-btn ${trendPeriod === "30d" ? "active" : ""}`}
                       onClick={() => setTrendPeriod("30d")}
                     >
-                      {lang === "ar" ? "هذا الشهر" : "This Month"}
+                      {lang === "ar" ? "الشهر ده" : "This Month"}
                     </button>
                   </div>
                 </div>
@@ -1147,11 +1189,31 @@ export default function WorkspaceLogsPage() {
                             {trendSeries[
                               hoveredTrendIndex
                             ].revenue.toLocaleString()}{" "}
-                            {stats.currency}
+                            {getCurrencySymbol(stats.currency, lang === "ar")}
                           </span>
                         </div>
                       </div>
                     )}
+
+                  {bookings.length === 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "42%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        color: "var(--muted)",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        pointerEvents: "none",
+                        textAlign: "center",
+                      }}
+                    >
+                      {lang === "ar"
+                        ? "لا توجد بيانات حجوزات أو إيرادات في هذه الفترة"
+                        : "No booking or revenue data for this period"}
+                    </div>
+                  )}
                 </div>
 
                 {/* Chart Legend */}
@@ -1210,85 +1272,109 @@ export default function WorkspaceLogsPage() {
                       <Icon name="sparkles" size={18} color="var(--primary)" />
                       <span>
                         {lang === "ar"
-                          ? "الخدمات الأكثر طلباً"
+                          ? "أكتر الخدمات المطلوبة"
                           : "Top Booked Services"}
                       </span>
                     </div>
                     <div className="chart-card-subtitle">
                       {lang === "ar"
-                        ? "ترتيب الخدمات بحسب الحجوزات والعائد"
+                        ? "ترتيب الخدمات حسب الحجوزات والدخل"
                         : "Ranking by appointment volume and revenue"}
                     </div>
                   </div>
                 </div>
 
                 <div className="top-services-list">
-                  {topServicesData.map((srv, sIdx) => (
-                    <div key={sIdx} className="top-service-item">
-                      <div className="top-service-row">
+                  {topServicesData.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "36px 16px",
+                        textAlign: "center",
+                        color: "var(--muted)",
+                        fontSize: "0.86rem",
+                      }}
+                    >
+                      <Icon
+                        name="sparkles"
+                        size={24}
+                        style={{ margin: "0 auto 8px", opacity: 0.4 }}
+                      />
+                      <div>
+                        {lang === "ar"
+                          ? "لا توجد خدمات محجوزة حتى الآن"
+                          : "No booked services recorded yet"}
+                      </div>
+                    </div>
+                  ) : (
+                    topServicesData.map((srv, sIdx) => (
+                      <div key={sIdx} className="top-service-item">
+                        <div className="top-service-row">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: 6,
+                                background:
+                                  sIdx === 0 ? "#f59e0b" : "var(--border)",
+                                color:
+                                  sIdx === 0 ? "#ffffff" : "var(--heading)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.72rem",
+                                fontWeight: 800,
+                              }}
+                            >
+                              #{sIdx + 1}
+                            </span>
+                            <span className="top-service-name">{srv.name}</span>
+                          </div>
+                          <span className="top-service-meta">
+                            {srv.count} {lang === "ar" ? "حجز" : "bookings"}
+                          </span>
+                        </div>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 8,
+                            justifyContent: "space-between",
+                            fontSize: "0.74rem",
+                            color: "var(--muted)",
                           }}
                         >
-                          <span
-                            style={{
-                              width: 22,
-                              height: 22,
-                              borderRadius: 6,
-                              background:
-                                sIdx === 0 ? "#f59e0b" : "var(--border)",
-                              color: sIdx === 0 ? "#ffffff" : "var(--heading)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.72rem",
-                              fontWeight: 800,
-                            }}
-                          >
-                            #{sIdx + 1}
+                          <span>
+                            {srv.revenue.toLocaleString()}{" "}
+                            {getCurrencySymbol(stats.currency, lang === "ar")}
                           </span>
-                          <span className="top-service-name">{srv.name}</span>
+                          <span>
+                            {srv.pct}%{" "}
+                            {lang === "ar" ? "من الإجمالي" : "of total"}
+                          </span>
                         </div>
-                        <span className="top-service-meta">
-                          {srv.count} {lang === "ar" ? "حجز" : "bookings"}
-                        </span>
+                        <div className="legend-bar-track">
+                          <div
+                            className="legend-bar-fill"
+                            style={{
+                              width: `${srv.pct}%`,
+                              background:
+                                sIdx === 0
+                                  ? "#10b981"
+                                  : sIdx === 1
+                                    ? "#3b82f6"
+                                    : "#6366f1",
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          fontSize: "0.74rem",
-                          color: "var(--muted)",
-                        }}
-                      >
-                        <span>
-                          {srv.revenue.toLocaleString()} {stats.currency}
-                        </span>
-                        <span>
-                          {srv.pct}%{" "}
-                          {lang === "ar" ? "من الإجمالي" : "of total"}
-                        </span>
-                      </div>
-                      <div className="legend-bar-track">
-                        <div
-                          className="legend-bar-fill"
-                          style={{
-                            width: `${srv.pct}%`,
-                            background:
-                              sIdx === 0
-                                ? "#10b981"
-                                : sIdx === 1
-                                  ? "#3b82f6"
-                                  : "#6366f1",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -1306,7 +1392,7 @@ export default function WorkspaceLogsPage() {
                     </div>
                     <div className="chart-card-subtitle">
                       {lang === "ar"
-                        ? "عرض تفصيلي للحجوزات مع تصفية فورية"
+                        ? "عرض تفصيلي للحجوزات مع فلترة سريعة"
                         : "Interactive appointments roster with quick actions"}
                     </div>
                   </div>
@@ -1325,7 +1411,8 @@ export default function WorkspaceLogsPage() {
                       className={`analytics-tab-btn ${tableFilter === "today" ? "active" : ""}`}
                       onClick={() => setTableFilter("today")}
                     >
-                      {lang === "ar" ? "اليوم" : "Today"} ({stats.todayCount})
+                      {lang === "ar" ? "النهارده" : "Today"} ({stats.todayCount}
+                      )
                     </button>
                     <button
                       type="button"
@@ -1357,7 +1444,7 @@ export default function WorkspaceLogsPage() {
                       className="analytics-search-input"
                       placeholder={
                         lang === "ar"
-                          ? "بحث بالاسم أو الخدمة..."
+                          ? "دور بالاسم أو الخدمة..."
                           : "Search client, service..."
                       }
                       value={tableSearch}
@@ -1373,7 +1460,7 @@ export default function WorkspaceLogsPage() {
                       <tr>
                         <th>{custSingular}</th>
                         <th>{lang === "ar" ? "الخدمة" : "Service"}</th>
-                        <th>{lang === "ar" ? "الموعد" : "Date & Time"}</th>
+                        <th>{lang === "ar" ? "الميعاد" : "Date & Time"}</th>
                         <th>{lang === "ar" ? "السعر" : "Price"}</th>
                         <th>{lang === "ar" ? "الحالة" : "Status"}</th>
                         <th style={{ textAlign: "center" }}>
@@ -1393,7 +1480,7 @@ export default function WorkspaceLogsPage() {
                             }}
                           >
                             {lang === "ar"
-                              ? "لا توجد مواعيد مطابقة للتصفية الحالية"
+                              ? "لا توجد مواعيد مطابقة للفلترة الحالية"
                               : "No appointments match your filter"}
                           </td>
                         </tr>
@@ -1473,7 +1560,10 @@ export default function WorkspaceLogsPage() {
                               <td>
                                 <span style={{ fontWeight: 700 }}>
                                   {!isNaN(price) ? price.toLocaleString() : "0"}{" "}
-                                  {stats.currency}
+                                  {getCurrencySymbol(
+                                    b.snapshot?.currency || stats.currency,
+                                    lang === "ar",
+                                  )}
                                 </span>
                               </td>
                               <td>
@@ -1488,14 +1578,14 @@ export default function WorkspaceLogsPage() {
                                         : "Completed"
                                       : st === "pending"
                                         ? lang === "ar"
-                                          ? "قيد التأكيد"
+                                          ? "مستنية التأكيد"
                                           : "Pending"
                                         : st === "cancelled"
                                           ? lang === "ar"
-                                            ? "ملغاة"
+                                            ? "ملغية"
                                             : "Cancelled"
                                           : lang === "ar"
-                                            ? "مؤكدة"
+                                            ? "متأكدة"
                                             : "Confirmed"}
                                   </span>
                                 </span>
@@ -1507,10 +1597,36 @@ export default function WorkspaceLogsPage() {
                                   style={{
                                     padding: "4px 12px",
                                     fontSize: "0.76rem",
+<<<<<<< HEAD
                                     textDecoration: "none",
                                     display: "inline-flex",
                                     alignItems: "center",
                                     justifyContent: "center",
+=======
+                                  }}
+                                  onClick={() => {
+                                    setSelectedBookingModal({
+                                      id: b.id,
+                                      name: cName,
+                                      service: sName,
+                                      time: timeStr,
+                                      date: dateStr,
+                                      price: !isNaN(price)
+                                        ? `${price.toLocaleString()} ${getCurrencySymbol(b.snapshot?.currency || stats.currency, lang === "ar")}`
+                                        : "—",
+                                      status: st,
+                                      phone:
+                                        b.customer_phone ||
+                                        b.customer?.phone ||
+                                        "—",
+                                      email:
+                                        b.customer_email ||
+                                        b.customer?.email ||
+                                        "—",
+                                      notes: b.notes || "—",
+                                      rawBooking: b,
+                                    });
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                                   }}
                                 >
                                   {lang === "ar" ? "تفاصيل" : "Details"}
@@ -1535,7 +1651,7 @@ export default function WorkspaceLogsPage() {
                 >
                   <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
                     {lang === "ar"
-                      ? `عرض ${Math.min(8, filteredTableAppointments.length)} من أصل ${filteredTableAppointments.length}`
+                      ? `معروض ${Math.min(8, filteredTableAppointments.length)} من أصل ${filteredTableAppointments.length}`
                       : `Showing ${Math.min(8, filteredTableAppointments.length)} of ${filteredTableAppointments.length}`}
                   </span>
                   <Link
@@ -1544,7 +1660,7 @@ export default function WorkspaceLogsPage() {
                     style={{ fontSize: "0.82rem" }}
                   >
                     {lang === "ar"
-                      ? "الانتقال لجميع الحجوزات ←"
+                      ? "روح لكل الحجوزات ←"
                       : "Go to all bookings →"}
                   </Link>
                 </div>
@@ -1574,6 +1690,201 @@ export default function WorkspaceLogsPage() {
           )}
         </div>
       )}
+<<<<<<< HEAD
+=======
+
+      {/* Appointment Detail Quick Modal */}
+      {selectedBookingModal && (
+        <ModalPortal>
+          <div
+            className="modal-overlay"
+            onClick={() => setSelectedBookingModal(null)}
+          >
+            <div
+              className="modal-content animate-pop-in"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: 480, padding: 24 }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: "1.15rem",
+                    fontWeight: 700,
+                    color: "var(--heading)",
+                  }}
+                >
+                  {lang === "ar" ? "تفاصيل الميعاد" : "Appointment Details"}
+                </h3>
+                <button
+                  type="button"
+                  className="btn-icon"
+                  onClick={() => setSelectedBookingModal(null)}
+                >
+                  <Icon name="x" size={18} />
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                  fontSize: "0.88rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {custSingular}:
+                  </span>
+                  <span style={{ fontWeight: 700 }}>
+                    {selectedBookingModal.name}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {lang === "ar" ? "الخدمة" : "Service"}:
+                  </span>
+                  <span style={{ fontWeight: 700 }}>
+                    {selectedBookingModal.service}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {lang === "ar" ? "الميعاد" : "Date & Time"}:
+                  </span>
+                  <span style={{ fontWeight: 700 }}>
+                    {selectedBookingModal.date} ({selectedBookingModal.time})
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {lang === "ar" ? "السعر" : "Price"}:
+                  </span>
+                  <span style={{ fontWeight: 700 }}>
+                    {selectedBookingModal.price}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {lang === "ar" ? "الموبايل" : "Phone"}:
+                  </span>
+                  <span style={{ fontWeight: 600 }}>
+                    {selectedBookingModal.phone}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "var(--bg)",
+                    borderRadius: 8,
+                  }}
+                >
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    {lang === "ar" ? "الحالة" : "Status"}:
+                  </span>
+                  <span
+                    className={`table-status-badge status-${selectedBookingModal.status}`}
+                  >
+                    <span className="badge-dot" />
+                    <span>
+                      {selectedBookingModal.status === "completed"
+                        ? lang === "ar"
+                          ? "مكتملة"
+                          : "Completed"
+                        : selectedBookingModal.status === "pending"
+                          ? lang === "ar"
+                            ? "مستنية التأكيد"
+                            : "Pending"
+                          : selectedBookingModal.status === "cancelled"
+                            ? lang === "ar"
+                              ? "ملغية"
+                              : "Cancelled"
+                            : lang === "ar"
+                              ? "متأكدة"
+                              : "Confirmed"}
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+                <Link
+                  to={`/member/workspace/bookings/${selectedBookingModal.id}`}
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
+                >
+                  {lang === "ar"
+                    ? "افتح صفحة الحجز كاملة"
+                    : "Open Full Booking"}
+                </Link>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedBookingModal(null)}
+                >
+                  {lang === "ar" ? "إغلاق" : "Close"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     </div>
   );
 }

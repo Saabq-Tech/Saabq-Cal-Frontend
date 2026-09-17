@@ -151,7 +151,12 @@ export default function BlogPostDetailPage() {
         <div className="container blog-detail-container">
           <div className="blog-detail-meta-top">
             {post.category && (
-              <span className="blog-card-badge">{post.category.name}</span>
+              <Link
+                to={`/blog?category=${post.category.slug}`}
+                className="blog-detail-badge"
+              >
+                {post.category.name}
+              </Link>
             )}
             {formattedDate && (
               <span className="blog-card-date">

@@ -17,7 +17,7 @@ export default defineConfig({
         name: 'Saabq Calendar',
         short_name: 'Saabq Cal',
         description: 'The Saabq Calendar progressive web application.',
-        theme_color: '#0a9099',
+        theme_color: '#026982',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',

@@ -22,11 +22,11 @@ export default function GoogleNotConnectedBanner() {
         <div className="warning-banner-text">
           <h4>
             {t("googleNotConnectedBannerTitle") ||
-              "تنبيه هام: حساب Google غير مرتبط"}
+              "تنبيه: حساب Google غير مرتبط"}
           </h4>
           <p>
             {t("googleNotConnectedBannerDesc") ||
-              "حساب Google بتاعك مش مربوط دلوقتي. مش هتتم مزامنة المواعيد أو إنشاء لينكات Google Meet تلقائياً لحد ما تربط حسابك."}
+              "حساب Google الخاص بك غير مرتبط حالياً. لن تتم مزامنة المواعيد أو إنشاء روابط Google Meet تلقائياً حتى تقوم بربط حسابك."}
           </p>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function GoogleNotConnectedBanner() {
         }}
       >
         <Icon name="custom-2963ac22" size={16} />
-        {t("connectGoogleNow") || "ربط حساب Google الآن"}
+        {t("connectGoogleNow") || "اربط حساب Google الآن"}
       </Link>
     </div>
   );

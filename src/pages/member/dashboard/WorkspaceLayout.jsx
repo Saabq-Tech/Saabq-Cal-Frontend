@@ -12,11 +12,13 @@ import {
   canViewWorkspaceTab,
   getWorkspaceSettingsSubTabs,
 } from "../../../config/dashboardNav";
+import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const location = useLocation();
+  const vibe = getWorkspaceVibe(user?.workspace, lang);
 
   const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
 
@@ -61,7 +63,11 @@ export default function WorkspaceLayout() {
   const _canViewPermission = (module) =>
     isOwner ||
     userPermissions.includes(`${module}_read`) ||
-    userPermissions.includes(`${module}_write`);
+    userPermissions.includes(`${module}_create`) ||
+    userPermissions.includes(`${module}_update`) ||
+    userPermissions.includes(`${module}_delete`) ||
+    userPermissions.includes(`${module}_write`) ||
+    userPermissions.includes(`${module}_manage`);
   const hasActiveSub = user?.workspace?.has_active_subscription ?? true;
   const isWorkspaceActive = user?.workspace?.status === "active";
   const _workspaceStatus = user?.workspace?.status || "pending";
@@ -135,7 +141,10 @@ export default function WorkspaceLayout() {
   }
 
   return (
-    <div className="workspace-dashboard-shell animate-page-enter">
+    <div
+      className={`workspace-dashboard-shell vibe-${vibe.key} animate-page-enter`}
+      data-workspace-vibe={vibe.key}
+    >
       {/* Two-column dashboard grid */}
       <div className="workspace-dashboard-grid">
         <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
@@ -159,7 +168,9 @@ export default function WorkspaceLayout() {
                       padding: "10px 14px",
                     }}
                     title={
-                      t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة"
+                      t("workspacePendingApprovalTitle") ||
+                      t("workspaceInactiveTitle") ||
+                      "مساحة العمل بانتظار موافقة الإدارة"
                     }
                   >
                     <span className="profile-sidebar-icon">
@@ -236,10 +247,7 @@ export default function WorkspaceLayout() {
           </nav>
         </aside>
 
-        <div
-          key={location.pathname}
-          className="workspace-dashboard-content animate-fade-in-up"
-        >
+        <div key={location.pathname} className="workspace-dashboard-content">
           {/* Settings sub-tabs on mobile: placed right under the workspace tabs, before banners and anything else */}
           {isSettingsOpen && (
             <div className="settings-subtab-strip">
@@ -263,25 +271,27 @@ export default function WorkspaceLayout() {
           {!isWorkspaceActive && (
             <div className="warning-banner warning-banner-inactive">
               <div className="warning-banner-content">
-                <div className="warning-banner-icon icon-red">
-                  <Icon name="alert-triangle" size={24} />
+                <div className="warning-banner-icon icon-amber">
+                  <Icon name="clock" size={24} />
                 </div>
                 <div className="warning-banner-text">
                   <h4>
-                    {t("workspaceInactiveTitle") || "مساحة العمل غير مفعّلة!"}
+                    {t("workspacePendingApprovalTitle") ||
+                      "مساحة العمل بانتظار موافقة الإدارة"}
                   </h4>
                   <p>
-                    {t("workspaceInactiveDesc") ||
-                      "مساحة العمل الخاصة بك بانتظار موافقة الإدارة أو غير مفعّلة حالياً. تم تقييد الوصول لصفحات وبيانات مساحة العمل."}
+                    {t("workspacePendingApprovalDesc") ||
+                      "تم إنشاء مساحة العمل الخاصة بك بنجاح وهي قيد المراجعة وبانتظار موافقة فريق الإدارة. يمكنك التواصل مع الدعم الفني للاستفسار أو طلب تفعيل مساحة العمل."}
                   </p>
                 </div>
               </div>
               <Link
-                to="/member/profile"
-                className="btn btn-secondary btn-sm warning-banner-action"
+                to="/member/chats"
+                className="btn btn-primary btn-sm warning-banner-action"
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
               >
-                <Icon name="user" size={14} />
-                {t("profileInfo") || "الملف الشخصي"}
+                <Icon name="message-square" size={14} />
+                {t("contactSupport") || "تواصل مع الدعم"}
               </Link>
             </div>
           )}
@@ -311,45 +321,102 @@ export default function WorkspaceLayout() {
           {!isWorkspaceActive ? (
             <div
               style={{
-                padding: "60px 20px",
+                padding: "60px 24px",
                 textAlign: "center",
                 background: "var(--surface)",
                 borderRadius: "var(--radius-lg, 16px)",
-                border: "1px solid rgba(239, 68, 68, 0.2)",
+                border: "1px solid rgba(245, 158, 11, 0.25)",
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              <Icon
-                name="lock"
-                size={56}
-                style={{ color: "#ef4444", marginBottom: 16 }}
-              />
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  background: "rgba(245, 158, 11, 0.12)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                  color: "#d97706",
+                }}
+              >
+                <Icon name="clock" size={38} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "4px 14px",
+                    borderRadius: 99,
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    background: "rgba(245, 158, 11, 0.12)",
+                    color: "#d97706",
+                    border: "1px solid rgba(245, 158, 11, 0.3)",
+                  }}
+                >
+                  <Icon name="clock" size={13} />
+                  {t("statusPendingApproval") || "بانتظار موافقة الإدارة"}
+                </span>
+              </div>
               <h2
                 style={{
                   color: "var(--heading)",
-                  fontSize: "1.4rem",
+                  fontSize: "1.45rem",
                   fontWeight: 800,
-                  marginBottom: 8,
+                  marginBottom: 10,
                 }}
               >
-                {t("workspaceLockedTitle") || "صفحات مساحة العمل مقفلة"}
+                {t("workspaceLockedTitle") || "مساحة العمل قيد المراجعة"}
               </h2>
               <p
                 style={{
                   color: "var(--text-secondary)",
-                  maxWidth: 460,
-                  margin: "0 auto 24px",
-                  lineHeight: 1.6,
-                  fontSize: "0.92rem",
+                  maxWidth: 480,
+                  margin: "0 auto 28px",
+                  lineHeight: 1.65,
+                  fontSize: "0.94rem",
                 }}
               >
                 {t("workspaceLockedDesc") ||
-                  "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب غير مفعّل بعد أو بانتظار موافقة أدمن المنصة. يمكنك الاستمرار في تعديل ملفك الشخصي واستعراض الدعم الفني."}
+                  "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب قيد المراجعة وبانتظار موافقة إدارة المنصة. يمكنك التواصل مباشرة مع فريق الدعم الفني عبر المحادثات لتسريع التفعيل، أو إدارة ملفك الشخصي."}
               </p>
               <div
-                style={{ display: "flex", justifyContent: "center", gap: 12 }}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
               >
-                <Link to="/member/profile" className="btn btn-primary">
+                <Link
+                  to="/member/chats"
+                  className="btn btn-primary"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 22px",
+                  }}
+                >
+                  <Icon name="message-square" size={16} />
+                  {t("contactSupport") || "تواصل مع الدعم الفني"}
+                </Link>
+                <Link
+                  to="/member/profile"
+                  className="btn btn-secondary"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                  }}
+                >
                   <Icon name="user" size={16} />
                   {t("profileInfo") || "الملف الشخصي"}
                 </Link>

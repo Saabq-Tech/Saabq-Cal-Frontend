@@ -13,9 +13,13 @@ export default function BookingsTab({
   page: _page = 1,
   onPageChange,
   onSelectBooking,
-  canEdit,
+  canEdit = true,
+  canCreate: _canCreate,
+  canUpdate,
+  canDelete: _canDelete,
   onReloadBookings,
 }) {
+  const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
   const { t, isRTL, lang } = useLanguage();
   const toast = useToast();
   const { user } = useAuth();
@@ -52,7 +56,7 @@ export default function BookingsTab({
   // detail page — same status endpoint BookingDetailsPage uses.
   const handleQuickConfirm = async (id, e) => {
     e.stopPropagation();
-    if (!canEdit) return;
+    if (!allowUpdate) return;
     try {
       setConfirmingId(id);
       await client.patch(endpoints.workspaceBookingStatus(id), {
@@ -260,7 +264,7 @@ export default function BookingsTab({
             style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
           >
             <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
+            {t("readOnlyNotice") || "للعرض فقط (بدون تعديل)"}
           </span>
         )}
       </div>
@@ -372,7 +376,7 @@ export default function BookingsTab({
               color: "var(--heading)",
             }}
           >
-            {t("noBookingsFound") || "مفيش مواعيد أو حجوزات متسجلة دلوقتي"}
+            {t("noBookingsFound") || "لا توجد مواعيد أو حجوزات مسجلة حالياً"}
           </h4>
           <p style={{ fontSize: "0.85rem", color: "var(--muted)", margin: 0 }}>
             {t("noBookingsDesc") ||
@@ -655,7 +659,7 @@ export default function BookingsTab({
                   </div>
                 </div>
 
-                {canEdit && b.status === "pending" ? (
+                {allowUpdate && b.status === "pending" ? (
                   <div className="booking-card-actions">
                     <button
                       type="button"

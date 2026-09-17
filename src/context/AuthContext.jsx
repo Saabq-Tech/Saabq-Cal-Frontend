@@ -7,7 +7,15 @@ import {
   useRef,
 } from "react";
 import client, { endpoints } from "../api/client";
+<<<<<<< HEAD
 import { resetWorkspaceBranding } from "../utils/theme";
+=======
+import {
+  applyWorkspaceBranding,
+  applyWorkspaceVibeTheme,
+} from "../utils/theme";
+import { getWorkspaceVibeKey } from "../utils/workspaceVibe";
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
 const AuthContext = createContext(null);
 
@@ -46,9 +54,27 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (user) {
       localStorage.setItem("saabq_user", JSON.stringify(user));
+<<<<<<< HEAD
     } else {
       localStorage.removeItem("saabq_user");
       resetWorkspaceBranding();
+=======
+      const ws = user.workspace;
+      if (ws) {
+        const vibeKey = getWorkspaceVibeKey(ws);
+        applyWorkspaceBranding(
+          ws.primary_color,
+          ws.secondary_color,
+          ws.hover_color,
+          vibeKey,
+        );
+        applyWorkspaceVibeTheme(vibeKey);
+      }
+    } else {
+      localStorage.removeItem("saabq_user");
+      applyWorkspaceBranding(null, null, null);
+      applyWorkspaceVibeTheme(null);
+>>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     }
   }, [user]);
 
