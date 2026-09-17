@@ -10,7 +10,6 @@ import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
-import { getCurrencySymbol } from "../../../utils/currency";
 import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
@@ -23,40 +22,17 @@ export default function MemberOverviewTab() {
   const { user } = useAuth();
   const { t, lang } = useLanguage();
   const navigate = useNavigate();
-  const {
-    isOwner,
-    canReadBookings,
-    canCreateBookings,
-    canReadCustomers,
-    canReadPayments,
-  } = usePermissions();
+  const { isOwner, canReadBookings, canCreateBookings, canReadCustomers } =
+    usePermissions();
 
   // Dynamic workspace customer label & industry vibe
   const ws = user?.workspace;
-<<<<<<< HEAD
   const {
     isCustom,
     customerSingular: custSingular,
     customerPlural: custPlural,
   } = useCustomerLabel(ws);
-=======
   const vibe = useMemo(() => getWorkspaceVibe(ws, lang), [ws, lang]);
-  const custSingular = (() => {
-    const f = ws?.customer_label_singular;
-    if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
-    return t("customerSingle") || "عميل";
-  })();
-
-  const custPlural = (() => {
-    const f = ws?.customer_label_plural;
-    if (f)
-      return typeof f === "object" ? f[lang] || f.ar || f.en || "العملاء" : f;
-    return t("navCustomers") || (lang === "ar" ? "العملاء" : "Customers");
-  })();
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
-  const custIcon =
-    ws?.customer_icon || workspaceSettings?.customer_icon || "users";
 
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
@@ -816,7 +792,6 @@ export default function MemberOverviewTab() {
     >
       <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
 
-<<<<<<< HEAD
       {/* Welcome Banner with Integrated Live Clock & Member Info */}
       <div className="workspace-welcome-banner">
         <div className="workspace-welcome-info">
@@ -876,35 +851,6 @@ export default function MemberOverviewTab() {
             </button>
           </div>
         )}
-=======
-      {/* Workspace Industry Vibe Welcome Banner */}
-      <div className={`workspace-vibe-dashboard-banner vibe-${vibe.key}`}>
-        <div className="workspace-vibe-dashboard-banner-content">
-          <div className="workspace-vibe-dashboard-greeting">
-            <span className="workspace-vibe-pill">
-              <Icon name={vibe.badgeIcon} size={15} />
-              <span>{vibe.badge}</span>
-            </span>
-            <h1 className="workspace-vibe-welcome-title">
-              {vibe.dashboardGreetingPrefix} {user?.name ? user.name : ""}
-            </h1>
-            <p className="workspace-vibe-welcome-desc">{vibe.tagline}</p>
-          </div>
-          {canCreateBookings && (
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="btn btn-primary workspace-vibe-quick-action"
-            >
-              <Icon name="calendar" size={16} />
-              <span>
-                {vibe.bookAction ||
-                  (lang === "ar" ? "إضافة موعد" : "New Booking")}
-              </span>
-            </button>
-          )}
-        </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       </div>
 
       {/* 8 Balanced Executive Stat Cards (4x2 Matrix) */}
@@ -912,49 +858,12 @@ export default function MemberOverviewTab() {
         {/* ROW 1: Financials & Daily Operations */}
 
         {/* 1. Total Revenue (Emerald Green Theme) */}
-<<<<<<< HEAD
         <div className="workspace-stat-card stat-emerald">
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="credit-card" size={18} />
-=======
-        {(canReadPayments || isOwner) && (
-          <div className="workspace-stat-card stat-emerald">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="credit-card" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {lang === "ar" ? "الإيرادات" : "Total Revenue"}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {stats.rawRevenue > 0
-                  ? lang === "ar"
-                    ? "هذا الشهر"
-                    : "This month"
-                  : lang === "ar"
-                    ? "الشهر الحالي"
-                    : "Current month"}
-              </span>
-            </div>
-            <div className="workspace-stat-number revenue-number">
-              <span>{stats.revenue}</span>
-              <span className="currency-unit">
-                {getCurrencySymbol(stats.currency, lang === "ar")}
-              </span>
-            </div>
-            <div className="stat-card-footer">
-              <span>
-                {lang === "ar"
-                  ? "إجمالي دخل الحجوزات"
-                  : "Gross completed revenue"}
-              </span>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </div>
           </div>
-<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "الإيرادات" : "Total Revenue"}
           </div>
@@ -978,38 +887,8 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="calendar" size={18} />
-=======
-        )}
-
-        {/* 2. Total Bookings (Royal Blue Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-blue">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="calendar" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {vibe.totalBookingsLabel ||
-                    (lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings")}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "سجلات نشطة" : "Active"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.totalBookings}</div>
-            <div className="stat-card-footer">
-              <span>
-                {vibe.totalBookingsDesc ||
-                  (lang === "ar"
-                    ? "كافة الحجوزات المسجلة"
-                    : "All recorded bookings")}
-              </span>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </div>
           </div>
-<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
           </div>
@@ -1028,38 +907,8 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="clock" size={18} />
-=======
-        )}
-
-        {/* 3. Today's Schedule (Sky Cyan Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-cyan">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="clock" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {vibe.todayStatsLabel ||
-                    (lang === "ar" ? "مواعيد اليوم" : "Today's Schedule")}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "اليوم" : "Today"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.todayCount}</div>
-            <div className="stat-card-footer">
-              <span>
-                {vibe.todayStatsDesc ||
-                  (lang === "ar"
-                    ? "مواعيد مجدولة لليوم"
-                    : "Scheduled for today")}
-              </span>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </div>
           </div>
-<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
           </div>
@@ -1076,90 +925,8 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="alert-triangle" size={18} />
-=======
-        )}
-
-        {/* 4. This Week's Appointments (Indigo Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-indigo">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="sparkles" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "7 أيام" : "7 Days"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.weekCount}</div>
-            <div className="stat-card-footer">
-              <span>
-                {lang === "ar"
-                  ? "حجوزات الأسبوع الجاري"
-                  : "Current week volume"}
-              </span>
             </div>
           </div>
-        )}
-
-        {/* 5. Completed Bookings (Mint / Teal Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-teal">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="check" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "تمت بنجاح" : "Serviced"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.completedCount}</div>
-            <div className="stat-card-footer">
-              <span>
-                {lang === "ar"
-                  ? "خدمات تم تقديمها للعملاء"
-                  : "Successfully completed"}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* 6. Pending Confirmation (Warm Amber Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-amber">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="alert-triangle" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
-                </div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.pendingCount}</div>
-            <div className="stat-card-footer">
-              <span>
-                {lang === "ar"
-                  ? "حجوزات بانتظار الاعتماد"
-                  : "Awaiting confirmation"}
-              </span>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-            </div>
-          </div>
-<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
           </div>
@@ -1259,38 +1026,8 @@ export default function MemberOverviewTab() {
           <div className="stat-card-header">
             <div className="stat-icon-wrap">
               <Icon name="bar-chart" size={18} />
-=======
-        )}
-
-        {/* 7. Completion Rate (Purple Theme) */}
-        {canReadBookings && (
-          <div className="workspace-stat-card stat-purple">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name="bar-chart" size={18} />
-                </div>
-                <div className="workspace-stat-label">
-                  {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
-                </div>
-              </div>
-              <span className="stat-pill">{stats.completionRate}%</span>
-            </div>
-            <div className="workspace-stat-number">{stats.completionRate}%</div>
-            <div className="stat-card-footer">
-              <div className="stat-progress-bar">
-                <div
-                  className="stat-progress-fill"
-                  style={{
-                    width: `${stats.completionRate}%`,
-                    background: "linear-gradient(90deg, #a855f7, #9333ea)",
-                  }}
-                />
-              </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </div>
           </div>
-<<<<<<< HEAD
           <div className="workspace-stat-label">
             {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
           </div>
@@ -1307,34 +1044,6 @@ export default function MemberOverviewTab() {
             </div>
           </div>
         </div>
-=======
-        )}
-
-        {/* 8. Active Clients / Patients (Rose Theme) */}
-        {canReadCustomers && (
-          <div className="workspace-stat-card stat-rose">
-            <div className="stat-card-header">
-              <div className="stat-header-left">
-                <div className="stat-icon-wrap">
-                  <Icon name={custIcon} size={18} />
-                </div>
-                <div className="workspace-stat-label">{custPlural}</div>
-              </div>
-              <span className="stat-pill">
-                {lang === "ar" ? "قاعدة العملاء" : "Clients"}
-              </span>
-            </div>
-            <div className="workspace-stat-number">{stats.customerCount}</div>
-            <div className="stat-card-footer">
-              <span>
-                {lang === "ar"
-                  ? "إجمالي المسجلين في المنشأة"
-                  : "Total registered clients"}
-              </span>
-            </div>
-          </div>
-        )}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       </div>
 
       {/* Two Column Workspace Grid: Right Column (Timeline) & Left Column (Calendar + Upcoming) */}
@@ -1714,41 +1423,9 @@ export default function MemberOverviewTab() {
                 </button>
               </div>
             </div>
-<<<<<<< HEAD
           </div>,
           document.body,
         )}
-=======
-            <div className="event-detail-actions">
-              {canReadBookings && (
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => {
-                    const bId = selectedEventModal?.rawBooking?.id;
-                    setSelectedEventModal(null);
-                    if (bId) {
-                      navigate(`/member/workspace/bookings/${bId}`);
-                    } else {
-                      navigate("/member/workspace/bookings");
-                    }
-                  }}
-                >
-                  {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
-                </button>
-              )}
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setSelectedEventModal(null)}
-              >
-                {lang === "ar" ? "إغلاق" : "Close"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 
       {/* Real Create Booking Modal Integration */}
       {showCreateModal && (

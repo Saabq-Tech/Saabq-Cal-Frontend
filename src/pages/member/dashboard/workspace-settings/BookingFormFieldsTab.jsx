@@ -11,27 +11,27 @@ export default function BookingFormFieldsTab({
   saving,
   canEdit: propCanEdit,
 }) {
-<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
-  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
-=======
-  const { t } = useLanguage();
   const {
     isOwner,
-    canCreateBookingForms,
     canUpdateBookingForms,
+    canCreateBookingForms,
     canDeleteBookingForms,
     canUpdateSettings,
   } = usePermissions();
 
   const canEdit =
-    propCanEdit !== undefined
-      ? propCanEdit
-      : isOwner || canUpdateBookingForms || canUpdateSettings;
-  const canCreateQuestion = isOwner || canCreateBookingForms || canEdit;
-  const canDeleteQuestion = isOwner || canDeleteBookingForms || canEdit;
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+    propCanEdit ??
+    (isOwner ||
+      canUpdateBookingForms ||
+      canCreateBookingForms ||
+      canUpdateSettings);
+  const canCreateQuestion =
+    propCanEdit ?? (isOwner || canCreateBookingForms || canUpdateBookingForms);
+  const canDeleteQuestion =
+    propCanEdit ?? (isOwner || canDeleteBookingForms || canUpdateBookingForms);
 
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
   // Standard system field statuses (required | optional | disabled)
   const [fieldStatuses, setFieldStatuses] = useState(() => {
     const fs = formFieldsForm.field_statuses || {};

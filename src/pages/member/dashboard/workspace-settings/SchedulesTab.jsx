@@ -326,7 +326,6 @@ export default function SchedulesTab({
   const [savingWeeklyRules, setSavingWeeklyRules] = useState(false);
   const [savingValidity, setSavingValidity] = useState(false);
 
-<<<<<<< HEAD
   // Schedule Copy Slots State
   const [copyState, setCopyState] = useState({
     isOpen: false,
@@ -351,65 +350,17 @@ export default function SchedulesTab({
   }, [copyState.isOpen, copyState.saving]);
 
   const getPopoverPosition = useCallback(() => {
-    if (!copyState.anchorRect) return {};
-
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-    if (isMobile) {
-      return {
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "min(calc(100vw - 32px), 360px)",
-        maxWidth: "360px",
-        maxHeight: "85vh",
-        zIndex: 999999,
-      };
-    }
-
-    const { anchorRect } = copyState;
-    const popoverWidth = 320;
-    const estimatedHeight = 390;
-    const padding = 16;
-
-    let top = anchorRect.bottom + 8;
-    if (top + estimatedHeight > window.innerHeight - padding) {
-      top = Math.max(padding, anchorRect.top - estimatedHeight - 8);
-    }
-
-    let left = "auto";
-    let right = "auto";
-
-    if (lang === "ar") {
-      right = window.innerWidth - anchorRect.right;
-      if (right + popoverWidth > window.innerWidth - padding) {
-        right = padding;
-      }
-      if (right < padding) {
-        right = padding;
-      }
-    } else {
-      left = anchorRect.left;
-      if (left + popoverWidth > window.innerWidth - padding) {
-        left = window.innerWidth - popoverWidth - padding;
-      }
-      if (left < padding) {
-        left = padding;
-      }
-    }
-
     return {
       position: "fixed",
-      top: `${top}px`,
-      ...(lang === "ar"
-        ? { right: `${right}px`, left: "auto" }
-        : { left: `${left}px`, right: "auto" }),
-      width: `${popoverWidth}px`,
-      maxWidth: `calc(100vw - ${padding * 2}px)`,
-      maxHeight: "calc(100vh - 32px)",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: "min(calc(100vw - 32px), 360px)",
+      maxWidth: "360px",
+      maxHeight: "85vh",
       zIndex: 999999,
     };
-  }, [copyState.anchorRect, lang]);
+  }, []);
 
   const handleOpenCopyModal = (dayKey, dayLabel, e) => {
     e.stopPropagation();
@@ -496,13 +447,6 @@ export default function SchedulesTab({
     );
     setCopyState((prev) => ({ ...prev, isOpen: false, saving: false }));
   };
-=======
-  // Copy slots to other days state
-  const [copyDropdownDay, setCopyDropdownDay] = useState(null);
-  const [copyTargetDays, setCopyTargetDays] = useState([]);
-  const copyDropdownRef = useRef(null);
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
   // --- Handlers ---
   const handleOpenCreateModal = () => {
     setModalForm({
@@ -693,54 +637,6 @@ export default function SchedulesTab({
     );
   };
 
-  // Copy day times to other days – click-outside handler
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        copyDropdownRef.current &&
-        !copyDropdownRef.current.contains(e.target)
-      ) {
-        setCopyDropdownDay(null);
-        setCopyTargetDays([]);
-      }
-    };
-    if (copyDropdownDay !== null) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [copyDropdownDay]);
-
-  const handleToggleCopyTarget = (dayKey) => {
-    setCopyTargetDays((prev) =>
-      prev.includes(dayKey)
-        ? prev.filter((k) => k !== dayKey)
-        : [...prev, dayKey],
-    );
-  };
-
-  const handleApplyCopySlots = (fromDayKey) => {
-    if (copyTargetDays.length === 0) return;
-    const sourceSlots = activeSchedule?.weekly_hours?.[fromDayKey] || [];
-    setSchedulesList((prev) =>
-      prev.map((s) => {
-        if (s.id === selectedScheduleId) {
-          const newWeeklyHours = { ...(s.weekly_hours || {}) };
-          copyTargetDays.forEach((targetDay) => {
-            newWeeklyHours[targetDay] = sourceSlots.map((slot) => ({
-              ...slot,
-            }));
-          });
-          return { ...s, weekly_hours: newWeeklyHours };
-        }
-        return s;
-      }),
-    );
-    setCopyDropdownDay(null);
-    setCopyTargetDays([]);
-    toast.success(t("slotsCopiedSuccess") || "تم نسخ الأوقات بنجاح");
-  };
-
   const handleSaveWeeklyRules = async () => {
     if (!activeSchedule) return;
 
@@ -864,7 +760,6 @@ export default function SchedulesTab({
       className="card-body"
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
-<<<<<<< HEAD
       {/* 1. Standard Workspace Header & Stats */}
       <WorkspacePageHeader
         title={
@@ -884,21 +779,6 @@ export default function SchedulesTab({
               type="button"
               className="btn btn-primary"
               onClick={handleOpenCreateModal}
-=======
-      {/* 1. Header Toolbar & Schedule Switcher Bar */}
-      <div className="schedules-tab-header">
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 4,
-              flexWrap: "wrap",
-            }}
-          >
-            <div
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -909,7 +789,6 @@ export default function SchedulesTab({
                 boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
               }}
             >
-<<<<<<< HEAD
               <Icon name="plus" size={18} />
               <span>
                 {t("newScheduleBtn") ||
@@ -951,45 +830,6 @@ export default function SchedulesTab({
           },
         ]}
       />
-=======
-              <Icon name="clock" size={18} />
-            </div>
-            <h2
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 800,
-                margin: 0,
-                color: "var(--heading)",
-              }}
-            >
-              {t("workspaceSchedules") || "الجداول والتوفر"}
-            </h2>
-          </div>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
-            {t("workspaceSchedulesDesc") ||
-              "ضبط أوقات وأيام العمل الفعالة لكل أسبوع، فترات الصلاحية، والاستثناءات المخصصة"}
-          </p>
-        </div>
-
-        {allowCreate && (
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleOpenCreateModal}
-            style={{ gap: 6 }}
-          >
-            <Icon name="plus" size={14} />
-            {t("newScheduleBtn") || "جدول جديد"}
-          </button>
-        )}
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       {/* 2. Schedule Selector Tabs */}
       {schedulesList.length === 0 ? (
         <div
@@ -1514,7 +1354,6 @@ export default function SchedulesTab({
                         )}
                       </div>
 
-<<<<<<< HEAD
                       {/* Action: Copy Slots & Add Slot */}
                       {canEdit && isDayEnabled && (
                         <div className="schedule-day-actions">
@@ -1534,20 +1373,6 @@ export default function SchedulesTab({
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm schedule-add-slot-btn"
-=======
-                      {/* Actions: Add Slot & Copy to Days */}
-                      {allowUpdate && isDayEnabled && (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                          }}
-                        >
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm"
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                             onClick={() => handleAddSlot(d.key)}
                             style={{
                               fontSize: "0.78rem",
@@ -1557,83 +1382,6 @@ export default function SchedulesTab({
                           >
                             {t("addTimeSlotBtn") || "+ إضافة فترة"}
                           </button>
-<<<<<<< HEAD
-=======
-                          <div
-                            style={{ position: "relative" }}
-                            ref={
-                              copyDropdownDay === d.key ? copyDropdownRef : null
-                            }
-                          >
-                            <button
-                              type="button"
-                              className="btn-copy-slots-trigger"
-                              onClick={() => {
-                                if (copyDropdownDay === d.key) {
-                                  setCopyDropdownDay(null);
-                                  setCopyTargetDays([]);
-                                } else {
-                                  setCopyDropdownDay(d.key);
-                                  setCopyTargetDays([]);
-                                }
-                              }}
-                              title={
-                                t("copySlotsToDays") || "نسخ للأيام الأخرى"
-                              }
-                            >
-                              <Icon name="copy" size={15} />
-                            </button>
-                            {copyDropdownDay === d.key && (
-                              <div className="copy-slots-dropdown">
-                                <div className="copy-slots-dropdown-header">
-                                  {t("copySlotsToDays") || "نسخ للأيام الأخرى"}
-                                </div>
-                                <div className="copy-slots-dropdown-list">
-                                  {daysList
-                                    .filter((dd) => dd.key !== d.key)
-                                    .map((dd) => (
-                                      <label
-                                        key={dd.key}
-                                        className="copy-slots-dropdown-item"
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          checked={copyTargetDays.includes(
-                                            dd.key,
-                                          )}
-                                          onChange={() =>
-                                            handleToggleCopyTarget(dd.key)
-                                          }
-                                          style={{
-                                            accentColor: "var(--primary)",
-                                            width: 16,
-                                            height: 16,
-                                            cursor: "pointer",
-                                          }}
-                                        />
-                                        <span>{dd.label}</span>
-                                      </label>
-                                    ))}
-                                </div>
-                                <div className="copy-slots-dropdown-actions">
-                                  <button
-                                    type="button"
-                                    className="btn btn-primary btn-sm"
-                                    onClick={() => handleApplyCopySlots(d.key)}
-                                    disabled={copyTargetDays.length === 0}
-                                    style={{
-                                      fontSize: "0.78rem",
-                                      fontWeight: 700,
-                                      padding: "6px 16px",
-                                    }}
-                                  >
-                                    {t("applyCopyBtn") || "تطبيق"}
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                         </div>
                       )}
                     </div>

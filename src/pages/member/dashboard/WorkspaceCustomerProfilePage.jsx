@@ -7,14 +7,9 @@ import { useToast } from "../../../context/ToastContext";
 import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
-import ModalPortal from "../../../components/common/ModalPortal";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
-<<<<<<< HEAD
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
-=======
 import { formatCurrency } from "../../../utils/currency";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
   const { user } = useAuth();
@@ -2399,7 +2394,6 @@ export default function WorkspaceCustomerProfilePage() {
       )}
 
       {/* Edit Customer Modal */}
-<<<<<<< HEAD
       {isEditModalOpen &&
         createPortal(
           <div
@@ -2414,37 +2408,6 @@ export default function WorkspaceCustomerProfilePage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
-=======
-      {isEditModalOpen && (
-        <ModalPortal>
-          <div
-            className="modal-overlay animate-fade-in"
-            onClick={() => setIsEditModalOpen(false)}
-          >
-            <div
-              className="modal-container glass-card animate-scale-in"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-lg, 16px)",
-                width: "100%",
-                maxWidth: 580,
-                maxHeight: "90vh",
-                overflowY: "auto",
-                padding: 24,
-                boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 20,
-                }}
-              >
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div
                     style={{
@@ -2460,7 +2423,6 @@ export default function WorkspaceCustomerProfilePage() {
                   >
                     <Icon name="edit-2" size={20} />
                   </div>
-<<<<<<< HEAD
                   <h3 className="modal-title">{editCustomerBtn}</h3>
                 </div>
                 <button
@@ -2469,32 +2431,6 @@ export default function WorkspaceCustomerProfilePage() {
                   onClick={() => setIsEditModalOpen(false)}
                 >
                   <Icon name="x" size={18} />
-=======
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "1.2rem",
-                      fontWeight: 800,
-                      color: "var(--heading)",
-                    }}
-                  >
-                    {(t("editPrefix") || "تعديل بيانات") +
-                      " " +
-                      customerSingular}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  <Icon name="x" size={20} />
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                 </button>
               </div>
 
@@ -2503,10 +2439,7 @@ export default function WorkspaceCustomerProfilePage() {
                   e.preventDefault();
                   handleSaveCustomer();
                 }}
-<<<<<<< HEAD
                 className="modal-body"
-=======
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               >
                 <div
                   className="form-row"
@@ -2706,14 +2639,7 @@ export default function WorkspaceCustomerProfilePage() {
                       <option value="active">
                         {t("filterStatusActive") || "نشط"}
                       </option>
-<<<<<<< HEAD
                       <option value="vip">{vipCustomer}</option>
-=======
-                      <option value="vip">
-                        {t("filterStatusVip") ||
-                          `${customerSingular} مميز (VIP)`}
-                      </option>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                       <option value="lead">
                         {t("filterStatusLead") || "محتمل / جديد"}
                       </option>
@@ -2728,19 +2654,7 @@ export default function WorkspaceCustomerProfilePage() {
                 </div>
 
                 {/* Action Buttons */}
-<<<<<<< HEAD
                 <div className="modal-actions" style={{ marginTop: 16 }}>
-=======
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                    gap: 10,
-                    marginTop: 16,
-                  }}
-                >
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -2761,16 +2675,9 @@ export default function WorkspaceCustomerProfilePage() {
                 </div>
               </form>
             </div>
-<<<<<<< HEAD
           </div>,
           document.body,
         )}
-=======
-          </div>
-        </ModalPortal>
-      )}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       {/* Quick Booking Modal */}
       {isBookingModalOpen && customer && (
         <CreateBookingModal

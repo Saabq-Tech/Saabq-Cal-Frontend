@@ -15,15 +15,12 @@ export default function RolesTab({
   onSaveRole,
   onDeleteRole,
 }) {
-<<<<<<< HEAD
-  const { t, isRTL } = useLanguage();
-  const { isCustom, customerPlural: custPlural } = useCustomerLabel();
-=======
   const allowCreate = canCreate !== undefined ? canCreate : canEdit;
   const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
   const allowDelete = canDelete !== undefined ? canDelete : canEdit;
-  const { t } = useLanguage();
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerPlural: custPlural } = useCustomerLabel();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleLangTab, setRoleLangTab] = useState("ar");
   const [roleForm, setRoleForm] = useState({
@@ -151,7 +148,6 @@ export default function RolesTab({
       category: isCustom ? custPlural : t("cat_customers") || "العملاء",
       permissions: [
         {
-<<<<<<< HEAD
           value: "customer_write",
           label: isCustom
             ? isRTL
@@ -160,8 +156,6 @@ export default function RolesTab({
             : t("permCustomerWrite") || "إضافة وتعديل العملاء",
         },
         {
-=======
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           value: "customer_read",
           label: isCustom
             ? isRTL
@@ -589,7 +583,6 @@ export default function RolesTab({
 
   return (
     <div className="card-body">
-<<<<<<< HEAD
       {/* Header Section & KPI Stats */}
       <WorkspacePageHeader
         title={
@@ -604,7 +597,7 @@ export default function RolesTab({
         }
         icon="shield"
         actions={
-          canEdit ? (
+          allowCreate ? (
             <button
               type="button"
               className="btn btn-primary"
@@ -664,47 +657,6 @@ export default function RolesTab({
           },
         ]}
       />
-=======
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceRoles") || "أدوار مساحة العمل والصلاحيات"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceRolesDesc") ||
-              "إنشاء وتحديد الصلاحيات الخاصة لكل دور مخصص"}
-          </p>
-        </div>
-        {allowCreate && (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-            + {t("addRole") || "إضافة دور جديد"}
-          </button>
-        )}
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       <div
         style={{
           display: "grid",

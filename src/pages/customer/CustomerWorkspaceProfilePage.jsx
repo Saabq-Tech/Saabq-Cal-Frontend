@@ -12,18 +12,12 @@ import {
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
 import { stripHtml } from "../../utils/htmlUtils";
+import { getWorkspaceVibe } from "../../utils/workspaceVibe";
 import {
   applyWorkspaceBranding,
-<<<<<<< HEAD
   resetWorkspaceBranding,
 } from "../../utils/theme";
 import { useCustomerLabel } from "../../hooks/useCustomerLabel";
-=======
-  applyWorkspaceVibeTheme,
-} from "../../utils/theme";
-import { getWorkspaceVibe } from "../../utils/workspaceVibe";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
   const [searchParams] = useSearchParams();
@@ -33,14 +27,11 @@ export default function WorkspaceProfilePage() {
   const isBookMode = searchParams.has("book");
 
   const [workspace, setWorkspace] = useState(null);
-<<<<<<< HEAD
-  const { customerPlural, isCustom } = useCustomerLabel(workspace);
-=======
   const vibe = useMemo(
     () => getWorkspaceVibe(workspace, isRTL ? "ar" : "en"),
     [workspace, isRTL],
   );
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+  const { customerPlural, isCustom } = useCustomerLabel(workspace);
   const [services, setServices] = useState([]);
   const [specialistRoles, setSpecialistRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,35 +104,9 @@ export default function WorkspaceProfilePage() {
   // Apply workspace custom colors & industry vibe dynamically
   useEffect(() => {
     if (workspace) {
-<<<<<<< HEAD
       applyWorkspaceBranding(workspace);
       return () => {
         resetWorkspaceBranding();
-=======
-      applyWorkspaceBranding(
-        workspace.primary_color,
-        workspace.secondary_color,
-        workspace.hover_color,
-        vibe.key,
-      );
-      applyWorkspaceVibeTheme(vibe.key);
-      return () => {
-        const storedUser = localStorage.getItem("saabq_user");
-        let prevWs = null;
-        try {
-          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
-        } catch {}
-        const prevVibe = prevWs
-          ? getWorkspaceVibe(prevWs, isRTL ? "ar" : "en").key
-          : null;
-        applyWorkspaceBranding(
-          prevWs?.primary_color || null,
-          prevWs?.secondary_color || null,
-          prevWs?.hover_color || null,
-          prevVibe,
-        );
-        applyWorkspaceVibeTheme(prevVibe);
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       };
     }
   }, [workspace, vibe.key, isRTL]);

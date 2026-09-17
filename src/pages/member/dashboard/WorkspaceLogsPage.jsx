@@ -8,17 +8,12 @@ import client, { endpoints } from "../../../api/client";
 import LogsTab from "./workspace-settings/LogsTab";
 import SEO from "../../../components/ui/SEO";
 import Icon from "../../../components/common/Icon";
-import ModalPortal from "../../../components/common/ModalPortal";
 import { TableSkeleton } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
+import { getCurrencySymbol } from "../../../utils/currency";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
-<<<<<<< HEAD
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
-=======
-import { getCurrencySymbol } from "../../../utils/currency";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 export default function WorkspaceLogsPage() {
   const { user } = useAuth();
   const { isOwner, canReadSettings, canReadBookings, canReadCustomers } =
@@ -533,7 +528,6 @@ export default function WorkspaceLogsPage() {
         noindex
       />
 
-<<<<<<< HEAD
       {/* Standard Workspace Header & Tab Switcher */}
       <WorkspacePageHeader
         title={lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
@@ -554,65 +548,6 @@ export default function WorkspaceLogsPage() {
               display: "inline-flex",
             }}
           >
-=======
-      {/* Page Header & Navigation Tabs */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-          background: "var(--surface)",
-          padding: "20px 24px",
-          borderRadius: 16,
-          border: "1px solid var(--border)",
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: "1.45rem",
-              fontWeight: 800,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              margin: "0 0 6px",
-            }}
-          >
-            <Icon name="bar-chart" size={26} color="var(--primary)" />
-            <span>
-              {lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
-            </span>
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "0.88rem",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {lang === "ar"
-              ? "لوحة كاملة لمؤشرات الأداء والتحليل المالي ومتابعة النشاطات"
-              : "Comprehensive hub for operational metrics, financial trajectory, and audit trails"}
-          </p>
-        </div>
-
-        {/* Tab Switcher */}
-        <div
-          className="analytics-tabs"
-          style={{
-            background: "var(--bg)",
-            border: "1px solid var(--border)",
-            padding: 4,
-            borderRadius: 12,
-            display: "inline-flex",
-          }}
-        >
-          {(isOwner || canReadAnalytics) && (
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             <button
               type="button"
               className={`analytics-tab-btn ${activeTab === "analytics" ? "active" : ""}`}
@@ -622,14 +557,9 @@ export default function WorkspaceLogsPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 18px",
-<<<<<<< HEAD
                 fontSize: "0.85rem",
                 fontWeight: 700,
                 borderRadius: 8,
-=======
-                fontSize: "0.88rem",
-                fontWeight: 700,
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               }}
             >
               <Icon name="bar-chart" size={16} />
@@ -639,13 +569,6 @@ export default function WorkspaceLogsPage() {
                   : "Analytics & Performance Hub"}
               </span>
             </button>
-<<<<<<< HEAD
-
-=======
-          )}
-
-          {(isOwner || canReadLogs) && (
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             <button
               type="button"
               className={`analytics-tab-btn ${activeTab === "logs" ? "active" : ""}`}
@@ -655,14 +578,9 @@ export default function WorkspaceLogsPage() {
                 alignItems: "center",
                 gap: 8,
                 padding: "8px 18px",
-<<<<<<< HEAD
                 fontSize: "0.85rem",
                 fontWeight: 700,
                 borderRadius: 8,
-=======
-                fontSize: "0.88rem",
-                fontWeight: 700,
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               }}
             >
               <Icon name="shield" size={16} />
@@ -672,16 +590,9 @@ export default function WorkspaceLogsPage() {
                   : "Audit & Activity Logs"}
               </span>
             </button>
-<<<<<<< HEAD
           </div>
         }
       />
-=======
-          )}
-        </div>
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       {/* ── TAB 1: Analytics & Performance Reports ── */}
       {activeTab === "analytics" &&
         (analyticsLoading && bookings.length === 0 ? (
@@ -1597,36 +1508,10 @@ export default function WorkspaceLogsPage() {
                                   style={{
                                     padding: "4px 12px",
                                     fontSize: "0.76rem",
-<<<<<<< HEAD
                                     textDecoration: "none",
                                     display: "inline-flex",
                                     alignItems: "center",
                                     justifyContent: "center",
-=======
-                                  }}
-                                  onClick={() => {
-                                    setSelectedBookingModal({
-                                      id: b.id,
-                                      name: cName,
-                                      service: sName,
-                                      time: timeStr,
-                                      date: dateStr,
-                                      price: !isNaN(price)
-                                        ? `${price.toLocaleString()} ${getCurrencySymbol(b.snapshot?.currency || stats.currency, lang === "ar")}`
-                                        : "—",
-                                      status: st,
-                                      phone:
-                                        b.customer_phone ||
-                                        b.customer?.phone ||
-                                        "—",
-                                      email:
-                                        b.customer_email ||
-                                        b.customer?.email ||
-                                        "—",
-                                      notes: b.notes || "—",
-                                      rawBooking: b,
-                                    });
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                                   }}
                                 >
                                   {lang === "ar" ? "تفاصيل" : "Details"}
@@ -1690,201 +1575,6 @@ export default function WorkspaceLogsPage() {
           )}
         </div>
       )}
-<<<<<<< HEAD
-=======
-
-      {/* Appointment Detail Quick Modal */}
-      {selectedBookingModal && (
-        <ModalPortal>
-          <div
-            className="modal-overlay"
-            onClick={() => setSelectedBookingModal(null)}
-          >
-            <div
-              className="modal-content animate-pop-in"
-              onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: 480, padding: 24 }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 16,
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.15rem",
-                    fontWeight: 700,
-                    color: "var(--heading)",
-                  }}
-                >
-                  {lang === "ar" ? "تفاصيل الميعاد" : "Appointment Details"}
-                </h3>
-                <button
-                  type="button"
-                  className="btn-icon"
-                  onClick={() => setSelectedBookingModal(null)}
-                >
-                  <Icon name="x" size={18} />
-                </button>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 12,
-                  fontSize: "0.88rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {custSingular}:
-                  </span>
-                  <span style={{ fontWeight: 700 }}>
-                    {selectedBookingModal.name}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {lang === "ar" ? "الخدمة" : "Service"}:
-                  </span>
-                  <span style={{ fontWeight: 700 }}>
-                    {selectedBookingModal.service}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {lang === "ar" ? "الميعاد" : "Date & Time"}:
-                  </span>
-                  <span style={{ fontWeight: 700 }}>
-                    {selectedBookingModal.date} ({selectedBookingModal.time})
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {lang === "ar" ? "السعر" : "Price"}:
-                  </span>
-                  <span style={{ fontWeight: 700 }}>
-                    {selectedBookingModal.price}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {lang === "ar" ? "الموبايل" : "Phone"}:
-                  </span>
-                  <span style={{ fontWeight: 600 }}>
-                    {selectedBookingModal.phone}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "8px 12px",
-                    background: "var(--bg)",
-                    borderRadius: 8,
-                  }}
-                >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    {lang === "ar" ? "الحالة" : "Status"}:
-                  </span>
-                  <span
-                    className={`table-status-badge status-${selectedBookingModal.status}`}
-                  >
-                    <span className="badge-dot" />
-                    <span>
-                      {selectedBookingModal.status === "completed"
-                        ? lang === "ar"
-                          ? "مكتملة"
-                          : "Completed"
-                        : selectedBookingModal.status === "pending"
-                          ? lang === "ar"
-                            ? "مستنية التأكيد"
-                            : "Pending"
-                          : selectedBookingModal.status === "cancelled"
-                            ? lang === "ar"
-                              ? "ملغية"
-                              : "Cancelled"
-                            : lang === "ar"
-                              ? "متأكدة"
-                              : "Confirmed"}
-                    </span>
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
-                <Link
-                  to={`/member/workspace/bookings/${selectedBookingModal.id}`}
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
-                >
-                  {lang === "ar"
-                    ? "افتح صفحة الحجز كاملة"
-                    : "Open Full Booking"}
-                </Link>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setSelectedBookingModal(null)}
-                >
-                  {lang === "ar" ? "إغلاق" : "Close"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </ModalPortal>
-      )}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     </div>
   );
 }

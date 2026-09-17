@@ -3,11 +3,7 @@ export const translations = {
     installApp: "تثبيت التطبيق",
     installAppTitle: "تثبيت تطبيق تقويم سابق",
     installAppDesc:
-<<<<<<< HEAD
       "ثبّت التطبيق على جهازك للحصول على تجربة أسرع وشاشة كاملة ووصول مباشر من شاشتك الرئيسية.",
-=======
-      "قم بتثبيت التطبيق على جهازك للحصول على تجربة أسرع وشاشة كاملة ووصول سريع من شاشتك الرئيسية.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     installManualInstruction:
       "انقر على قائمة المتصفح أو أيقونة المشاركة، واختر 'إضافة إلى الشاشة الرئيسية'.",
     pageTitleHome: "تقويم سابق — الجدولة وإدارة المواعيد الذكية",
@@ -74,11 +70,7 @@ export const translations = {
     noServicesFound: "لا توجد خدمات متاحة حالياً في مساحة العمل هذه",
     checkAvailability: "فحص الأوقات المتاحة",
     bookAppointment: "حجز موعد",
-<<<<<<< HEAD
     signin_required_booking: "يرجى تسجيل الدخول أولاً لإتمام حجز الموعد",
-=======
-    signin_required_booking: "يرجى تسجيل الدخول أولاً لإكمال حجز الموعد",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     currency_unconfigured_error:
       "تعذر إكمال الحجز بسبب عدم ضبط عملة الخدمة في مساحة العمل",
     durationMinutes: "دقيقة",
@@ -103,11 +95,7 @@ export const translations = {
     signUp: "إنشاء حساب",
     setupWorkspaceTitle: "إعداد مساحة العمل الخاصة بك",
     setupWorkspaceDesc:
-<<<<<<< HEAD
       "يرجى إدخال اسم وتفاصيل مساحة العمل لمتابعة تسجيل الدخول بحساب Google.",
-=======
-      "يرجى كتابة اسم وتفاصيل مساحة العمل لإكمال تسجيل الدخول بحساب Google.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     workspaceSlug: "رابط مساحة العمل المعرف (Slug)",
     workspaceType: "تصنيف مساحة العمل",
     selectWorkspaceType: "اختر نوع مساحة العمل",
@@ -212,11 +200,7 @@ export const translations = {
     channelsBadge: "قريباً",
     channelsTitle: "تواصل مع عملائك من مكان واحد",
     channelsDesc:
-<<<<<<< HEAD
       "قريباً، ستتمكن من التواصل مع عملائك عبر قنوات المراسلة التي يفضلونها يومياً، مثل واتساب وماسنجر وإنستغرام ورسائل SMS وغيرها، دون الحاجة للتنقل بين منصات متعددة.",
-=======
-      "قريباً، ستتمكن من التواصل مع عملائك عبر قنوات التواصل التي يستخدمونها يومياً، مثل واتساب، ماسنجر، إنستغرام، ورسائل SMS وغيرها، دون الحاجة للتنقل بين منصات أخرى.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     channelsFooter: "قنوات تواصل متعددة لعملاء أكثر وتفاعل أفضل",
     channelMessenger: "ماسنجر",
     channelInstagram: "إنستغرام",
@@ -248,11 +232,7 @@ export const translations = {
     authorBy: "بواسطة",
     shareArticle: "مشاركة المقال",
     relatedArticles: "مقالات ذات صلة",
-<<<<<<< HEAD
     noArticlesFound: "لم يتم العثور على مقالات مطابقة لبحثك",
-=======
-    noArticlesFound: "لم نجد أي مقالات مطابقة لبحثك",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     clearFilters: "مسح الفلاتر",
     featuredArticle: "مقال مميز",
     backToBlog: "العودة إلى المدونة",
@@ -262,12 +242,7 @@ export const translations = {
       "أنشئ مساحة عملك على تقويم سابق وابدأ باستقبال الحجوزات الذكية خلال دقائق.",
     createWorkspaceNow: "أنشئ مساحة عملك الآن",
     viewsCount: "مشاهدة",
-<<<<<<< HEAD
     googleSheetsCreatedSuccessfully: "تم إنشاء وتنسيق جدول Google Sheets بنجاح",
-=======
-    googleSheetsCreatedSuccessfully:
-      "تم إنشاء جدول Google Sheets وتنسيقه بنجاح",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     heroTitlePrefix: "تحكم في جدول ",
     heroTitleSpan: "مواعيدك بكفاءة",
     heroDescription:
@@ -301,11 +276,7 @@ export const translations = {
     whyBadge1: "روابط Google Meet تلقائية",
     whyBadge2: "اتصال مشفر بالكامل (HTTPS)",
     whyBadge3: "تأكيدات وتذكيرات بالبريد",
-<<<<<<< HEAD
     whyBadge4: "دون الحاجة لتثبيت تطبيق — مباشرة من المتصفح",
-=======
-    whyBadge4: "بدون تطبيق — مباشرة من المتصفح",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     aboutTitle: "عن تقويم سابق",
     aboutBodyFallback1:
       "تقويم سابق هي منصة ذكية لجدولة وإدارة المواعيد تهدف لمساعدة الشركات والمهنيين على تنظيم أوقاتهم بكفاءة عالية.",
@@ -346,11 +317,7 @@ export const translations = {
     passkey: "مفتاح المرور (Passkey) (Passkey)",
     accountCreatedVerifyEmail:
       "تم إنشاء الحساب بنجاح! يرجى تأكيد بريدك الإلكتروني.",
-<<<<<<< HEAD
     registrationFailed: "فشل إنشاء الحساب.",
-=======
-    registrationFailed: "إنشاء الحساب منجحش.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     loginSuccess: "تم تسجيل الدخول بنجاح! مرحباً بك مجدداً.",
     invalidCredentials: "بيانات الاعتماد غير صحيحة.",
     googleAuthSuccess: "تم تسجيل الدخول عبر Google بنجاح!",
@@ -365,11 +332,7 @@ export const translations = {
     resetPasswordButton: "إعادة تعيين كلمة المرور",
     passwordResetSuccess:
       "تم تغيير كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.",
-<<<<<<< HEAD
     failedToSendResetCode: "فشل إرسال رمز إعادة التعيين.",
-=======
-    failedToSendResetCode: "إرسال كود إعادة التعيين منجحش.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     passwordsDoNotMatch: "كلمتا المرور غير متطابقتين.",
     changeEmail: "تغيير البريد الإلكتروني",
     checkInbox: "يرجى مراجعة صندوق الوارد في بريدك الإلكتروني.",
@@ -387,11 +350,7 @@ export const translations = {
     verificationSuccess:
       "تم تأكيد البريد الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.",
     emailNotVerifiedNotice:
-<<<<<<< HEAD
       "يرجى تأكيد بريدك الإلكتروني لمتابعة استخدام الحساب.",
-=======
-      "يرجى تأكيد بريدك الإلكتروني لإكمال استخدام الحساب.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     backToSignIn: "العودة لتسجيل الدخول",
     profileInfo: "معلومات الملف الشخصي",
     updatePersonalDetails: "تحديث بياناتك الشخصية",
@@ -417,7 +376,6 @@ export const translations = {
     updatePasswordBtn: "تحديث كلمة المرور",
     twoFactorInitialized:
       "بدأ إعداد التحقق بخطوتين. يرجى مسح رمز QR أو إدخال المفتاح للتأكيد.",
-<<<<<<< HEAD
     twoFactorEnabledSuccess: "تم تفعيل التحقق بخطوتين بنجاح!",
     twoFactorDisableConfirm: "هل أنت متأكد من رغبتك في تعطيل التحقق بخطوتين؟",
     twoFactorDisabledSuccess: "تم تعطيل التحقق بخطوتين.",
@@ -425,29 +383,14 @@ export const translations = {
     passkeyDeleteConfirm: "هل أنت متأكد من رغبتك في حذف مفتاح المرور هذا؟",
     passkeyDeletedSuccess: "تم حذف مفتاح المرور.",
     googleConnectedSuccess: "تم ربط حساب Google بنجاح!",
-=======
-    twoFactorEnabledSuccess: "التحقق بخطوتين اتفعل بنجاح!",
-    twoFactorDisableConfirm: "هل أنت متأكد من رغبتك في تعطيل التحقق بخطوتين؟",
-    twoFactorDisabledSuccess: "التحقق بخطوتين اتعطل.",
-    passkeyRegisteredSuccess: "مفتاح المرور (Passkey) اتسجل بنجاح!",
-    passkeyDeleteConfirm:
-      "هل أنت متأكد من رغبتك في حذف مفتاح المرور (Passkey) هذا؟",
-    passkeyDeletedSuccess: "تم حذف مفتاح المرور (Passkey).",
-    googleConnectedSuccess: "حساب جوجل اتربط بنجاح!",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     googleDisconnectConfirm: "هل أنت متأكد من رغبتك في إلغاء ربط حساب Google؟",
     googleDisconnectedSuccess: "تم إلغاء ربط حساب Google.",
     verifyEmailOtpTitle: "رمز تأكيد البريد الإلكتروني",
     verifyEmailOtpDesc: "اكتب رمز OTP المكون من 6 أرقام المرسل إلى",
     registerPasskeyTitle: "تسجيل مفتاح مرور جديد",
     registerPasskeyDesc:
-<<<<<<< HEAD
       "أدخل اسماً لمفتاح المرور الخاص بك (مثلاً: بصمة الحاسوب أو بصمة الوجه).",
     passkeyNameLabel: "اسم مفتاح المرور",
-=======
-      "أدخل اسماً لمفتاح المرور الخاص بك (مثلاً: بصمة الإصبع أو التعرف على الوجه).",
-    passkeyNameLabel: "اسم مفتاح المرور (Passkey)",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     passkeyPlaceholder: "مثال: لابتوب العمل",
     registerBtn: "تسجيل",
     recoveryCodesTitle: "أكواد الاسترداد (2FA)",
@@ -460,15 +403,9 @@ export const translations = {
     deleteAccountBtn: "حذف الحساب نهائياً",
     deleteAccountModalTitle: "تأكيد حذف الحساب",
     deleteAccountModalDesc:
-<<<<<<< HEAD
       "هل أنت متأكد من رغبتك في حذف حسابك؟ سيتم حذف كافة الرموز والبيانات المرتبطة بالحساب نهائياً.",
     deleteAccountPasswordPrompt:
       "يرجى إدخال كلمة المرور الحالية لتأكيد حذف الحساب:",
-=======
-      "هل أنت متأكد من رغبتك في حذف حسابك؟ سيتم حذف جميع البيانات المرتبطة بالحساب نهائياً.",
-    deleteAccountPasswordPrompt:
-      "يرجى كتابة كلمة المرور الحالية لتأكيد حذف الحساب:",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     deleteAccountPasswordPlaceholder: "أدخل كلمة المرور الحالية",
     deleteAccountSuccess: "تم حذف الحساب بنجاح",
     confirmDeleteAccount: "حذف الحساب",
@@ -586,19 +523,11 @@ export const translations = {
     dateFormatLabel: "صيغة التاريخ",
     minNoticeHoursLabel: "الحد الأدنى للإشعار المسبق (بالساعات)",
     noActiveSubscriptionBanner:
-<<<<<<< HEAD
       "تنبيه: مساحة العمل ليس لديها اشتراك نشط. تم تقييد الميزات المتقدمة حتى يتم تفعيل الاشتراك.",
     noSubscriptionTitle: "لا يوجد اشتراك نشط لمساحة العمل",
     noSubscriptionDesc:
       "مساحة العمل الخاصة بك ليس لديها اشتراك مفعّل. يرجى الاشتراك في إحدى الباقات للاستفادة من كافة المميزات.",
     capabilityLockedTitle: "هذه الميزة غير متاحة في باقتك الحالية",
-=======
-      "تنبيه: لا يوجد اشتراك نشط لمساحة العمل. تم تقييد الميزات المتقدمة حتى يتم تفعيل الاشتراك.",
-    noSubscriptionTitle: "لا يوجد اشتراك نشط لمساحة العمل",
-    noSubscriptionDesc:
-      "مساحة العمل الخاصة بك ليس لديها اشتراك نشط. يرجى الاشتراك في إحدى الباقات للاستفادة من كافة المميزات.",
-    capabilityLockedTitle: "هذه الميزة غير متوفرة في باقتك الحالية",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     capabilityLockedDesc:
       "الميزة المطلوبة تتطلب ترقية باقة الاشتراك الخاصة بمساحة العمل للوصول إليها واستخدامها.",
     planCapabilitiesLabel: "الإمكانيات والمميزات المتاحة:",
@@ -643,24 +572,14 @@ export const translations = {
     sendTestEmail: "إرسال رسالة تجريبية",
     testEmailSent: "تم إرسال الرسالة التجريبية بنجاح!",
     resetLinkSent: "تم إرسال رمز إعادة تعيين كلمة المرور إلى بريدك الإلكتروني!",
-<<<<<<< HEAD
     checkYourEmail: "يرجى التحقق من بريدك الإلكتروني واتباع التعليمات.",
-=======
-    checkYourEmail: "من فضلك التحقق من إيميلك واتباع التعليمات.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     sendResetLink: "إرسال رابط إعادة التعيين",
     weekStartsOn: "بداية الأسبوع",
     websiteUrl: "رابط الموقع (Website URL)",
     bufferMinutes: "الوقت البيني الحائل (بالدقائق)",
-<<<<<<< HEAD
     settingsUpdatedSuccess: "تم تحديث إعدادات مساحة العمل بنجاح!",
     twoFactorCodeRequired: "رمز التحقق بخطوتين مطلوب.",
     googleSdkLoading: "جاري تحميل خدمات Google. يرجى المحاولة بعد قليل.",
-=======
-    settingsUpdatedSuccess: "إعدادات مساحة العمل اتحدثت بنجاح!",
-    twoFactorCodeRequired: "كود التحقق بخطوتين مطلوب.",
-    googleSdkLoading: "جاري تحميل خدمات جوجل. من فضلك المحاولة بعد لحظات.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     passkeyAuthCancelled:
       "تم إلغاء المصادقة بمفتاح المرور أو لا يوجد مفتاح مسجل.",
     namePlaceholder: "أحمد محمد",
@@ -704,19 +623,11 @@ export const translations = {
     passkeysTitle: "مفاتيح المرور (Passkeys) (Passkeys)",
     passkeysDesc: "تسجيل الدخول الآمن باستخدام البصمة أو التعرف على الوجه",
     addPasskey: "+ إضافة مفتاح مرور",
-<<<<<<< HEAD
     passkeyName: "اسم مفتاح المرور",
     noPasskeys: "لا توجد مفاتيح مرور مسجلة بعد.",
     workspaceSettingsDesc: "إدارة الهوية البصرية، النطاق الزمني، وقواعد الحجز",
     noWorkspacePermission:
       "ليس لديك صلاحية لتعديل أو عرض إعدادات مساحة العمل. اطلب من مالك مساحة العمل منحك صلاحية settings_write.",
-=======
-    passkeyName: "اسم مفتاح المرور (Passkey)",
-    noPasskeys: "لا توجد مفاتيح مرور مسجلة حتى الآن.",
-    workspaceSettingsDesc: "إدارة الهوية البصرية، النطاق الزمني، وقواعد الحجز",
-    noWorkspacePermission:
-      "ليس لديك صلاحية لتعديل أو عرض إعدادات مساحة العمل. يرجى طلب صلاحية settings_write من مالك المساحة.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     basicInfoTab: "البيانات الأساسية",
     brandingTab: "الهوية البصرية",
     timezoneTab: "المنطقة الزمنية والوقت",
@@ -743,13 +654,8 @@ export const translations = {
       "أقصى مدى زمني في المستقبل يقدر العميل حجز المواعيد خلاله.",
     completeWorkspaceDetails: "إكمال بيانات مساحة العمل (الخطوة 2)",
     workspaceDetailsDesc:
-<<<<<<< HEAD
       "يرجى إدخال بيانات مساحة العمل الخاصة بك لإكمال إنشاء حسابك عبر Google",
     phone: "رقم الهاتف",
-=======
-      "يرجى كتابة بيانات مساحة العمل الخاصة بك لإكمال إنشاء حسابك عبر Google",
-    phone: "رقم التليفون",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     workspaceNameRequired: "اسم مساحة العمل مطلوب",
     workspaceTypeRequired: "تصنيف مساحة العمل مطلوب",
     applicationsTitle: "التطبيقات والربط",
@@ -822,11 +728,7 @@ export const translations = {
     statusPendingApproval: "بانتظار موافقة الإدارة",
     workspaceLockedTitle: "صفحات مساحة العمل بانتظار الموافقة",
     workspaceLockedDesc:
-<<<<<<< HEAD
       "لا يمكنك تصفح أو تعديل بيانات مساحة العمل لأن الحساب غير مفعّل بعد أو بانتظار موافقة إدارة المنصة. يمكنك إكمال تعديل ملفك الشخصي والتواصل مع الدعم الفني.",
-=======
-      "لا تقدر تصفح أو تعديل بيانات مساحة العمل لأن الحساب قيد المراجعة وبانتظار موافقة إدارة المنصة. تقدر التواصل مباشرة مع فريق الدعم الفني عبر المحادثات لتسريع التفعيل، أو إدارة ملفك الشخصي.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     brandingAndIdentity: "الهوية والعلامة التجارية",
     logo: "شعار التطبيق (الفاتح)",
     coverImage: "صورة الغلاف",
@@ -911,11 +813,7 @@ export const translations = {
     connectedAccountLabel: "الحساب المرتبط حالياً",
     connectionDate: "تاريخ الربط:",
     noGoogleConnectedNotice:
-<<<<<<< HEAD
       "لا يوجد أي حساب Google مرتبط حتى الآن. انقر على الزر أدناه للربط بأمان.",
-=======
-      "لم يتم ربط أي حساب Google حتى الآن. انقر على الزر أدناه للربط بأمان.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     googleNotConnectedBannerTitle: "تنبيه هام: حساب Google غير مرتبط",
     googleNotConnectedBannerDesc:
       "حساب Google الخاص بك غير مرتبط حالياً. لن تتم مزامنة المواعيد أو إنشاء روابط Google Meet تلقائياً حتى تقوم بربط حسابك.",
@@ -947,15 +845,10 @@ export const translations = {
     testRowAddedSuccess: "تمت إضافة صف تجريبي في جدول البيانات بنجاح.",
     createSheetAuto: "إنشاء جدول Google Sheets تلقائياً",
     createSheetAutoDesc:
-<<<<<<< HEAD
       "لا يوجد جدول بيانات مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة.",
-=======
-      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     creatingSheet: "جاري إنشاء الشيت...",
     testingSheet: "جاري اختبار الاتصال...",
     recreateSheetAuto: "إعادة إنشاء جدول جديد بتنسيق النظام",
-    statusCompleted: "مكتمل",
     statusUpdatedSuccess: "تم تحديث حالة الموعد بنجاح",
     bookingCancelledSuccess: "تم إلغاء الموعد بنجاح",
     copiedToClipboard: "تم نسخ النص إلى الحافظة",
@@ -976,13 +869,8 @@ export const translations = {
     processing: "جاري المعالجة...",
     confirmAction: "تأكيد الإجراء",
     viewDetails: "عرض التفاصيل",
-<<<<<<< HEAD
     cannotChangeCompletedStatus: "لا يمكن تغيير حالة موعد مكتمل بالفعل",
     cannotCancelCompletedStatus: "لا يمكنك إلغاء موعد مكتمل بالفعل",
-=======
-    cannotChangeCompletedStatus: "لا تقدر تغير حالة موعد مكتمل بالفعل",
-    cannotCancelCompletedStatus: "متقدرش تلغي موعد مكتمل بالفعل",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     attachedReceiptImage: "صورة إيصال التحويل المرفقة",
     enterCancelReasonPlaceholder: "اكتب سبب إلغاء الموعد...",
     failed: "فشل الإجراء",
@@ -993,14 +881,9 @@ export const translations = {
     currentPlanActive: "الخطة المفعلة حالياً",
     requestedPlan: "الخطة المطلوبة",
     activeSubscription: "● اشتراك نشط",
-    statusPending: "قيد الانتظار",
     pendingSubscriptionTitle: "طلب الاشتراك قيد المراجعة",
     pendingSubscriptionDesc:
-<<<<<<< HEAD
       "تم تقديم طلب الاشتراك الخاص بمساحة العمل وهو قيد المراجعة حالياً من قبل الإدارة. سيتم تفعيل المميزات فور الاعتماد.",
-=======
-      "تم تقديم طلب الاشتراك لمساحة العمل وهو قيد المراجعة حالياً من الإدارة. سيتم تفعيل المميزات فور الاعتماد.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     subscriptionRequestSubmitted:
       "تم تقديم طلب الاشتراك بنجاح، وطلبك في انتظار موافقة الإدارة.",
     failedToLoadNotifications: "حدث خطأ أثناء تحميل الإشعارات",
@@ -1042,7 +925,8 @@ export const translations = {
     availableSlotsMode: "الأوقات المتاحة للخدمة",
     enterCustomerNamePrompt: "يرجى إدخال اسم العميل",
     emailOptional: "البريد الإلكتروني (اختياري)",
-    manualTempBookingNotice: "حجز يدوي لعميل مؤقت بدون إرسال بريد أو مزامنة تقويم",
+    manualTempBookingNotice:
+      "حجز يدوي لعميل مؤقت بدون إرسال بريد أو مزامنة تقويم",
     filterAll: "الكل",
     filterConfirmed: "مؤكدة",
     filterPending: "قيد الانتظار",
@@ -1051,11 +935,7 @@ export const translations = {
     serviceHeader: "الخدمة",
     bookingDateHeader: "الموعد",
     statusHeader: "الحالة",
-<<<<<<< HEAD
     readOnlyNotice: "للعرض فقط (دون إمكانية التعديل)",
-=======
-    readOnlyNotice: "للعرض فقط (بدون تعديل)",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     daySunday: "الأحد",
     dayMonday: "الإثنين",
     dayTuesday: "الثلاثاء",
@@ -1114,11 +994,7 @@ export const translations = {
     schedulesLoadFailed: "حدث خطأ أثناء تحميل الجداول والأوقات المتاحة",
     servicesLoadFailed: "حدث خطأ أثناء تحميل خدمات مساحة العمل",
     serviceUpdatedSuccess: "تم تحديث الخدمة بنجاح",
-<<<<<<< HEAD
     serviceAddedSuccess: "تمت إضافة الخدمة بنجاح",
-=======
-    serviceAddedSuccess: "تم إضافة الخدمة بنجاح",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     serviceDeletedSuccess: "تم حذف الخدمة بنجاح",
     deleteService: "حذف الخدمة",
     confirmDeleteService:
@@ -1149,11 +1025,7 @@ export const translations = {
     webhooksModalTitle: "الربط البرمجي (Webhooks) والتنبيهات",
     webhookUrlLabel: "رابط الـ Webhook ",
     webhookUrlPlaceholder: "https://api.yourdomain.com/webhooks/saabq",
-<<<<<<< HEAD
     webhookDisconnectConfirm: "هل أنت متأكد من رغبتك في إلغاء رابط Webhook؟",
-=======
-    webhookDisconnectConfirm: "هل أنت متأكد من رغبتك في إلغاء ربط الـ Webhook؟",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     webhookDisconnectedSuccess: "تم إلغاء رابط الـ Webhook بنجاح",
     disconnectWebhook: "إلغاء Webhook",
     telegramTitle: "إعدادات Telegram",
@@ -1163,20 +1035,12 @@ export const translations = {
     telegramBotQuestion: "أي بوت تليجرام يُستخدم لإشعارات المساحة دي؟",
     telegramCustomBot: "بوت خاص بمساحتي",
     telegramCustomBotDesc:
-<<<<<<< HEAD
       "أنشئ بوتاً خاصاً بك عبر BotFather وأدخل الرمز المميز (Token) الخاص به.",
-=======
-      "أنشئ بوتاً خاصاً بك عبر BotFather وأدخل الرمز (Token) الخاص به.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     telegramDefaultBot: "استخدام بوت Saabq Cal الافتراضي",
     telegramDefaultBotDesc:
       "لا تحتاج لإنشاء بوت مخصص — ستحتاج فقط إلى معرف المحادثة (Chat ID) الخاص بك.",
     telegramDefaultBotNotice:
-<<<<<<< HEAD
       "ستُرسل إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. انقر على الزر أدناه لفتح البوت واختيار الخدمة المراد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً دون الحاجة لأي نسخ أو لصق.",
-=======
-      "ستُرسل إشعارات حجوزات مساحة العمل هذه عبر بوت Saabq Cal الافتراضي. اضغط على الزر أدناه لفتح البوت واختيار الخدمة التي تريد ربط هذه المحادثة بإشعاراتها — يتم الربط تلقائياً بدون أي نسخ أو لصق.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     openBotAndConnect: "فتح البوت وربط محادثة تلقائيًا",
     orFindChatManually: "أو، إن أردت العثور على فتح المحادثة يدويًا:",
     botTokenLabel: "Bot Token ",
@@ -1185,13 +1049,8 @@ export const translations = {
     chatIdPlaceholder: "123456789",
     chatIdHelpText:
       "افتح بوت Saabq Cal وأرسل له أي رسالة — سيرد عليك البوت مباشرة بمعرف المحادثة (Chat ID) الخاص بك لنسخه هنا.",
-<<<<<<< HEAD
     servicesToNotify: "الخدمات التي تصل إشعاراتها إلى هذه المحادثة",
     servicesToNotifyNotice: "أدخل واحفظ الـ Chat ID أولاً قبل تحديد الخدمات.",
-=======
-    servicesToNotify: "الخدمات التي تصل إشعاراتها إلى هذا الشات",
-    servicesToNotifyNotice: "اكتب واحفظ الـ Chat ID أولاً قبل تحديد الخدمات.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     selectAll: "تحديد الكل",
     deselectAll: "إلغاء تحديد الكل",
     addNewChat: "+ إضافة محادثة جديدة",
@@ -1248,7 +1107,6 @@ export const translations = {
     editScheduleNameBtn: "تعديل",
     deleteScheduleBtn: "حذف",
     copySlotsToDays: "نسخ للأيام الأخرى",
-<<<<<<< HEAD
     copyTimesTo: "نسخ الفترات إلى",
     copySlotsTitle: "نسخ فترات العمل",
     copySlotsFrom: "نسخ مواعيد",
@@ -1260,10 +1118,6 @@ export const translations = {
     selectAtLeastOneDay: "يرجى اختيار يوم واحد على الأقل للنسخ إليه",
     slotCountSingular: "فترة",
     slotCountPlural: "فترات",
-=======
-    applyCopyBtn: "تطبيق",
-    slotsCopiedSuccess: "تم نسخ الأوقات بنجاح",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     addTimeSlotBtn: "+ إضافة فترة",
     scheduleSavedSuccess: "تم حفظ إعدادات الجدول بنجاح",
     exceptionAddedSuccess: "تم إضافة الاستثناء بنجاح",
@@ -1273,11 +1127,7 @@ export const translations = {
     scheduleDeletedSuccess: "تم حذف الجدول بنجاح",
     defaultScheduleName: "الجدول الافتراضي (الدوام الأساسي)",
     confirmDeleteSchedule: "هل أنت متأكد من رغبتك في حذف هذا الجدول؟",
-<<<<<<< HEAD
     selectDateError: "يرجى اختيار التاريخ أولاً",
-=======
-    selectDateError: "من فضلك اختار التاريخ أولاً",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     scheduleNamePlaceholder: "مثال: الجدول الافتراضي",
     permissionsEnabled: "صلاحية مفعلة",
     protectedRoleBadge: "محمي",
@@ -1434,11 +1284,7 @@ export const translations = {
     memberLoginSubtitle:
       "أهلاً بك مجدداً في مساحة عملك لإدارة الخدمات، المواعيد والأعضاء.",
     memberRegisterSubtitle:
-<<<<<<< HEAD
       "أنشئ حساب عضو فريق وابدأ في بناء وإدارة مساحة عملك.",
-=======
-      "أنشئ حساب عضو فريق وابدأ في بناء وإدارة مساحة العمل الخاصة بك.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     confirmLabel: "تأكيد",
     activateLabel: "تأكيد الحساب",
     consultationSubjectLabel: "موضوع الاستشارة",
@@ -1473,11 +1319,7 @@ export const translations = {
       "تكوين المقدمة القصيرة وشروط وقواعد حجز المواعيد في مساحة العمل.",
     enableOnlineBookingDesc: "السماح للعملاء بحجز المواعيد أونلاين.",
     autoConfirmAppointmentsDesc:
-<<<<<<< HEAD
       "الموافقة على الحجوزات فور إنشائها تلقائياً دون مراجعة يدوية.",
-=======
-      "تأكيد الحجوزات تلقائياً فور إنشائها دون الحاجة للمراجعة.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     optionalFieldTag: "(اختياري)",
     customQuestionsTitle: "أسئلة مخصصة",
     customQuestionsDesc:
@@ -1507,11 +1349,7 @@ export const translations = {
     markAllRead: "تحديد الكل كمقروء",
     clearAllNotifs: "حذف جميع الإشعارات",
     confirmClearTitle: "تأكيد حذف الإشعارات",
-<<<<<<< HEAD
     confirmClearBody: "سيتم حذف جميع إشعاراتك نهائياً. هل أنت متأكد؟",
-=======
-    confirmClearBody: "كل إشعاراتك هتتحذف نهائياً. إنت متأكد؟",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     noNotificationsYet: "لا توجد إشعارات حتى الآن",
     noNotificationsDesc: "ستظهر هنا إشعاراتك عند وصولها",
     markAsRead: "تحديد كمقروء",
@@ -1521,11 +1359,7 @@ export const translations = {
     notifMarkedRead: "تم تحديده كمقروء",
     allNotifsMarkedRead: "تم تحديد الكل كمقروء",
     allNotifsCleared: "تم حذف جميع الإشعارات",
-<<<<<<< HEAD
     notifLoadFailed: "تعذر تحميل الإشعارات",
-=======
-    notifLoadFailed: "حصلت مشكلة في تحميل الإشعارات",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     justNow: "الآن",
     minutesAgo: "دقيقة مضت",
     hoursAgo: "ساعة مضت",
@@ -1538,11 +1372,7 @@ export const translations = {
     startNewChat: "بدء محادثة دعم جديدة",
     searchChats: "ابحث في المحادثات...",
     noChatsFound: "لا توجد محادثات",
-<<<<<<< HEAD
     noChatsFoundDesc: "اضغط على زر بدء محادثة جديدة للتواصل مع فريق الدعم",
-=======
-    noChatsFoundDesc: "انقر على زر بدء محادثة جديدة للتواصل مع فريق الدعم",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     typeMessagePlaceholder: "اكتب رسالتك هنا...",
     replyTo: "الرد على",
     cancelReply: "إلغاء الرد",
@@ -1570,13 +1400,8 @@ export const translations = {
     sentVoiceNote: "أرسل تسجيل صوتي",
     failedToSendMessage: "حدث خطأ أثناء إرسال الرسالة",
     failedToStartChat: "فشل بدء المحادثة",
-<<<<<<< HEAD
     failedToLoadChats: "حدث خطأ أثناء تحميل المحادثات",
     failedToLoadMessages: "حدث خطأ أثناء تحميل الرسائل",
-=======
-    failedToLoadChats: "حصلت مشكلة في تحميل المحادثات",
-    failedToLoadMessages: "حصلت مشكلة في تحميل الرسائل",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     micPermissionDenied: "تعذر الوصول إلى الميكروفون",
     callSupport: "محادثة الدعم الفني",
     whatsIncludedTitle: "ما تتضمنه المنصة",
@@ -1622,20 +1447,13 @@ export const translations = {
     newsletterTitle: "النشرة البريدية",
     newsletterDesc: "اشترك للحصول على أحدث التحديثات والمميزات مباشرة في بريدك",
     subscribeBtn: "اشترك الآن",
-<<<<<<< HEAD
     subscribingBtn: "جاري الاشتراك...",
-=======
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     newsletterSuccess: "شكراً لاشتراكك في النشرة البريدية!",
     newsletterAlreadySubscribed: "أنت مشترك بالفعل في نشرتنا البريدية!",
     newsletterError: "حدث خطأ أثناء الاشتراك، يرجى المحاولة مرة أخرى.",
     faq3Q: "هل تتوفر فترة تجريبية مجانية؟",
     faq3A:
-<<<<<<< HEAD
       "نعم، يمكنك البدء مجاناً دون الحاجة لإدخال بطاقة بنكية وتجربة كافة الميزات الأساسية.",
-=======
-      "نعم، يمكنك البدء مجاناً وبدون الحاجة لإدخال بطاقة بنكية وتجربة كافة المميزات الأساسية.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     faq4Q: "كيف يتم التكامل مع Google Calendar و Meet؟",
     faq4A:
       "بمجرد ربط حسابك في Google بنقرة واحدة، سيتم إنشاء روابط Google Meet تلقائياً وإضافتها إلى تقويمك وتقويم العميل فور تأكيد الحجز.",
@@ -1644,13 +1462,8 @@ export const translations = {
       "بالتأكيد، توفر المنصة محرر إعدادات متكامل لإضافة شعار مؤسستك وألوانها، وتخصيص أسئلة الحجز الإضافية.",
     faq6Q: "ما هي سياسة الاسترجاع والإلغاء؟",
     faq6A:
-<<<<<<< HEAD
       "يمكنك إلغاء أو تغيير باقة اشتراكك في أي وقت من لوحة التحكم، كما يستطيع العملاء إلغاء حجوزاتهم وفقاً لشروط وقواعد الحجز المحددة.",
     noServicesDesc: "أضف أولى خدماتك لتتيح للعملاء اختيارها وحجز المواعيد.",
-=======
-      "تقدر تلغي أو تغير باقة اشتراكك في أي وقت من لوحة التحكم، كمان العملاء يقدروا يلغوا حجوزاتهم حسب شروط الحجز اللي بتحددها.",
-    noServicesDesc: "أضف خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     addFirstService: "إضافة أول خدمة",
     featured: "مميزة",
     persons: "أشخاص",
@@ -1704,15 +1517,9 @@ export const translations = {
     deselectCategory: "إلغاء تحديد القسم",
     selectCategory: "تحديد القسم",
     noSchedulesFound: "لا توجد جداول أسبوعية",
-<<<<<<< HEAD
     noSchedulesDesc: "أضف جدولك الأول لتعيين ساعات العمل الأسبوعية.",
     addFirstSchedule: "إضافة أول جدول",
     selectPlanError: "يرجى تحديد الباقة المطلوبة",
-=======
-    noSchedulesDesc: "ضيف جدولك الأول لتعيين ساعات العمل الأسبوعية.",
-    addFirstSchedule: "إضافة أول جدول",
-    selectPlanError: "من فضلك حدد الباقة المطلوبة",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     noSubscriptionFound: "لا يوجد اشتراك نشط",
     choosePlan: "اختيار باقة",
     basicPlan: "الباقة الأساسية",
@@ -1760,24 +1567,14 @@ export const translations = {
     appointmentId: "رقم الموعد",
     timeframeUpcoming: "المواعيد القادمة",
     timeframePast: "المواعيد السابقة",
-<<<<<<< HEAD
     noCustomerAppointments: "ليس لديك أي مواعيد حالياً",
-=======
-    noCustomerAppointments: "ليس لديك مواعيد حالياً",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     noCustomerAppointmentsDesc:
       "استكشف مساحات العمل المتاحة واحجز موعدك بسهولة.",
     deleting: "جاري الحذف...",
     cancelSubscriptionSuccess: "تم إلغاء الاشتراك بنجاح.",
-<<<<<<< HEAD
     cancelSubscriptionFailed: "فشل إلغاء الاشتراك.",
     pauseSubscriptionSuccess: "تم إيقاف الاشتراك مؤقتاً بنجاح.",
     pauseSubscriptionFailed: "فشل إيقاف الاشتراك مؤقتاً.",
-=======
-    cancelSubscriptionFailed: "إلغاء الاشتراك منجحش.",
-    pauseSubscriptionSuccess: "الاشتراك اتوقف مؤقتاً بنجاح.",
-    pauseSubscriptionFailed: "إيقاف الاشتراك مؤقتاً منجحش.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     resumeSubscriptionSuccess: "تم استئناف الاشتراك بنجاح.",
     resumeSubscriptionFailed: "فشل استئناف الاشتراك.",
     setTermsAndRules: "إعداد الشروط والقواعد",
@@ -1789,29 +1586,20 @@ export const translations = {
     statusPastDue: "متأخر السداد",
     statusUnpaid: "غير مدفوع",
     statusIncomplete: "غير مكتمل",
-    statusExpired: "منتهي الصلاحية",
     statusEnded: "منتهي",
     cancelSubscription: "إلغاء الاشتراك",
     resumeSubscription: "استئناف الاشتراك",
     pauseSubscription: "إيقاف مؤقت للاشتراك",
     cancelSubscriptionTitle: "إلغاء اشتراك مساحة العمل",
     cancelSubscriptionConfirmMsg:
-<<<<<<< HEAD
       "هل أنت متأكد من رغبتك في إلغاء الاشتراك؟ ستفقد مساحة العمل الميزات المتقدمة فور انتهاء الفترة الحالية.",
-=======
-      "هل أنت متأكد من رغبتك في إلغاء الاشتراك؟ ستفقد مساحة العمل المميزات المتقدمة بمجرد انتهاء الفترة الحالية.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     cancelReasonLabel: "سبب الإلغاء (اختياري)",
     cancelReasonPlaceholder:
       "يرجى كتابة سبب الإلغاء لمساعدتنا في تحسين الخدمة...",
     cancelling: "جاري الإلغاء...",
     confirmCancelBtn: "تأكيد الإلغاء",
     customHours: "ساعات مخصصة",
-<<<<<<< HEAD
     vacationClosedDay: "إجازة / يوم مغلق",
-=======
-    vacationClosedDay: "إجازة / يوم مقفول",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     readOnlyChat: "ليس لديك صلاحية للرد على المحادثات",
     invalidJsonConfig: "تنسيق JSON غير صالح لإعدادات الأزرار",
     actionButtonsConfig: "إعدادات الأزرار المخصصة (JSON)",
@@ -1885,11 +1673,7 @@ export const translations = {
     error503Title: "الخدمة قيد الصيانة",
     error503Badge: "خطأ 503 — صيانة",
     error503Desc:
-<<<<<<< HEAD
       "المنصة تخضع لصيانة دورية حالياً. يرجى المحاولة مرة أخرى بعد قليل.",
-=======
-      "المنصة في وضع الصيانة الدورية حالياً. يرجى المحاولة مرة أخرى لاحقاً.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     errorBoundaryTitle: "عذراً، حدث خطأ غير متوقع",
     errorBoundaryBadge: "خطأ تشغيل التطبيق",
     errorBoundaryDesc:
@@ -1907,15 +1691,9 @@ export const translations = {
     maxDaysDesc: "عدد الأيام المستقبلية المتاحة أمام العملاء لحجز المواعيد.",
     emailSettingsTitle: "إعدادات البريد الإلكتروني",
     emailIntegrationDesc:
-<<<<<<< HEAD
       "ضبط خيارات سيرفر البريد الإلكتروني (SMTP / Resend) لإرسال إشعارات الحجوزات والتنبيهات المباشرة للعملاء.",
     enterSmtpHost: "يرجى إدخال Host الخاص بـ SMTP",
     enterResendKey: "يرجى إدخال Resend API Key",
-=======
-      "ضبط خيارات خادم البريد الإلكتروني (SMTP / Resend) لإرسال إشعارات الحجوزات والتنبيهات المباشرة للعملاء.",
-    enterSmtpHost: "يرجى إدخال اسم المضيف (Host) الخاص بـ SMTP",
-    enterResendKey: "من فضلك اكتب Resend API Key",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     enterFromAddress: 'يرجى إدخال عنوان البريد الإلكتروني "من"',
     emailSettingsSaved: "تم حفظ إعدادات البريد الإلكتروني بنجاح",
     testEmailSuccess: "تم إرسال البريد الإلكتروني التجريبي بنجاح!",
@@ -1927,11 +1705,7 @@ export const translations = {
     resendApiKeyLabel: "مفتاح Resend API",
     resendInstructionsTitle: "كيف تحصل على مفتاح Resend API Key؟",
     resendInstructionsText:
-<<<<<<< HEAD
       '1. ادخل إلى موقع Resend وسجل الدخول إلى حسابك.\n2. اضغط على API Keys من القائمة الجانبية ثم اضغط Create API Key.\n3. قم بتسمية المفتاح ونسخه، ثم ألصقه في الحقل أدناه.\n• ملاحظة هامة: تأكد من إضافة وتوثيق نطاق (Domain) عنوان البريد "من" في قسم Domains على Resend، أو استخدم onboarding@resend.dev للتجربة.',
-=======
-      '1. توجه إلى موقع Resend وسجل الدخول إلى حسابك.\n2. انقر على API Keys من القائمة الجانبية ثم اضغط Create API Key.\n3. قم بتسمية المفتاح ونسخه، ثم الصقه في الحقل أدناه.\n• ملاحظة هامة: تأكد من إضافة وتوثيق نطاق (Domain) عنوان البريد "من" في قسم Domains على Resend، أو استخدم onboarding@resend.dev للتجربة.',
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     visitResendBtn: "الانتقال إلى Resend ↗",
     smtpHostLabel: "خادم SMTP (Host)",
     smtpPortLabel: "المنفذ (Port)",
@@ -1939,28 +1713,17 @@ export const translations = {
     smtpPasswordLabel: "كلمة المرور",
     smtpInstructionsTitle: "كيفية ضبط إعدادات خادم SMTP؟",
     smtpInstructionsText:
-<<<<<<< HEAD
       "يمكنك استخدام خادم البريد الخاص بموقعك أو المزودات العالمية مثل Gmail أو Zoho.\n• إرشادات Gmail: Host: smtp.gmail.com | Port: 587 | Username: بريدك الإلكتروني | Password: كلمة سر التطبيق (App Password) التي يتم إنشاؤها من حساب Google > الأمان > كلمات مرور التطبيقات.",
-=======
-      "يمكنك استخدام خادم البريد الخاص بموقعك أو المزودات العالمية مثل Gmail أو Zoho.\n• إرشادات Gmail: Host: smtp.gmail.com | Port: 587 | Username: بريدك الإلكتروني | Password: كلمة مرور التطبيق (App Password) التي تحصل عليها من حساب Google > الأمان > كلمات مرور التطبيقات.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     telegramCustomBotInstructionsTitle: "كيف تنشئ بوت Telegram خاص بك؟",
     telegramCustomBotInstructionsText:
       "1. افتح تطبيق تليجرام وابحث عن المستخدم الرسمي @BotFather.n2. أرسل له الأمر /newbot واتبع الخطوات لاختيار اسم واسم مستخدم للبوت.n3. سيمنحك @BotFather الـ API Token. انسخه وألصقه هنا.",
     openBotFatherBtn: "فتح @BotFather ↗",
     telegramChatIdInstructionsTitle: "كيف تحصل على رقم الـ Chat ID؟",
     telegramChatIdInstructionsText:
-<<<<<<< HEAD
       "• للمحادثات الشخصية: افتح بوت Saabq Cal وأرسل له أي رسالة وسيرد عليك برقم معرف المحادثة (Chat ID) مباشرة.\n• للمجموعات/القنوات: أضف البوت إلى المجموعة وامنحه صلاحية الإرسال، ثم استخدم بوتاً مثل @userinfobot للحصول على معرف المجموعة (يبدأ بـ -).",
     webhookInstructionsTitle: "كيفية الربط بواسطة Webhook؟",
     webhookInstructionsText:
       "أدخل رابط الـ URL لخادمك أو رابط Zapier/Make. سيتم إرسال طلب HTTP POST بصيغة JSON يتضمن كافة تفاصيل الموعد فور وقوع الأحداث المحددة.",
-=======
-      "• للمحادثات الشخصية: افتح بوت Saabq Cal وأرسل له أي رسالة وسيرد عليك برقم الـ Chat ID مباشرة.n• للمجموعات/القنوات: أضف البوت إلى المجموع وأعطه صلاحية الإرسال، ثم استخدم بوت مثل @userinfobot للحصول على ID المجموعة (يبدأ بـ -).",
-    webhookInstructionsTitle: "كيفية الربط بواسطة Webhook؟",
-    webhookInstructionsText:
-      "أدخل رابط الـ URL الخاص بخادمك أو رابط Zapier/Make. سيتم إرسال طلب HTTP POST بصيغة JSON يتضمن كافة تفاصيل الموعد فور وقوع الأحداث المحددة.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     senderNamePlaceholder: "اسم نشاطك التجاري أو موقعك",
     defaultSystemMail: "مفعّلة افتراضياً بالنظام",
     change: "تغيير",
@@ -2044,19 +1807,11 @@ export const translations = {
     confirmDelete: "تأكيد الحذف",
     confirmDeleteResource: "حذف المورد",
     editResourceSubtitle: "تعديل بيانات وسعر وحدود تنبيه المورد",
-<<<<<<< HEAD
     addResourceSubtitle: "أدخل بيانات العنصر أو اختر نموذجاً سريعاً لمساحتك",
     deleteResourceWarning:
       "هل أنت متأكد من رغبتك في حذف هذا المورد؟ لا يمكن التراجع عن هذا الإجراء.",
     logsLoadFailed: "تعذر تحميل سجل النشاطات",
     resourcesLoadFailed: "تعذر تحميل الموارد والقطع",
-=======
-    addResourceSubtitle: "اكتب بيانات العنصر أو اختار نموذج سريع لمساحتك",
-    deleteResourceWarning:
-      "هل أنت متأكد من رغبتك في حذف هذا المورد؟ لا يمكن التراجع عن هذه العملية.",
-    logsLoadFailed: "حصلت مشكلة في تحميل سجل النشاطات",
-    resourcesLoadFailed: "حصلت مشكلة في تحميل الموارد والقطع",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     resourceUpdatedSuccess: "تم تحديث بيانات المورد بنجاح",
     resourceAddedSuccess: "تم إضافة المورد بنجاح",
     resourceDeletedSuccess: "تم حذف المورد بنجاح",
@@ -2076,11 +1831,7 @@ export const translations = {
     briefcase: "خدمة / أعمال",
     check: "تأكيد / ضمان",
     featureDescription: "وصف الميزة",
-<<<<<<< HEAD
     noFeatureHighlightsYet: "لا توجد بطاقات مزايا مضافة حالياً.",
-=======
-    noFeatureHighlightsYet: "لا توجد بطاقات مميزات مضافة حالياً.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     clientTestimonials: "آراء وانطباعات العملاء",
     addTestimonial: "إضافة رأي عميل جديد",
     testimonial: "رأي العميل",
@@ -2102,13 +1853,8 @@ export const translations = {
       "إذا كان معطّلاً، لن يظهر زر «الملف الشخصي» إطلاقًا في صفحة الحجز — ولن يعود إلى صفحة الشركة.",
     telegramChatSectionTitle: "ربط الخدمة بمحادثة تلجرام",
     telegramChatSectionDesc:
-<<<<<<< HEAD
       "تخصيص محادثة أو مجموعة تلجرام لاستقبال إشعارات الحجوزات الخاصة بهذه الخدمة",
     telegramOptionNone: "بدون ربط بتلجرام",
-=======
-      "تخصيص محادثة أو مجموعة Telegram لاستقبال إشعارات الحجوزات الخاصة بهذه الخدمة",
-    telegramOptionNone: "بدون ربط بـ Telegram",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     telegramOptionNoneDesc: "استخدام الإعدادات الإفتراضية للمساحة",
     telegramOptionProvider: "محادثة مقدم الخدمة",
     telegramOptionProviderDesc:
@@ -2123,11 +1869,7 @@ export const translations = {
     telegramProviderNotConnected: "لم يقم مقدم الخدمة بربط حسابه بتلجرام بعد",
     selectOtherProviderTelegram: "اختر مقدم الخدمة لتسليم الإشعارات:",
     noOtherProvidersTelegram:
-<<<<<<< HEAD
       "لا يوجد مقدمو خدمات آخرون لديهم حساب تلجرام مفعّل",
-=======
-      "لا يوجد مقدمو خدمات آخرون لديهم حساب Telegram نشط",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     telegramChatIdLabel: "معرف محادثة تلجرام (Chat ID):",
     telegramChatIdPlaceholder: "مثال: -100123456789",
     howToGetTelegramChatId: "كيفية الحصول على معرف المحادثة؟",
@@ -2141,11 +1883,7 @@ export const translations = {
       "أضف بوت المنصة كعضو أو مشرف داخل المجموعة لتلقي الإشعارات والتحكم.",
     telegramStep3Title: "الخطوة 3: استخراج معرف المحادثة (Chat ID)",
     telegramStep3Desc:
-<<<<<<< HEAD
       "أضف البوت @userinfobot أو @raw_data_bot إلى المجموعة، أو قم بتحويل رسالة من المجموعة للبوت للحصول على معرف المحادثة (Chat ID) الذي يبدأ عادة بـ -100.",
-=======
-      "أضف البوت @userinfobot أو @raw_data_bot إلى المجموعة، أو قم بتحويل رسالة من المجموعة إلى البوت للحصول على معرف المحادثة (Chat ID) الذي يبدأ عادةً بـ -100.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     telegramStep4Title: "الخطوة 4: إدخال المعرف وحفظه",
     telegramStep4Desc:
       "انسخ المعرف الذي حصلت عليه (مثال: -100123456789) وضعه في خانة معرف المحادثة تحت.",
@@ -2168,13 +1906,8 @@ export const translations = {
     activeVipCustomers: "العملاء النشطون والمميزون",
     activeAndVipSuffix: "النشطون والمميزون",
     totalBookingsCount: "إجمالي الحجوزات",
-<<<<<<< HEAD
     newThisMonth: "عملاء جدد هذا الشهر",
     searchCustomersPlaceholder: "بحث بالاسم، البريد، الهاتف، أو رقم الملف...",
-=======
-    newThisMonth: "عملاء جدد الشهر ده",
-    searchCustomersPlaceholder: "بحث بالاسم، البريد، التليفون، أو رقم الملف...",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     filterStatusAll: "جميع الحالات",
     filterStatusActive: "نشط",
     filterStatusVip: "عميل مميز (VIP)",
@@ -2242,7 +1975,6 @@ export const translations = {
     confirmDeleteCustomer:
       "هل أنت متأكد من رغبتك في حذف العميل من مساحة العمل؟",
     confirmDeleteCustomerDesc:
-<<<<<<< HEAD
       "سيتم فك ارتباط العميل بمساحة العمل هذه ولن يظهر في قائمتك. وستبقى سجلات المواعيد والمدفوعات السابقة محفوظة للأرشفة.",
     customerCreatedSuccess: "تم إضافة العميل بنجاح",
     customerUpdatedSuccess: "تم تحديث بيانات العميل بنجاح",
@@ -2250,15 +1982,6 @@ export const translations = {
     noCustomersFound: "لم يتم العثور على أي عملاء",
     noCustomersFoundDesc:
       "لا يوجد أي عملاء مسجلين حتى الآن أو لا توجد نتائج مطابقة للبحث.",
-=======
-      "سيتم فك ارتباط العميل بمساحة العمل هذه ولن يظهر في قائمتك. وستظل سجلات المواعيد والمدفوعات السابقة محفوظة للأرشفة.",
-    customerCreatedSuccess: "تم إضافة العميل بنجاح",
-    customerUpdatedSuccess: "تم تحديث بيانات العميل بنجاح",
-    customerDeletedSuccess: "تم حذف ارتباط العميل بنجاح",
-    noCustomersFound: "لم نجد أي عملاء",
-    noCustomersFoundDesc:
-      "لم تتم إضافة أي عملاء حتى الآن أو لا توجد نتائج مطابقة للبحث.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     customerNotFound: "العميل غير موجود أو ليس لديك صلاحية لعرضه",
     backToCustomers: "العودة لقائمة العملاء",
     quickAppointmentBooking: "حجز موعد سريع",
@@ -2267,13 +1990,8 @@ export const translations = {
     customerTypeSection: "بيانات التخصص ومجال العمل",
     addCustomerPrefix: "إضافة",
     customerSingle: "عميل",
-<<<<<<< HEAD
     savedSuccessfully: "تم الحفظ بنجاح",
     errorSavingData: "حدث خطأ أثناء حفظ البيانات",
-=======
-    savedSuccessfully: "اتحفظ بنجاح",
-    errorSavingData: "حصل خطأ وإحنا بنـحفظ البيانات",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     statusUpcoming: "قادم",
     customService: "خدمة مخصصة",
     assignedSpecialist: "الأخصائي المكلف",
@@ -2341,11 +2059,7 @@ export const translations = {
     dataFormat: "صيغة البيانات (Data Format)",
     playgroundTitle: "منصة فحص واستكشاف الـ API التفاعلية",
     playgroundDesc:
-<<<<<<< HEAD
       "جرّب إرسال طلبات حية وافحص سرعة الاستجابة وهيكل البيانات المرتجعة دون كتابة أي سطر برمجيات.",
-=======
-      "جرّب إرسال طلبات مباشرة وافحص سرعة الاستجابة وشكل البيانات المسترجعة دون الحاجة لكتابة سطر برمجيات واحد.",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     chooseEndpoint: "اختر النقطة البرمجية (Endpoint)",
     targetDate: "تاريخ اليوم المطلوب",
     jsonPayload: "بيانات الحجز المرسلة (JSON Payload)",
@@ -2369,22 +2083,12 @@ export const translations = {
     submitRequest: "إرسال الطلب",
     confirmPasswordTitle: "تأكيد كلمة المرور لعرض المفتاح السري",
     confirmPasswordDesc:
-<<<<<<< HEAD
       "لدواعٍ أمنية، يرجى إدخال كلمة مرور حسابك لإظهار المفتاح السري.",
     confirmAndReveal: "تأكيد وإظهار",
     confirmRegenerateTitle: "هل أنت متأكد من رغبتك في تدوير المفتاح السري؟",
     confirmRegenerateDesc:
       "سيتوقف المفتاح السري الحالي عن العمل فوراً، وسيتعين عليك تحديثه في متغيرات بيئة موقعك الخارجي (.env).",
     confirmRegenerate: "نعم، قم بتدوير المفتاح الآن",
-=======
-      "لأسباب أمنية، يرجى كتابة كلمة مرور حسابك لعرض المفتاح السري.",
-    confirmAndReveal: "تأكيد وإظهار",
-    confirmRegenerateTitle:
-      "هل أنت متأكد من رغبتك في إعادة توليد المفتاح السري؟",
-    confirmRegenerateDesc:
-      "سيتوقف المفتاح السري الحالي عن العمل على طول، وسيتعين عليك تحديثه في متغيرات بيئة موقعك الخارجي (.env).",
-    confirmRegenerate: "نعم، أعد توليد المفتاح الآن",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     rotating: "جارِ التدوير...",
     postmanDownloaded: "تم تحميل ملف Postman بنجاح!",
     apiRequestedSuccess: "تم إرسال طلب الوصول للـ API بنجاح",
@@ -2411,7 +2115,6 @@ export const translations = {
       "مثال: نرغب في ربط نظام الحجوزات في متجرنا https://example.com لمزامنة المواعيد مباشرة...",
     passwordPlaceholder: "كلمة مرور حسابك",
     backToDashboard: "العودة إلى لوحة التحكم",
-<<<<<<< HEAD
     workspaceKeywordsTitle: "الكلمات المفتاحية والمصطلحات",
     searchKeywords: "بحث في الكلمات المفتاحية...",
     cancelAdd: "إلغاء الإضافة",
@@ -2510,11 +2213,9 @@ export const translations = {
     totalMembersCount: "إجمالي الأعضاء",
     activeMembersCount: "الأعضاء النشطون",
     assignedRolesCount: "الأعضاء المعين لهم أدوار",
-=======
     formatBlock: "تنسيق الفقرة",
     whatsApp: "واتساب",
     book: "حجز",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   },
   en: {
     installApp: "Install App",
@@ -3372,7 +3073,6 @@ export const translations = {
     creatingSheet: "Creating sheet...",
     testingSheet: "Testing connection...",
     recreateSheetAuto: "Recreate New Sheet with System Style",
-    statusCompleted: "Completed",
     statusUpdatedSuccess: "Appointment status updated successfully",
     bookingCancelledSuccess: "Appointment cancelled successfully",
     copiedToClipboard: "Copied to clipboard",
@@ -3407,7 +3107,6 @@ export const translations = {
     currentPlanActive: "Currently Active Plan",
     requestedPlan: "Requested Plan",
     activeSubscription: "● Active Subscription",
-    statusPending: "Pending Approval",
     pendingSubscriptionTitle: "Subscription Request Pending",
     pendingSubscriptionDesc:
       "Your workspace subscription request has been submitted and is currently under review by system admin. Features will be unlocked upon approval.",
@@ -3453,7 +3152,8 @@ export const translations = {
     availableSlotsMode: "Service Available Slots",
     enterCustomerNamePrompt: "Please enter client name",
     emailOptional: "Email (Optional)",
-    manualTempBookingNotice: "Manual temporary client booking without email or calendar sync",
+    manualTempBookingNotice:
+      "Manual temporary client booking without email or calendar sync",
     filterAll: "All",
     filterConfirmed: "Confirmed",
     filterPending: "Pending",
@@ -3641,7 +3341,6 @@ export const translations = {
     editScheduleNameBtn: "Edit",
     deleteScheduleBtn: "Delete",
     copySlotsToDays: "Copy to other days",
-<<<<<<< HEAD
     copyTimesTo: "Copy slots to",
     copySlotsTitle: "Copy Working Hours",
     copySlotsFrom: "Copy hours from",
@@ -3653,10 +3352,6 @@ export const translations = {
     selectAtLeastOneDay: "Please select at least one day to copy to",
     slotCountSingular: "slot",
     slotCountPlural: "slots",
-=======
-    applyCopyBtn: "Apply",
-    slotsCopiedSuccess: "Times copied successfully",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     addTimeSlotBtn: "+ Add Slot",
     scheduleSavedSuccess: "Schedule settings saved successfully",
     exceptionAddedSuccess: "Exception added successfully",
@@ -4149,7 +3844,6 @@ export const translations = {
     statusPastDue: "Past Due",
     statusUnpaid: "Unpaid",
     statusIncomplete: "Incomplete",
-    statusExpired: "Expired",
     statusEnded: "Ended",
     cancelSubscription: "Cancel Subscription",
     resumeSubscription: "Resume Subscription",
@@ -4681,7 +4375,6 @@ export const translations = {
       "e.g. We want to integrate bookings on our store https://example.com directly...",
     passwordPlaceholder: "Your account password",
     backToDashboard: "Back to Dashboard",
-<<<<<<< HEAD
     workspaceKeywordsTitle: "Workspace Keywords",
     searchKeywords: "Search keywords...",
     cancelAdd: "Cancel",
@@ -4783,10 +4476,8 @@ export const translations = {
     totalMembersCount: "Total Members",
     activeMembersCount: "Active Members",
     assignedRolesCount: "Members with Assigned Roles",
-=======
     formatBlock: "Paragraph Format",
     whatsApp: "WhatsApp",
     book: "Book",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   },
 };

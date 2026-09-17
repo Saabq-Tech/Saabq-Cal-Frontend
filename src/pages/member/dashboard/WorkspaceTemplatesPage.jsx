@@ -47,6 +47,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
   const canCreate = isOwner || canCreateBookings || canUpdateSettings;
   const canUpdate = isOwner || canUpdateBookings || canUpdateSettings;
   const canDelete = isOwner || canDeleteBookings || canUpdateSettings;
+  const canEdit = canCreate || canUpdate;
 
   const workspaceTypeId =
     user?.workspace?.workspace_type_id || user?.workspace_type_id || null;
@@ -165,20 +166,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
 
   return (
     <div
-<<<<<<< HEAD
       className="workspace-templates-page"
       style={{ display: "flex", flexDirection: "column", gap: 20 }}
-=======
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 20,
-        width: "100%",
-        maxWidth: "100%",
-        minWidth: 0,
-        boxSizing: "border-box",
-      }}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     >
       {!embedded && (
         <SEO
@@ -189,7 +178,6 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
         />
       )}
 
-<<<<<<< HEAD
       {/* Top Standard Header */}
       <WorkspacePageHeader
         title={
@@ -223,67 +211,6 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           )
         }
       />
-=======
-      {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          gap: 12,
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        <div style={{ flex: "1 1 240px", minWidth: 0 }}>
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-              wordBreak: "break-word",
-            }}
-          >
-            {isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              color: "var(--muted)",
-              margin: "4px 0 0",
-              wordBreak: "break-word",
-              lineHeight: 1.5,
-            }}
-          >
-            {isRTL
-              ? "إدارة القوالب الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات"
-              : "Manage ready-to-use templates for reports and consultation summaries"}
-          </p>
-        </div>
-
-        {canCreate && (
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={openCreateModal}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <Icon name="plus" size={16} />
-            {isRTL ? "+ إضافة قالب جديد" : "+ Add Template"}
-          </button>
-        )}
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       {/* SEARCH BAR */}
       <div
         style={{
@@ -821,30 +748,19 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             onClick={() => setPreviewTemplate(null)}
           >
             <div
-<<<<<<< HEAD
               dir={isRTL ? "rtl" : "ltr"}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 background: "var(--surface)",
                 borderRadius: "var(--radius-lg)",
+                maxWidth: 720,
                 width: "100%",
-                maxWidth: 700,
-                maxHeight: "85vh",
+                maxHeight: "90vh",
                 overflowY: "auto",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
                 display: "flex",
                 flexDirection: "column",
-              }}
-=======
-              className="modal-dialog card"
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxWidth: 720,
-                width: "100%",
-                maxHeight: "90vh",
-                display: "block",
                 padding: 0,
-                overflow: "hidden",
               }}
             >
               <div
@@ -932,12 +848,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             }}
           >
             <div
-<<<<<<< HEAD
               dir={isRTL ? "rtl" : "ltr"}
-=======
-              className="card"
-              onClick={(e) => e.stopPropagation()}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               style={{
                 maxWidth: 440,
                 width: "100%",

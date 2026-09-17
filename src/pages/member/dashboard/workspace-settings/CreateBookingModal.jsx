@@ -7,14 +7,10 @@ import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
-<<<<<<< HEAD
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import { getLimitInfo } from "../../../../utils/planLimits";
 import { PlanLimitBanner } from "../../../../components/common/PlanLimitAlert";
-=======
 import { getCurrencySymbol } from "../../../../utils/currency";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const { isOwner, canCreateBookings } = usePermissions();
   const { t, lang } = useLanguage();
@@ -48,7 +44,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [workspaceMemberId, setWorkspaceMemberId] = useState("");
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
   const [startsAt, setStartsAt] = useState("");
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -182,12 +180,19 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
         if (workspaceMemberId) {
           params.workspace_member_id = Number(workspaceMemberId);
         }
-        const res = await client.get(endpoints.workspaceServiceSlots(serviceId), { params });
+        const res = await client.get(
+          endpoints.workspaceServiceSlots(serviceId),
+          { params },
+        );
         if (isMounted) {
           const slotList = res.data?.data || [];
           setSlots(slotList);
           if (selectedSlot && !manualTimeMode) {
-            const match = slotList.find((s) => s.start_time === selectedSlot && (s.is_available || bypassRules));
+            const match = slotList.find(
+              (s) =>
+                s.start_time === selectedSlot &&
+                (s.is_available || bypassRules),
+            );
             if (!match) {
               setSelectedSlot("");
               setStartsAt("");
@@ -211,7 +216,15 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     return () => {
       isMounted = false;
     };
-  }, [isOpen, serviceId, selectedDate, workspaceMemberId, bypassRules, manualTimeMode]);
+  }, [
+    isOpen,
+    serviceId,
+    selectedDate,
+    workspaceMemberId,
+    bypassRules,
+    manualTimeMode,
+    selectedSlot,
+  ]);
 
   const handleSlotSelect = (slot) => {
     setSelectedSlot(slot.start_time);
@@ -250,16 +263,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
 
     if (customerMode === "new" && !customerName.trim()) {
       setErrorMessage(
-<<<<<<< HEAD
         isCustom
           ? lang === "ar"
             ? `يرجى إدخال اسم ${custSingular} والبريد الإلكتروني`
             : `Please enter ${custSingular} name and email`
           : t("enterCustomerDetails") ||
               "من فضلك اكتب اسم العميل والبريد الإلكتروني",
-=======
-        t("enterCustomerNamePrompt") || `يرجى إدخال اسم ${custSingular}`,
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       );
       return;
     }
@@ -425,7 +434,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 const currSym = getCurrencySymbol(
                   s.currency_detail ||
                     s.currency ||
-                    workspace?.currency ||
+                    user?.workspace?.currency ||
                     "SAR",
                   lang === "ar",
                 );
@@ -446,12 +455,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               className="form-label"
               style={{ fontWeight: 700, fontSize: "0.86rem", marginBottom: 6 }}
             >
-<<<<<<< HEAD
               {isCustom ? custSingular : t("customerHeader") || custSingular}{" "}
               <span style={{ color: "#ef4444" }}>*</span>
-=======
-              {custSingular} <span style={{ color: "#ef4444" }}>*</span>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
             </label>
             <div
               style={{
@@ -789,7 +794,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="clock" size={15} />
-                <span>{t("availableTimeSlots") || "الأوقات المتاحة للخدمة"}</span>
+                <span>
+                  {t("availableTimeSlots") || "الأوقات المتاحة للخدمة"}
+                </span>
                 <span style={{ color: "red" }}>*</span>
               </label>
               <button
@@ -830,7 +837,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                   color: "var(--text-muted)",
                 }}
               >
-                {t("selectServiceFirst") || "يرجى اختيار الخدمة أولاً لعرض الأوقات المتاحة"}
+                {t("selectServiceFirst") ||
+                  "يرجى اختيار الخدمة أولاً لعرض الأوقات المتاحة"}
               </div>
             ) : loadingSlots ? (
               <div
@@ -845,7 +853,9 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="loader" size={16} className="animate-spin" />
-                <span>{t("loadingSlots") || "جاري جلب الأوقات المتاحة..."}</span>
+                <span>
+                  {t("loadingSlots") || "جاري جلب الأوقات المتاحة..."}
+                </span>
               </div>
             ) : slots.length === 0 ? (
               <div
@@ -858,7 +868,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                   borderRadius: "var(--radius-sm, 6px)",
                 }}
               >
-                {t("noSlotsAvailableOnDate") || "لا توجد أوقات متاحة في هذا اليوم"}
+                {t("noSlotsAvailableOnDate") ||
+                  "لا توجد أوقات متاحة في هذا اليوم"}
               </div>
             ) : (
               <div>

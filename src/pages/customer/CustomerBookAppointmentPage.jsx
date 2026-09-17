@@ -14,16 +14,11 @@ import LazyImage from "../../components/ui/LazyImage";
 import { BookingFormSkeleton } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
+import { getWorkspaceVibe } from "../../utils/workspaceVibe";
 import {
   applyWorkspaceBranding,
-<<<<<<< HEAD
   resetWorkspaceBranding,
 } from "../../utils/theme";
-=======
-  applyWorkspaceVibeTheme,
-} from "../../utils/theme";
-import { getWorkspaceVibe } from "../../utils/workspaceVibe";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
 import { Turnstile } from "@marsidev/react-turnstile";
 
 const MONTH_NAMES_AR = [
@@ -526,35 +521,9 @@ export default function CustomerBookAppointmentPage() {
   // Apply workspace custom colors & vibe to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-<<<<<<< HEAD
       applyWorkspaceBranding(workspace);
       return () => {
         resetWorkspaceBranding();
-=======
-      applyWorkspaceBranding(
-        workspace.primary_color,
-        workspace.secondary_color,
-        workspace.hover_color,
-        vibe.key,
-      );
-      applyWorkspaceVibeTheme(vibe.key);
-      return () => {
-        const storedUser = localStorage.getItem("saabq_user");
-        let prevWs = null;
-        try {
-          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
-        } catch {}
-        const prevVibe = prevWs
-          ? getWorkspaceVibe(prevWs, isRTL ? "ar" : "en").key
-          : null;
-        applyWorkspaceBranding(
-          prevWs?.primary_color || null,
-          prevWs?.secondary_color || null,
-          prevWs?.hover_color || null,
-          prevVibe,
-        );
-        applyWorkspaceVibeTheme(prevVibe);
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       };
     }
   }, [workspace, vibe.key, isRTL]);

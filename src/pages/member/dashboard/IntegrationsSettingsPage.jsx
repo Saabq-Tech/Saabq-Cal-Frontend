@@ -106,23 +106,17 @@ export default function IntegrationsSettingsPage() {
     testEmailIntegration,
   } = useAuth();
 
-<<<<<<< HEAD
   const { t, isRTL } = useLanguage();
-  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
-=======
   const {
     isOwner,
-    canReadIntegrations: _canReadIntegrations,
-    canCreateIntegrations,
     canUpdateIntegrations,
+    canCreateIntegrations,
     canDeleteIntegrations,
   } = usePermissions();
   const canEditIntegrations =
     isOwner || canUpdateIntegrations || canCreateIntegrations;
   const canDelete = isOwner || canDeleteIntegrations;
-
-  const { t } = useLanguage();
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -976,7 +970,6 @@ export default function IntegrationsSettingsPage() {
         }
       />
 
-<<<<<<< HEAD
       {/* Integrations Main Container */}
       <div className="workspace-page-container">
         {/* Filter Tabs */}
@@ -988,10 +981,6 @@ export default function IntegrationsSettingsPage() {
             overflowX: "auto",
           }}
         >
-=======
-        {/* Filter Tabs Slider */}
-        <div className="integrations-tabs-slider no-scrollbar">
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           {[
             {
               id: "all",

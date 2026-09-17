@@ -428,46 +428,9 @@ export default function BookingsCalendar({ onSelectBooking }) {
 
           {/* Selected Day Expanded Drawer */}
           {selectedDay && (
-<<<<<<< HEAD
             <div className="cal-selected-day-drawer animate-fade-in-up">
               <div className="cal-drawer-header">
                 <div className="cal-drawer-title-group">
-=======
-            <div
-              className="cal-selected-day-drawer"
-              style={{
-                background: "var(--surface-alt)",
-                padding: "18px 16px",
-                borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-                maxWidth: "100%",
-                overflow: "hidden",
-                boxSizing: "border-box",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 14,
-                  flexWrap: "wrap",
-                  gap: 10,
-                }}
-              >
-                <h3
-                  style={{
-                    fontSize: "1.05rem",
-                    fontWeight: 800,
-                    margin: 0,
-                    color: "var(--heading)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   <Icon
                     name="clock"
                     size={18}
@@ -1004,7 +967,6 @@ export default function BookingsCalendar({ onSelectBooking }) {
           }
 
           .cal-selected-day-drawer {
-<<<<<<< HEAD
             padding: 12px 10px !important;
             border-radius: 12px !important;
           }
@@ -1028,37 +990,6 @@ export default function BookingsCalendar({ onSelectBooking }) {
 
           .booking-list-item-main {
             width: 100% !important;
-=======
-            padding: 12px 8px !important;
-            overflow: hidden;
-            max-width: 100%;
-            box-sizing: border-box;
-          }
-
-          .cal-selected-day-drawer > div:first-child {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 8px !important;
-          }
-
-          .cal-selected-day-drawer > div:first-child h3 {
-            font-size: 0.92rem !important;
-            flex-wrap: wrap;
-            line-height: 1.4;
-          }
-
-          .booking-list-item {
-            padding: 10px 8px !important;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-          }
-
-          .booking-list-item-main {
-            gap: 8px !important;
-            min-width: 0;
-            overflow: hidden;
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           }
 
           .booking-list-customer-name {
@@ -1077,7 +1008,6 @@ export default function BookingsCalendar({ onSelectBooking }) {
             font-size: 0.78rem !important;
           }
 
-<<<<<<< HEAD
           .booking-list-item-meta {
             flex-direction: row !important;
             justify-content: space-between !important;
@@ -1096,21 +1026,6 @@ export default function BookingsCalendar({ onSelectBooking }) {
             gap: 10px 14px !important;
             font-size: 0.74rem !important;
             border-radius: 10px;
-=======
-          .cal-legend-bar {
-            padding: 10px 12px !important;
-            gap: 10px !important;
-            font-size: 0.76rem !important;
-          }
-
-          .cal-legend-item {
-            gap: 5px !important;
-          }
-
-          .cal-legend-indicator {
-            width: 8px !important;
-            height: 8px !important;
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
           }
         }
 
@@ -1235,16 +1150,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
           cursor: pointer;
           transition: all 0.15s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-<<<<<<< HEAD
           width: 100%;
           box-sizing: border-box;
           gap: 12px;
           min-width: 0;
-=======
-          max-width: 100%;
-          box-sizing: border-box;
-          overflow: hidden;
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         }
         .booking-list-item:hover {
           transform: translateY(-1px);

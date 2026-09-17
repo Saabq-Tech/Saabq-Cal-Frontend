@@ -64,11 +64,7 @@ export default function WorkspaceSettingsPage() {
     name: "",
     email: "",
     phone: "",
-<<<<<<< HEAD
     description: "",
-=======
-    description: { ar: "", en: "" },
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     customer_label_singular: { ar: "", en: "" },
     customer_label_plural: { ar: "", en: "" },
     customer_icon: "users",
@@ -218,26 +214,16 @@ export default function WorkspaceSettingsPage() {
               typeof data.customer_label_singular === "object" &&
               data.customer_label_singular !== null
                 ? {
-<<<<<<< HEAD
                     ar: data.customer_label_singular.ar || "",
                     en: data.customer_label_singular.en || "",
-=======
-                    ar: data.customer_label_singular?.ar || "",
-                    en: data.customer_label_singular?.en || "",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }
                 : { ar: data.customer_label_singular || "", en: "" },
             customer_label_plural:
               typeof data.customer_label_plural === "object" &&
               data.customer_label_plural !== null
                 ? {
-<<<<<<< HEAD
                     ar: data.customer_label_plural.ar || "",
                     en: data.customer_label_plural.en || "",
-=======
-                    ar: data.customer_label_plural?.ar || "",
-                    en: data.customer_label_plural?.en || "",
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }
                 : { ar: data.customer_label_plural || "", en: "" },
             customer_icon: data.customer_icon || "users",
@@ -509,18 +495,7 @@ export default function WorkspaceSettingsPage() {
   };
 
   return (
-<<<<<<< HEAD
     <div className="workspace-settings-page animate-fade-in">
-=======
-    <div
-      style={{
-        width: "100%",
-        maxWidth: "100%",
-        minWidth: 0,
-        boxSizing: "border-box",
-      }}
-    >
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
       <SEO title={t("settings")} noindex />
 
       {/* Top Unified Header */}
@@ -550,18 +525,7 @@ export default function WorkspaceSettingsPage() {
       ) : (
         <div
           key={subSettingsTab}
-<<<<<<< HEAD
           className="animate-tab-card workspace-page-container"
-=======
-          className="card animate-tab-card"
-          style={{
-            padding: 24,
-            width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            boxSizing: "border-box",
-          }}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         >
           {loading ? (
             <TabSettingsSkeleton />

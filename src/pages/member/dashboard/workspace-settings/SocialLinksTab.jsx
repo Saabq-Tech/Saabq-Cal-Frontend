@@ -169,17 +169,12 @@ export default function SocialLinksTab({
             margin: "4px 0 0",
           }}
         >
-<<<<<<< HEAD
           {isCustom
             ? isRTL
               ? `روابط حساباتك وموقعك التي تظهر لـ ${customerPlural} في صفحة الحجز والإيميلات`
               : `Your social media and links displayed to ${customerPlural.toLowerCase()} on booking pages and emails`
             : t("socialMediaLinksDesc") ||
               "روابط حساباتك وموقعك التي تظهر للعملاء في صفحة الحجز والإيميلات"}
-=======
-          {t("socialMediaLinksDesc") ||
-            "روابط حساباتك وموقعك التي تظهر للعملاء في صفحة الحجز ورسائل البريد الإلكتروني"}
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
         </p>
       </div>
 

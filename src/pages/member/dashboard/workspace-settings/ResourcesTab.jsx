@@ -4,12 +4,8 @@ import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import ConfirmationModal from "./ConfirmationModal";
-<<<<<<< HEAD
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
-=======
 import { formatCurrency } from "../../../../utils/currency";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 const defaultFormState = {
   id: null,
   name: "",
@@ -207,7 +203,6 @@ export default function ResourcesTab({
 
   return (
     <div className="card-body">
-<<<<<<< HEAD
       {/* Top Section Header & KPI Stats */}
       <WorkspacePageHeader
         title={
@@ -222,101 +217,11 @@ export default function ResourcesTab({
         }
         icon="package"
         actions={
-          canEdit && (
+          allowCreate && (
             <button
               type="button"
               className="btn btn-primary"
               onClick={handleOpenCreate}
-=======
-      {/* Top Section Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 24,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon name="package" size={22} color="var(--primary)" />
-            {t("workspaceResources") ||
-              (isRTL
-                ? "إدارة الموارد والمخزون"
-                : "Workspace Resources & Inventory")}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.88rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceResourcesDesc") ||
-              (isRTL
-                ? "إدارة ومتابعة معدات ومستلزمات مساحة العمل، الأسعار، حدود التنبيه الأدنى للكميات، والموردين."
-                : "Manage workspace assets, equipment, pricing, low-stock threshold limits, and suppliers.")}
-          </p>
-        </div>
-        {allowCreate && (
-          <button className="btn btn-primary" onClick={handleOpenCreate}>
-            <Icon name="plus" size={16} />
-            {t("addResource") ||
-              (isRTL ? "+ إضافة مورد جديد" : "+ Add New Resource")}
-          </button>
-        )}
-      </div>
-
-      {/* KPI Stats Overview Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(59, 130, 246, 0.1)",
-              color: "#3b82f6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="layers" size={22} />
-          </div>
-          <div>
-            <div
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -332,7 +237,6 @@ export default function ResourcesTab({
                 {t("addResource") ||
                   (isRTL ? "إضافة مورد جديد" : "Add Resource")}
               </span>
-<<<<<<< HEAD
             </button>
           )
         }
@@ -360,69 +264,6 @@ export default function ResourcesTab({
             label: isRTL ? "تنبيهات انخفاض المخزون" : "Low Stock Alerts",
             value: calculatedStats.low_stock_count,
             valueColor:
-=======
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(16, 185, 129, 0.1)",
-              color: "#10b981",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="dollar-sign" size={22} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {t("totalValue") ||
-                (isRTL ? "القيمة الإجمالية للمخزون" : "Total Inventory Value")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-              }}
-            >
-              {formatCurrency(
-                calculatedStats.total_inventory_value,
-                wsCurrency,
-                isRTL,
-                "0",
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background:
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
               calculatedStats.low_stock_count > 0
                 ? "#f59e0b"
                 : "var(--heading)",

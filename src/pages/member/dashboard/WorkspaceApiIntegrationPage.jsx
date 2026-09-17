@@ -514,7 +514,6 @@ export default function WorkspaceApiIntegrationPage() {
         description="Connect your business website and apps to your Saabq workspace via secure REST API."
       />
 
-<<<<<<< HEAD
       <div style={{ padding: "0 4px 40px" }}>
         {/* Unified Standard Header */}
         <WorkspacePageHeader
@@ -547,62 +546,6 @@ export default function WorkspaceApiIntegrationPage() {
                     fontSize: "0.82rem",
                     padding: "8px 16px",
                     borderRadius: "var(--radius-md, 10px)",
-=======
-      <div className="workspace-api-container">
-        {/* Header Title Bar */}
-        <div
-          className="workspace-api-header"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
-            marginBottom: 24,
-            paddingBottom: 20,
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div>
-            <div
-              className="mobile-nowrap"
-              style={{ display: "flex", alignItems: "center", gap: 12 }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  backgroundColor: "rgba(32, 123, 89, 0.12)",
-                  color: "var(--primary)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Icon name="code" size={24} />
-              </div>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <h1
-                  style={{
-                    fontSize: "1.3rem",
-                    fontWeight: 800,
-                    margin: 0,
-                    lineHeight: 1.35,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {t("apiIntegrationTitle") ||
-                    "الربط البرمجي للمطورين (REST API)"}
-                </h1>
-                <p
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    margin: "4px 0 0",
-                    lineHeight: 1.5,
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
                   }}
                 >
                   <Icon name="download" size={14} />
@@ -631,65 +574,9 @@ export default function WorkspaceApiIntegrationPage() {
                   </span>
                 </button>
               </div>
-<<<<<<< HEAD
             )
           }
         />
-=======
-            </div>
-          </div>
-
-          <div
-            className="workspace-api-header-actions"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            {isActive && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handleDownloadPostman}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: "0.82rem",
-                }}
-              >
-                <Icon name="download" size={14} />
-                <span>{t("downloadPostman") || "نزّل كولكشن Postman"}</span>
-              </button>
-            )}
-
-            {isActive && (
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={handleQuickPing}
-                disabled={isPinging}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: "0.82rem",
-                }}
-              >
-                <Icon name="activity" size={14} />
-                <span>
-                  {isPinging
-                    ? t("testing") || "جارِ الفحص..."
-                    : t("testConnection") || "فحص الاتصال اللحظي"}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
         {/* Tab Navigation Slider */}
         <div
           className="no-scrollbar api-tabs-slider"

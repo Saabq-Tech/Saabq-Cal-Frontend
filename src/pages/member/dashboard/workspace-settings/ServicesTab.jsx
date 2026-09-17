@@ -7,7 +7,6 @@ import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import ConfirmationModal from "./ConfirmationModal";
-<<<<<<< HEAD
 import { getLimitInfo } from "../../../../utils/planLimits";
 import {
   PlanLimitBanner,
@@ -15,11 +14,7 @@ import {
 } from "../../../../components/common/PlanLimitAlert";
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
-=======
 import { getCurrencySymbol } from "../../../../utils/currency";
-import { getWorkspaceVibe } from "../../../../utils/workspaceVibe";
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
 const defaultFormState = {
   id: null,
   slug: "",
@@ -64,30 +59,7 @@ export default function ServicesTab({
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
-<<<<<<< HEAD
   const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
-=======
-  const vibe = getWorkspaceVibe(user?.workspace, isRTL ? "ar" : "en");
-  const {
-    isOwner: hookIsOwner,
-    canCreateServices,
-    canUpdateServices,
-    canDeleteServices,
-  } = usePermissions();
-
-  const isOwner = hookIsOwner || user?.is_owner === true;
-  const canCreate =
-    propCanCreate !== undefined ? propCanCreate : isOwner || canCreateServices;
-  const canUpdate =
-    propCanUpdate !== undefined ? propCanUpdate : isOwner || canUpdateServices;
-  const canDelete =
-    propCanDelete !== undefined ? propCanDelete : isOwner || canDeleteServices;
-  const _canEdit =
-    propCanEdit !== undefined
-      ? propCanEdit
-      : canCreate || canUpdate || canDelete;
-
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isTelegramInstructionModalOpen, setIsTelegramInstructionModalOpen] =
@@ -103,12 +75,20 @@ export default function ServicesTab({
     onConfirm: null,
   });
 
-<<<<<<< HEAD
-  const isOwner = user?.is_owner === true;
+  const {
+    isOwner: permIsOwner,
+    canCreateServices,
+    canUpdateServices,
+    canDeleteServices,
+  } = usePermissions();
+
+  const isOwner = user?.is_owner === true || permIsOwner;
+  const canCreate = propCanCreate ?? (isOwner || canCreateServices);
+  const canUpdate = propCanUpdate ?? (isOwner || canUpdateServices);
+  const canDelete = propCanDelete ?? (isOwner || canDeleteServices);
+  const canEdit = propCanEdit ?? (canCreate || canUpdate || canDelete);
   const servicesList = Array.isArray(services) ? services : [];
 
-=======
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
   const canDeleteService = (s) => {
     if (!s) return false;
     if (isOwner || canDelete) return true;
@@ -188,28 +168,11 @@ export default function ServicesTab({
   const limitInfo = getLimitInfo(user, "services", servicesList.length);
 
   const handleOpenCreate = () => {
-<<<<<<< HEAD
     if (limitInfo.isReached) {
       setIsLimitModalOpen(true);
       return;
     }
     setForm(defaultFormState);
-=======
-    const defaultCurr =
-      user?.workspace?.currency?.code ||
-      user?.workspace?.currency_code ||
-      (availableCurrencies && availableCurrencies.length > 0
-        ? availableCurrencies[0].code
-        : "SAR");
-    const matchedCurr = availableCurrencies?.find(
-      (c) => c.code?.toUpperCase() === defaultCurr?.toUpperCase(),
-    );
-    setForm({
-      ...defaultFormState,
-      currency: defaultCurr,
-      currency_id: matchedCurr?.id || null,
-    });
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
     setIsModalOpen(true);
   };
 
@@ -375,7 +338,6 @@ export default function ServicesTab({
 
   return (
     <div className="card-body">
-<<<<<<< HEAD
       <PlanLimitBanner type="services" limitInfo={limitInfo} />
 
       <PlanLimitModal
@@ -463,85 +425,6 @@ export default function ServicesTab({
           },
         ]}
       />
-=======
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-                margin: 0,
-              }}
-            >
-              {vibe.serviceTermPlural ||
-                (isRTL
-                  ? "إدارة خدمات المساحة"
-                  : "Workspace Services Management")}
-            </h2>
-            <span
-              className={`badge vibe-badge vibe-${vibe.key}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Icon name={vibe.badgeIcon} size={13} />
-              <span>{vibe.badge}</span>
-            </span>
-          </div>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceServicesDesc") ||
-              (isRTL
-                ? "إضافة وتحديث جميع بيانات وقواعد وإعدادات الخدمات المتاحة للحجز."
-                : "Manage customer services, pricing, and durations")}
-          </p>
-        </div>
-        {canCreate ? (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-            +{" "}
-            {isRTL
-              ? `إضافة ${vibe.serviceTerm} جديدة`
-              : `Add New ${vibe.serviceTerm}`}
-          </button>
-        ) : (
-          <span
-            className="profile-badge unverified"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-          >
-            <Icon name="lock" size={12} />
-            {t("readOnlyNotice") ||
-              (isRTL ? "للعرض فقط (بدون تعديل)" : "Read-only mode")}
-          </span>
-        )}
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       {/* Services Grid */}
       {servicesList.length === 0 ? (
         <div

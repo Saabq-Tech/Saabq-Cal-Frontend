@@ -21,13 +21,11 @@ export default function MembersTab({
   onSaveMember,
   onDeleteMember,
 }) {
-<<<<<<< HEAD
-  const { user } = useAuth();
-=======
   const allowCreate = canCreate !== undefined ? canCreate : canEdit;
   const allowUpdate = canUpdate !== undefined ? canUpdate : canEdit;
   const allowDelete = canDelete !== undefined ? canDelete : canEdit;
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
+
+  const { user } = useAuth();
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
@@ -100,7 +98,6 @@ export default function MembersTab({
 
   return (
     <div className="card-body">
-<<<<<<< HEAD
       <PlanLimitBanner type="members" limitInfo={limitInfo} />
 
       {/* Header Section & KPI Stats */}
@@ -113,7 +110,7 @@ export default function MembersTab({
         icon="users"
         limitBadge={limitInfo}
         actions={
-          canEdit ? (
+          allowCreate ? (
             <button
               type="button"
               className="btn btn-primary"
@@ -177,47 +174,6 @@ export default function MembersTab({
         type="members"
         limitInfo={limitInfo}
       />
-=======
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceMembers") || "أعضاء مساحة العمل"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceMembersDesc") ||
-              "إدارة فريق العمل، الأدوار، والصلاحيات الممنوحة لكل عضو"}
-          </p>
-        </div>
-        {allowCreate && (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenInvite}>
-            + {t("inviteMember") || "دعوة عضو جديد"}
-          </button>
-        )}
-      </div>
->>>>>>> f96c99cda1f7f257552f1b9a380cc71cd7df9828
-
       <div
         style={{
           overflowX: "auto",
