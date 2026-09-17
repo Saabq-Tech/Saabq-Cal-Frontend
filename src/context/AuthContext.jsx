@@ -7,7 +7,7 @@ import {
   useRef,
 } from "react";
 import client, { endpoints } from "../api/client";
-import { applyWorkspaceBranding } from "../utils/theme";
+import { resetWorkspaceBranding } from "../utils/theme";
 
 const AuthContext = createContext(null);
 
@@ -46,17 +46,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (user) {
       localStorage.setItem("saabq_user", JSON.stringify(user));
-      const ws = user.workspace;
-      if (ws) {
-        applyWorkspaceBranding(
-          ws.primary_color,
-          ws.secondary_color,
-          ws.hover_color,
-        );
-      }
     } else {
       localStorage.removeItem("saabq_user");
-      applyWorkspaceBranding(null, null, null);
+      resetWorkspaceBranding();
     }
   }, [user]);
 

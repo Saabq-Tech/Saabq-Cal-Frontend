@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -6,6 +7,7 @@ import { useToast } from "../../../context/ToastContext";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
+import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
@@ -19,29 +21,21 @@ export default function WorkspaceCustomerProfilePage() {
   const canWrite = isOwner || permissions.includes("customer_write");
   const canBook = isOwner || permissions.includes("booking_write");
 
-  // Dynamic Workspace Customer Terminology & Icon
-  const getCustomerLabel = (type = "plural") => {
-    const field =
-      type === "singular" ? "customer_label_singular" : "customer_label_plural";
-    if (workspace && workspace[field]) {
-      if (typeof workspace[field] === "object") {
-        return (
-          workspace[field][lang] ||
-          workspace[field].ar ||
-          workspace[field].en ||
-          (type === "singular" ? "عميل" : "العملاء")
-        );
-      }
-      return workspace[field];
-    }
-    return type === "singular"
-      ? t("customerSingle") || "عميل"
-      : t("navCustomers") || "العملاء";
-  };
-
-  const customerPlural = getCustomerLabel("plural");
-  const customerSingular = getCustomerLabel("singular");
-  const customerIcon = workspace?.customer_icon || "users";
+  // Dynamic Workspace Customer Terminology & Icon via Hook
+  const {
+    customerSingular,
+    customerPlural,
+    customerIcon,
+    editCustomerBtn,
+    vipCustomer,
+    customerNotFound,
+    backToCustomers,
+    customerSince,
+    noCustomerAppointmentsYet,
+    internalNotesNotice,
+    internalNotesPlaceholder,
+    customerUpdatedSuccess,
+  } = useCustomerLabel(workspace);
 
   // State
   const [customer, setCustomer] = useState(null);
@@ -101,15 +95,11 @@ export default function WorkspaceCustomerProfilePage() {
       }
     } catch (err) {
       console.error("Failed to load customer profile:", err);
-      toast.show(
-        t("customerNotFound") ||
-          `${customerSingular} غير موجود أو ليس لديك صلاحية لعرضه`,
-        "error",
-      );
+      toast.show(customerNotFound, "error");
     } finally {
       setLoading(false);
     }
-  }, [customerId, t, toast, customerSingular]);
+  }, [customerId, toast, customerNotFound]);
 
   useEffect(() => {
     fetchCustomer();
@@ -174,11 +164,7 @@ export default function WorkspaceCustomerProfilePage() {
         endpoints.workspaceCustomerItem(customerId),
         customerForm,
       );
-      toast.show(
-        t("customerUpdatedSuccess") ||
-          `تم تحديث بيانات ${customerSingular} بنجاح`,
-        "success",
-      );
+      toast.show(customerUpdatedSuccess, "success");
       setIsEditModalOpen(false);
       fetchCustomer();
     } catch (err) {
@@ -285,7 +271,7 @@ export default function WorkspaceCustomerProfilePage() {
             marginBottom: 8,
           }}
         >
-          {t("customerNotFound") || `${customerSingular} غير موجود`}
+          {customerNotFound}
         </h2>
         <Link
           to="/member/workspace/customers"
@@ -293,9 +279,7 @@ export default function WorkspaceCustomerProfilePage() {
           style={{ marginTop: 12 }}
         >
           <Icon name="arrow-right" size={16} />
-          <span>
-            {t("backToCustomers") || `العودة لقائمة ${customerPlural}`}
-          </span>
+          <span>{backToCustomers}</span>
         </Link>
       </div>
     );
@@ -519,7 +503,7 @@ export default function WorkspaceCustomerProfilePage() {
                 )}
                 {customer.created_at && (
                   <span>
-                    {t("customerSince") || "منذ"}:{" "}
+                    {customerSince}:{" "}
                     {new Date(customer.created_at).toLocaleDateString(
                       lang === "ar" ? "ar-EG" : "en-US",
                     )}
@@ -1605,8 +1589,7 @@ export default function WorkspaceCustomerProfilePage() {
                   margin: "0 auto 16px",
                 }}
               >
-                {t("noCustomerAppointmentsYet") ||
-                  `لم يسجل هذا ${customerSingular} أي مواعيد في مساحة العمل هذه حتى الآن.`}
+                {noCustomerAppointmentsYet}
               </p>
               {canBook && (
                 <button
@@ -1985,8 +1968,7 @@ export default function WorkspaceCustomerProfilePage() {
                 lineHeight: 1.5,
               }}
             >
-              {t("internalNotesNotice") ||
-                `هذه الملاحظات خاصة بمساحة العمل فقط ولا تظهر لـ${customerSingular} إطلاقاً.`}
+              {internalNotesNotice}
             </p>
 
             <textarea
@@ -1994,10 +1976,7 @@ export default function WorkspaceCustomerProfilePage() {
               rows={8}
               value={internalNotes}
               onChange={(e) => setInternalNotes(e.target.value)}
-              placeholder={
-                t("internalNotesPlaceholder") ||
-                `أضف ملاحظات سرية، تفضيلات ${customerSingular}، أو تعليمات خاصة بمتابعة حالته...`
-              }
+              placeholder={internalNotesPlaceholder}
               disabled={!canWrite}
               style={{
                 width: "100%",
@@ -2394,334 +2373,290 @@ export default function WorkspaceCustomerProfilePage() {
       )}
 
       {/* Edit Customer Modal */}
-      {isEditModalOpen && (
-        <div
-          className="modal-overlay animate-fade-in"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 16,
-          }}
-          onClick={() => setIsEditModalOpen(false)}
-        >
+      {isEditModalOpen &&
+        createPortal(
           <div
-            className="modal-container glass-card animate-scale-in"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg, 16px)",
-              width: "100%",
-              maxWidth: 580,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: 24,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-            }}
-            onClick={(e) => e.stopPropagation()}
+            className="modal-backdrop animate-fade-in"
+            onClick={() => setIsEditModalOpen(false)}
           >
             <div
+              className="modal-card modal-md animate-scale-in"
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 20,
+                maxWidth: 580,
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    background: "rgba(2, 105, 130, 0.1)",
-                    color: "var(--primary)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="edit-2" size={20} />
-                </div>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.2rem",
-                    fontWeight: 800,
-                    color: "var(--heading)",
-                  }}
-                >
-                  {(t("editPrefix") || "تعديل بيانات") + " " + customerSingular}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "var(--text-secondary)",
-                }}
-              >
-                <Icon name="x" size={20} />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSaveCustomer();
-              }}
-            >
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 700 }}>
-                    {t("fullName") || "الاسم الكامل"} *
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customerForm.name}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, name: e.target.value })
-                    }
-                    required
-                  />
-                  {formErrors.name && (
-                    <span
-                      style={{
-                        color: "#ef4444",
-                        fontSize: "0.75rem",
-                        marginTop: 4,
-                        display: "block",
-                      }}
-                    >
-                      {Array.isArray(formErrors.name)
-                        ? formErrors.name[0]
-                        : formErrors.name}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerFileNo") || "رقم الملف / المرجع"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customerForm.customer_reference}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        customer_reference: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 700 }}>
-                    {t("email") || "البريد الإلكتروني"} *
-                  </label>
-                  <input
-                    type="email"
-                    className="form-input"
-                    value={customerForm.email}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        email: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                  {formErrors.email && (
-                    <span
-                      style={{
-                        color: "#ef4444",
-                        fontSize: "0.75rem",
-                        marginTop: 4,
-                        display: "block",
-                      }}
-                    >
-                      {Array.isArray(formErrors.email)
-                        ? formErrors.email[0]
-                        : formErrors.email}
-                    </span>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("phone") || "رقم الهاتف"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customerForm.phone}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        phone: e.target.value,
-                      })
-                    }
-                    dir="ltr"
-                  />
-                  {formErrors.phone && (
-                    <span
-                      style={{
-                        color: "#ef4444",
-                        fontSize: "0.75rem",
-                        marginTop: 4,
-                        display: "block",
-                      }}
-                    >
-                      {Array.isArray(formErrors.phone)
-                        ? formErrors.phone[0]
-                        : formErrors.phone}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerGender") || "الجنس"}
-                  </label>
-                  <select
-                    className="form-select"
-                    value={customerForm.gender || "male"}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        gender: e.target.value,
-                      })
-                    }
+              <div className="modal-header">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      background: "rgba(2, 105, 130, 0.1)",
+                      color: "var(--primary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <option value="male">{t("genderMale") || "ذكر"}</option>
-                    <option value="female">
-                      {t("genderFemale") || "أنثى"}
-                    </option>
-                    <option value="other">{t("other") || "آخر"}</option>
-                  </select>
+                    <Icon name="edit-2" size={20} />
+                  </div>
+                  <h3 className="modal-title">{editCustomerBtn}</h3>
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerDob") || "تاريخ الميلاد"}
-                  </label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={customerForm.date_of_birth}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        date_of_birth: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("status") || "الحالة"}
-                  </label>
-                  <select
-                    className="form-select"
-                    value={customerForm.status || "active"}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        status: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="active">
-                      {t("filterStatusActive") || "نشط"}
-                    </option>
-                    <option value="vip">
-                      {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
-                    </option>
-                    <option value="lead">
-                      {t("filterStatusLead") || "محتمل / جديد"}
-                    </option>
-                    <option value="inactive">
-                      {t("filterStatusInactive") || "غير نشط"}
-                    </option>
-                    <option value="blocked">
-                      {t("filterStatusBlocked") || "محظور"}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                  gap: 10,
-                  marginTop: 16,
-                }}
-              >
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close-btn"
                   onClick={() => setIsEditModalOpen(false)}
-                  disabled={savingCustomer}
                 >
-                  {t("cancel") || "إلغاء"}
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={savingCustomer}
-                >
-                  {savingCustomer
-                    ? t("saving") || "جاري الحفظ..."
-                    : t("saveChanges") || "حفظ التغييرات"}
+                  <Icon name="x" size={18} />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveCustomer();
+                }}
+                className="modal-body"
+              >
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("fullName") || "الاسم الكامل"} *
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.name}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          name: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                    {formErrors.name && (
+                      <span
+                        style={{
+                          color: "#ef4444",
+                          fontSize: "0.75rem",
+                          marginTop: 4,
+                          display: "block",
+                        }}
+                      >
+                        {Array.isArray(formErrors.name)
+                          ? formErrors.name[0]
+                          : formErrors.name}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerFileNo") || "رقم الملف / المرجع"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.customer_reference}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          customer_reference: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("email") || "البريد الإلكتروني"} *
+                    </label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={customerForm.email}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          email: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                    {formErrors.email && (
+                      <span
+                        style={{
+                          color: "#ef4444",
+                          fontSize: "0.75rem",
+                          marginTop: 4,
+                          display: "block",
+                        }}
+                      >
+                        {Array.isArray(formErrors.email)
+                          ? formErrors.email[0]
+                          : formErrors.email}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("phone") || "رقم الهاتف"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.phone}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          phone: e.target.value,
+                        })
+                      }
+                      dir="ltr"
+                    />
+                    {formErrors.phone && (
+                      <span
+                        style={{
+                          color: "#ef4444",
+                          fontSize: "0.75rem",
+                          marginTop: 4,
+                          display: "block",
+                        }}
+                      >
+                        {Array.isArray(formErrors.phone)
+                          ? formErrors.phone[0]
+                          : formErrors.phone}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerGender") || "الجنس"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={customerForm.gender || "male"}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          gender: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="male">{t("genderMale") || "ذكر"}</option>
+                      <option value="female">
+                        {t("genderFemale") || "أنثى"}
+                      </option>
+                      <option value="other">{t("other") || "آخر"}</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerDob") || "تاريخ الميلاد"}
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={customerForm.date_of_birth}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          date_of_birth: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("status") || "الحالة"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={customerForm.status || "active"}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          status: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="active">
+                        {t("filterStatusActive") || "نشط"}
+                      </option>
+                      <option value="vip">{vipCustomer}</option>
+                      <option value="lead">
+                        {t("filterStatusLead") || "محتمل / جديد"}
+                      </option>
+                      <option value="inactive">
+                        {t("filterStatusInactive") || "غير نشط"}
+                      </option>
+                      <option value="blocked">
+                        {t("filterStatusBlocked") || "محظور"}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="modal-actions" style={{ marginTop: 16 }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setIsEditModalOpen(false)}
+                    disabled={savingCustomer}
+                  >
+                    {t("cancel") || "إلغاء"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={savingCustomer}
+                  >
+                    {savingCustomer
+                      ? t("saving") || "جاري الحفظ..."
+                      : t("saveChanges") || "حفظ التغييرات"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* Quick Booking Modal */}
       {isBookingModalOpen && customer && (

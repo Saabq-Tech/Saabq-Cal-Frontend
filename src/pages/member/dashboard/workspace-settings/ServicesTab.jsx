@@ -6,6 +6,13 @@ import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import ConfirmationModal from "./ConfirmationModal";
+import { getLimitInfo } from "../../../../utils/planLimits";
+import {
+  PlanLimitBanner,
+  PlanLimitModal,
+} from "../../../../components/common/PlanLimitAlert";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 
 const defaultFormState = {
   id: null,
@@ -48,7 +55,9 @@ export default function ServicesTab({
 }) {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isTelegramInstructionModalOpen, setIsTelegramInstructionModalOpen] =
     useState(false);
   const [form, setForm] = useState(defaultFormState);
@@ -63,6 +72,7 @@ export default function ServicesTab({
   });
 
   const isOwner = user?.is_owner === true;
+  const servicesList = Array.isArray(services) ? services : [];
 
   const canDeleteService = (s) => {
     if (!canEdit || !s) return false;
@@ -140,7 +150,13 @@ export default function ServicesTab({
     return `${window.location.origin}/${workspaceSlug}/${serviceSlug}`;
   };
 
+  const limitInfo = getLimitInfo(user, "services", servicesList.length);
+
   const handleOpenCreate = () => {
+    if (limitInfo.isReached) {
+      setIsLimitModalOpen(true);
+      return;
+    }
     setForm(defaultFormState);
     setIsModalOpen(true);
   };
@@ -305,63 +321,95 @@ export default function ServicesTab({
     setIsModalOpen(false);
   };
 
-  const servicesList = Array.isArray(services) ? services : [];
-
   return (
     <div className="card-body">
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceServices") ||
-              (isRTL ? "إدارة خدمات المساحة" : "Workspace Services Management")}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceServicesDesc") ||
-              (isRTL
-                ? "إضافة وتحديث جميع بيانات وقواعد وإعدادات الخدمات المتاحة للحجز."
-                : "Manage customer services, pricing, and durations")}
-          </p>
-        </div>
-        {canEdit ? (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-            +{" "}
-            {t("addService") ||
-              (isRTL ? "إضافة خدمة جديدة" : "Add New Service")}
-          </button>
-        ) : (
-          <span
-            className="profile-badge unverified"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-          >
-            <Icon name="lock" size={12} />
-            {t("readOnlyNotice") ||
-              (isRTL ? "للعرض بس (من غير تعديل)" : "Read-only mode")}
-          </span>
-        )}
-      </div>
+      <PlanLimitBanner type="services" limitInfo={limitInfo} />
+
+      <PlanLimitModal
+        isOpen={isLimitModalOpen}
+        onClose={() => setIsLimitModalOpen(false)}
+        type="services"
+        limitInfo={limitInfo}
+      />
+
+      {/* Header Section & KPI Stats */}
+      <WorkspacePageHeader
+        title={
+          t("workspaceServices") ||
+          (isRTL ? "إدارة خدمات مساحة العمل" : "Workspace Services")
+        }
+        subtitle={
+          t("workspaceServicesDesc") ||
+          (isRTL
+            ? "عرض وإدارة كافة الخدمات وباقات المواعيد، وتحديد المدد والأسعار وقواعد الحجز."
+            : "Manage customer services, booking rules, pricing, and durations")
+        }
+        icon="briefcase"
+        limitBadge={limitInfo}
+        actions={
+          canEdit ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenCreate}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+              }}
+            >
+              <Icon name="plus" size={18} />
+              <span>
+                {t("addService") ||
+                  (isRTL ? "إضافة خدمة جديدة" : "Add New Service")}
+              </span>
+            </button>
+          ) : (
+            <span
+              className="profile-badge unverified"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            >
+              <Icon name="lock" size={12} />
+              {t("readOnlyNotice") ||
+                (isRTL ? "للعرض بس (من غير تعديل)" : "Read-only mode")}
+            </span>
+          )
+        }
+        stats={[
+          {
+            id: "total_services",
+            label: isRTL ? "إجمالي الخدمات" : "Total Services",
+            value: servicesList.length,
+            icon: "briefcase",
+            iconBg: "rgba(2, 105, 130, 0.12)",
+            iconColor: "var(--primary)",
+          },
+          {
+            id: "active_services",
+            label: isRTL ? "الخدمات المتاحة للحجز" : "Active Bookable",
+            value: servicesList.filter(
+              (s) => s.status === "active" && s.booking_enabled !== false,
+            ).length,
+            valueColor: "#10b981",
+            icon: "check-circle",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "featured_services",
+            label: isRTL ? "الخدمات المميزة" : "Featured Services",
+            value: servicesList.filter((s) => s.is_featured).length,
+            valueColor: "#f59e0b",
+            icon: "star",
+            iconBg: "rgba(245, 158, 11, 0.12)",
+            iconColor: "#f59e0b",
+          },
+        ]}
+      />
 
       {/* Services Grid */}
       {servicesList.length === 0 ? (
@@ -409,10 +457,14 @@ export default function ServicesTab({
               margin: "0 0 16px",
             }}
           >
-            {t("noServicesDesc") ||
-              (isRTL
-                ? "قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد."
-                : "Add your first service to allow customers to select and book appointments.")}
+            {isCustom
+              ? isRTL
+                ? `قم بإضافة خدماتك الأولى لتتيح لـ ${customerPlural} اختيارها وحجز المواعيد.`
+                : `Add your first service to allow ${customerPlural.toLowerCase()} to select and book appointments.`
+              : t("noServicesDesc") ||
+                (isRTL
+                  ? "قم بإضافة خدماتك الأولى لتتيح للعملاء اختيارها وحجز المواعيد."
+                  : "Add your first service to allow customers to select and book appointments.")}
           </p>
           {canEdit && (
             <button
@@ -888,8 +940,12 @@ export default function ServicesTab({
                           boxSizing: "border-box",
                         }}
                         title={
-                          t("openCustomerBookingPage") ||
-                          "فتح صفحة الحجز للعميل"
+                          isCustom
+                            ? isRTL
+                              ? `فتح صفحة الحجز لـ ${customerSingular}`
+                              : `Open booking page for ${customerSingular.toLowerCase()}`
+                            : t("openCustomerBookingPage") ||
+                              "فتح صفحة الحجز للعميل"
                         }
                       >
                         <Icon name="external-link" size={13} />
@@ -1374,8 +1430,12 @@ export default function ServicesTab({
                         }
                         rows={3}
                         placeholder={
-                          t("fullDescPlaceholder") ||
-                          "شرح كامل لتفاصيل الخدمة واللي العميل هيستفيده منها..."
+                          isCustom
+                            ? isRTL
+                              ? `شرح كامل لتفاصيل الخدمة والقيمة المقدمة لـ ${customerSingular}...`
+                              : `Full description of service details and value delivered to the ${customerSingular.toLowerCase()}...`
+                            : t("fullDescPlaceholder") ||
+                              "شرح كامل لتفاصيل الخدمة واللي العميل هيستفيده منها..."
                         }
                       />
                     </div>

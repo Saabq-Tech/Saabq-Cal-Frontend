@@ -271,6 +271,44 @@ export default function CustomerRegisterPage() {
           </div>
         )}
 
+        <p
+          style={{
+            fontSize: "0.82rem",
+            color: "var(--text-secondary)",
+            textAlign: "center",
+            margin: "0 0 16px",
+            lineHeight: 1.5,
+          }}
+        >
+          {t("termsAgreementDisclaimer") || "بإنشاء حسابك، فإنك توافق على"}{" "}
+          <Link
+            to="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("termsOfService")}
+          </Link>{" "}
+          {t("andText") || "و"}{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("privacyPolicy")}
+          </Link>
+          .
+        </p>
+
         <button
           type="submit"
           className="btn btn-primary btn-block btn-lg"

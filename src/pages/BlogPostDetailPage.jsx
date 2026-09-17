@@ -112,6 +112,7 @@ export default function BlogPostDetailPage() {
         title={`${post.seo_title || post.title} — ${t("appName")}`}
         description={post.seo_description || post.excerpt || ""}
         canonical={`/blog/${post.slug}`}
+        ogType="article"
         image={post.featured_image_url}
         structuredData={structuredData}
       />

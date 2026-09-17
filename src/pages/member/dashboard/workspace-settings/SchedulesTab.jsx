@@ -5,6 +5,7 @@ import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function SchedulesTab({
   schedules,
@@ -319,6 +320,176 @@ export default function SchedulesTab({
   const [savingWeeklyRules, setSavingWeeklyRules] = useState(false);
   const [savingValidity, setSavingValidity] = useState(false);
 
+  // Schedule Copy Slots State
+  const [copyState, setCopyState] = useState({
+    isOpen: false,
+    fromDayKey: null,
+    fromDayLabel: "",
+    targetDays: [],
+    saving: false,
+    anchorRect: null,
+  });
+
+  useEffect(() => {
+    if (!copyState.isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && !copyState.saving) {
+        setCopyState((prev) => ({ ...prev, isOpen: false }));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [copyState.isOpen, copyState.saving]);
+
+  const getPopoverPosition = useCallback(() => {
+    if (!copyState.anchorRect) return {};
+
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+    if (isMobile) {
+      return {
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "min(calc(100vw - 32px), 360px)",
+        maxWidth: "360px",
+        maxHeight: "85vh",
+        zIndex: 999999,
+      };
+    }
+
+    const { anchorRect } = copyState;
+    const popoverWidth = 320;
+    const estimatedHeight = 390;
+    const padding = 16;
+
+    let top = anchorRect.bottom + 8;
+    if (top + estimatedHeight > window.innerHeight - padding) {
+      top = Math.max(padding, anchorRect.top - estimatedHeight - 8);
+    }
+
+    let left = "auto";
+    let right = "auto";
+
+    if (lang === "ar") {
+      right = window.innerWidth - anchorRect.right;
+      if (right + popoverWidth > window.innerWidth - padding) {
+        right = padding;
+      }
+      if (right < padding) {
+        right = padding;
+      }
+    } else {
+      left = anchorRect.left;
+      if (left + popoverWidth > window.innerWidth - padding) {
+        left = window.innerWidth - popoverWidth - padding;
+      }
+      if (left < padding) {
+        left = padding;
+      }
+    }
+
+    return {
+      position: "fixed",
+      top: `${top}px`,
+      ...(lang === "ar"
+        ? { right: `${right}px`, left: "auto" }
+        : { left: `${left}px`, right: "auto" }),
+      width: `${popoverWidth}px`,
+      maxWidth: `calc(100vw - ${padding * 2}px)`,
+      maxHeight: "calc(100vh - 32px)",
+      zIndex: 999999,
+    };
+  }, [copyState.anchorRect, lang]);
+
+  const handleOpenCopyModal = (dayKey, dayLabel, e) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const slots = activeSchedule?.weekly_hours?.[dayKey] || [];
+    if (slots.length === 0) {
+      toast.error(t("noSlotsToCopy") || "لا توجد فترات لنسخها في هذا اليوم");
+      return;
+    }
+
+    setCopyState({
+      isOpen: true,
+      fromDayKey: dayKey,
+      fromDayLabel: dayLabel,
+      targetDays: [],
+      saving: false,
+      anchorRect: {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+      },
+    });
+  };
+
+  const handleToggleTargetDay = (targetDayKey) => {
+    setCopyState((prev) => {
+      const exists = prev.targetDays.includes(targetDayKey);
+      return {
+        ...prev,
+        targetDays: exists
+          ? prev.targetDays.filter((k) => k !== targetDayKey)
+          : [...prev.targetDays, targetDayKey],
+      };
+    });
+  };
+
+  const handleToggleAllTargetDays = (eligibleDayKeys) => {
+    setCopyState((prev) => {
+      const allSelected = prev.targetDays.length === eligibleDayKeys.length;
+      return {
+        ...prev,
+        targetDays: allSelected ? [] : [...eligibleDayKeys],
+      };
+    });
+  };
+
+  const handleApplyCopySlots = () => {
+    if (!activeSchedule || copyState.targetDays.length === 0) {
+      toast.error(
+        t("selectAtLeastOneDay") || "يرجى اختيار يوم واحد على الأقل للنسخ إليه",
+      );
+      return;
+    }
+
+    const fromSlots = activeSchedule.weekly_hours?.[copyState.fromDayKey] || [];
+    if (fromSlots.length === 0) {
+      toast.error(t("noSlotsToCopy") || "لا توجد فترات لنسخها في هذا اليوم");
+      return;
+    }
+
+    // Update local weekly_hours directly on the frontend
+    setSchedulesList((prev) =>
+      prev.map((s) => {
+        if (s.id === selectedScheduleId) {
+          const updatedWeeklyHours = { ...(s.weekly_hours || {}) };
+          copyState.targetDays.forEach((tDay) => {
+            updatedWeeklyHours[tDay] = fromSlots.map((slot) => ({ ...slot }));
+          });
+          return {
+            ...s,
+            weekly_hours: updatedWeeklyHours,
+          };
+        }
+        return s;
+      }),
+    );
+
+    toast.success(
+      t("slotsCopiedLocalSuccess") ||
+        "تم تطبيق الفترات المنسوخة. اضغط على حفظ التغييرات لاعتمادها",
+    );
+    setCopyState((prev) => ({ ...prev, isOpen: false, saving: false }));
+  };
+
   // --- Handlers ---
   const handleOpenCreateModal = () => {
     setModalForm({
@@ -632,76 +803,76 @@ export default function SchedulesTab({
       className="card-body"
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
-      {/* 1. Header Toolbar & Schedule Switcher Bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 16,
-          paddingBottom: 16,
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 4,
-              flexWrap: "wrap",
-            }}
-          >
-            <div
+      {/* 1. Standard Workspace Header & Stats */}
+      <WorkspacePageHeader
+        title={
+          t("workspaceSchedules") ||
+          (lang === "ar" ? "جداول وساعات العمل" : "Schedules & Availability")
+        }
+        subtitle={
+          t("workspaceSchedulesDesc") ||
+          (lang === "ar"
+            ? "ضبط أوقات وأيام العمل الفعالة لكل أسبوع، فترات الصلاحية، والاستثناءات المخصصة."
+            : "Set weekly working hours, validity windows, holiday exceptions, and break periods.")
+        }
+        icon="clock"
+        actions={
+          canEdit && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenCreateModal}
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "var(--primary-subtle)",
-                color: "var(--primary)",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
               }}
             >
-              <Icon name="clock" size={18} />
-            </div>
-            <h2
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 800,
-                margin: 0,
-                color: "var(--heading)",
-              }}
-            >
-              {t("workspaceSchedules") || "الجداول والتوفر"}
-            </h2>
-          </div>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
-            {t("workspaceSchedulesDesc") ||
-              "ضبط أوقات وأيام العمل الفعالة لكل أسبوع، فترات الصلاحية، والاستثناءات المخصصة"}
-          </p>
-        </div>
-
-        {canEdit && (
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleOpenCreateModal}
-            style={{ gap: 6 }}
-          >
-            <Icon name="plus" size={14} />
-            {t("newScheduleBtn") || "جدول جديد"}
-          </button>
-        )}
-      </div>
+              <Icon name="plus" size={18} />
+              <span>
+                {t("newScheduleBtn") ||
+                  (lang === "ar" ? "إنشاء جدول جديد" : "New Schedule")}
+              </span>
+            </button>
+          )
+        }
+        stats={[
+          {
+            id: "total_schedules",
+            label: lang === "ar" ? "إجمالي الجداول" : "Total Schedules",
+            value: schedulesList.length,
+            icon: "clock",
+            iconBg: "rgba(2, 105, 130, 0.12)",
+            iconColor: "var(--primary)",
+          },
+          {
+            id: "workspace_schedules",
+            label: lang === "ar" ? "جداول المساحة العامة" : "Workspace Scope",
+            value: schedulesList.filter(
+              (s) => !s.workspace_member_id && s.scope !== "member",
+            ).length,
+            valueColor: "#10b981",
+            icon: "grid",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "member_schedules",
+            label: lang === "ar" ? "جداول الأعضاء المخصصة" : "Member Schedules",
+            value: schedulesList.filter(
+              (s) => s.workspace_member_id || s.scope === "member",
+            ).length,
+            valueColor: "#6366f1",
+            icon: "users",
+            iconBg: "rgba(99, 102, 241, 0.12)",
+            iconColor: "#6366f1",
+          },
+        ]}
+      />
 
       {/* 2. Schedule Selector Tabs */}
       {schedulesList.length === 0 ? (
@@ -804,29 +975,8 @@ export default function SchedulesTab({
                       key={sch.id}
                       ref={isSelected ? activeTabRef : null}
                       type="button"
+                      className={`schedule-tab-btn ${isSelected ? "active" : ""}`}
                       onClick={() => setSelectedScheduleId(sch.id)}
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: 20,
-                        fontSize: "0.86rem",
-                        fontWeight: isSelected ? 800 : 500,
-                        border: isSelected
-                          ? "1.5px solid var(--primary)"
-                          : "1px solid var(--border-light)",
-                        background: isSelected
-                          ? "var(--primary-subtle)"
-                          : "var(--bg-card)",
-                        color: isSelected
-                          ? "var(--primary)"
-                          : "var(--text-secondary)",
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 8,
-                        whiteSpace: "nowrap",
-                        flexShrink: 0,
-                        transition: "all 0.15s ease",
-                      }}
                     >
                       <span
                         style={{
@@ -839,9 +989,13 @@ export default function SchedulesTab({
                         <span
                           style={{
                             fontSize: "0.72rem",
-                            background: "var(--surface-alt)",
-                            color: "var(--primary)",
-                            border: "1px solid var(--border)",
+                            background: isSelected
+                              ? "var(--surface)"
+                              : "var(--surface-alt)",
+                            color: isSelected
+                              ? "var(--primary)"
+                              : "var(--text-secondary)",
+                            border: `1px solid ${isSelected ? "var(--primary)" : "var(--border)"}`,
                             padding: "2px 8px",
                             borderRadius: 10,
                             fontWeight: 600,
@@ -1236,20 +1390,35 @@ export default function SchedulesTab({
                         )}
                       </div>
 
-                      {/* Action: Add Slot */}
+                      {/* Action: Copy Slots & Add Slot */}
                       {canEdit && isDayEnabled && (
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => handleAddSlot(d.key)}
-                          style={{
-                            fontSize: "0.78rem",
-                            color: "var(--primary)",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {t("addTimeSlotBtn") || "+ إضافة فترة"}
-                        </button>
+                        <div className="schedule-day-actions">
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm schedule-copy-btn"
+                            onClick={(e) =>
+                              handleOpenCopyModal(d.key, d.label, e)
+                            }
+                            title={t("copySlotsToDays") || "نسخ للأيام الأخرى"}
+                            aria-label={
+                              t("copySlotsToDays") || "نسخ للأيام الأخرى"
+                            }
+                          >
+                            <Icon name="copy" size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm schedule-add-slot-btn"
+                            onClick={() => handleAddSlot(d.key)}
+                            style={{
+                              fontSize: "0.78rem",
+                              color: "var(--primary)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {t("addTimeSlotBtn") || "+ إضافة فترة"}
+                          </button>
+                        </div>
                       )}
                     </div>
                   );
@@ -1947,6 +2116,189 @@ export default function SchedulesTab({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* 7. MODAL / POPOVER: Copy Schedule Slots to other days */}
+      {copyState.isOpen &&
+        copyState.fromDayKey !== null &&
+        copyState.fromDayKey !== undefined &&
+        createPortal(
+          <div className="schedule-copy-portal">
+            <div
+              className="schedule-copy-backdrop"
+              onClick={() => {
+                if (!copyState.saving) {
+                  setCopyState((prev) => ({ ...prev, isOpen: false }));
+                }
+              }}
+            />
+            <div
+              className="schedule-copy-popover"
+              style={getPopoverPosition()}
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Popover Header */}
+              <div className="schedule-copy-header">
+                <div className="schedule-copy-title-box">
+                  <Icon name="copy" size={16} className="schedule-copy-icon" />
+                  <h4 className="schedule-copy-title">
+                    {t("copyTimesTo") || "نسخ الفترات إلى"}
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  className="schedule-copy-close-btn"
+                  onClick={() => {
+                    if (!copyState.saving) {
+                      setCopyState((prev) => ({ ...prev, isOpen: false }));
+                    }
+                  }}
+                  disabled={copyState.saving}
+                  aria-label={t("close") || "إغلاق"}
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+
+              {/* Source Day Info with Slots Chips */}
+              <div className="schedule-copy-source-info">
+                <div className="schedule-copy-source-label">
+                  <span>{t("copySlotsFrom") || "نسخ مواعيد:"}</span>
+                  <strong>{copyState.fromDayLabel}</strong>
+                </div>
+                <div className="schedule-copy-source-slots">
+                  {(
+                    activeSchedule?.weekly_hours?.[copyState.fromDayKey] || []
+                  ).map((s, idx) => (
+                    <span key={idx} className="schedule-copy-slot-chip">
+                      {s.from} – {s.to}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Toolbar: Counter & Toggle All */}
+              {(() => {
+                const otherDays = daysList.filter(
+                  (d) => d && d.key !== copyState.fromDayKey,
+                );
+                const eligibleDayKeys = otherDays.map((d) => d.key);
+                const allSelected =
+                  copyState.targetDays.length === eligibleDayKeys.length;
+
+                return (
+                  <>
+                    <div className="schedule-copy-toolbar">
+                      <span className="schedule-copy-selected-count">
+                        {copyState.targetDays.length} / {otherDays.length}{" "}
+                        {t("selected") || "محدد"}
+                      </span>
+                      <button
+                        type="button"
+                        className="schedule-copy-toggle-all"
+                        onClick={() =>
+                          handleToggleAllTargetDays(eligibleDayKeys)
+                        }
+                        disabled={copyState.saving}
+                      >
+                        {allSelected
+                          ? t("deselectAll") || "إلغاء تحديد الكل"
+                          : t("selectAll") || "تحديد الكل"}
+                      </button>
+                    </div>
+
+                    {/* Target Days Checkbox List */}
+                    <div className="schedule-copy-days-list custom-scrollbar">
+                      {otherDays.map((targetDay) => {
+                        const isChecked = copyState.targetDays.includes(
+                          targetDay.key,
+                        );
+                        const currentTargetSlots =
+                          activeSchedule?.weekly_hours?.[targetDay.key] || [];
+
+                        return (
+                          <label
+                            key={targetDay.key}
+                            className={`schedule-copy-day-item ${
+                              isChecked ? "is-checked" : ""
+                            }`}
+                          >
+                            <div className="schedule-copy-day-content">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() =>
+                                  handleToggleTargetDay(targetDay.key)
+                                }
+                                disabled={copyState.saving}
+                                className="schedule-copy-checkbox"
+                              />
+                              <span className="schedule-copy-day-name">
+                                {targetDay.label}
+                              </span>
+                            </div>
+                            {currentTargetSlots.length > 0 ? (
+                              <span className="schedule-copy-slots-badge">
+                                {currentTargetSlots.length}{" "}
+                                {currentTargetSlots.length === 1
+                                  ? t("slotCountSingular") || "فترة"
+                                  : t("slotCountPlural") || "فترات"}
+                              </span>
+                            ) : (
+                              <span className="schedule-copy-slots-badge is-empty">
+                                {t("unavailableClosed") || "مغلق"}
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* Popover Footer */}
+              <div className="schedule-copy-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() =>
+                    setCopyState((prev) => ({ ...prev, isOpen: false }))
+                  }
+                  disabled={copyState.saving}
+                >
+                  {t("cancel") || "إلغاء"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={handleApplyCopySlots}
+                  disabled={
+                    copyState.saving || copyState.targetDays.length === 0
+                  }
+                  style={{ gap: 6, fontWeight: 700 }}
+                >
+                  {copyState.saving ? (
+                    <>
+                      <span
+                        className="spinner spinner-sm"
+                        style={{ borderTopColor: "#fff" }}
+                      />
+                      {t("saving") || "جاري الحفظ..."}
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="check" size={14} />
+                      {t("apply") || "تطبيق"}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>,
           document.body,

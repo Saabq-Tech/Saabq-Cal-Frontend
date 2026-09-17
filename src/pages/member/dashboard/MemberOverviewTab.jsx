@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -9,6 +10,8 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
+import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
+import UserAvatar from "../../../components/ui/UserAvatar";
 
 const HOUR_HEIGHT = 82; // pixels per hour
 const TOTAL_HOURS = 24; // 24 hours (00:00 to 23:00)
@@ -20,18 +23,11 @@ export default function MemberOverviewTab() {
 
   // Dynamic workspace customer label
   const ws = user?.workspace;
-  const custSingular = (() => {
-    const f = ws?.customer_label_singular;
-    if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
-    return t("customerSingle") || "عميل";
-  })();
-
-  const custPlural = (() => {
-    const f = ws?.customer_label_plural;
-    if (f)
-      return typeof f === "object" ? f[lang] || f.ar || f.en || "العملاء" : f;
-    return t("navCustomers") || (lang === "ar" ? "العملاء" : "Customers");
-  })();
+  const {
+    isCustom,
+    customerSingular: custSingular,
+    customerPlural: custPlural,
+  } = useCustomerLabel(ws);
 
   const isOwner = user?.is_owner === true;
   const userPermissions = Array.isArray(user?.permissions)
@@ -71,13 +67,121 @@ export default function MemberOverviewTab() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedEventModal, setSelectedEventModal] = useState(null);
 
-  // Real-time clock updater every minute
+  // Lock body scroll and handle Escape key when quick booking details modal is open
+  useEffect(() => {
+    if (!selectedEventModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSelectedEventModal(null);
+      }
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedEventModal]);
+
+  // Real-time clock updater every second
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000);
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Determine if workspace uses 24-hour format
+  const is24Hour = useMemo(() => {
+    const format =
+      workspaceSettings?.time_format || ws?.time_format || user?.time_format;
+    return format === "24h" || format === "24";
+  }, [workspaceSettings, ws, user]);
+
+  // Live greeting calculation based on workspace local hour
+  const liveGreeting = useMemo(() => {
+    let hour = currentTime.getHours();
+    if (wsTimezone) {
+      try {
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: wsTimezone,
+          hour: "numeric",
+          hour12: false,
+        });
+        const hPart = formatter
+          .formatToParts(currentTime)
+          .find((p) => p.type === "hour")?.value;
+        if (hPart !== undefined) hour = parseInt(hPart, 10);
+      } catch {}
+    }
+    if (hour >= 5 && hour < 12) {
+      return lang === "ar" ? "صباح الخير" : "Good morning";
+    } else if (hour >= 12 && hour < 17) {
+      return lang === "ar" ? "مساء الخير" : "Good afternoon";
+    } else {
+      return lang === "ar" ? "مساء الخير" : "Good evening";
+    }
+  }, [currentTime, wsTimezone, lang]);
+
+  // Formatted real-time live clock with seconds
+  const formattedLiveTime = useMemo(() => {
+    let hours = currentTime.getHours();
+    let minutes = currentTime.getMinutes();
+    let seconds = currentTime.getSeconds();
+
+    if (wsTimezone) {
+      try {
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: wsTimezone,
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: false,
+        });
+        const parts = formatter.formatToParts(currentTime);
+        const hPart = parts.find((p) => p.type === "hour")?.value;
+        const mPart = parts.find((p) => p.type === "minute")?.value;
+        const sPart = parts.find((p) => p.type === "second")?.value;
+        if (hPart !== undefined) hours = parseInt(hPart, 10);
+        if (mPart !== undefined) minutes = parseInt(mPart, 10);
+        if (sPart !== undefined) seconds = parseInt(sPart, 10);
+      } catch {}
+    }
+
+    const mm = String(minutes).padStart(2, "0");
+    const ss = String(seconds).padStart(2, "0");
+
+    if (is24Hour) {
+      const hh = String(hours).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    const period =
+      hours >= 12 ? (lang === "ar" ? "م" : "PM") : lang === "ar" ? "ص" : "AM";
+    hours = hours % 12 || 12;
+    const hh = String(hours).padStart(2, "0");
+    return `${hh}:${mm}:${ss} ${period}`;
+  }, [currentTime, is24Hour, lang, wsTimezone]);
+
+  // Formatted live date matching workspace timezone
+  const formattedLiveDate = useMemo(() => {
+    try {
+      const options = {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      };
+      if (wsTimezone) options.timeZone = wsTimezone;
+      return new Intl.DateTimeFormat(
+        lang === "ar" ? "ar-SA" : "en-US",
+        options,
+      ).format(currentTime);
+    } catch {
+      return currentTime.toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US");
+    }
+  }, [currentTime, lang, wsTimezone]);
 
   const getText = useCallback(
     (val, fallback = "") => extractTranslatableText(val, lang, fallback),
@@ -109,13 +213,6 @@ export default function MemberOverviewTab() {
     },
     [wsTimezone],
   );
-
-  // Determine if workspace uses 24-hour format
-  const is24Hour = useMemo(() => {
-    const format =
-      workspaceSettings?.time_format || ws?.time_format || user?.time_format;
-    return format === "24h" || format === "24";
-  }, [workspaceSettings, ws, user]);
 
   // Unified time formatter conforming to workspace 12h/24h setting
   const formatTime = useCallback(
@@ -777,48 +874,83 @@ export default function MemberOverviewTab() {
     <div className="workspace-main-dashboard animate-fade-in-up">
       <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
 
-      {/* Top action icons */}
-      <div className="workspace-dashboard-top-actions">
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          onClick={() => navigate("/member/workspace/settings")}
-          title={t("workspaceSettings") || "الإعدادات"}
-        >
-          <Icon name="settings" size={18} />
-        </button>
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          title={t("notifications") || "الإشعارات"}
-        >
-          <Icon name="bell" size={18} />
-        </button>
-        <button
-          type="button"
-          className="workspace-top-icon-btn"
-          title={t("search") || "البحث"}
-        >
-          <Icon name="search" size={18} />
-        </button>
+      {/* Welcome Banner with Integrated Live Clock & Member Info */}
+      <div className="workspace-welcome-banner">
+        <div className="workspace-welcome-info">
+          <UserAvatar
+            name={user?.name || user?.full_name}
+            avatarUrl={user?.avatar_url || user?.avatar}
+            size={46}
+            className="workspace-welcome-avatar"
+          />
+          <div className="workspace-welcome-text">
+            <div className="workspace-welcome-title-wrap">
+              <h1 className="workspace-welcome-greeting">
+                <span>
+                  {liveGreeting}
+                  {lang === "ar" ? "، " : ", "}
+                </span>
+                <strong>
+                  {user?.name ||
+                    user?.full_name ||
+                    (lang === "ar" ? "يا مرحباً" : "Welcome")}
+                </strong>
+              </h1>
+              <span className="workspace-role-pill">
+                {isOwner
+                  ? lang === "ar"
+                    ? "مالك المنشأة"
+                    : "Workspace Owner"
+                  : user?.role?.name ||
+                    user?.role_name ||
+                    (lang === "ar" ? "عضو فريق" : "Team Member")}
+              </span>
+            </div>
+
+            <div className="workspace-welcome-meta-row">
+              <span className="workspace-live-badge">
+                <span className="live-pulsing-dot" />
+                <span className="workspace-live-time">{formattedLiveTime}</span>
+              </span>
+              <span className="workspace-meta-sep">•</span>
+              <span className="workspace-live-date">
+                <Icon name="calendar" size={13} />
+                <span>{formattedLiveDate}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {isBookingCapable && (
+          <div className="workspace-welcome-actions">
+            <button
+              type="button"
+              className="workspace-quick-book-btn"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Icon name="plus" size={16} />
+              <span>{lang === "ar" ? "موعد جديد" : "New Booking"}</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* 8 Organized & Colored Executive Stat Cards */}
+      {/* 8 Balanced Executive Stat Cards (4x2 Matrix) */}
       <div className="workspace-stats-grid">
+        {/* ROW 1: Financials & Daily Operations */}
+
         {/* 1. Total Revenue (Emerald Green Theme) */}
         <div className="workspace-stat-card stat-emerald">
           <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="credit-card" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "الإيرادات" : "Total Revenue"}
-              </div>
+            <div className="stat-icon-wrap">
+              <Icon name="credit-card" size={18} />
             </div>
             <span className="stat-pill">
               {lang === "ar" ? "+14% هذا الشهر" : "+14% this month"}
             </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "الإيرادات" : "Total Revenue"}
           </div>
           <div className="workspace-stat-number revenue-number">
             <span>{stats.revenue}</span>
@@ -838,17 +970,15 @@ export default function MemberOverviewTab() {
         {/* 2. Total Bookings (Royal Blue Theme) */}
         <div className="workspace-stat-card stat-blue">
           <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="calendar" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
-              </div>
+            <div className="stat-icon-wrap">
+              <Icon name="calendar" size={18} />
             </div>
             <span className="stat-pill">
               {lang === "ar" ? "سجلات نشطة" : "Active"}
             </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "إجمالي الحجوزات" : "Total Bookings"}
           </div>
           <div className="workspace-stat-number">{stats.totalBookings}</div>
           <div className="stat-card-footer">
@@ -863,17 +993,15 @@ export default function MemberOverviewTab() {
         {/* 3. Today's Schedule (Sky Cyan Theme) */}
         <div className="workspace-stat-card stat-cyan">
           <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="clock" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
-              </div>
+            <div className="stat-icon-wrap">
+              <Icon name="clock" size={18} />
             </div>
             <span className="stat-pill">
               {lang === "ar" ? "اليوم" : "Today"}
             </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "مواعيد اليوم" : "Today's Schedule"}
           </div>
           <div className="workspace-stat-number">{stats.todayCount}</div>
           <div className="stat-card-footer">
@@ -883,68 +1011,18 @@ export default function MemberOverviewTab() {
           </div>
         </div>
 
-        {/* 4. This Week's Appointments (Indigo Theme) */}
-        <div className="workspace-stat-card stat-indigo">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="sparkles" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
-              </div>
-            </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "7 أيام" : "7 Days"}
-            </span>
-          </div>
-          <div className="workspace-stat-number">{stats.weekCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar" ? "حجوزات الأسبوع الجاري" : "Current week volume"}
-            </span>
-          </div>
-        </div>
-
-        {/* 5. Completed Bookings (Mint / Teal Theme) */}
-        <div className="workspace-stat-card stat-teal">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="check" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
-              </div>
-            </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "تمت بنجاح" : "Serviced"}
-            </span>
-          </div>
-          <div className="workspace-stat-number">{stats.completedCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "خدمات تم تقديمها للعملاء"
-                : "Successfully completed"}
-            </span>
-          </div>
-        </div>
-
-        {/* 6. Pending Confirmation (Warm Amber Theme) */}
+        {/* 4. Pending Confirmation (Warm Amber Theme) */}
         <div className="workspace-stat-card stat-amber">
           <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="alert-triangle" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
-              </div>
+            <div className="stat-icon-wrap">
+              <Icon name="alert-triangle" size={18} />
             </div>
             <span className="stat-pill">
               {lang === "ar" ? "تتطلب مراجعة" : "Requires review"}
             </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "قيد التأكيد" : "Pending Approval"}
           </div>
           <div className="workspace-stat-number">{stats.pendingCount}</div>
           <div className="stat-card-footer">
@@ -956,18 +1034,97 @@ export default function MemberOverviewTab() {
           </div>
         </div>
 
-        {/* 7. Completion Rate (Purple Theme) */}
+        {/* ROW 2: Volume, Execution & Relationships */}
+
+        {/* 5. This Week's Appointments (Indigo Theme) */}
+        <div className="workspace-stat-card stat-indigo">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrap">
+              <Icon name="sparkles" size={18} />
+            </div>
+            <span className="stat-pill">
+              {lang === "ar" ? "7 أيام" : "7 Days"}
+            </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "مواعيد هذا الأسبوع" : "This Week"}
+          </div>
+          <div className="workspace-stat-number">{stats.weekCount}</div>
+          <div className="stat-card-footer">
+            <span>
+              {lang === "ar" ? "حجوزات الأسبوع الجاري" : "Current week volume"}
+            </span>
+          </div>
+        </div>
+
+        {/* 6. Completed Bookings (Mint / Teal Theme) */}
+        <div className="workspace-stat-card stat-teal">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrap">
+              <Icon name="check" size={18} />
+            </div>
+            <span className="stat-pill">
+              {lang === "ar" ? "تمت بنجاح" : "Serviced"}
+            </span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "مكتملة بنجاح" : "Completed"}
+          </div>
+          <div className="workspace-stat-number">{stats.completedCount}</div>
+          <div className="stat-card-footer">
+            <span>
+              {isCustom
+                ? lang === "ar"
+                  ? `خدمات تم تقديمها لـ ${custPlural}`
+                  : `Delivered to ${custPlural.toLowerCase()}`
+                : lang === "ar"
+                  ? "خدمات تم تقديمها للعملاء"
+                  : "Successfully completed"}
+            </span>
+          </div>
+        </div>
+
+        {/* 7. Active Clients / Custom Singular-Plural (Rose Theme) */}
+        <div className="workspace-stat-card stat-rose">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrap">
+              <Icon name="users" size={18} />
+            </div>
+            <span className="stat-pill">
+              {isCustom
+                ? lang === "ar"
+                  ? `قاعدة ${custPlural}`
+                  : `${custPlural}`
+                : lang === "ar"
+                  ? "قاعدة العملاء"
+                  : "Clients"}
+            </span>
+          </div>
+          <div className="workspace-stat-label">{custPlural}</div>
+          <div className="workspace-stat-number">{stats.customerCount}</div>
+          <div className="stat-card-footer">
+            <span>
+              {isCustom
+                ? lang === "ar"
+                  ? `إجمالي ${custPlural} المسجلين في المنشأة`
+                  : `Total registered ${custPlural}`
+                : lang === "ar"
+                  ? "إجمالي المسجلين في المنشأة"
+                  : "Total registered clients"}
+            </span>
+          </div>
+        </div>
+
+        {/* 8. Completion Rate (Purple Theme) */}
         <div className="workspace-stat-card stat-purple">
           <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="bar-chart" size={18} />
-              </div>
-              <div className="workspace-stat-label">
-                {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
-              </div>
+            <div className="stat-icon-wrap">
+              <Icon name="bar-chart" size={18} />
             </div>
             <span className="stat-pill">{stats.completionRate}%</span>
+          </div>
+          <div className="workspace-stat-label">
+            {lang === "ar" ? "نسبة الإنجاز" : "Completion Rate"}
           </div>
           <div className="workspace-stat-number">{stats.completionRate}%</div>
           <div className="stat-card-footer">
@@ -980,29 +1137,6 @@ export default function MemberOverviewTab() {
                 }}
               />
             </div>
-          </div>
-        </div>
-
-        {/* 8. Active Clients / Patients (Rose Theme) */}
-        <div className="workspace-stat-card stat-rose">
-          <div className="stat-card-header">
-            <div className="stat-header-left">
-              <div className="stat-icon-wrap">
-                <Icon name="users" size={18} />
-              </div>
-              <div className="workspace-stat-label">{custPlural}</div>
-            </div>
-            <span className="stat-pill">
-              {lang === "ar" ? "قاعدة العملاء" : "Clients"}
-            </span>
-          </div>
-          <div className="workspace-stat-number">{stats.customerCount}</div>
-          <div className="stat-card-footer">
-            <span>
-              {lang === "ar"
-                ? "إجمالي المسجلين في المنشأة"
-                : "Total registered clients"}
-            </span>
           </div>
         </div>
       </div>
@@ -1275,88 +1409,90 @@ export default function MemberOverviewTab() {
       </div>
 
       {/* Quick Booking Details Modal */}
-      {selectedEventModal && (
-        <div
-          className="workspace-event-detail-backdrop"
-          onClick={() => setSelectedEventModal(null)}
-        >
+      {selectedEventModal &&
+        createPortal(
           <div
-            className="workspace-event-detail-card animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
+            className="workspace-event-detail-backdrop"
+            onClick={() => setSelectedEventModal(null)}
           >
-            <div className="event-detail-header">
-              <h3>{lang === "ar" ? "تفاصيل الموعد" : "Booking Details"}</h3>
-              <button
-                type="button"
-                className="event-detail-close-btn"
-                onClick={() => setSelectedEventModal(null)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="event-detail-body">
-              <div className="event-detail-row">
-                <span className="detail-label">{custSingular + ":"}</span>
-                <strong className="detail-value">
-                  {selectedEventModal.name}
-                </strong>
+            <div
+              className="workspace-event-detail-card animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="event-detail-header">
+                <h3>{lang === "ar" ? "تفاصيل الموعد" : "Booking Details"}</h3>
+                <button
+                  type="button"
+                  className="event-detail-close-btn"
+                  onClick={() => setSelectedEventModal(null)}
+                >
+                  ✕
+                </button>
               </div>
-              <div className="event-detail-row">
-                <span className="detail-label">
-                  {lang === "ar" ? "الخدمة:" : "Service:"}
-                </span>
-                <span className="detail-value">
-                  {selectedEventModal.service}
-                </span>
-              </div>
-              <div className="event-detail-row">
-                <span className="detail-label">
-                  {lang === "ar" ? "الوقت:" : "Time:"}
-                </span>
-                <span className="detail-value" dir="ltr">
-                  {selectedEventModal.time}
-                </span>
-              </div>
-              {selectedEventModal.rawBooking?.status && (
+              <div className="event-detail-body">
+                <div className="event-detail-row">
+                  <span className="detail-label">{custSingular + ":"}</span>
+                  <strong className="detail-value">
+                    {selectedEventModal.name}
+                  </strong>
+                </div>
                 <div className="event-detail-row">
                   <span className="detail-label">
-                    {lang === "ar" ? "الحالة:" : "Status:"}
+                    {lang === "ar" ? "الخدمة:" : "Service:"}
                   </span>
-                  <span
-                    className={`badge badge-${selectedEventModal.rawBooking.status}`}
-                  >
-                    {selectedEventModal.rawBooking.status}
+                  <span className="detail-value">
+                    {selectedEventModal.service}
                   </span>
                 </div>
-              )}
+                <div className="event-detail-row">
+                  <span className="detail-label">
+                    {lang === "ar" ? "الوقت:" : "Time:"}
+                  </span>
+                  <span className="detail-value" dir="ltr">
+                    {selectedEventModal.time}
+                  </span>
+                </div>
+                {selectedEventModal.rawBooking?.status && (
+                  <div className="event-detail-row">
+                    <span className="detail-label">
+                      {lang === "ar" ? "الحالة:" : "Status:"}
+                    </span>
+                    <span
+                      className={`badge badge-${selectedEventModal.rawBooking.status}`}
+                    >
+                      {selectedEventModal.rawBooking.status}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="event-detail-actions">
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    const bId = selectedEventModal?.rawBooking?.id;
+                    setSelectedEventModal(null);
+                    if (bId) {
+                      navigate(`/member/workspace/bookings/${bId}`);
+                    } else {
+                      navigate("/member/workspace/bookings");
+                    }
+                  }}
+                >
+                  {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setSelectedEventModal(null)}
+                >
+                  {lang === "ar" ? "إغلاق" : "Close"}
+                </button>
+              </div>
             </div>
-            <div className="event-detail-actions">
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  const bId = selectedEventModal?.rawBooking?.id;
-                  setSelectedEventModal(null);
-                  if (bId) {
-                    navigate(`/member/workspace/bookings/${bId}`);
-                  } else {
-                    navigate("/member/workspace/bookings");
-                  }
-                }}
-              >
-                {lang === "ar" ? "عرض في الحجوزات" : "View in Bookings"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setSelectedEventModal(null)}
-              >
-                {lang === "ar" ? "إغلاق" : "Close"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* Real Create Booking Modal Integration */}
       {showCreateModal && (

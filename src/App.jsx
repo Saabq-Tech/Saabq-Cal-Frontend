@@ -12,6 +12,7 @@ import GuestRoute from "./components/layout/GuestRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import ScrollReveal from "./components/layout/ScrollReveal";
+import ThemeBrandingController from "./components/common/ThemeBrandingController";
 import PageLoader from "./components/ui/PageLoader";
 import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 
@@ -19,6 +20,10 @@ import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 const Home = lazy(() => import("./pages/Home"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPostDetailPage = lazy(() => import("./pages/BlogPostDetailPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
+const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
 
 // Customer Workspace Suite Pages
 const CustomerWorkspacesPage = lazy(
@@ -198,6 +203,7 @@ export default function App() {
       <ScrollReveal />
       <LanguageProvider>
         <AuthProvider>
+          <ThemeBrandingController />
           <ToastProvider>
             <ErrorBoundary>
               <Suspense fallback={<PageLoader />}>
@@ -228,6 +234,38 @@ export default function App() {
                     element={
                       <MainLayout>
                         <BlogPostDetailPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/privacy"
+                    element={
+                      <MainLayout>
+                        <PrivacyPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/terms"
+                    element={
+                      <MainLayout>
+                        <TermsPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/features"
+                    element={
+                      <MainLayout>
+                        <FeaturesPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/how-it-works"
+                    element={
+                      <MainLayout>
+                        <HowItWorksPage />
                       </MainLayout>
                     }
                   />

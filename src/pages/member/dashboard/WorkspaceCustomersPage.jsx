@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -6,6 +7,13 @@ import { useToast } from "../../../context/ToastContext";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
+import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
+import { getLimitInfo } from "../../../utils/planLimits";
+import {
+  PlanLimitBanner,
+  PlanLimitModal,
+} from "../../../components/common/PlanLimitAlert";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceCustomersPage() {
   const { user } = useAuth();
@@ -19,29 +27,27 @@ export default function WorkspaceCustomersPage() {
   const canWrite = isOwner || permissions.includes("customer_write");
   const canBook = isOwner || permissions.includes("booking_write");
 
-  // Dynamic Workspace Customer Terminology & Icon
-  const getCustomerLabel = (type = "plural") => {
-    const field =
-      type === "singular" ? "customer_label_singular" : "customer_label_plural";
-    if (workspace && workspace[field]) {
-      if (typeof workspace[field] === "object") {
-        return (
-          workspace[field][lang] ||
-          workspace[field].ar ||
-          workspace[field].en ||
-          (type === "singular" ? "عميل" : "العملاء")
-        );
-      }
-      return workspace[field];
-    }
-    return type === "singular"
-      ? t("customerSingle") || "عميل"
-      : t("navCustomers") || "العملاء";
-  };
-
-  const customerPlural = getCustomerLabel("plural");
-  const customerSingular = getCustomerLabel("singular");
-  const customerIcon = workspace?.customer_icon || "users";
+  // Dynamic Workspace Customer Terminology & Icon via Hook
+  const {
+    customerSingular,
+    customerPlural,
+    customerIcon,
+    manageCustomers,
+    customersSubtitle,
+    totalCustomers,
+    addCustomerBtn,
+    editCustomerBtn,
+    deleteCustomerBtn,
+    vipCustomer,
+    noCustomersFound,
+    noCustomersFoundDesc,
+    customerCreatedSuccess,
+    customerUpdatedSuccess,
+    customerDeletedSuccess,
+    confirmDeleteCustomer,
+    confirmDeleteCustomerDesc,
+    internalNotesPlaceholder,
+  } = useCustomerLabel(workspace);
 
   // State
   const [customers, setCustomers] = useState([]);
@@ -58,6 +64,7 @@ export default function WorkspaceCustomersPage() {
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -123,8 +130,19 @@ export default function WorkspaceCustomersPage() {
     return () => clearTimeout(timer);
   }, [fetchCustomers]);
 
+  const limitInfo = getLimitInfo(
+    user,
+    "customers",
+    pagination.total || customers.length,
+  );
+
   // Handle Open Add Modal
   const handleOpenAdd = () => {
+    if (limitInfo.isReached) {
+      setIsLimitModalOpen(true);
+      return;
+    }
+
     setCustomerForm({
       name: "",
       email: "",
@@ -170,18 +188,11 @@ export default function WorkspaceCustomersPage() {
           endpoints.workspaceCustomerItem(selectedCustomer.id),
           customerForm,
         );
-        toast.show(
-          t("customerUpdatedSuccess") ||
-            `تم تحديث بيانات ${customerSingular} بنجاح`,
-          "success",
-        );
+        toast.show(customerUpdatedSuccess, "success");
         setIsEditModalOpen(false);
       } else {
         await client.post(endpoints.workspaceCustomers, customerForm);
-        toast.show(
-          t("customerCreatedSuccess") || `تم إضافة ${customerSingular} بنجاح`,
-          "success",
-        );
+        toast.show(customerCreatedSuccess, "success");
         setIsAddModalOpen(false);
       }
       fetchCustomers(pagination.current_page);
@@ -206,10 +217,7 @@ export default function WorkspaceCustomersPage() {
     if (!selectedCustomer) return;
     try {
       await client.delete(endpoints.workspaceCustomerItem(selectedCustomer.id));
-      toast.show(
-        t("customerDeletedSuccess") || `تم فك ارتباط ${customerSingular} بنجاح`,
-        "success",
-      );
+      toast.show(customerDeletedSuccess, "success");
       setIsDeleteModalOpen(false);
       fetchCustomers(pagination.current_page);
     } catch (err) {
@@ -258,422 +266,191 @@ export default function WorkspaceCustomersPage() {
       className="workspace-customers-page animate-fade-in"
       style={{ padding: "0 4px" }}
     >
-      {/* Header Section */}
-      <div
-        className="page-header"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: "var(--radius-lg, 14px)",
-              background:
-                "linear-gradient(135deg, var(--primary), var(--primary-hover, #0389A5))",
-              color: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 8px 20px -4px rgba(2, 105, 130, 0.35)",
-            }}
-          >
-            <Icon name={customerIcon} size={28} />
-          </div>
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "1.6rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {(t("managePrefix") || "إدارة") + " " + customerPlural}
-            </h1>
-            <p
-              style={{
-                margin: "4px 0 0 0",
-                fontSize: "0.88rem",
-                color: "var(--text-secondary)",
-              }}
-            >
-              {t("customersSubtitle") ||
-                `عرض وإدارة سجلات وملفات ${customerPlural} الخاصة بمساحة العمل والمتابعة الشاملة لمواعيدهم.`}
-            </p>
-          </div>
-        </div>
+      <PlanLimitBanner type="customers" limitInfo={limitInfo} />
 
-        {canWrite && (
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleOpenAdd}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 20px",
-              fontWeight: 700,
-              borderRadius: "var(--radius-md, 10px)",
-              boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
-            }}
-          >
-            <Icon name="user-plus" size={18} />
-            <span>
-              {(t("addPrefix") || "إضافة") +
-                " " +
-                customerSingular +
-                " " +
-                (t("newSuffix") || "جديد")}
-            </span>
-          </button>
-        )}
-      </div>
+      <PlanLimitModal
+        isOpen={isLimitModalOpen}
+        onClose={() => setIsLimitModalOpen(false)}
+        type="customers"
+        limitInfo={limitInfo}
+      />
 
-      {/* KPI Stats Summary Cards */}
-      <div
-        className="kpi-stats-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        {/* Stat 1: Total */}
-        <div
-          className="dashboard-stat-card glass-card"
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-lg, 14px)",
-            padding: "18px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          }}
-        >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 12,
-              background: "rgba(2, 105, 130, 0.12)",
-              color: "var(--primary)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name={customerIcon} size={24} />
-          </div>
-          <div>
-            <div
+      {/* Header Section & KPI Stats */}
+      <WorkspacePageHeader
+        title={manageCustomers}
+        subtitle={customersSubtitle}
+        icon={customerIcon}
+        limitBadge={limitInfo}
+        actions={
+          canWrite && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenAdd}
               style={{
-                fontSize: "0.82rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
               }}
             >
-              {(t("totalPrefix") || "إجمالي") + " " + customerPlural}
-            </div>
-            <div
-              style={{
-                fontSize: "1.45rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-                marginTop: 2,
-              }}
-            >
-              {totalCount}
-            </div>
-          </div>
-        </div>
-
-        {/* Stat 2: Active / VIP */}
-        <div
-          className="dashboard-stat-card glass-card"
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-lg, 14px)",
-            padding: "18px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 12,
-              background: "rgba(16, 185, 129, 0.12)",
-              color: "#10b981",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="star" size={24} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.82rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {customerPlural +
-                " " +
-                (t("activeAndVipSuffix") || "النشطون والمميزون")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.45rem",
-                fontWeight: 800,
-                color: "#10b981",
-                marginTop: 2,
-              }}
-            >
-              {activeCount}{" "}
-              {vipCount > 0 && (
-                <span
-                  style={{
-                    fontSize: "0.85rem",
-                    color: "#f59e0b",
-                    fontWeight: 600,
-                  }}
-                >
-                  ({vipCount} VIP)
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Stat 3: Total Bookings */}
-        <div
-          className="dashboard-stat-card glass-card"
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-lg, 14px)",
-            padding: "18px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 12,
-              background: "rgba(99, 102, 241, 0.12)",
-              color: "#6366f1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="calendar" size={24} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.82rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {t("totalBookingsCount") || "إجمالي المواعيد"}
-            </div>
-            <div
-              style={{
-                fontSize: "1.45rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-                marginTop: 2,
-              }}
-            >
-              {totalBookingsSum}
-            </div>
-          </div>
-        </div>
-      </div>
+              <Icon name="user-plus" size={18} />
+              <span>{addCustomerBtn}</span>
+            </button>
+          )
+        }
+        stats={[
+          {
+            id: "total",
+            label: totalCustomers,
+            value: totalCount,
+            icon: customerIcon,
+            iconBg: "rgba(2, 105, 130, 0.12)",
+            iconColor: "var(--primary)",
+          },
+          {
+            id: "active",
+            label:
+              customerPlural +
+              " " +
+              (t("activeAndVipSuffix") ||
+                (lang === "ar" ? "النشطون والمميزون" : "Active & VIP")),
+            value: activeCount,
+            suffix: vipCount > 0 ? `(${vipCount} VIP)` : null,
+            suffixColor: "#f59e0b",
+            valueColor: "#10b981",
+            icon: "star",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "bookings",
+            label:
+              t("totalBookingsCount") ||
+              (lang === "ar" ? "إجمالي المواعيد" : "Total Bookings"),
+            value: totalBookingsSum,
+            icon: "calendar",
+            iconBg: "rgba(99, 102, 241, 0.12)",
+            iconColor: "#6366f1",
+          },
+        ]}
+      />
 
       {/* Search, Filter & Controls Toolbar */}
-      <div
-        className="customers-toolbar glass-card"
-        style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg, 14px)",
-          padding: "16px 20px",
-          marginBottom: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 14,
-        }}
-      >
+      {/* Search, Filter & Controls Toolbar */}
+      <div className="workspace-filter-toolbar">
         {/* Search Bar */}
-        <div
-          style={{
-            position: "relative",
-            flex: "1 1 280px",
-            maxWidth: 420,
-          }}
-        >
-          <Icon
-            name="search"
-            size={18}
-            style={{
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              [lang === "ar" ? "right" : "left"]: 12,
-              color: "var(--text-secondary)",
-              pointerEvents: "none",
-            }}
-          />
+        <div className="workspace-search-box">
+          <span className="workspace-search-icon">
+            <Icon name="search" size={17} />
+          </span>
           <input
             type="text"
-            className="form-input"
+            className="workspace-search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={
               t("searchCustomersPlaceholder") ||
-              `بحث بالاسم، الهاتف، البريد، أو رقم الملف...`
+              (lang === "ar"
+                ? `بحث بالاسم، الهاتف، البريد، أو رقم الملف...`
+                : `Search by name, phone, email...`)
             }
-            style={{
-              paddingInlineStart: 38,
-              height: 42,
-              borderRadius: "var(--radius-md, 10px)",
-              fontSize: "0.88rem",
-            }}
           />
+          {search && (
+            <button
+              type="button"
+              className="workspace-search-clear-btn"
+              onClick={() => setSearch("")}
+              title={lang === "ar" ? "مسح البحث" : "Clear search"}
+            >
+              <Icon name="x" size={12} />
+            </button>
+          )}
         </div>
 
         {/* Filters & View Modes */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="workspace-filter-group">
           {/* Status Dropdown */}
-          <select
-            className="form-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              height: 42,
-              minWidth: 140,
-              borderRadius: 8,
-              fontSize: "0.86rem",
-            }}
-          >
-            <option value="all">
-              {t("filterStatusAll") || "جميع الحالات"}
-            </option>
-            <option value="active">{t("filterStatusActive") || "نشط"}</option>
-            <option value="vip">
-              {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
-            </option>
-            <option value="lead">
-              {t("filterStatusLead") || "محتمل / جديد"}
-            </option>
-            <option value="inactive">
-              {t("filterStatusInactive") || "غير نشط"}
-            </option>
-            <option value="blocked">
-              {t("filterStatusBlocked") || "محظور"}
-            </option>
-          </select>
+          <div className="workspace-filter-select-wrap">
+            <select
+              className="workspace-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">
+                {t("filterStatusAll") ||
+                  (lang === "ar" ? "جميع الحالات" : "All Statuses")}
+              </option>
+              <option value="active">
+                {t("filterStatusActive") || (lang === "ar" ? "نشط" : "Active")}
+              </option>
+              <option value="vip">{vipCustomer}</option>
+              <option value="lead">
+                {t("filterStatusLead") ||
+                  (lang === "ar" ? "محتمل / جديد" : "Lead")}
+              </option>
+              <option value="inactive">
+                {t("filterStatusInactive") ||
+                  (lang === "ar" ? "غير نشط" : "Inactive")}
+              </option>
+              <option value="blocked">
+                {t("filterStatusBlocked") ||
+                  (lang === "ar" ? "محظور" : "Blocked")}
+              </option>
+            </select>
+            <span className="workspace-select-arrow">
+              <Icon name="chevron-down" size={14} />
+            </span>
+          </div>
 
           {/* Sort Dropdown */}
-          <select
-            className="form-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            style={{
-              height: 42,
-              minWidth: 140,
-              borderRadius: 8,
-              fontSize: "0.86rem",
-            }}
-          >
-            <option value="latest">
-              {t("sortByNewest") || "الأحدث انضماماً"}
-            </option>
-            <option value="name">{t("sortByName") || "الاسم أبجدياً"}</option>
-            <option value="appointments_count">
-              {t("sortByMostBookings") || "الأكثر حجوزات"}
-            </option>
-            <option value="oldest">{t("sortByOldest") || "الأقدم"}</option>
-          </select>
+          <div className="workspace-filter-select-wrap">
+            <select
+              className="workspace-filter-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="latest">
+                {t("sortByNewest") ||
+                  (lang === "ar" ? "الأحدث انضماماً" : "Newest")}
+              </option>
+              <option value="name">
+                {t("sortByName") ||
+                  (lang === "ar" ? "الاسم أبجدياً" : "Alphabetical")}
+              </option>
+              <option value="appointments_count">
+                {t("sortByMostBookings") ||
+                  (lang === "ar" ? "الأكثر حجوزات" : "Most Bookings")}
+              </option>
+              <option value="oldest">
+                {t("sortByOldest") || (lang === "ar" ? "الأقدم" : "Oldest")}
+              </option>
+            </select>
+            <span className="workspace-select-arrow">
+              <Icon name="chevron-down" size={14} />
+            </span>
+          </div>
 
           {/* View Mode Toggle */}
-          <div
-            style={{
-              display: "flex",
-              border: "1px solid var(--border)",
-              borderRadius: 8,
-              overflow: "hidden",
-              background: "var(--surface-alt)",
-            }}
-          >
+          <div className="workspace-view-toggle">
             <button
               type="button"
               onClick={() => setViewMode("table")}
-              title="Table View"
-              style={{
-                padding: "8px 12px",
-                border: "none",
-                background:
-                  viewMode === "table" ? "var(--primary)" : "transparent",
-                color:
-                  viewMode === "table" ? "#ffffff" : "var(--text-secondary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              className={`workspace-view-btn ${viewMode === "table" ? "active" : ""}`}
+              title={lang === "ar" ? "عرض جدولي" : "Table View"}
             >
-              <Icon name="clipboard-list" size={18} />
+              <Icon name="list" size={16} />
             </button>
             <button
               type="button"
               onClick={() => setViewMode("cards")}
-              title="Cards View"
-              style={{
-                padding: "8px 12px",
-                border: "none",
-                background:
-                  viewMode === "cards" ? "var(--primary)" : "transparent",
-                color:
-                  viewMode === "cards" ? "#ffffff" : "var(--text-secondary)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-              }}
+              className={`workspace-view-btn ${viewMode === "cards" ? "active" : ""}`}
+              title={lang === "ar" ? "عرض بطاقات" : "Cards View"}
             >
-              <Icon name="home" size={18} />
+              <Icon name="grid" size={16} />
             </button>
           </div>
         </div>
@@ -731,7 +508,7 @@ export default function WorkspaceCustomersPage() {
               marginBottom: 6,
             }}
           >
-            {t("noCustomersFound") || `لم يتم العثور على أي ${customerPlural}`}
+            {noCustomersFound}
           </h3>
           <p
             style={{
@@ -741,8 +518,7 @@ export default function WorkspaceCustomersPage() {
               fontSize: "0.88rem",
             }}
           >
-            {t("noCustomersFoundDesc") ||
-              `لم تتم إضافة أي ${customerPlural} حتى الآن أو مفيش نتائج مطابقة للبحث الحالي.`}
+            {noCustomersFoundDesc}
           </p>
           {canWrite && (
             <button
@@ -751,13 +527,7 @@ export default function WorkspaceCustomersPage() {
               onClick={handleOpenAdd}
             >
               <Icon name="user-plus" size={16} />
-              <span>
-                {(t("addPrefix") || "إضافة") +
-                  " " +
-                  customerSingular +
-                  " " +
-                  (t("newSuffix") || "جديد")}
-              </span>
+              <span>{addCustomerBtn}</span>
             </button>
           )}
         </div>
@@ -1476,442 +1246,385 @@ export default function WorkspaceCustomersPage() {
       )}
 
       {/* Add / Edit Customer Modal */}
-      {(isAddModalOpen || isEditModalOpen) && (
-        <div
-          className="modal-overlay animate-fade-in"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 16,
-          }}
-          onClick={() => {
-            setIsAddModalOpen(false);
-            setIsEditModalOpen(false);
-          }}
-        >
+      {(isAddModalOpen || isEditModalOpen) &&
+        createPortal(
           <div
-            className="modal-container glass-card animate-scale-in"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg, 16px)",
-              width: "100%",
-              maxWidth: 580,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: 24,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            className="modal-backdrop animate-fade-in"
+            onClick={() => {
+              setIsAddModalOpen(false);
+              setIsEditModalOpen(false);
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div
+              className="modal-card modal-md animate-scale-in"
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 20,
+                maxWidth: 580,
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    background: "rgba(2, 105, 130, 0.1)",
-                    color: "var(--primary)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon
-                    name={isEditModalOpen ? "edit-2" : "user-plus"}
-                    size={20}
-                  />
-                </div>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1.2rem",
-                    fontWeight: 800,
-                    color: "var(--heading)",
-                  }}
-                >
-                  {isEditModalOpen
-                    ? `${t("editPrefix") || "تعديل بيانات"} ${customerSingular}`
-                    : `${t("addPrefix") || "إضافة"} ${customerSingular} ${t("newSuffix") || "جديد"}`}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setIsEditModalOpen(false);
-                }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "var(--text-secondary)",
-                  padding: 4,
-                }}
-              >
-                <Icon name="x" size={20} />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSaveCustomer(isEditModalOpen);
-              }}
-            >
-              {/* Row 1: Name & Reference */}
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 700 }}>
-                    {t("fullName") || "الاسم الكامل"} *
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-input ${formErrors.name ? "input-error" : ""}`}
-                    value={customerForm.name}
-                    onChange={(e) =>
-                      setCustomerForm({ ...customerForm, name: e.target.value })
-                    }
-                    placeholder={
-                      lang === "ar"
-                        ? "مثال: د. أحمد خالد"
-                        : "e.g. Dr. Ahmed Khaled"
-                    }
-                    required
-                  />
-                  {formErrors.name && (
-                    <div className="form-error-msg">{formErrors.name[0]}</div>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerFileNo") || "رقم الملف / المرجع"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customerForm.customer_reference}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        customer_reference: e.target.value,
-                      })
-                    }
-                    placeholder={
-                      lang === "ar"
-                        ? "مثال: #MED-4091 أو #STU-102"
-                        : "e.g. #MED-4091 or #STU-102"
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: Email & Phone */}
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 700 }}>
-                    {t("email") || "البريد الإلكتروني"} *
-                  </label>
-                  <input
-                    type="email"
-                    className={`form-input ${formErrors.email ? "input-error" : ""}`}
-                    value={customerForm.email}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        email: e.target.value,
-                      })
-                    }
-                    placeholder="name@example.com"
-                    required
-                  />
-                  {formErrors.email && (
-                    <div className="form-error-msg">{formErrors.email[0]}</div>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("phone") || "رقم الهاتف"}
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customerForm.phone}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        phone: e.target.value,
-                      })
-                    }
-                    placeholder="+20 10 1234 5678"
-                    dir="ltr"
-                  />
-                </div>
-              </div>
-
-              {/* Row 3: Gender, Date of Birth & Status */}
-              <div
-                className="form-row"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: 14,
-                  marginBottom: 14,
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerGender") || "الجنس"}
-                  </label>
-                  <select
-                    className="form-select"
-                    value={customerForm.gender || "male"}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        gender: e.target.value,
-                      })
-                    }
+              <div className="modal-header">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      background: "rgba(2, 105, 130, 0.1)",
+                      color: "var(--primary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <option value="male">{t("genderMale") || "ذكر"}</option>
-                    <option value="female">
-                      {t("genderFemale") || "أنثى"}
-                    </option>
-                    <option value="other">{t("other") || "آخر"}</option>
-                  </select>
+                    <Icon
+                      name={isEditModalOpen ? "edit-2" : "user-plus"}
+                      size={20}
+                    />
+                  </div>
+                  <h3 className="modal-title">
+                    {isEditModalOpen ? editCustomerBtn : addCustomerBtn}
+                  </h3>
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("customerDob") || "تاريخ الميلاد"}
-                  </label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={customerForm.date_of_birth}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        date_of_birth: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">
-                    {t("status") || "الحالة"}
-                  </label>
-                  <select
-                    className="form-select"
-                    value={customerForm.status || "active"}
-                    onChange={(e) =>
-                      setCustomerForm({
-                        ...customerForm,
-                        status: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="active">
-                      {t("filterStatusActive") || "نشط"}
-                    </option>
-                    <option value="vip">
-                      {t("filterStatusVip") || `${customerSingular} مميز (VIP)`}
-                    </option>
-                    <option value="lead">
-                      {t("filterStatusLead") || "محتمل / جديد"}
-                    </option>
-                    <option value="inactive">
-                      {t("filterStatusInactive") || "غير نشط"}
-                    </option>
-                    <option value="blocked">
-                      {t("filterStatusBlocked") || "محظور"}
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Row 4: Internal Staff Notes */}
-              <div className="form-group" style={{ marginBottom: 20 }}>
-                <label className="form-label">
-                  {t("internalNotes") || "ملاحظات سرية لفريق العمل"}
-                </label>
-                <textarea
-                  className="form-input"
-                  rows={3}
-                  value={customerForm.internal_notes}
-                  onChange={(e) =>
-                    setCustomerForm({
-                      ...customerForm,
-                      internal_notes: e.target.value,
-                    })
-                  }
-                  placeholder={
-                    t("internalNotesPlaceholder") ||
-                    `أضف ملاحظات خاصة أو تعليمات داخلية عن هذا ${customerSingular}...`
-                  }
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                  gap: 10,
-                }}
-              >
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close-btn"
                   onClick={() => {
                     setIsAddModalOpen(false);
                     setIsEditModalOpen(false);
                   }}
-                  disabled={savingCustomer}
+                >
+                  <Icon name="x" size={18} />
+                </button>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveCustomer(isEditModalOpen);
+                }}
+                className="modal-body"
+              >
+                {/* Row 1: Name & Reference */}
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("fullName") || "الاسم الكامل"} *
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-input ${formErrors.name ? "input-error" : ""}`}
+                      value={customerForm.name}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          name: e.target.value,
+                        })
+                      }
+                      placeholder={
+                        lang === "ar"
+                          ? "مثال: د. أحمد خالد"
+                          : "e.g. Dr. Ahmed Khaled"
+                      }
+                      required
+                    />
+                    {formErrors.name && (
+                      <div className="form-error-msg">{formErrors.name[0]}</div>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerFileNo") || "رقم الملف / المرجع"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.customer_reference}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          customer_reference: e.target.value,
+                        })
+                      }
+                      placeholder={
+                        lang === "ar"
+                          ? "مثال: #MED-4091 أو #STU-102"
+                          : "e.g. #MED-4091 or #STU-102"
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Email & Phone */}
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("email") || "البريد الإلكتروني"} *
+                    </label>
+                    <input
+                      type="email"
+                      className={`form-input ${formErrors.email ? "input-error" : ""}`}
+                      value={customerForm.email}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          email: e.target.value,
+                        })
+                      }
+                      placeholder="name@example.com"
+                      required
+                    />
+                    {formErrors.email && (
+                      <div className="form-error-msg">
+                        {formErrors.email[0]}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("phone") || "رقم الهاتف"}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.phone}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          phone: e.target.value,
+                        })
+                      }
+                      placeholder="+20 10 1234 5678"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Gender, Date of Birth & Status */}
+                <div
+                  className="form-row"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                    gap: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerGender") || "الجنس"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={customerForm.gender || "male"}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          gender: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="male">{t("genderMale") || "ذكر"}</option>
+                      <option value="female">
+                        {t("genderFemale") || "أنثى"}
+                      </option>
+                      <option value="other">{t("other") || "آخر"}</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("customerDob") || "تاريخ الميلاد"}
+                    </label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={customerForm.date_of_birth}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          date_of_birth: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      {t("status") || "الحالة"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={customerForm.status || "active"}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          status: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="active">
+                        {t("filterStatusActive") || "نشط"}
+                      </option>
+                      <option value="vip">{vipCustomer}</option>
+                      <option value="lead">
+                        {t("filterStatusLead") || "محتمل / جديد"}
+                      </option>
+                      <option value="inactive">
+                        {t("filterStatusInactive") || "غير نشط"}
+                      </option>
+                      <option value="blocked">
+                        {t("filterStatusBlocked") || "محظور"}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 4: Internal Staff Notes */}
+                <div className="form-group" style={{ marginBottom: 20 }}>
+                  <label className="form-label">
+                    {t("internalNotes") || "ملاحظات سرية لفريق العمل"}
+                  </label>
+                  <textarea
+                    className="form-input"
+                    rows={3}
+                    value={customerForm.internal_notes}
+                    onChange={(e) =>
+                      setCustomerForm({
+                        ...customerForm,
+                        internal_notes: e.target.value,
+                      })
+                    }
+                    placeholder={internalNotesPlaceholder}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setIsAddModalOpen(false);
+                      setIsEditModalOpen(false);
+                    }}
+                    disabled={savingCustomer}
+                  >
+                    {t("cancel") || "إلغاء"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={savingCustomer}
+                  >
+                    {savingCustomer
+                      ? t("saving") || "جاري الحفظ..."
+                      : t("saveChanges") || "حفظ البيانات"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* Delete / Unlink Confirmation Modal */}
+      {isDeleteModalOpen &&
+        selectedCustomer &&
+        createPortal(
+          <div
+            className="modal-backdrop animate-fade-in"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            <div
+              className="modal-card modal-sm animate-scale-in"
+              style={{
+                maxWidth: 440,
+                textAlign: "center",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: "50%",
+                  background: "rgba(239, 68, 68, 0.12)",
+                  color: "#ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                }}
+              >
+                <Icon name="trash-2" size={24} />
+              </div>
+              <h3
+                style={{
+                  fontSize: "1.15rem",
+                  fontWeight: 800,
+                  color: "var(--heading)",
+                  marginBottom: 8,
+                }}
+              >
+                {confirmDeleteCustomer}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.5,
+                  marginBottom: 20,
+                }}
+              >
+                {confirmDeleteCustomerDesc}
+              </p>
+              <div
+                className="modal-actions"
+                style={{ justifyContent: "center" }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsDeleteModalOpen(false)}
                 >
                   {t("cancel") || "إلغاء"}
                 </button>
                 <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={savingCustomer}
+                  type="button"
+                  className="btn"
+                  style={{
+                    background: "#ef4444",
+                    color: "#ffffff",
+                    border: "none",
+                    fontWeight: 700,
+                  }}
+                  onClick={handleDeleteCustomer}
                 >
-                  {savingCustomer
-                    ? t("saving") || "جاري الحفظ..."
-                    : t("saveChanges") || "حفظ البيانات"}
+                  {deleteCustomerBtn}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete / Unlink Confirmation Modal */}
-      {isDeleteModalOpen && selectedCustomer && (
-        <div
-          className="modal-overlay animate-fade-in"
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 16,
-          }}
-          onClick={() => setIsDeleteModalOpen(false)}
-        >
-          <div
-            className="modal-container glass-card animate-scale-in"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg, 16px)",
-              width: "100%",
-              maxWidth: 440,
-              padding: 24,
-              textAlign: "center",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: "50%",
-                background: "rgba(239, 68, 68, 0.12)",
-                color: "#ef4444",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 16px",
-              }}
-            >
-              <Icon name="trash-2" size={24} />
             </div>
-            <h3
-              style={{
-                fontSize: "1.15rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-                marginBottom: 8,
-              }}
-            >
-              {t("confirmDeleteCustomer") ||
-                `هل أنت متأكد من حذف هذا ${customerSingular} من مساحة العمل؟`}
-            </h3>
-            <p
-              style={{
-                fontSize: "0.85rem",
-                color: "var(--text-secondary)",
-                lineHeight: 1.5,
-                marginBottom: 20,
-              }}
-            >
-              {t("confirmDeleteCustomerDesc") ||
-                `سيتم فك ارتباط ${customerSingular} بمساحة العمل الحالية ولن يظهر في قائمتك. سجلات المواعيد والمدفوعات السابقة ستبقى محفوظة لأغراض الأرشفة.`}
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
-                {t("cancel") || "إلغاء"}
-              </button>
-              <button
-                type="button"
-                className="btn"
-                style={{
-                  background: "#ef4444",
-                  color: "#ffffff",
-                  border: "none",
-                  fontWeight: 700,
-                }}
-                onClick={handleDeleteCustomer}
-              >
-                {t("deleteCustomerBtn") || "تأكيد الحذف"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* Quick Booking Modal Trigger */}
       {isBookingModalOpen && selectedCustomer && (

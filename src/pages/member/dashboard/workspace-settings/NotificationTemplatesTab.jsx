@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import Flag from "../../../../components/common/Flag";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function NotificationTemplatesTab({
   templates,
@@ -17,6 +19,7 @@ export default function NotificationTemplatesTab({
   getInterpolatedText: _getInterpolatedText,
 }) {
   const { t, isRTL } = useLanguage();
+  const { isCustom, customerSingular } = useCustomerLabel();
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -154,7 +157,11 @@ export default function NotificationTemplatesTab({
       .replace(/\{\{amount\}\}/g, t("mockAmountSar") || "250 ر.س")
       .replace(
         /\{\{cancelledBy\}\}/g,
-        t("mockCancelledByCustomer") || "من قِبل العميل",
+        isCustom
+          ? isRTL
+            ? `من قِبل ${customerSingular}`
+            : `By the ${customerSingular}`
+          : t("mockCancelledByCustomer") || "من قِبل العميل",
       )
       .replace(
         /\{\{rejectedReason\}\}/g,
@@ -179,91 +186,71 @@ export default function NotificationTemplatesTab({
 
   return (
     <div className="card-body">
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
+      {/* Top Standard Header */}
+      <WorkspacePageHeader
+        title={
+          t("notificationTemplates") ||
+          (isRTL ? "قوالب الإشعارات والرسائل" : "Notification Templates")
+        }
+        subtitle={
+          isRTL
+            ? "تخصيص جميع إشعارات وتنبيهات الحجوزات، المدفوعات، والجلسات الموجهة للعملاء وفريق العمل."
+            : "Customize automated email and SMS notification templates for bookings and payments."
+        }
+        icon="bell"
+        actions={
+          <div
             style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
+              display: "flex",
+              background: "var(--surface)",
+              padding: 3,
+              borderRadius: "var(--radius-md, 10px)",
+              border: "1px solid var(--border)",
             }}
           >
-            {t("notificationTemplates") || "إدارة قوالب الإشعارات والرسائل"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            تخصيص جميع إشعارات الحجوزات والمدفوعات والحساب والجلسات لكل عملائك
-          </p>
-        </div>
-
-        {/* Language Switcher */}
-        <div
-          style={{
-            display: "flex",
-            background: "var(--surface-alt)",
-            padding: 3,
-            borderRadius: "var(--radius-md)",
-            border: "1px solid var(--border-light)",
-          }}
-        >
-          <button
-            type="button"
-            className={`btn btn-sm ${templateLang === "ar" ? "btn-primary" : "btn-ghost"}`}
-            onClick={() => setTemplateLang("ar")}
-            style={{
-              borderRadius: "var(--radius-sm)",
-              padding: "5px 16px",
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Flag
-              country="eg"
-              style={{ width: 18, height: 12, borderRadius: 2 }}
-            />
-            <span>{isRTL ? "العربية" : "Arabic"}</span>
-          </button>
-          <button
-            type="button"
-            className={`btn btn-sm ${templateLang === "en" ? "btn-primary" : "btn-ghost"}`}
-            onClick={() => setTemplateLang("en")}
-            style={{
-              borderRadius: "var(--radius-sm)",
-              padding: "5px 16px",
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Flag
-              country="us"
-              style={{ width: 18, height: 12, borderRadius: 2 }}
-            />
-            <span>English</span>
-          </button>
-        </div>
-      </div>
+            <button
+              type="button"
+              className={`btn btn-sm ${templateLang === "ar" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setTemplateLang("ar")}
+              style={{
+                borderRadius: "var(--radius-sm)",
+                padding: "6px 16px",
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Flag
+                country="eg"
+                style={{ width: 18, height: 12, borderRadius: 2 }}
+              />
+              <span>{isRTL ? "العربية" : "Arabic"}</span>
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm ${templateLang === "en" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setTemplateLang("en")}
+              style={{
+                borderRadius: "var(--radius-sm)",
+                padding: "6px 16px",
+                fontSize: "0.82rem",
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Flag
+                country="us"
+                style={{ width: 18, height: 12, borderRadius: 2 }}
+              />
+              <span>{isRTL ? "الإنجليزية" : "English"}</span>
+            </button>
+          </div>
+        }
+      />
 
       {/* Read-Only Notice Banner when editing is disabled */}
       {!canEdit && (

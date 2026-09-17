@@ -9,6 +9,7 @@ export default function AppLogo({
   height = 36,
   showText = true,
   className = "",
+  forceOriginalColors = false,
 }) {
   const { t } = useLanguage();
   const [logoUrl, setLogoUrl] = useState(DEFAULT_LOGO);
@@ -38,7 +39,7 @@ export default function AppLogo({
 
   return (
     <div
-      className={`app-logo-wrapper ${className}`}
+      className={`app-logo-wrapper${forceOriginalColors ? " app-logo--original" : ""} ${className}`}
       style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
     >
       {!imgError ? (
@@ -58,7 +59,12 @@ export default function AppLogo({
         />
       ) : (
         <svg width={height} height={height} viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="var(--primary)" />
+          <rect
+            width="32"
+            height="32"
+            rx="8"
+            fill={forceOriginalColors ? "#026982" : "var(--primary)"}
+          />
           <path
             d="M8 16c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8"
             stroke="#fff"

@@ -151,7 +151,7 @@ export default function WorkspaceSetupModal({
 
           <div className="form-group">
             <label htmlFor="ws-setup-type" className="form-label">
-              {t("workspaceType", "تصنيف مساحة العمل")}
+              {t("workspaceType", "تصنيف مساحة العمل")} *
             </label>
             <select
               id="ws-setup-type"
@@ -168,6 +168,8 @@ export default function WorkspaceSetupModal({
                     workspace_type_id: null,
                   });
               }}
+              required
+              aria-required="true"
               aria-describedby={
                 getFieldError("workspace_type_id")
                   ? "ws-setup-type-error"

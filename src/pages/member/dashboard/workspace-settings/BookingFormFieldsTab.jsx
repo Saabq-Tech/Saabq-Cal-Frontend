@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 
 export default function BookingFormFieldsTab({
   formFieldsForm,
@@ -9,7 +10,8 @@ export default function BookingFormFieldsTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
 
   // Standard system field statuses (required | optional | disabled)
   const [fieldStatuses, setFieldStatuses] = useState(() => {
@@ -347,8 +349,12 @@ export default function BookingFormFieldsTab({
               margin: 0,
             }}
           >
-            {t("formBuilderDesc") ||
-              "تخصيص الحقول المطلوبة والاختيارية والمخفية في نموذج حجز العملاء، مع معاينة مباشرة."}
+            {isCustom
+              ? isRTL
+                ? `تخصيص الحقول المطلوبة والاختيارية والمخفية في نموذج حجز ${customerPlural}، مع معاينة مباشرة.`
+                : `Customize required, optional, and hidden fields in the ${customerSingular.toLowerCase()} booking form, with live preview.`
+              : t("formBuilderDesc") ||
+                "تخصيص الحقول المطلوبة والاختيارية والمخفية في نموذج حجز العملاء، مع معاينة مباشرة."}
           </p>
         </div>
 
@@ -625,8 +631,12 @@ export default function BookingFormFieldsTab({
                     margin: 0,
                   }}
                 >
-                  {t("customQuestionsDesc") ||
-                    "إضافة وإدارة أسئلة مخصصة لجمع معلومات إضافية من العملاء أثناء الحجز."}
+                  {isCustom
+                    ? isRTL
+                      ? `إضافة وإدارة أسئلة مخصصة لجمع معلومات إضافية من ${customerPlural} أثناء الحجز.`
+                      : `Add and manage custom questions to collect additional information from ${customerPlural.toLowerCase()} during booking.`
+                    : t("customQuestionsDesc") ||
+                      "إضافة وإدارة أسئلة مخصصة لجمع معلومات إضافية من العملاء أثناء الحجز."}
                 </p>
               </div>
 

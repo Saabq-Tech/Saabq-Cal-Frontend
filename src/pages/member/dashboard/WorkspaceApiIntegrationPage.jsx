@@ -8,6 +8,7 @@ import Icon from "../../../components/common/Icon";
 import PageLoader from "../../../components/ui/PageLoader";
 import client, { endpoints } from "../../../api/client";
 import { isApiIntegrationEnabled } from "../../../utils/capabilities";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceApiIntegrationPage() {
   const { user } = useAuth();
@@ -449,96 +450,69 @@ export default function WorkspaceApiIntegrationPage() {
         description="Connect your business website and apps to your Saabq workspace via secure REST API."
       />
 
-      <div style={{ padding: "0 28px 40px" }}>
-        {/* Header Title Bar */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
-            marginBottom: 24,
-            paddingBottom: 20,
-            borderBottom: "1px solid var(--border)",
-          }}
-        >
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ padding: "0 4px 40px" }}>
+        {/* Unified Standard Header */}
+        <WorkspacePageHeader
+          title={
+            t("apiIntegrationTitle") || "الربط البرمجي للمطورين (REST API)"
+          }
+          subtitle={
+            t("apiIntegrationHeaderDesc") ||
+            "ربط موقعك وتطبيقاتك الخارجية بمساحة عملك مع مزامنة لحظية ومستندات برمجية شاملة."
+          }
+          icon="code"
+          actions={
+            isActive && (
               <div
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 12,
-                  backgroundColor: "rgba(32, 123, 89, 0.12)",
-                  color: "var(--primary)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  gap: 10,
+                  flexWrap: "wrap",
                 }}
               >
-                <Icon name="code" size={24} />
-              </div>
-              <div>
-                <h1 style={{ fontSize: "1.4rem", fontWeight: 800, margin: 0 }}>
-                  {t("apiIntegrationTitle") ||
-                    "الربط البرمجي للمطورين (REST API)"}
-                </h1>
-                <p
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleDownloadPostman}
                   style={{
-                    fontSize: "0.85rem",
-                    color: "var(--text-muted)",
-                    margin: "4px 0 0",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: "0.82rem",
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-md, 10px)",
                   }}
                 >
-                  {t("apiIntegrationHeaderDesc") ||
-                    "ربط موقعك وتطبيقاتك الخارجية بمساحة عملك مع مزامنة لحظية ومستندات برمجية شاملة."}
-                </p>
+                  <Icon name="download" size={14} />
+                  <span>{t("downloadPostman") || "نزّل كولكشن Postman"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={handleQuickPing}
+                  disabled={isPinging}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: "0.82rem",
+                    padding: "8px 16px",
+                    borderRadius: "var(--radius-md, 10px)",
+                  }}
+                >
+                  <Icon name="activity" size={14} />
+                  <span>
+                    {isPinging
+                      ? t("testing") || "جارِ الفحص..."
+                      : t("testConnection") || "فحص الاتصال اللحظي"}
+                  </span>
+                </button>
               </div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {isActive && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={handleDownloadPostman}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: "0.82rem",
-                }}
-              >
-                <Icon name="download" size={14} />
-                <span>{t("downloadPostman") || "نزّل كولكشن Postman"}</span>
-              </button>
-            )}
-
-            {isActive && (
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={handleQuickPing}
-                disabled={isPinging}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: "0.82rem",
-                }}
-              >
-                <Icon name="activity" size={14} />
-                <span>
-                  {isPinging
-                    ? t("testing") || "جارِ الفحص..."
-                    : t("testConnection") || "فحص الاتصال اللحظي"}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
+            )
+          }
+        />
 
         {/* Tab Navigation */}
         <div

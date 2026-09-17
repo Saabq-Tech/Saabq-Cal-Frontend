@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import Icon from "../../../../components/common/Icon";
 
 export default function SocialLinksTab({
@@ -9,7 +10,8 @@ export default function SocialLinksTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { customerPlural, isCustom } = useCustomerLabel();
 
   // Initialize links state
   const [links, setLinks] = useState(() => {
@@ -167,8 +169,12 @@ export default function SocialLinksTab({
             margin: "4px 0 0",
           }}
         >
-          {t("socialMediaLinksDesc") ||
-            "روابط حساباتك وموقعك التي تظهر للعملاء في صفحة الحجز والإيميلات"}
+          {isCustom
+            ? isRTL
+              ? `روابط حساباتك وموقعك التي تظهر لـ ${customerPlural} في صفحة الحجز والإيميلات`
+              : `Your social media and links displayed to ${customerPlural.toLowerCase()} on booking pages and emails`
+            : t("socialMediaLinksDesc") ||
+              "روابط حساباتك وموقعك التي تظهر للعملاء في صفحة الحجز والإيميلات"}
         </p>
       </div>
 

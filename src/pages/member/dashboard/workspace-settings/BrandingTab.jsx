@@ -1,7 +1,138 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import LazyImage from "../../../../components/ui/LazyImage";
+
+function ColorField({
+  label,
+  description,
+  value,
+  defaultValue = "",
+  onChange,
+  canEdit,
+  optional = false,
+}) {
+  const { t, isRTL } = useLanguage();
+  const displayVal = value || defaultValue || "";
+  const hasCustomValue = Boolean(value);
+
+  return (
+    <div
+      style={{
+        background: "var(--surface)",
+        padding: "12px 14px",
+        borderRadius: "var(--radius-md)",
+        border: "1px solid var(--border)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <label
+          style={{
+            fontSize: "0.82rem",
+            fontWeight: 700,
+            color: "var(--heading)",
+            margin: 0,
+          }}
+        >
+          {label}
+        </label>
+        {optional && hasCustomValue && canEdit && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            title={
+              t("resetToDefault") ||
+              (isRTL ? "إعادة تعيين للافتراضي" : "Reset to default")
+            }
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              fontSize: "0.74rem",
+              padding: "2px 4px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <Icon name="rotate-ccw" size={12} />
+            <span>{t("reset") || (isRTL ? "إعادة ضبط" : "Reset")}</span>
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          style={{
+            position: "relative",
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            border: "1px solid var(--border)",
+            background: displayVal || "var(--surface-alt)",
+            flexShrink: 0,
+            overflow: "hidden",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          }}
+        >
+          <input
+            type="color"
+            value={
+              displayVal.startsWith("#") && displayVal.length >= 7
+                ? displayVal.slice(0, 7)
+                : defaultValue || "#026982"
+            }
+            onChange={(e) => onChange(e.target.value)}
+            disabled={!canEdit}
+            style={{
+              opacity: 0,
+              width: "100%",
+              height: "100%",
+              cursor: canEdit ? "pointer" : "default",
+            }}
+          />
+        </div>
+        <input
+          type="text"
+          className="form-input"
+          placeholder={defaultValue || "#------"}
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={!canEdit}
+          style={{
+            fontFamily: "monospace",
+            direction: "ltr",
+            textAlign: "center",
+            height: 36,
+            fontSize: "0.85rem",
+            flex: 1,
+          }}
+        />
+      </div>
+      {description && (
+        <span
+          style={{
+            fontSize: "0.72rem",
+            color: "var(--text-secondary)",
+            lineHeight: 1.3,
+          }}
+        >
+          {description}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export default function BrandingTab({
   brandingForm,
@@ -12,6 +143,7 @@ export default function BrandingTab({
 }) {
   const { t, isRTL } = useLanguage();
   const galleryInputRef = useRef(null);
+  const [previewMode, setPreviewMode] = useState("light");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -352,219 +484,527 @@ export default function BrandingTab({
           marginTop: 8,
         }}
       >
-        <h4
-          style={{
-            fontSize: "0.92rem",
-            fontWeight: 800,
-            color: "var(--heading)",
-            margin: 0,
-          }}
-        >
-          {t("brandColors") || "ألوان العلامة التجارية"}
-        </h4>
-
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 16,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 8,
           }}
         >
-          {/* Primary Color */}
           <div>
-            <label
-              className="form-label"
+            <h4
               style={{
-                fontSize: "0.84rem",
-                fontWeight: 700,
-                marginBottom: 8,
-                display: "block",
+                fontSize: "0.98rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+                margin: "0 0 4px",
               }}
             >
-              {t("primaryColor") || "اللون الأساسي"}
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
+              {t("brandColorsSection") || "ألوان الهوية والعلامة التجارية"}
+            </h4>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--text-secondary)",
+                margin: 0,
+              }}
+            >
+              {t("brandColorsDesc") ||
+                "تخصيص كامل للألوان الأساسية، ودرجات الوضع الفاتح والداكن لتعكس هويتك بدقة."}
+            </p>
+          </div>
+        </div>
+
+        {/* 1. Brand Palette */}
+        <div style={{ marginTop: 8 }}>
+          <h5
+            style={{
+              fontSize: "0.86rem",
+              fontWeight: 800,
+              color: "var(--heading)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: brandingForm.primary_color || "var(--primary)",
+              }}
+            />
+            {t("brandPalette") || "ألوان الهوية الأساسية"}
+          </h5>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 14,
+            }}
+          >
+            <ColorField
+              label={t("primaryColor") || "اللون الأساسي"}
+              description={
+                t("primaryColorDesc") ||
+                "يُستخدم للأزرار الرئيسية، الروابط النشطة، وتفاصيل الهوية"
+              }
+              value={brandingForm.primary_color}
+              defaultValue="#026982"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, primary_color: val })
+              }
+              canEdit={canEdit}
+            />
+            <ColorField
+              label={t("secondaryColor") || "اللون الثانوي"}
+              description={
+                t("secondaryColorDesc") ||
+                "يُستخدم للتدرجات والعناصر المكملة والبطاقات"
+              }
+              value={brandingForm.secondary_color}
+              defaultValue="#033d4b"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, secondary_color: val })
+              }
+              canEdit={canEdit}
+            />
+            <ColorField
+              label={t("hoverColor") || "لون التحويم والتفاعل"}
+              description={
+                t("hoverColorDesc") ||
+                "يُستخدم عند التمرير على الأزرار والروابط التفاعلية"
+              }
+              value={brandingForm.hover_color}
+              defaultValue="#034d60"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, hover_color: val })
+              }
+              canEdit={canEdit}
+            />
+            <ColorField
+              label={t("accentColor") || "لون التمييز (Accent)"}
+              description={
+                t("accentColorDesc") ||
+                "يُستخدم للنقاط البارزة والشارات والإشعارات"
+              }
+              value={brandingForm.accent_color}
+              defaultValue="#2de2f2"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, accent_color: val })
+              }
+              canEdit={canEdit}
+              optional
+            />
+          </div>
+        </div>
+
+        {/* 2. Light Mode Palette */}
+        <div style={{ marginTop: 14 }}>
+          <h5
+            style={{
+              fontSize: "0.86rem",
+              fontWeight: 800,
+              color: "var(--heading)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Icon name="sun" size={15} style={{ color: "#f59e0b" }} />
+            {t("lightModePalette") || "ألوان الوضع الفاتح (Light Mode)"}
+          </h5>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 12,
+            }}
+          >
+            <ColorField
+              label={t("backgroundColorLight") || "لون الخلفية (فاتح)"}
+              value={brandingForm.background_color_light}
+              defaultValue="#f8fafc"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  background_color_light: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("surfaceColorLight") || "لون البطاقات والحاويات (فاتح)"}
+              value={brandingForm.surface_color_light}
+              defaultValue="#ffffff"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  surface_color_light: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("headingColorLight") || "لون العناوين (فاتح)"}
+              value={brandingForm.heading_color_light}
+              defaultValue="#022a35"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  heading_color_light: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("textColorLight") || "لون النصوص (فاتح)"}
+              value={brandingForm.text_color_light}
+              defaultValue="#033d4b"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, text_color_light: val })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("borderColorLight") || "لون الحدود والفواصل (فاتح)"}
+              value={brandingForm.border_color_light}
+              defaultValue="#c1d9dd"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  border_color_light: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+          </div>
+        </div>
+
+        {/* 3. Dark Mode Palette */}
+        <div style={{ marginTop: 14 }}>
+          <h5
+            style={{
+              fontSize: "0.86rem",
+              fontWeight: 800,
+              color: "var(--heading)",
+              marginBottom: 10,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Icon name="moon" size={15} style={{ color: "#38bdf8" }} />
+            {t("darkModePalette") || "ألوان الوضع الداكن (Dark Mode)"}
+          </h5>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 12,
+            }}
+          >
+            <ColorField
+              label={t("backgroundColorDark") || "لون الخلفية (داكن)"}
+              value={brandingForm.background_color_dark}
+              defaultValue="#022a35"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  background_color_dark: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("surfaceColorDark") || "لون البطاقات والحاويات (داكن)"}
+              value={brandingForm.surface_color_dark}
+              defaultValue="#033d4b"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  surface_color_dark: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("headingColorDark") || "لون العناوين (داكن)"}
+              value={brandingForm.heading_color_dark}
+              defaultValue="#ffffff"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  heading_color_dark: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("textColorDark") || "لون النصوص (داكن)"}
+              value={brandingForm.text_color_dark}
+              defaultValue="#e2e8f0"
+              onChange={(val) =>
+                setBrandingForm({ ...brandingForm, text_color_dark: val })
+              }
+              canEdit={canEdit}
+              optional
+            />
+            <ColorField
+              label={t("borderColorDark") || "لون الحدود والفواصل (داكن)"}
+              value={brandingForm.border_color_dark}
+              defaultValue="#04566b"
+              onChange={(val) =>
+                setBrandingForm({
+                  ...brandingForm,
+                  border_color_dark: val,
+                })
+              }
+              canEdit={canEdit}
+              optional
+            />
+          </div>
+        </div>
+
+        {/* 4. Interactive Live Preview */}
+        <div
+          style={{
+            marginTop: 18,
+            padding: 18,
+            borderRadius: "var(--radius-lg)",
+            border: "1px solid var(--border)",
+            background:
+              previewMode === "dark"
+                ? brandingForm.background_color_dark || "#022a35"
+                : brandingForm.background_color_light || "#f8fafc",
+            transition: "all 0.3s ease",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 14,
+              flexWrap: "wrap",
+              gap: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: 800,
+                color:
+                  previewMode === "dark"
+                    ? brandingForm.heading_color_dark || "#ffffff"
+                    : brandingForm.heading_color_light || "#022a35",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Icon name="eye" size={16} />
+              {t("liveThemePreview") || "معاينة حية للمظهر والألوان"}
+            </span>
+
+            <div
+              style={{
+                display: "inline-flex",
+                padding: 3,
+                borderRadius: "var(--radius-full)",
+                background:
+                  previewMode === "dark"
+                    ? "rgba(255,255,255,0.12)"
+                    : "rgba(0,0,0,0.06)",
+                border: "1px solid var(--border)",
+                gap: 4,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewMode("light")}
                 style={{
-                  position: "relative",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  border: "1px solid var(--border)",
-                  background: brandingForm.primary_color || "#0a9099",
-                  flexShrink: 0,
-                  overflow: "hidden",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+                  padding: "4px 12px",
+                  borderRadius: "var(--radius-full)",
+                  border: "none",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  background:
+                    previewMode === "light"
+                      ? brandingForm.primary_color || "var(--primary)"
+                      : "transparent",
+                  color:
+                    previewMode === "light"
+                      ? "#ffffff"
+                      : previewMode === "dark"
+                        ? "#cbd5e1"
+                        : "var(--text)",
+                  transition: "all 0.2s ease",
                 }}
               >
-                <input
-                  type="color"
-                  value={brandingForm.primary_color || "#0a9099"}
-                  onChange={(e) =>
-                    setBrandingForm({
-                      ...brandingForm,
-                      primary_color: e.target.value,
-                    })
-                  }
-                  disabled={!canEdit}
-                  style={{
-                    opacity: 0,
-                    width: "100%",
-                    height: "100%",
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <input
-                type="text"
-                className="form-input"
-                value={brandingForm.primary_color || "#0a9099"}
-                onChange={(e) =>
-                  setBrandingForm({
-                    ...brandingForm,
-                    primary_color: e.target.value,
-                  })
-                }
-                disabled={!canEdit}
+                {isRTL ? "الوضع الفاتح" : "Light Mode"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewMode("dark")}
                 style={{
-                  fontFamily: "monospace",
-                  direction: "ltr",
-                  textAlign: "center",
-                  height: 40,
+                  padding: "4px 12px",
+                  borderRadius: "var(--radius-full)",
+                  border: "none",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  background:
+                    previewMode === "dark"
+                      ? brandingForm.primary_color || "var(--primary)"
+                      : "transparent",
+                  color:
+                    previewMode === "dark"
+                      ? "#ffffff"
+                      : previewMode === "light"
+                        ? "var(--text)"
+                        : "#cbd5e1",
+                  transition: "all 0.2s ease",
                 }}
-              />
+              >
+                {isRTL ? "الوضع الداكن" : "Dark Mode"}
+              </button>
             </div>
           </div>
 
-          {/* Secondary Color */}
-          <div>
-            <label
-              className="form-label"
+          <div
+            style={{
+              padding: 16,
+              borderRadius: "var(--radius-md)",
+              border: `1px solid ${
+                previewMode === "dark"
+                  ? brandingForm.border_color_dark || "#04566b"
+                  : brandingForm.border_color_light || "#c1d9dd"
+              }`,
+              background:
+                previewMode === "dark"
+                  ? brandingForm.surface_color_dark || "#033d4b"
+                  : brandingForm.surface_color_light || "#ffffff",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            <div
               style={{
-                fontSize: "0.84rem",
-                fontWeight: 700,
-                marginBottom: 8,
-                display: "block",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 8,
               }}
             >
-              {t("secondaryColor") || "اللون الثانوي"}
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
+              <h6
                 style={{
-                  position: "relative",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  border: "1px solid var(--border)",
-                  background: brandingForm.secondary_color || "#166992",
-                  flexShrink: 0,
-                  overflow: "hidden",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+                  margin: 0,
+                  fontSize: "1rem",
+                  fontWeight: 800,
+                  color:
+                    previewMode === "dark"
+                      ? brandingForm.heading_color_dark || "#ffffff"
+                      : brandingForm.heading_color_light || "#022a35",
                 }}
               >
-                <input
-                  type="color"
-                  value={brandingForm.secondary_color || "#166992"}
-                  onChange={(e) =>
-                    setBrandingForm({
-                      ...brandingForm,
-                      secondary_color: e.target.value,
-                    })
-                  }
-                  disabled={!canEdit}
-                  style={{
-                    opacity: 0,
-                    width: "100%",
-                    height: "100%",
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <input
-                type="text"
-                className="form-input"
-                value={brandingForm.secondary_color || "#166992"}
-                onChange={(e) =>
-                  setBrandingForm({
-                    ...brandingForm,
-                    secondary_color: e.target.value,
-                  })
-                }
-                disabled={!canEdit}
-                style={{
-                  fontFamily: "monospace",
-                  direction: "ltr",
-                  textAlign: "center",
-                  height: 40,
-                }}
-              />
-            </div>
-          </div>
+                {isRTL
+                  ? "عيادة د. أحمد خالد — استشارة عامة"
+                  : "Dr. Ahmed Clinic — General Consultation"}
+              </h6>
 
-          {/* Hover Color */}
-          <div>
-            <label
-              className="form-label"
-              style={{
-                fontSize: "0.84rem",
-                fontWeight: 700,
-                marginBottom: 8,
-                display: "block",
-              }}
-            >
-              {t("hoverColor") || "لون التحويم"}
-            </label>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
+              <span
                 style={{
-                  position: "relative",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  border: "1px solid var(--border)",
-                  background: brandingForm.hover_color || "#44f2fe",
-                  flexShrink: 0,
-                  overflow: "hidden",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  padding: "3px 10px",
+                  borderRadius: "var(--radius-full)",
+                  background:
+                    brandingForm.accent_color ||
+                    brandingForm.secondary_color ||
+                    "#2de2f2",
+                  color: "#ffffff",
                 }}
               >
-                <input
-                  type="color"
-                  value={brandingForm.hover_color || "#44f2fe"}
-                  onChange={(e) =>
-                    setBrandingForm({
-                      ...brandingForm,
-                      hover_color: e.target.value,
-                    })
-                  }
-                  disabled={!canEdit}
-                  style={{
-                    opacity: 0,
-                    width: "100%",
-                    height: "100%",
-                    cursor: "pointer",
-                  }}
-                />
-              </div>
-              <input
-                type="text"
-                className="form-input"
-                value={brandingForm.hover_color || "#44f2fe"}
-                onChange={(e) =>
-                  setBrandingForm({
-                    ...brandingForm,
-                    hover_color: e.target.value,
-                  })
-                }
-                disabled={!canEdit}
+                {isRTL ? "متاح للحجز" : "Available"}
+              </span>
+            </div>
+
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.85rem",
+                lineHeight: 1.6,
+                color:
+                  previewMode === "dark"
+                    ? brandingForm.text_color_dark || "#e2e8f0"
+                    : brandingForm.text_color_light || "#033d4b",
+              }}
+            >
+              {isRTL
+                ? "هذه بطاقة توضيحية تحاكي كيف ستبدو ألوان نصوصك، خلفياتك، وأزرارك لعملائك وفريقك بدقة في هذا الوضع."
+                : "This sample card illustrates how your custom text, background, and button colors appear to clients and team members."}
+            </p>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+              <button
+                type="button"
                 style={{
-                  fontFamily: "monospace",
-                  direction: "ltr",
-                  textAlign: "center",
-                  height: 40,
+                  padding: "8px 18px",
+                  borderRadius: "var(--radius-md)",
+                  border: "none",
+                  background: brandingForm.primary_color || "#026982",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  cursor: "default",
+                  boxShadow: `0 4px 12px ${
+                    brandingForm.primary_color
+                      ? `${brandingForm.primary_color}33`
+                      : "rgba(0,0,0,0.1)"
+                  }`,
                 }}
-              />
+              >
+                {isRTL ? "احجز الآن" : "Book Now"}
+              </button>
+              <button
+                type="button"
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "var(--radius-md)",
+                  border: `1px solid ${
+                    previewMode === "dark"
+                      ? brandingForm.border_color_dark || "#04566b"
+                      : brandingForm.border_color_light || "#c1d9dd"
+                  }`,
+                  background: "transparent",
+                  color:
+                    previewMode === "dark"
+                      ? brandingForm.heading_color_dark || "#ffffff"
+                      : brandingForm.heading_color_light || "#022a35",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  cursor: "default",
+                }}
+              >
+                {isRTL ? "عرض التفاصيل" : "View Details"}
+              </button>
             </div>
           </div>
         </div>

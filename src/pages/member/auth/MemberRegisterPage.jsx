@@ -58,13 +58,26 @@ export default function MemberRegisterPage() {
     e.preventDefault();
     setErrors({});
 
+    if (!formData.workspace_type_id) {
+      setErrors((prev) => ({
+        ...prev,
+        workspace_type_id: [
+          t("workspaceTypeRequired") ||
+            (lang === "ar"
+              ? "تصنيف مساحة العمل مطلوب"
+              : "Workspace category is required"),
+        ],
+      }));
+      return;
+    }
+
     const data = {
       name: formData.name,
       email: formData.email,
       password: formData.password,
       phone: formData.phone || undefined,
       workspace_name: formData.workspace_name,
-      workspace_type_id: formData.workspace_type_id || undefined,
+      workspace_type_id: formData.workspace_type_id,
       "cf-turnstile-response": turnstileToken,
     };
 
@@ -280,14 +293,19 @@ export default function MemberRegisterPage() {
 
         <div className="form-group animate-fade-in-up">
           <label className="form-label" htmlFor="workspace_type_id">
-            {t("workspaceType") || "تصنيف مساحة العمل"}
+            {t("workspaceType") || "تصنيف مساحة العمل"} *
           </label>
           <select
             id="workspace_type_id"
             name="workspace_type_id"
-            className="form-input"
+            className={`form-input${errors.workspace_type_id ? " is-invalid" : ""}`}
             value={formData.workspace_type_id}
             onChange={handleChange}
+            required
+            aria-required="true"
+            aria-describedby={
+              errors.workspace_type_id ? "workspace_type_id-error" : undefined
+            }
           >
             <option value="">
               -- {t("selectWorkspaceType") || "اختر نوع مساحة العمل"} --
@@ -298,6 +316,15 @@ export default function MemberRegisterPage() {
               </option>
             ))}
           </select>
+          {errors.workspace_type_id && (
+            <span
+              id="workspace_type_id-error"
+              className="form-error"
+              role="alert"
+            >
+              {errors.workspace_type_id[0]}
+            </span>
+          )}
         </div>
 
         <div
@@ -336,6 +363,44 @@ export default function MemberRegisterPage() {
             {errors["cf-turnstile-response"][0]}
           </div>
         )}
+
+        <p
+          style={{
+            fontSize: "0.82rem",
+            color: "var(--text-secondary)",
+            textAlign: "center",
+            margin: "0 0 16px",
+            lineHeight: 1.5,
+          }}
+        >
+          {t("termsAgreementDisclaimer") || "بإنشاء حسابك، فإنك توافق على"}{" "}
+          <Link
+            to="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("termsOfService")}
+          </Link>{" "}
+          {t("andText") || "و"}{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("privacyPolicy")}
+          </Link>
+          .
+        </p>
 
         <button
           type="submit"

@@ -146,7 +146,7 @@ export default function WorkspaceSubscriptionsPage() {
   };
 
   return (
-    <div className="card" style={{ padding: 24 }}>
+    <div className="workspace-page-container">
       <SEO title={t("subscription") || "الاشتراكات"} noindex />
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

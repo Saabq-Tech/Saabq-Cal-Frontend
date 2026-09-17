@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { fetchPublicSettings } from "../../api/client";
+import { fetchPublicSettings, subscribeToNewsletter } from "../../api/client";
 import { useLanguage } from "../../context/LanguageContext";
 import AppLogo from "../ui/AppLogo";
 import Icon from "../common/Icon";
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
@@ -20,12 +20,31 @@ export default function Footer() {
 
   const [subscribed, setSubscribed] = useState(false);
   const [emailInput, setEmailInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!emailInput || !emailInput.includes("@")) return;
-    setSubscribed(true);
-    setEmailInput("");
+    setErrorMessage("");
+    const cleanEmail = emailInput.trim();
+    if (!cleanEmail || !cleanEmail.includes("@")) return;
+
+    setLoading(true);
+    try {
+      const res = await subscribeToNewsletter(cleanEmail, language || "ar");
+      setSubscribed(true);
+      setSuccessMessage(res?.message || t("newsletterSuccess"));
+      setEmailInput("");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.email?.[0] ||
+        t("newsletterError");
+      setErrorMessage(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -109,10 +128,10 @@ export default function Footer() {
             <h2>{t("security")}</h2>
             <ul className="footer-links">
               <li>
-                <a href="/#features">{t("navFeatures")}</a>
+                <Link to="/features">{t("navFeatures")}</Link>
               </li>
               <li>
-                <a href="/#how-it-works">{t("navHowItWorks")}</a>
+                <Link to="/how-it-works">{t("navHowItWorks")}</Link>
               </li>
               <li>
                 <Link to="/privacy">{t("privacyPolicy")}</Link>
@@ -126,47 +145,99 @@ export default function Footer() {
           <div className="footer-col footer-col-newsletter">
             <h2>{t("newsletterTitle")}</h2>
             <p className="footer-note">{t("newsletterDesc")}</p>
+
             {subscribed ? (
               <div
+                className="newsletter-success"
                 role="status"
                 aria-live="polite"
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "var(--radius-md)",
-                  background: "var(--primary-subtle)",
-                  color: "var(--primary)",
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                }}
               >
-                ✓ {t("newsletterSuccess")}
+                <span className="newsletter-success-check">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+                <span>{successMessage || t("newsletterSuccess")}</span>
               </div>
             ) : (
               <form
                 onSubmit={handleSubscribe}
-                className="footer-newsletter-form"
+                className="newsletter-form"
+                noValidate
               >
                 <label htmlFor="footer-newsletter-email" className="sr-only">
-                  {t("newsletterTitle") || "الاشتراك بالنشرة البريدية"}
+                  {t("newsletterTitle")}
                 </label>
-                <input
-                  id="footer-newsletter-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  className="form-input"
-                  style={{ fontSize: "0.84rem", padding: "8px 12px" }}
-                  required
-                  aria-required="true"
-                />
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  style={{ flexShrink: 0 }}
-                >
-                  {t("subscribeBtn")}
-                </button>
+                <div className="newsletter-input-group">
+                  <span className="newsletter-input-icon" aria-hidden="true">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </span>
+                  <input
+                    id="footer-newsletter-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    className="newsletter-email-input"
+                    required
+                    disabled={loading}
+                    aria-required="true"
+                  />
+                  <button
+                    type="submit"
+                    className="newsletter-submit-btn"
+                    disabled={loading}
+                    aria-label={
+                      loading ? t("subscribingBtn") : t("subscribeBtn")
+                    }
+                  >
+                    {loading ? (
+                      <span className="newsletter-spinner" aria-hidden="true" />
+                    ) : (
+                      <svg
+                        className="newsletter-btn-arrow"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {errorMessage && (
+                  <p className="newsletter-error" role="alert">
+                    {errorMessage}
+                  </p>
+                )}
               </form>
             )}
           </div>

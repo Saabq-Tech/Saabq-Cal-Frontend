@@ -8,6 +8,7 @@ import SEO from "../../../components/ui/SEO";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
 import RichTextEditor from "../../../components/common/RichTextEditor";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceTemplatesPage({ embedded = false }) {
   const { user } = useAuth();
@@ -159,7 +160,10 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div
+      className="workspace-templates-page"
+      style={{ display: "flex", flexDirection: "column", gap: 20 }}
+    >
       {!embedded && (
         <SEO
           title={
@@ -169,52 +173,39 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
         />
       )}
 
-      {/* HEADER */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              color: "var(--muted)",
-              margin: "4px 0 0",
-            }}
-          >
-            {isRTL
-              ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية"
-              : "Manage ready-to-use templates for reports and consultation summaries"}
-          </p>
-        </div>
-
-        {canEdit && (
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={openCreateModal}
-            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-          >
-            <Icon name="plus" size={16} />
-            {isRTL ? "+ إضافة قالب جديد" : "+ Add Template"}
-          </button>
-        )}
-      </div>
+      {/* Top Standard Header */}
+      <WorkspacePageHeader
+        title={
+          isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"
+        }
+        subtitle={
+          isRTL
+            ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية."
+            : "Manage ready-to-use templates for reports and consultation summaries."
+        }
+        icon="file-text"
+        actions={
+          canEdit && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={openCreateModal}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+              }}
+            >
+              <Icon name="plus" size={18} />
+              <span>{isRTL ? "إضافة قالب جديد" : "Add Template"}</span>
+            </button>
+          )
+        }
+      />
 
       {/* SEARCH BAR */}
       <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -475,6 +466,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             onClick={() => !saving && setShowModal(false)}
           >
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               style={{
                 background: "var(--surface)",
                 borderRadius: "var(--radius-lg)",
@@ -690,6 +682,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             onClick={() => setPreviewTemplate(null)}
           >
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               style={{
                 background: "var(--surface)",
                 borderRadius: "var(--radius-lg)",
@@ -787,6 +780,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
             onClick={() => !deleting && setDeletingId(null)}
           >
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               style={{
                 background: "var(--surface)",
                 borderRadius: "var(--radius-lg)",

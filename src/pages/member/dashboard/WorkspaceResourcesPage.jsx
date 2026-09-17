@@ -84,7 +84,7 @@ export default function WorkspaceResourcesPage() {
   };
 
   return (
-    <div className="card" style={{ padding: 24 }}>
+    <div className="workspace-page-container">
       <SEO
         title={t("workspaceResources") || "إدارة الموارد والمخزون"}
         noindex

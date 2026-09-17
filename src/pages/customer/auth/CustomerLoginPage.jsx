@@ -327,6 +327,45 @@ export default function CustomerLoginPage() {
           </div>
         )}
 
+        <p
+          className="auth-terms-disclaimer"
+          style={{
+            fontSize: "0.82rem",
+            color: "var(--text-secondary)",
+            textAlign: "center",
+            margin: "0 0 16px",
+            lineHeight: 1.5,
+          }}
+        >
+          {t("loginAgreementDisclaimer")}{" "}
+          <Link
+            to="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("termsOfService")}
+          </Link>{" "}
+          {t("andText")}{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("privacyPolicy")}
+          </Link>
+          .
+        </p>
+
         <button
           type="submit"
           className="btn btn-primary btn-block btn-lg"

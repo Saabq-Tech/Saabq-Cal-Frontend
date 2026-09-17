@@ -13,8 +13,12 @@ import {
   getWorkspaceTabs,
   canViewWorkspaceTab,
 } from "../../config/dashboardNav";
+import {
+  updateMetaThemeColor,
+  isWorkspaceRoute,
+  getSavedWorkspaceBranding,
+} from "../../utils/theme";
 import { checkWorkspaceCapability } from "../../utils/capabilities";
-import { updateMetaThemeColor } from "../../utils/theme";
 
 export default function Navbar() {
   const {
@@ -167,8 +171,25 @@ export default function Navbar() {
       dark ? "dark" : "light",
     );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
-    updateMetaThemeColor(localStorage.getItem("saabq_primary_color"));
-  }, [dark]);
+
+    if (isWorkspaceRoute(location.pathname)) {
+      const saved = getSavedWorkspaceBranding();
+      if (saved) {
+        const bottomColor = dark
+          ? saved.background_color_dark ||
+            saved.surface_color_dark ||
+            saved.secondary_color ||
+            saved.primary_color ||
+            "#034d60"
+          : saved.secondary_color || saved.primary_color || "#033d4b";
+        updateMetaThemeColor(bottomColor);
+      } else {
+        updateMetaThemeColor(dark ? "#034d60" : "#033d4b");
+      }
+    } else {
+      updateMetaThemeColor(dark ? "#034d60" : "#033d4b");
+    }
+  }, [dark, location.pathname]);
 
   // Lock scroll when mobile drawer is open
   useEffect(() => {
@@ -248,7 +269,10 @@ export default function Navbar() {
             className="navbar-brand"
             onClick={(e) => handleSectionClick("home", e)}
           >
-            <AppLogo height={32} />
+            <AppLogo
+              height={32}
+              forceOriginalColors={isWorkspaceRoute(location.pathname)}
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -726,7 +750,10 @@ export default function Navbar() {
           >
             {/* Drawer Header */}
             <div className="mobile-drawer-header">
-              <AppLogo height={28} />
+              <AppLogo
+                height={28}
+                forceOriginalColors={isWorkspaceRoute(location.pathname)}
+              />
               <button
                 className="mobile-drawer-close"
                 onClick={closeMobileDrawer}

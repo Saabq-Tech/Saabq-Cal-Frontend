@@ -4,6 +4,8 @@ import { useLanguage } from "../../../../context/LanguageContext";
 import { useToast } from "../../../../context/ToastContext";
 import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function SubscriptionTab({
   subscriptionInfo,
@@ -16,7 +18,8 @@ export default function SubscriptionTab({
   onPause: _onPause,
   onResume: _onResume,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerPlural } = useCustomerLabel();
   const toast = useToast();
 
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -287,63 +290,76 @@ export default function SubscriptionTab({
 
   return (
     <div className="card-body">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceSubscription") || "اشتراك مساحة العمل والخطة الحالية"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("subscriptionDesc") ||
-              "متابعة حالة الاشتراك الحالي، ميعاد التجديد، وإمكانية الترقية لباقات أعلى"}
-          </p>
-        </div>
-        {canEdit && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {statusStr !== "pending" && (
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => setIsUpgradeModalOpen(true)}
-                style={{ gap: 6 }}
-              >
-                <Icon name="rocket" size={14} />
-                {t("upgradePlan") || "ترقية الباقة"}
-              </button>
-            )}
-            {canUploadProof && (
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => setIsProofModalOpen(true)}
-                style={{ gap: 6 }}
-              >
-                <Icon name="upload-cloud" size={14} />
-                {t("uploadProofBtn") || "إرفاق إيصال الدفع"}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Standard Workspace Header */}
+      <WorkspacePageHeader
+        title={
+          t("workspaceSubscription") ||
+          (isRTL ? "الاشتراكات وباقة المساحة" : "Workspace Subscriptions")
+        }
+        subtitle={
+          t("subscriptionDesc") ||
+          (isRTL
+            ? "متابعة حالة الاشتراك الحالي، ميعاد التجديد، إمكانيات الخطة وترقية الباقة."
+            : "Monitor active plan details, renewal cycles, capability limits, and upgrades.")
+        }
+        icon="award"
+        actions={
+          canEdit && (
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              {statusStr !== "pending" && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setIsUpgradeModalOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                    fontWeight: 700,
+                    borderRadius: "var(--radius-md, 10px)",
+                    boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+                  }}
+                >
+                  <Icon name="rocket" size={18} />
+                  <span>
+                    {t("upgradePlan") ||
+                      (isRTL ? "ترقية الباقة" : "Upgrade Plan")}
+                  </span>
+                </button>
+              )}
+              {canUploadProof && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setIsProofModalOpen(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 18px",
+                    fontWeight: 700,
+                    borderRadius: "var(--radius-md, 10px)",
+                  }}
+                >
+                  <Icon name="upload-cloud" size={16} />
+                  <span>
+                    {t("uploadProofBtn") ||
+                      (isRTL ? "إرفاق إيصال الدفع" : "Upload Payment Proof")}
+                  </span>
+                </button>
+              )}
+            </div>
+          )
+        }
+      />
 
       {!subscriptionInfo ? (
         <div
@@ -687,91 +703,146 @@ export default function SubscriptionTab({
                               "المميزات والإمكانيات:"}
                           </div>
                           <ul className="plan-card-features-list">
-                            <li>
-                              <Icon
-                                name="check"
-                                size={14}
-                                className="feature-check-icon"
-                              />
-                              <span>
-                                {p.max_members || p.max_team_members
-                                  ? `${t("members") || "أعضاء الفريق"}: ${p.max_members || p.max_team_members}`
-                                  : t("unlimitedTeamMembers") ||
-                                    "أعضاء فريق غير محدودين"}
-                              </span>
-                            </li>
-                            <li>
-                              <Icon
-                                name="check"
-                                size={14}
-                                className="feature-check-icon"
-                              />
-                              <span>
-                                {p.max_services || p.max_schedules
-                                  ? `${t("services") || "الخدمات والجداول"}: ${p.max_services || p.max_schedules}`
-                                  : t("unlimitedServices") ||
-                                    "خدمات وجداول غير محدودة"}
-                              </span>
-                            </li>
-                            <li>
-                              <Icon
-                                name="check"
-                                size={14}
-                                className="feature-check-icon"
-                              />
-                              <span>
-                                {p.max_appointments || p.max_bookings
-                                  ? `${t("appointments") || "الحجوزات"}: ${p.max_appointments || p.max_bookings}`
-                                  : t("unlimitedAppointments") ||
-                                    "حجوزات عملاء غير محدودة"}
-                              </span>
-                            </li>
-                            {p.max_customers && (
-                              <li>
-                                <Icon
-                                  name="check"
-                                  size={14}
-                                  className="feature-check-icon"
-                                />
-                                <span>
-                                  {`${t("customers") || "العملاء"}: ${p.max_customers}`}
-                                </span>
-                              </li>
-                            )}
+                            {(() => {
+                              const items = [];
+                              const seen = new Set();
 
-                            {/* Capabilities Array */}
-                            {Array.isArray(p.capabilities) &&
-                              p.capabilities.map((cap, idx) => {
-                                const nameStr = formatCapStr(cap);
-                                if (!nameStr) return null;
-                                return (
-                                  <li key={cap.id || cap.code || idx}>
-                                    <Icon
-                                      name="check"
-                                      size={14}
-                                      className="feature-check-icon"
-                                    />
-                                    <span>{nameStr}</span>
-                                  </li>
+                              // 1. Core limits
+                              if (p.max_members || p.max_team_members) {
+                                items.push(
+                                  `${t("members") || "أعضاء الفريق"}: ${p.max_members || p.max_team_members}`,
                                 );
-                              })}
+                                seen.add("members");
+                                seen.add("team_members");
+                              } else if (
+                                p.max_members === null &&
+                                p.price > 0
+                              ) {
+                                items.push(
+                                  t("unlimitedTeamMembers") ||
+                                    "أعضاء فريق غير محدودين",
+                                );
+                                seen.add("members");
+                                seen.add("team_members");
+                              }
 
-                            {/* Features Array */}
-                            {Array.isArray(p.features) &&
-                              p.features.map((feat, idx) => {
-                                const featStr = formatCapStr(feat);
-                                if (!featStr) return null;
-                                return (
-                                  <li key={idx}>
-                                    <Icon
-                                      name="check"
-                                      size={14}
-                                      className="feature-check-icon"
-                                    />
-                                    <span>{featStr}</span>
-                                  </li>
+                              if (p.max_services || p.max_schedules) {
+                                items.push(
+                                  `${t("services") || "الخدمات"}: ${p.max_services || p.max_schedules}`,
                                 );
-                              })}
+                                seen.add("services");
+                              } else if (
+                                p.max_services === null &&
+                                p.price > 0
+                              ) {
+                                items.push(
+                                  t("unlimitedServices") || "خدمات غير محدودة",
+                                );
+                                seen.add("services");
+                              }
+
+                              if (p.max_appointments || p.max_bookings) {
+                                items.push(
+                                  `${t("appointments") || "الحجوزات"}: ${p.max_appointments || p.max_bookings}`,
+                                );
+                                seen.add("appointments");
+                                seen.add("bookings");
+                              } else if (
+                                p.max_appointments === null &&
+                                p.price > 0
+                              ) {
+                                items.push(
+                                  t("unlimitedAppointments") ||
+                                    "حجوزات غير محدودة",
+                                );
+                                seen.add("appointments");
+                                seen.add("bookings");
+                              }
+
+                              if (p.max_customers) {
+                                items.push(
+                                  `${isCustom ? customerPlural : t("customers") || "العملاء"}: ${p.max_customers}`,
+                                );
+                                seen.add("customers");
+                              } else if (
+                                p.max_customers === null &&
+                                p.price > 0
+                              ) {
+                                items.push(
+                                  isCustom
+                                    ? isRTL
+                                      ? `${customerPlural} غير محدودين`
+                                      : `Unlimited ${customerPlural}`
+                                    : t("unlimitedCustomers") ||
+                                        "عملاء غير محدودين",
+                                );
+                                seen.add("customers");
+                              }
+
+                              // 2. Distinct Capabilities
+                              if (Array.isArray(p.capabilities)) {
+                                p.capabilities.forEach((cap) => {
+                                  const code = (
+                                    cap.code ||
+                                    cap.key ||
+                                    ""
+                                  ).toUpperCase();
+                                  if (
+                                    code === "BOOKING" ||
+                                    code === "TEAM_MEMBERS"
+                                  )
+                                    return;
+
+                                  const nameStr = formatCapStr(cap);
+                                  if (
+                                    nameStr &&
+                                    !seen.has(nameStr.toLowerCase())
+                                  ) {
+                                    seen.add(nameStr.toLowerCase());
+                                    items.push(nameStr);
+                                  }
+                                });
+                              }
+
+                              // 3. Distinct Features
+                              if (Array.isArray(p.features)) {
+                                p.features.forEach((feat) => {
+                                  const featStr = formatCapStr(feat);
+                                  if (
+                                    featStr &&
+                                    !seen.has(featStr.toLowerCase())
+                                  ) {
+                                    seen.add(featStr.toLowerCase());
+                                    items.push(featStr);
+                                  }
+                                });
+                              } else if (
+                                p.features &&
+                                typeof p.features === "object"
+                              ) {
+                                Object.entries(p.features).forEach(([k, v]) => {
+                                  if (v === true) {
+                                    const label =
+                                      t(`feature_${k}`) || k.replace(/_/g, " ");
+                                    if (!seen.has(label.toLowerCase())) {
+                                      seen.add(label.toLowerCase());
+                                      items.push(label);
+                                    }
+                                  }
+                                });
+                              }
+
+                              return items.map((itemStr, idx) => (
+                                <li key={idx}>
+                                  <Icon
+                                    name="check"
+                                    size={14}
+                                    className="feature-check-icon"
+                                  />
+                                  <span>{itemStr}</span>
+                                </li>
+                              ));
+                            })()}
                           </ul>
                         </div>
                       </div>
@@ -856,11 +927,21 @@ export default function SubscriptionTab({
                   }}
                 >
                   {t("paymentProofUploadTitle") ||
-                    "إرفاق إيصال تحويل الاشتراك (إجباري للاعتماد)"}
+                    "إرفاق إيصال تحويل الاشتراك (اختياري)"}
                 </h4>
                 <div className="form-group" style={{ marginBottom: 10 }}>
                   <label className="form-label">
                     {t("receiptFile") || "ملف الإيصال (صورة / PDF)"}
+                    <span
+                      style={{
+                        fontSize: "0.76rem",
+                        fontWeight: 500,
+                        color: "var(--muted)",
+                        marginInlineStart: 6,
+                      }}
+                    >
+                      ({t("optional") || "اختياري"})
+                    </span>
                   </label>
                   <input
                     type="file"
@@ -944,6 +1025,16 @@ export default function SubscriptionTab({
                 <div className="form-group" style={{ marginBottom: 14 }}>
                   <label className="form-label" style={{ fontWeight: 700 }}>
                     {t("receiptFile") || "ملف الإيصال (صورة / PDF)"}
+                    <span
+                      style={{
+                        fontSize: "0.76rem",
+                        fontWeight: 500,
+                        color: "var(--muted)",
+                        marginInlineStart: 6,
+                      }}
+                    >
+                      ({t("optional") || "اختياري"})
+                    </span>
                   </label>
                   <input
                     type="file"

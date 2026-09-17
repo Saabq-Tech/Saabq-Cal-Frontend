@@ -21,12 +21,15 @@ export default function RichTextEditor({
   onSelectTemplate,
 }) {
   const { user } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, lang, isRTL } = useLanguage();
+  const language = lang;
   const toast = useToast();
-  const isRTL = language === "ar";
 
   const editorRef = useRef(null);
+  const textareaRef = useRef(null);
+  const savedRangeRef = useRef(null);
   const fileInputRef = useRef(null);
+  const internalUpdateRef = useRef(false);
 
   const [isCodeView, setIsCodeView] = useState(false);
   const [htmlContent, setHtmlContent] = useState(value || "");
@@ -57,13 +60,28 @@ export default function RichTextEditor({
 
   // Sync internal state with prop value when updated externally
   useEffect(() => {
+    if (internalUpdateRef.current) {
+      internalUpdateRef.current = false;
+      return;
+    }
     if (value !== htmlContent) {
       setHtmlContent(value || "");
       if (editorRef.current && !isCodeView) {
-        editorRef.current.innerHTML = value || "";
+        if (editorRef.current.innerHTML !== (value || "")) {
+          editorRef.current.innerHTML = value || "";
+        }
       }
     }
-  }, [value, htmlContent, isCodeView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, isCodeView]);
+
+  // Initial mount sync
+  useEffect(() => {
+    if (editorRef.current && !isCodeView) {
+      editorRef.current.innerHTML = value || "";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadTemplates = useCallback(async () => {
     if (!enableTemplates || propTemplates) return;
@@ -109,13 +127,15 @@ export default function RichTextEditor({
       htmlContent &&
       htmlContent.trim() !== "" &&
       !window.confirm(
-        isRTL
-          ? "هل ترغب في استبدال المحتوى الحالي بالقالب المحدد؟"
-          : "Replace current content with the selected template?",
+        t("confirmReplaceTemplate") ||
+          (isRTL
+            ? "هل ترغب في استبدال المحتوى الحالي بالقالب المحدد؟"
+            : "Replace current content with the selected template?"),
       )
     ) {
       return;
     }
+    internalUpdateRef.current = true;
     setHtmlContent(tmpl.content);
     if (editorRef.current) {
       editorRef.current.innerHTML = tmpl.content;
@@ -124,7 +144,8 @@ export default function RichTextEditor({
     if (onSelectTemplate) onSelectTemplate(tmpl);
     setShowTemplatesModal(false);
     toast.success(
-      isRTL ? "تم تطبيق القالب بنجاح" : "Template applied successfully",
+      t("templateAppliedSuccess") ||
+        (isRTL ? "تم تطبيق القالب بنجاح" : "Template applied successfully"),
     );
   };
 
@@ -134,22 +155,38 @@ export default function RichTextEditor({
       description: true,
       image: true,
     };
+    const includeTitle = opts.title !== false;
     const includeDesc = opts.description && kw.description;
-    const includeImg = opts.image && kw.image_url;
+    const imgUrl = kw.image_url
+      ? kw.image_url.startsWith("http") || kw.image_url.startsWith("data:")
+        ? kw.image_url
+        : getPublicAssetUrl(kw.image_url)
+      : null;
+    const includeImg = opts.image && imgUrl;
 
     let snippet = "";
-    if (includeImg && includeDesc) {
-      snippet = `<div style="display: flex; gap: 10px; align-items: center; margin: 8px 0; padding: 8px 12px; background: #f0fdfa; border-inline-start: 4px solid #0d9488; border-radius: 6px;"><img src="${kw.image_url}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" /><div><strong style="color: #0f766e;">${kw.title}</strong><p style="margin: 2px 0 0; font-size: 0.88em; color: #475569;">${kw.description}</p></div></div><p><br></p>`;
-    } else if (includeImg && !includeDesc) {
-      snippet = `<div style="display: flex; gap: 10px; align-items: center; margin: 6px 0;"><img src="${kw.image_url}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" /><strong style="color: #0f766e;">${kw.title}</strong></div><p><br></p>`;
-    } else if (includeDesc) {
+    if (includeImg && includeDesc && includeTitle) {
+      snippet = `<div style="display: flex; gap: 10px; align-items: center; margin: 8px 0; padding: 8px 12px; background: #f0fdfa; border-inline-start: 4px solid #0d9488; border-radius: 6px;"><img src="${imgUrl}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" /><div><strong style="color: #0f766e;">${kw.title}</strong><p style="margin: 2px 0 0; font-size: 0.88em; color: #475569;">${kw.description}</p></div></div><p><br></p>`;
+    } else if (includeImg && includeTitle && !includeDesc) {
+      snippet = `<div style="display: flex; gap: 10px; align-items: center; margin: 6px 0;"><img src="${imgUrl}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" /><strong style="color: #0f766e;">${kw.title}</strong></div><p><br></p>`;
+    } else if (includeDesc && includeTitle) {
       snippet = `<div style="margin: 6px 0; padding: 6px 12px; background: #f8fafc; border-inline-start: 3px solid #0d9488; border-radius: 4px;"><strong style="color: #0f766e;">${kw.title}</strong>: <span>${kw.description}</span></div><p><br></p>`;
+    } else if (includeTitle) {
+      snippet = `<strong>${kw.title}</strong>&nbsp;`;
+    } else if (includeDesc) {
+      snippet = `<span>${kw.description}</span>&nbsp;`;
+    } else if (includeImg) {
+      snippet = `<img src="${imgUrl}" style="max-width: 120px; height: auto; border-radius: 6px;" />&nbsp;`;
     } else {
       snippet = `<strong>${kw.title}</strong>&nbsp;`;
     }
 
-    executeCommand("insertHTML", snippet);
+    insertHtmlAtSelection(snippet);
     setShowKeywordsModal(false);
+    toast.success(
+      t("keywordInsertedSuccess") ||
+        (isRTL ? "تم إدراج الكلمة بنجاح" : "Keyword inserted successfully"),
+    );
   };
 
   const handleCreateKeywordOnTheFly = async (e) => {
@@ -176,9 +213,10 @@ export default function RichTextEditor({
           [createdKw.id]: { title: true, description: true, image: true },
         }));
         toast.success(
-          isRTL
-            ? "تم إضافة الكلمة المفتاحية بنجاح"
-            : "Keyword created successfully",
+          t("keywordCreatedSuccess") ||
+            (isRTL
+              ? "تم إضافة الكلمة المفتاحية بنجاح"
+              : "Keyword created successfully"),
         );
         setShowNewKeywordForm(false);
         setNewKwTitle("");
@@ -188,6 +226,7 @@ export default function RichTextEditor({
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
+          t("keywordCreateFailed") ||
           (isRTL ? "فشل إنشاء الكلمة المفتاحية" : "Failed to create keyword"),
       );
     } finally {
@@ -212,7 +251,7 @@ export default function RichTextEditor({
       <html dir="${isRTL ? "rtl" : "ltr"}" lang="${language}">
         <head>
           <meta charset="utf-8" />
-          <title>${isRTL ? "تقرير ومستند" : "Document & Report"}</title>
+          <title>${t("documentAndReport") || (isRTL ? "تقرير ومستند" : "Document & Report")}</title>
           <style>
             @page {
               size: A4 portrait;
@@ -434,6 +473,7 @@ export default function RichTextEditor({
   const handleInput = () => {
     if (editorRef.current) {
       const newHtml = editorRef.current.innerHTML;
+      internalUpdateRef.current = true;
       setHtmlContent(newHtml);
       if (onChange) onChange(newHtml);
     }
@@ -441,14 +481,155 @@ export default function RichTextEditor({
 
   const handleCodeChange = (e) => {
     const newHtml = e.target.value;
+    internalUpdateRef.current = true;
     setHtmlContent(newHtml);
     if (onChange) onChange(newHtml);
   };
 
+  const saveSelection = useCallback(() => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editorRef.current) {
+      const range = sel.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
+    }
+  }, []);
+
+  const insertHtmlAtSelection = useCallback(
+    (html) => {
+      if (disabled) return;
+
+      if (isCodeView) {
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const start = textarea.selectionStart ?? textarea.value.length;
+          const end = textarea.selectionEnd ?? textarea.value.length;
+          const text = textarea.value;
+          const before = text.substring(0, start);
+          const after = text.substring(end);
+          const updated = before + html + after;
+          internalUpdateRef.current = true;
+          setHtmlContent(updated);
+          if (onChange) onChange(updated);
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+              start + html.length,
+              start + html.length,
+            );
+          }, 0);
+        } else {
+          internalUpdateRef.current = true;
+          setHtmlContent((prev) => {
+            const next = prev ? prev + "\n" + html : html;
+            if (onChange) onChange(next);
+            return next;
+          });
+        }
+        return;
+      }
+
+      const editor = editorRef.current;
+      if (!editor) return;
+
+      editor.focus();
+
+      const sel = window.getSelection();
+      let range = null;
+
+      if (
+        savedRangeRef.current &&
+        editor.contains(savedRangeRef.current.commonAncestorContainer)
+      ) {
+        range = savedRangeRef.current;
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      } else if (sel && sel.rangeCount > 0) {
+        const curRange = sel.getRangeAt(0);
+        if (editor.contains(curRange.commonAncestorContainer)) {
+          range = curRange;
+        }
+      }
+
+      let inserted = false;
+
+      // 1. Try native document.execCommand first
+      if (range) {
+        try {
+          inserted = document.execCommand("insertHTML", false, html);
+        } catch {
+          inserted = false;
+        }
+      }
+
+      // 2. Fallback if execCommand failed or was not possible
+      if (!inserted) {
+        if (range) {
+          range.deleteContents();
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = html;
+          const frag = document.createDocumentFragment();
+          let node;
+          let lastNode = null;
+          while ((node = tempDiv.firstChild)) {
+            lastNode = frag.appendChild(node);
+          }
+          range.insertNode(frag);
+          if (lastNode && sel) {
+            const newRange = document.createRange();
+            newRange.setStartAfter(lastNode);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            savedRangeRef.current = newRange.cloneRange();
+          }
+        } else {
+          // No active range in editor: append snippet to editor content
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = html;
+          while (tempDiv.firstChild) {
+            editor.appendChild(tempDiv.firstChild);
+          }
+        }
+      }
+
+      // Ensure content is synced to state and parent onChange handler
+      const newHtml = editor.innerHTML;
+      internalUpdateRef.current = true;
+      setHtmlContent(newHtml);
+      if (onChange) onChange(newHtml);
+
+      // Refresh saved range
+      if (sel && sel.rangeCount > 0) {
+        const r = sel.getRangeAt(0);
+        if (editor.contains(r.commonAncestorContainer)) {
+          savedRangeRef.current = r.cloneRange();
+        }
+      }
+    },
+    [disabled, isCodeView, onChange],
+  );
+
   const executeCommand = (command, value = null) => {
     if (disabled || isCodeView) return;
+    const editor = editorRef.current;
+    if (editor) {
+      editor.focus();
+      if (
+        savedRangeRef.current &&
+        editor.contains(savedRangeRef.current.commonAncestorContainer)
+      ) {
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(savedRangeRef.current);
+      }
+    }
     document.execCommand(command, false, value);
     handleInput();
+    saveSelection();
   };
 
   const handleFormatBlock = (e) => {
@@ -463,7 +644,9 @@ export default function RichTextEditor({
     reader.onload = (event) => {
       const base64Url = event.target?.result;
       if (base64Url) {
-        executeCommand("insertImage", base64Url);
+        insertHtmlAtSelection(
+          `<img src="${base64Url}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;" /><p><br></p>`,
+        );
       }
     };
     reader.readAsDataURL(file);
@@ -476,7 +659,9 @@ export default function RichTextEditor({
       "https://",
     );
     if (url && url !== "https://") {
-      executeCommand("insertImage", url);
+      insertHtmlAtSelection(
+        `<img src="${url}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;" /><p><br></p>`,
+      );
     }
   };
 
@@ -489,7 +674,26 @@ export default function RichTextEditor({
       formattedUrl = "https://" + formattedUrl;
     }
 
-    executeCommand("createLink", formattedUrl);
+    const editor = editorRef.current;
+    if (editor) {
+      editor.focus();
+      if (
+        savedRangeRef.current &&
+        editor.contains(savedRangeRef.current.commonAncestorContainer)
+      ) {
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(savedRangeRef.current);
+      }
+    }
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed && editor && editor.contains(sel.anchorNode)) {
+      document.execCommand("createLink", false, formattedUrl);
+      handleInput();
+    } else {
+      const linkHtml = `<a href="${formattedUrl}" target="_blank" rel="noopener noreferrer">${formattedUrl}</a>&nbsp;`;
+      insertHtmlAtSelection(linkHtml);
+    }
     setLinkUrl("");
     setShowLinkModal(false);
   };
@@ -518,7 +722,7 @@ export default function RichTextEditor({
     }
     tableHtml += `</tbody></table><p><br></p>`;
 
-    executeCommand("insertHTML", tableHtml);
+    insertHtmlAtSelection(tableHtml);
     setShowTableModal(false);
   };
 
@@ -811,7 +1015,10 @@ export default function RichTextEditor({
           type="button"
           className="btn-toolbar"
           title={t("insertTable") || "إدراج جدول"}
-          onClick={() => setShowTableModal(true)}
+          onClick={() => {
+            saveSelection();
+            setShowTableModal(true);
+          }}
           disabled={isCodeView}
           style={btnStyle}
         >
@@ -822,7 +1029,10 @@ export default function RichTextEditor({
           type="button"
           className="btn-toolbar"
           title={t("insertLink") || "إدراج رابط"}
-          onClick={() => setShowLinkModal(true)}
+          onClick={() => {
+            saveSelection();
+            setShowLinkModal(true);
+          }}
           disabled={isCodeView}
           style={btnStyle}
         >
@@ -855,8 +1065,14 @@ export default function RichTextEditor({
           <button
             type="button"
             className="btn-toolbar"
-            title={isRTL ? "اختيار قالب جاهز" : "Select Template"}
-            onClick={() => setShowTemplatesModal(true)}
+            title={
+              t("chooseTemplate") ||
+              (isRTL ? "اختيار قالب جاهز" : "Select Template")
+            }
+            onClick={() => {
+              saveSelection();
+              setShowTemplatesModal(true);
+            }}
             disabled={isCodeView}
             style={{
               ...btnStyle,
@@ -871,7 +1087,9 @@ export default function RichTextEditor({
             }}
           >
             <span>📄</span>
-            <span>{isRTL ? "قوالب جاهزة" : "Templates"}</span>
+            <span>
+              {t("readyTemplates") || (isRTL ? "قوالب جاهزة" : "Templates")}
+            </span>
           </button>
         )}
 
@@ -879,8 +1097,14 @@ export default function RichTextEditor({
           <button
             type="button"
             className="btn-toolbar"
-            title={isRTL ? "إدراج كلمات مفتاحية" : "Insert Keywords"}
-            onClick={() => setShowKeywordsModal(true)}
+            title={
+              t("workspaceKeywordsTitle") ||
+              (isRTL ? "إدراج كلمات مفتاحية" : "Insert Keywords")
+            }
+            onClick={() => {
+              saveSelection();
+              setShowKeywordsModal(true);
+            }}
             disabled={isCodeView}
             style={{
               ...btnStyle,
@@ -895,7 +1119,9 @@ export default function RichTextEditor({
             }}
           >
             <span>🏷️</span>
-            <span>{isRTL ? "كلمات مفتاحية" : "Keywords"}</span>
+            <span>
+              {t("keywords") || (isRTL ? "كلمات مفتاحية" : "Keywords")}
+            </span>
           </button>
         )}
 
@@ -903,7 +1129,9 @@ export default function RichTextEditor({
           <button
             type="button"
             className="btn-toolbar"
-            title={isRTL ? "طباعة المحتوى" : "Print Content"}
+            title={
+              t("printContent") || (isRTL ? "طباعة المحتوى" : "Print Content")
+            }
             onClick={handlePrint}
             style={{
               ...btnStyle,
@@ -948,6 +1176,7 @@ export default function RichTextEditor({
       {/* Editor Main Content Area */}
       {isCodeView ? (
         <textarea
+          ref={textareaRef}
           className="form-textarea"
           value={htmlContent}
           onChange={handleCodeChange}
@@ -970,9 +1199,25 @@ export default function RichTextEditor({
         <div
           ref={editorRef}
           contentEditable={!disabled}
+          suppressContentEditableWarning={true}
           onInput={handleInput}
-          onBlur={handleInput}
+          onBlur={() => {
+            handleInput();
+            saveSelection();
+          }}
+          onFocus={saveSelection}
+          onKeyUp={saveSelection}
+          onMouseUp={saveSelection}
+          onTouchEnd={saveSelection}
+          onSelect={saveSelection}
+          onClick={(e) => {
+            if (e.target === editorRef.current && !disabled) {
+              editorRef.current.focus();
+            }
+            saveSelection();
+          }}
           data-placeholder={placeholder}
+          className="rich-text-editor-content"
           style={{
             minHeight,
             padding: 16,
@@ -980,8 +1225,11 @@ export default function RichTextEditor({
             overflowY: "auto",
             lineHeight: 1.7,
             color: "var(--heading, #0f172a)",
+            cursor: disabled ? "default" : "text",
+            caretColor: "var(--heading, #0f172a)",
+            userSelect: "text",
+            WebkitUserSelect: "text",
           }}
-          dangerouslySetInnerHTML={{ __html: value || "" }}
         />
       )}
 
@@ -1002,6 +1250,7 @@ export default function RichTextEditor({
             }}
           >
             <form
+              dir={isRTL ? "rtl" : "ltr"}
               onSubmit={handleInsertTable}
               style={{
                 background: "var(--surface)",
@@ -1100,6 +1349,7 @@ export default function RichTextEditor({
             }}
           >
             <form
+              dir={isRTL ? "rtl" : "ltr"}
               onSubmit={handleInsertLink}
               style={{
                 background: "var(--surface)",
@@ -1175,6 +1425,7 @@ export default function RichTextEditor({
             }}
           >
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               style={{
                 background: "var(--surface)",
                 color: "var(--heading)",
@@ -1200,11 +1451,13 @@ export default function RichTextEditor({
                 }}
               >
                 <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>
-                  {isRTL ? "📄 اختيار قالب جاهز" : "📄 Choose a Template"}
+                  {t("chooseTemplateHeading") ||
+                    (isRTL ? "📄 اختيار قالب جاهز" : "📄 Choose a Template")}
                 </h4>
                 <button
                   type="button"
                   onClick={() => setShowTemplatesModal(false)}
+                  aria-label={t("close") || (isRTL ? "إغلاق" : "Close")}
                   style={{
                     background: "transparent",
                     border: "none",
@@ -1224,9 +1477,10 @@ export default function RichTextEditor({
                   color: "var(--text-secondary)",
                 }}
               >
-                {isRTL
-                  ? "اختر قالباً لبدء كتابة التقرير أو الملخص، أو يمكنك البدء بمستند فارغ."
-                  : "Select a template to start drafting, or choose to start with a blank document."}
+                {t("chooseTemplateDesc") ||
+                  (isRTL
+                    ? "اختر قالباً لبدء كتابة التقرير أو الملخص، أو يمكنك البدء بمستند فارغ."
+                    : "Select a template to start drafting, or choose to start with a blank document.")}
               </p>
 
               <div
@@ -1248,7 +1502,10 @@ export default function RichTextEditor({
                       color: "var(--text-secondary)",
                     }}
                   >
-                    {isRTL ? "جاري تحميل القوالب..." : "Loading templates..."}
+                    {t("loadingTemplates") ||
+                      (isRTL
+                        ? "جاري تحميل القوالب..."
+                        : "Loading templates...")}
                   </p>
                 ) : templates.length === 0 ? (
                   <div
@@ -1259,9 +1516,10 @@ export default function RichTextEditor({
                     }}
                   >
                     <p style={{ margin: 0, fontWeight: 700 }}>
-                      {isRTL
-                        ? "مفيش قوالب محفوظة لسه"
-                        : "No templates saved yet"}
+                      {t("noSavedTemplates") ||
+                        (isRTL
+                          ? "لا توجد قوالب محفوظة بعد"
+                          : "No templates saved yet")}
                     </p>
                   </div>
                 ) : (
@@ -1312,7 +1570,8 @@ export default function RichTextEditor({
                                 color: "#0f766e",
                               }}
                             >
-                              {isRTL ? "افتراضي" : "Default"}
+                              {t("defaultBadge") ||
+                                (isRTL ? "افتراضي" : "Default")}
                             </span>
                           )}
                         </div>
@@ -1326,7 +1585,8 @@ export default function RichTextEditor({
                             borderRadius: 8,
                           }}
                         >
-                          {isRTL ? "تطبيق القالب" : "Apply"}
+                          {t("applyTemplate") ||
+                            (isRTL ? "تطبيق القالب" : "Apply")}
                         </button>
                       </div>
 
@@ -1361,11 +1621,13 @@ export default function RichTextEditor({
                   onClick={() => {
                     if (
                       window.confirm(
-                        isRTL
-                          ? "هل تريد بدء مستند فارغ ومسح المحتوى الحالي؟"
-                          : "Start blank and clear current content?",
+                        t("confirmClearContent") ||
+                          (isRTL
+                            ? "هل تريد بدء مستند فارغ ومسح المحتوى الحالي؟"
+                            : "Start blank and clear current content?"),
                       )
                     ) {
+                      internalUpdateRef.current = true;
                       setHtmlContent("");
                       if (editorRef.current) editorRef.current.innerHTML = "";
                       if (onChange) onChange("");
@@ -1374,7 +1636,8 @@ export default function RichTextEditor({
                   }}
                   style={{ fontSize: "0.84rem" }}
                 >
-                  {isRTL ? "بدء مستند فارغ" : "Start Blank"}
+                  {t("startBlank") ||
+                    (isRTL ? "بدء مستند فارغ" : "Start Blank")}
                 </button>
                 <button
                   type="button"
@@ -1382,7 +1645,7 @@ export default function RichTextEditor({
                   onClick={() => setShowTemplatesModal(false)}
                   style={{ fontSize: "0.84rem" }}
                 >
-                  {t("cancel") || "إلغاء"}
+                  {t("cancel") || (isRTL ? "إلغاء" : "Cancel")}
                 </button>
               </div>
             </div>
@@ -1407,6 +1670,7 @@ export default function RichTextEditor({
             }}
           >
             <div
+              dir={isRTL ? "rtl" : "ltr"}
               style={{
                 background: "var(--surface)",
                 color: "var(--heading)",
@@ -1443,14 +1707,16 @@ export default function RichTextEditor({
                 >
                   <span>🏷️</span>
                   <span>
-                    {isRTL
-                      ? "الكلمات المفتاحية والمصطلحات"
-                      : "Workspace Keywords"}
+                    {t("workspaceKeywordsTitle") ||
+                      (isRTL
+                        ? "الكلمات المفتاحية والمصطلحات"
+                        : "Workspace Keywords")}
                   </span>
                 </h4>
                 <button
                   type="button"
                   onClick={() => setShowKeywordsModal(false)}
+                  aria-label={t("close") || (isRTL ? "إغلاق" : "Close")}
                   style={{
                     background: "transparent",
                     border: "none",
@@ -1469,7 +1735,10 @@ export default function RichTextEditor({
                   type="text"
                   className="form-input"
                   placeholder={
-                    isRTL ? "بحث في الكلمات المفتاحية..." : "Search keywords..."
+                    t("searchKeywords") ||
+                    (isRTL
+                      ? "بحث في الكلمات المفتاحية..."
+                      : "Search keywords...")
                   }
                   value={keywordSearch}
                   onChange={(e) => setKeywordSearch(e.target.value)}
@@ -1487,12 +1756,9 @@ export default function RichTextEditor({
                   }}
                 >
                   {showNewKeywordForm
-                    ? isRTL
-                      ? "إلغاء الإضافة"
-                      : "Cancel"
-                    : isRTL
-                      ? "+ إضافة كلمة جديدة"
-                      : "+ Add Keyword"}
+                    ? t("cancelAdd") || (isRTL ? "إلغاء الإضافة" : "Cancel")
+                    : t("addNewKeyword") ||
+                      (isRTL ? "+ إضافة كلمة جديدة" : "+ Add Keyword")}
                 </button>
               </div>
 
@@ -1518,17 +1784,19 @@ export default function RichTextEditor({
                       color: "var(--heading)",
                     }}
                   >
-                    {isRTL
-                      ? "إضافة مصطلح / كلمة مفتاحية جديدة لنوع مساحة العمل"
-                      : "Add new keyword for this workspace type"}
+                    {t("addNewKeywordHeading") ||
+                      (isRTL
+                        ? "إضافة مصطلح / كلمة مفتاحية جديدة لنوع مساحة العمل"
+                        : "Add new keyword for this workspace type")}
                   </div>
                   <input
                     type="text"
                     className="form-input"
                     placeholder={
-                      isRTL
+                      t("keywordTitlePlaceholder") ||
+                      (isRTL
                         ? "عنوان الكلمة المفتاحية (مثل: Paracetamol 500mg)"
-                        : "Keyword Title"
+                        : "Keyword Title")
                     }
                     value={newKwTitle}
                     onChange={(e) => setNewKwTitle(e.target.value)}
@@ -1539,9 +1807,10 @@ export default function RichTextEditor({
                     className="form-textarea"
                     rows={2}
                     placeholder={
-                      isRTL
+                      t("keywordDescPlaceholder") ||
+                      (isRTL
                         ? "الوصف والجرعة أو التعليمات (اختياري)..."
-                        : "Description / instructions (optional)..."
+                        : "Description / instructions (optional)...")
                     }
                     value={newKwDescription}
                     onChange={(e) => setNewKwDescription(e.target.value)}
@@ -1553,29 +1822,81 @@ export default function RichTextEditor({
                       alignItems: "center",
                       justifyContent: "space-between",
                       gap: 10,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setNewKwImage(e.target.files?.[0] || null)
-                      }
-                      style={{ fontSize: "0.78rem" }}
-                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        flex: 1,
+                        minWidth: 160,
+                      }}
+                    >
+                      <label
+                        htmlFor="new-kw-image-upload"
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          cursor: "pointer",
+                          padding: "5px 12px",
+                          fontSize: "0.8rem",
+                          borderRadius: 8,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        <span>📷</span>
+                        <span>
+                          {t("chooseImage") ||
+                            (isRTL ? "اختيار صورة" : "Choose Image")}
+                        </span>
+                      </label>
+                      <input
+                        id="new-kw-image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setNewKwImage(e.target.files?.[0] || null)
+                        }
+                        style={{ display: "none" }}
+                      />
+                      <span
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "var(--text-secondary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                        title={newKwImage ? newKwImage.name : ""}
+                      >
+                        {newKwImage
+                          ? newKwImage.name
+                          : t("noImageChosen") ||
+                            (isRTL
+                              ? "لم يتم اختيار صورة (اختياري)"
+                              : "No file chosen (optional)")}
+                      </span>
+                    </div>
+
                     <button
                       type="submit"
                       className="btn btn-primary btn-sm"
                       disabled={creatingKeyword || !newKwTitle.trim()}
-                      style={{ padding: "6px 16px", borderRadius: 8 }}
+                      style={{
+                        padding: "6px 16px",
+                        borderRadius: 8,
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       {creatingKeyword
-                        ? isRTL
-                          ? "جاري الحفظ..."
-                          : "Saving..."
-                        : isRTL
-                          ? "حفظ الكلمة"
-                          : "Save Keyword"}
+                        ? t("savingKeyword") ||
+                          (isRTL ? "جاري الحفظ..." : "Saving...")
+                        : t("saveKeyword") ||
+                          (isRTL ? "حفظ الكلمة" : "Save Keyword")}
                     </button>
                   </div>
                 </form>
@@ -1600,9 +1921,10 @@ export default function RichTextEditor({
                       color: "var(--text-secondary)",
                     }}
                   >
-                    {isRTL
-                      ? "جاري تحميل الكلمات المفتاحية..."
-                      : "Loading keywords..."}
+                    {t("loadingKeywords") ||
+                      (isRTL
+                        ? "جاري تحميل الكلمات المفتاحية..."
+                        : "Loading keywords...")}
                   </p>
                 ) : keywords.filter((kw) => {
                     if (!keywordSearch.trim()) return true;
@@ -1621,14 +1943,16 @@ export default function RichTextEditor({
                     }}
                   >
                     <p style={{ margin: 0, fontWeight: 700 }}>
-                      {isRTL
-                        ? "لم يتم العثور على كلمات مطابقة"
-                        : "No matching keywords found"}
+                      {t("noMatchingKeywords") ||
+                        (isRTL
+                          ? "لم يتم العثور على كلمات مطابقة"
+                          : "No matching keywords found")}
                     </p>
                     <p style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
-                      {isRTL
-                        ? "يمكنك إضافة كلمة مفتاحية جديدة باستخدام الزر أعلاه."
-                        : "You can add a new keyword using the button above."}
+                      {t("addKeywordHint") ||
+                        (isRTL
+                          ? "يمكنك إضافة كلمة مفتاحية جديدة باستخدام الزر أعلاه."
+                          : "You can add a new keyword using the button above.")}
                     </p>
                   </div>
                 ) : (
@@ -1750,7 +2074,10 @@ export default function RichTextEditor({
                                     }))
                                   }
                                 />
-                                <span>{isRTL ? "العنوان" : "Title"}</span>
+                                <span>
+                                  {t("keywordTitleOption") ||
+                                    (isRTL ? "العنوان" : "Title")}
+                                </span>
                               </label>
 
                               {kw.description && (
@@ -1775,7 +2102,10 @@ export default function RichTextEditor({
                                       }))
                                     }
                                   />
-                                  <span>{isRTL ? "الوصف" : "Desc"}</span>
+                                  <span>
+                                    {t("keywordDescOption") ||
+                                      (isRTL ? "الوصف" : "Desc")}
+                                  </span>
                                 </label>
                               )}
 
@@ -1801,7 +2131,10 @@ export default function RichTextEditor({
                                       }))
                                     }
                                   />
-                                  <span>{isRTL ? "الصورة" : "Image"}</span>
+                                  <span>
+                                    {t("keywordImageOption") ||
+                                      (isRTL ? "الصورة" : "Image")}
+                                  </span>
                                 </label>
                               )}
                             </div>
@@ -1817,7 +2150,8 @@ export default function RichTextEditor({
                                 fontWeight: 800,
                               }}
                             >
-                              {isRTL ? "إدراج" : "Insert"}
+                              {t("insertKeyword") ||
+                                (isRTL ? "إدراج" : "Insert")}
                             </button>
                           </div>
                         </div>

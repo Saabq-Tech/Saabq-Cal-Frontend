@@ -6,33 +6,26 @@ import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import Icon from "../../../../components/common/Icon";
 import SearchableSelect from "../../../../components/common/SearchableSelect";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+import { getLimitInfo } from "../../../../utils/planLimits";
+import { PlanLimitBanner } from "../../../../components/common/PlanLimitAlert";
 
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const { t, lang } = useLanguage();
   const toast = useToast();
   const { user } = useAuth();
-  const workspace = user?.workspace;
+  const limitInfo = getLimitInfo(user, "appointments");
 
-  // Dynamic workspace customer label
-  const getLabel = (type = "singular") => {
-    const field =
-      type === "singular" ? "customer_label_singular" : "customer_label_plural";
-    if (workspace?.[field]) {
-      if (typeof workspace[field] === "object") {
-        return (
-          workspace[field][lang] ||
-          workspace[field].ar ||
-          workspace[field].en ||
-          (type === "singular" ? "عميل" : "العملاء")
-        );
-      }
-      return workspace[field];
-    }
-    return type === "singular"
-      ? t("customerSingle") || "عميل"
-      : t("navCustomers") || "العملاء";
-  };
-  const custSingular = getLabel("singular");
+  const {
+    isCustom,
+    customerSingular: custSingular,
+    createBookingTitle,
+    existingCustomerTab,
+    newCustomerTab,
+    selectCustomerPrompt,
+    searchCustomerPrompt,
+    customerNameLabel,
+  } = useCustomerLabel();
 
   const [customerMode, setCustomerMode] = useState("existing"); // 'existing' or 'new'
 
@@ -185,15 +178,23 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
 
     if (customerMode === "existing" && !customerId) {
       setErrorMessage(
-        t("selectCustomerPrompt") || `يرجى اختيار ${custSingular}`,
+        isCustom
+          ? lang === "ar"
+            ? `يرجى اختيار ${custSingular}`
+            : `Please select ${custSingular}`
+          : t("selectCustomerPrompt") || "يرجى اختيار العميل",
       );
       return;
     }
 
     if (customerMode === "new" && (!customerName || !customerEmail)) {
       setErrorMessage(
-        t("enterCustomerDetails") ||
-          `يرجى إدخال اسم ${custSingular} والبريد الإلكتروني`,
+        isCustom
+          ? lang === "ar"
+            ? `يرجى إدخال اسم ${custSingular} والبريد الإلكتروني`
+            : `Please enter ${custSingular} name and email`
+          : t("enterCustomerDetails") ||
+              "من فضلك اكتب اسم العميل والبريد الإلكتروني",
       );
       return;
     }
@@ -220,7 +221,13 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
       setSubmitting(true);
       await client.post(endpoints.workspaceBookings, payload);
 
-      toast.success(t("bookingCreatedSuccess") || "تم حجز الموعد بنجاح!");
+      toast.success(
+        isCustom
+          ? lang === "ar"
+            ? `تم حجز الموعد لـ ${custSingular} بنجاح!`
+            : `Appointment booked for ${custSingular} successfully!`
+          : t("bookingCreatedSuccess") || "تم حجز الموعد للعميل بنجاح!",
+      );
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
@@ -282,10 +289,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               }}
             >
               <Icon name="calendar" size={20} />
-              <span>
-                {t("createBookingForClient") ||
-                  `حجز موعد جديد ل${custSingular}`}
-              </span>
+              <span>{createBookingTitle}</span>
             </h3>
           </div>
           <button
@@ -303,6 +307,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
             <Icon name="x" size={20} />
           </button>
         </div>
+
+        <PlanLimitBanner type="appointments" limitInfo={limitInfo} />
 
         {/* Error Banner */}
         {errorMessage && (
@@ -368,7 +374,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
               className="form-label"
               style={{ fontWeight: 700, fontSize: "0.86rem", marginBottom: 6 }}
             >
-              {t("customerHeader") || custSingular}{" "}
+              {isCustom ? custSingular : t("customerHeader") || custSingular}{" "}
               <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <div
@@ -416,9 +422,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="user" size={14} />
-                <span>
-                  {t("existingCustomerTab") || `${custSingular} مسجل`}
-                </span>
+                <span>{existingCustomerTab}</span>
               </button>
               <button
                 type="button"
@@ -453,9 +457,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                 }}
               >
                 <Icon name="plus" size={14} />
-                <span>
-                  {t("newCustomerTab") || `${custSingular} جديد (إنشاء سريع)`}
-                </span>
+                <span>{newCustomerTab}</span>
               </button>
             </div>
 
@@ -472,13 +474,8 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                       label: `${cName}${cEmail ? ` (${cEmail})` : ""}`,
                     };
                   })}
-                  placeholder={
-                    t("selectCustomerPrompt") || `اختر ${custSingular}...`
-                  }
-                  searchPlaceholder={
-                    t("searchCustomerPrompt") ||
-                    `بحث باسم ${custSingular} أو البريد...`
-                  }
+                  placeholder={selectCustomerPrompt}
+                  searchPlaceholder={searchCustomerPrompt}
                   disabled={loadingData}
                   error={Boolean(fieldErrors.customer_id)}
                 />
@@ -498,13 +495,13 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                       display: "block",
                     }}
                   >
-                    {t("customerName") || `اسم ${custSingular}`}{" "}
+                    {customerNameLabel}{" "}
                     <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder={t("customerName") || `اسم ${custSingular}`}
+                    placeholder={customerNameLabel}
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     required={customerMode === "new"}

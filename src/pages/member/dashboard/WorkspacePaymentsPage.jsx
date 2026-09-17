@@ -7,6 +7,7 @@ import client, { endpoints } from "../../../api/client";
 import SEO from "../../../components/ui/SEO";
 import Icon from "../../../components/common/Icon";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspacePaymentsPage() {
   useAuth();
@@ -214,291 +215,81 @@ export default function WorkspacePaymentsPage() {
   };
 
   return (
-    <div className="card responsive-card-container">
+    <div className="workspace-page-container">
       <SEO
         title={isRTL ? "سجل المدفوعات والمالية" : "Payments & Finance Log"}
         noindex
       />
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon
-              name="credit-card"
-              size={22}
-              style={{ color: "var(--primary)" }}
-            />
-            {isRTL
-              ? "سجل المدفوعات والتحويلات المالية"
-              : "Payments & Finance Log"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {isRTL
-              ? "متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي"
-              : "Monitor all payment transactions, transfer receipts, and verification statuses"}
-          </p>
-        </div>
-      </div>
-
-      {/* Workspace Safe / Wallet Summary Cards */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        {/* Net Safe Balance */}
-        <div
-          style={{
-            flex: "1 1 220px",
-            background:
-              "linear-gradient(135deg, rgba(13, 104, 92, 0.12) 0%, rgba(13, 104, 92, 0.04) 100%)",
-            border: "1px solid rgba(13, 104, 92, 0.25)",
-            borderRadius: 16,
-            padding: "18px 20px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{ fontSize: "0.85rem", fontWeight: 700, color: "#0d685c" }}
-            >
-              {t("netBalanceLabel")}
-            </span>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                background: "rgba(13, 104, 92, 0.15)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#0d685c",
-              }}
-            >
-              <Icon name="credit-card" size={18} />
-            </div>
-          </div>
-          <div
-            style={{
-              fontSize: "1.45rem",
-              fontWeight: 900,
-              color: "var(--heading)",
-            }}
-          >
-            {walletLoading ? (
-              <SkeletonRect height={28} width={120} />
-            ) : (
-              `${walletData?.net_balance ?? 0} ${walletData?.currency || "SAR"}`
-            )}
-          </div>
-        </div>
-
-        {/* Total Income (Credit) */}
-        <div
-          style={{
-            flex: "1 1 220px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: 16,
-            padding: "18px 20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "var(--badge-success-color)",
-              }}
-            >
-              {t("totalCreditLabel")}
-            </span>
-            <span
-              style={{
-                fontSize: "0.78rem",
-                fontWeight: 800,
-                color: "var(--badge-success-color)",
-                background: "var(--badge-success-bg)",
-                border: "1px solid var(--badge-success-border)",
-                padding: "3px 8px",
-                borderRadius: 12,
-              }}
-            >
-              {t("creditBadge")}
-            </span>
-          </div>
-          <div
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: 800,
-              color: "var(--badge-success-color)",
-            }}
-          >
-            {walletLoading ? (
-              <SkeletonRect height={28} width={100} />
-            ) : (
-              `${walletData?.total_credit ?? 0} ${walletData?.currency || "SAR"}`
-            )}
-          </div>
-        </div>
-
-        {/* Total Expenses & Refunds (Debit) */}
-        <div
-          style={{
-            flex: "1 1 220px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: 16,
-            padding: "18px 20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "var(--badge-danger-color)",
-              }}
-            >
-              {t("totalDebitLabel")}
-            </span>
-            <span
-              style={{
-                fontSize: "0.78rem",
-                fontWeight: 800,
-                color: "var(--badge-danger-color)",
-                background: "var(--badge-danger-bg)",
-                border: "1px solid var(--badge-danger-border)",
-                padding: "3px 8px",
-                borderRadius: 12,
-              }}
-            >
-              {t("debitBadge")}
-            </span>
-          </div>
-          <div
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: 800,
-              color: "var(--badge-danger-color)",
-            }}
-          >
-            {walletLoading ? (
-              <SkeletonRect height={28} width={100} />
-            ) : (
-              `${walletData?.total_debit ?? 0} ${walletData?.currency || "SAR"}`
-            )}
-          </div>
-        </div>
-
-        {/* Pending Verification */}
-        <div
-          style={{
-            flex: "1 1 220px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: 16,
-            padding: "18px 20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                color: "var(--badge-warning-color)",
-              }}
-            >
-              {t("pendingVerificationLabel")}
-            </span>
-            <span
-              style={{
-                fontSize: "0.78rem",
-                fontWeight: 800,
-                color: "var(--badge-warning-color)",
-                background: "var(--badge-warning-bg)",
-                border: "1px solid var(--badge-warning-border)",
-                padding: "3px 8px",
-                borderRadius: 12,
-              }}
-            >
-              {walletData?.pending_count ?? 0}
-            </span>
-          </div>
-          <div
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: 800,
-              color: "var(--badge-warning-color)",
-            }}
-          >
-            {walletLoading ? (
-              <SkeletonRect height={28} width={100} />
-            ) : (
-              `${walletData?.pending_balance ?? 0} ${walletData?.currency || "SAR"}`
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Top Standard Header with Wallet Stats */}
+      <WorkspacePageHeader
+        title={
+          isRTL
+            ? "سجل المدفوعات والتحويلات المالية"
+            : "Payments & Financial Hub"
+        }
+        subtitle={
+          isRTL
+            ? "متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي وإجمالي المحفظة."
+            : "Monitor all payment transactions, transfer receipts, wallet balances, and verifications."
+        }
+        icon="credit-card"
+        stats={[
+          {
+            id: "net_balance",
+            label:
+              t("netBalanceLabel") ||
+              (isRTL ? "صافي رصيد الخزينة" : "Net Balance"),
+            value: walletLoading
+              ? "..."
+              : `${walletData?.net_balance ?? 0} ${walletData?.currency || "SAR"}`,
+            icon: "credit-card",
+            iconBg: "rgba(13, 104, 92, 0.15)",
+            iconColor: "#0d685c",
+            valueColor: "#0d685c",
+          },
+          {
+            id: "total_credit",
+            label:
+              t("totalCreditLabel") ||
+              (isRTL ? "إجمالي الإيرادات (دائن)" : "Total Income"),
+            value: walletLoading
+              ? "..."
+              : `${walletData?.total_credit ?? 0} ${walletData?.currency || "SAR"}`,
+            icon: "arrow-down-left",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+            valueColor: "#10b981",
+          },
+          {
+            id: "total_debit",
+            label:
+              t("totalDebitLabel") ||
+              (isRTL ? "إجمالي المصروفات (مدين)" : "Total Expenses"),
+            value: walletLoading
+              ? "..."
+              : `${walletData?.total_debit ?? 0} ${walletData?.currency || "SAR"}`,
+            icon: "arrow-up-right",
+            iconBg: "rgba(239, 68, 68, 0.12)",
+            iconColor: "#ef4444",
+            valueColor: "#ef4444",
+          },
+          {
+            id: "pending_verification",
+            label:
+              t("pendingVerificationLabel") ||
+              (isRTL ? "بانتظار التحقق والمراجعة" : "Pending Verification"),
+            value: walletLoading ? "..." : `${walletData?.pending_count ?? 0}`,
+            suffix: walletData?.pending_amount
+              ? `(${walletData.pending_amount} ${walletData?.currency || "SAR"})`
+              : null,
+            icon: "clock",
+            iconBg: "rgba(245, 158, 11, 0.15)",
+            iconColor: "#f59e0b",
+            valueColor: "#f59e0b",
+          },
+        ]}
+      />
 
       {/* Responsive Filters Bar */}
       <div className="responsive-filters-bar">

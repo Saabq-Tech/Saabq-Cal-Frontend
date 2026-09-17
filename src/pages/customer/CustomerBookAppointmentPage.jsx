@@ -14,7 +14,10 @@ import LazyImage from "../../components/ui/LazyImage";
 import { BookingFormSkeleton } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
-import { applyWorkspaceBranding } from "../../utils/theme";
+import {
+  applyWorkspaceBranding,
+  resetWorkspaceBranding,
+} from "../../utils/theme";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 const MONTH_NAMES_AR = [
@@ -518,22 +521,9 @@ export default function CustomerBookAppointmentPage() {
   // Apply workspace custom colors to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      applyWorkspaceBranding(
-        workspace.primary_color,
-        workspace.secondary_color,
-        workspace.hover_color,
-      );
+      applyWorkspaceBranding(workspace);
       return () => {
-        const storedUser = localStorage.getItem("saabq_user");
-        let prevWs = null;
-        try {
-          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
-        } catch {}
-        applyWorkspaceBranding(
-          prevWs?.primary_color || null,
-          prevWs?.secondary_color || null,
-          prevWs?.hover_color || null,
-        );
+        resetWorkspaceBranding();
       };
     }
   }, [workspace]);
@@ -617,17 +607,25 @@ export default function CustomerBookAppointmentPage() {
     >
       <SEO
         title={
-          isRTL
-            ? `حجز موعد في ${workspace.name}`
-            : `Book Appointment at ${workspace.name}`
+          selectedService
+            ? isRTL
+              ? `احجز ${getTranslatableText(selectedService.name)} لدى ${getTranslatableText(workspace.name)}`
+              : `Book ${getTranslatableText(selectedService.name)} at ${getTranslatableText(workspace.name)}`
+            : isRTL
+              ? `حجز موعد في ${getTranslatableText(workspace.name)}`
+              : `Book Appointment at ${getTranslatableText(workspace.name)}`
         }
         description={
-          workspace.booking_short_intro ||
+          (selectedService &&
+            getTranslatableText(
+              selectedService.short_description || selectedService.description,
+            )) ||
+          getTranslatableText(workspace.booking_short_intro) ||
+          getTranslatableText(workspace.description) ||
           (isRTL ? "احجز موعدك بسهولة" : "Book your appointment easily")
         }
-        noindex
-        canonical={`/${workspace.slug}${selectedService?.slug ? `/${selectedService.slug}` : ""}`}
-        ogImage={bannerUrl || workspace.logo_url}
+        canonical={`/${workspace.slug}${selectedService?.slug ? `/${selectedService.slug}` : "/book"}`}
+        ogImage={bannerUrl || workspace.cover_url || workspace.logo_url}
       />
       {/* Header Banner */}
       <div

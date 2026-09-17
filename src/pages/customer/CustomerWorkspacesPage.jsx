@@ -340,10 +340,12 @@ export default function WorkspacesPage() {
         title={isRTL ? "استكشاف مساحات العمل" : "Explore Workspaces"}
         description={
           isRTL
-            ? "تصفح واستكشف مساحات العمل المتاحة لحجز المواعيد والخدمات على منصة تقويم سابق."
-            : "Browse and explore available workspaces for booking appointments and services on Saabq Cal."
+            ? "تصفح واستكشف مساحات العمل والعيادات والمراكز المتاحة لحجز المواعيد والخدمات بسهولة على منصة تقويم سابق."
+            : "Browse and explore available workspaces, clinics, and service centers for booking appointments on Saabq Cal."
         }
         canonical="/workspaces"
+        ogType="website"
+        ogImage="/logo.png"
         jsonLd={jsonLd}
       />
 

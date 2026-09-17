@@ -10,6 +10,8 @@ import client, { endpoints } from "../../../api/client";
 import PermissionCheck from "../../../components/PermissionCheck";
 import TelegramActionBuilder from "../../../components/dashboard/TelegramActionBuilder";
 import { isApiIntegrationEnabled } from "../../../utils/capabilities";
+import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 // Helper function to safely render strings or localized objects
 function _getTranslatableText(textObj, currentLang = "ar") {
@@ -103,7 +105,8 @@ export default function IntegrationsSettingsPage() {
     testEmailIntegration,
   } = useAuth();
 
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -826,9 +829,12 @@ export default function IntegrationsSettingsPage() {
       title: "Google Meet",
       category: "google",
       icon: <Icon name="google-meet" size={28} />,
-      description:
-        t("googleMeetDesc") ||
-        "توليد روابط اجتماعات افتراضية فورية لكل موعد يتم تأكيده مع العملاء.",
+      description: isCustom
+        ? isRTL
+          ? `توليد روابط اجتماعات افتراضية فورية لكل موعد يتم تأكيده مع ${customerPlural}.`
+          : `Generate instant meeting links for every confirmed appointment with ${customerPlural.toLowerCase()}.`
+        : t("googleMeetDesc") ||
+          "توليد روابط اجتماعات افتراضية فورية لكل موعد يتم تأكيده مع العملاء.",
       isConnected: !!googleIntegration && autoMeet,
       subtitle: autoMeet
         ? t("autoCreateEnabled") || "الإنشاء التلقائي مفعّل"
@@ -912,6 +918,8 @@ export default function IntegrationsSettingsPage() {
     return item.category === activeTab;
   });
 
+  const connectedCount = integrationsList.filter((i) => i.isConnected).length;
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
@@ -921,60 +929,37 @@ export default function IntegrationsSettingsPage() {
         title={t("applicationsTitle") || "Applications & Integrations"}
         noindex
       />
-      {/* Header & App Directory Banner */}
-      <div
-        className="card"
-        style={{ background: "var(--surface-gradient, var(--bg-card))" }}
-      >
-        <div
-          className="card-header"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 16,
-          }}
-        >
-          <div>
-            <h2
-              className="card-title"
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: 800,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <Icon name="custom-1ebf3dba" size={20} />
-              {t("appDirectoryTitle") || "دليل التطبيقات والتكاملات"}
-            </h2>
-            <p
-              className="card-subtitle"
-              style={{ fontSize: "0.88rem", marginTop: 4 }}
-            >
-              {t("appDirectoryDesc") ||
-                "ربط وإدارة الخدمات الخارجية مثل تقويم جوجل، التنبيهات، والـ Webhooks بضغطة زر"}
-            </p>
-          </div>
 
+      {/* Unified Standard Header */}
+      <WorkspacePageHeader
+        title={t("appDirectoryTitle") || "دليل التطبيقات والتكاملات"}
+        subtitle={
+          t("appDirectoryDesc") ||
+          "ربط وإدارة الخدمات الخارجية مثل تقويم جوجل، التنبيهات، والـ Webhooks بضغطة زر."
+        }
+        icon="share-2"
+        actions={
           <span
             className="profile-badge verified"
             style={{
-              fontSize: "0.82rem",
-              padding: "6px 14px",
+              fontSize: "0.85rem",
+              padding: "7px 16px",
               display: "inline-flex",
               alignItems: "center",
-              gap: 4,
+              gap: 6,
+              borderRadius: "var(--radius-md, 10px)",
             }}
           >
-            <Icon name="zap" size={12} />
-            {integrationsList.filter((i) => i.isConnected).length}{" "}
-            {t("connectedServicesCount") || "خدمات متصلة"}
+            <Icon name="zap" size={14} />
+            <span>
+              {connectedCount} {t("connectedServicesCount") || "خدمات متصلة"}
+            </span>
           </span>
-        </div>
+        }
+      />
 
+      {/* Integrations Main Container */}
+      <div className="workspace-page-container">
         {/* Filter Tabs */}
         <div
           style={{
@@ -1517,8 +1502,12 @@ export default function IntegrationsSettingsPage() {
                       marginTop: 2,
                     }}
                   >
-                    {t("autoCreateMeetLinksSub") ||
-                      "سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية للعميل."}
+                    {isCustom
+                      ? isRTL
+                        ? `سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية لـ ${customerSingular}.`
+                        : `A direct link will be generated and attached to confirmation messages for the ${customerSingular.toLowerCase()}.`
+                      : t("autoCreateMeetLinksSub") ||
+                        "سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية للعميل."}
                   </div>
                 </div>
                 <ToggleSwitch
@@ -1831,12 +1820,20 @@ export default function IntegrationsSettingsPage() {
                   onChange={(e) => setSheetLanguage(e.target.value)}
                 >
                   <option value="ar">
-                    {t("sheetLangArOption") ||
-                      "العربية (اسم العميل، الموعد، الخدمة)"}
+                    {isCustom
+                      ? isRTL
+                        ? `العربية (اسم ${customerSingular}، الموعد، الخدمة)`
+                        : `Arabic (${customerSingular} Name, Date, Service)`
+                      : t("sheetLangArOption") ||
+                        (isRTL
+                          ? "العربية (اسم العميل، الموعد، الخدمة)"
+                          : "Arabic (Customer Name, Date, Service)")}
                   </option>
                   <option value="en">
-                    {t("sheetLangEnOption") ||
-                      "English (Customer Name, Date, Service)"}
+                    {isCustom
+                      ? `English (${customerSingular} Name, Date, Service)`
+                      : t("sheetLangEnOption") ||
+                        "English (Customer Name, Date, Service)"}
                   </option>
                 </select>
               </div>

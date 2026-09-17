@@ -19,6 +19,7 @@ import BookingFormFieldsTab from "./workspace-settings/BookingFormFieldsTab";
 import PaymentReceiptsTab from "./workspace-settings/PaymentReceiptsTab";
 import NotificationTemplatesTab from "./workspace-settings/NotificationTemplatesTab";
 import WorkspaceTemplatesPage from "./WorkspaceTemplatesPage";
+import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceSettingsPage() {
   const { user, fetchProfile, updateWorkspaceState } = useAuth();
@@ -45,8 +46,9 @@ export default function WorkspaceSettingsPage() {
     email: "",
     phone: "",
     description: "",
-    customer_label_singular: "",
-    customer_label_plural: "",
+    customer_label_singular: { ar: "", en: "" },
+    customer_label_plural: { ar: "", en: "" },
+    customer_icon: "users",
     is_visible_in_explorer: true,
     slug: "",
     status: "active",
@@ -62,6 +64,17 @@ export default function WorkspaceSettingsPage() {
     primary_color: "#0a9099",
     secondary_color: "#166992",
     hover_color: "#44f2fe",
+    accent_color: "#2de2f2",
+    text_color_light: "",
+    heading_color_light: "",
+    background_color_light: "",
+    surface_color_light: "",
+    border_color_light: "",
+    text_color_dark: "",
+    heading_color_dark: "",
+    background_color_dark: "",
+    surface_color_dark: "",
+    border_color_dark: "",
   });
   const [timezoneForm, setTimezoneForm] = useState({
     timezone: "Asia/Riyadh",
@@ -151,11 +164,7 @@ export default function WorkspaceSettingsPage() {
         const data = settingsRes.data?.data;
         if (data) {
           setSettings(data);
-          applyWorkspaceBranding(
-            data.primary_color,
-            data.secondary_color,
-            data.hover_color,
-          );
+          applyWorkspaceBranding(data);
           setBasicForm({
             name:
               typeof data.name === "object" && data.name !== null
@@ -177,17 +186,22 @@ export default function WorkspaceSettingsPage() {
                   ""
                 : data.booking_short_intro || "",
             customer_label_singular:
-              typeof data.customer_label_singular === "object"
-                ? data.customer_label_singular?.ar ||
-                  data.customer_label_singular?.en ||
-                  ""
-                : data.customer_label_singular || "",
+              typeof data.customer_label_singular === "object" &&
+              data.customer_label_singular !== null
+                ? {
+                    ar: data.customer_label_singular.ar || "",
+                    en: data.customer_label_singular.en || "",
+                  }
+                : { ar: data.customer_label_singular || "", en: "" },
             customer_label_plural:
-              typeof data.customer_label_plural === "object"
-                ? data.customer_label_plural?.ar ||
-                  data.customer_label_plural?.en ||
-                  ""
-                : data.customer_label_plural || "",
+              typeof data.customer_label_plural === "object" &&
+              data.customer_label_plural !== null
+                ? {
+                    ar: data.customer_label_plural.ar || "",
+                    en: data.customer_label_plural.en || "",
+                  }
+                : { ar: data.customer_label_plural || "", en: "" },
+            customer_icon: data.customer_icon || "users",
             is_visible_in_explorer: data.is_visible_in_explorer !== false,
             slug: data.slug || "",
             status: data.status || "active",
@@ -204,6 +218,17 @@ export default function WorkspaceSettingsPage() {
             primary_color: data.primary_color || "#0a9099",
             secondary_color: data.secondary_color || "#166992",
             hover_color: data.hover_color || "#44f2fe",
+            accent_color: data.accent_color || "#2de2f2",
+            text_color_light: data.text_color_light || "",
+            heading_color_light: data.heading_color_light || "",
+            background_color_light: data.background_color_light || "",
+            surface_color_light: data.surface_color_light || "",
+            border_color_light: data.border_color_light || "",
+            text_color_dark: data.text_color_dark || "",
+            heading_color_dark: data.heading_color_dark || "",
+            background_color_dark: data.background_color_dark || "",
+            surface_color_dark: data.surface_color_dark || "",
+            border_color_dark: data.border_color_dark || "",
             gallery_urls: Array.isArray(data.gallery_urls)
               ? data.gallery_urls
               : [],
@@ -340,13 +365,7 @@ export default function WorkspaceSettingsPage() {
       if (fetchProfile) {
         await fetchProfile();
       }
-      if (data.primary_color || data.secondary_color || data.hover_color) {
-        applyWorkspaceBranding(
-          data.primary_color || settings?.primary_color,
-          data.secondary_color || settings?.secondary_color,
-          data.hover_color || settings?.hover_color,
-        );
-      }
+      applyWorkspaceBranding(data);
     } catch (err) {
       toast.error(err.response?.data?.message || "فشل حفظ الإعدادات");
     } finally {
@@ -387,8 +406,18 @@ export default function WorkspaceSettingsPage() {
   };
 
   return (
-    <div>
+    <div className="workspace-settings-page animate-fade-in">
       <SEO title={t("settings")} noindex />
+
+      {/* Top Unified Header */}
+      <WorkspacePageHeader
+        title={t("workspaceSettings") || "إعدادات مساحة العمل"}
+        subtitle={
+          t("workspaceSettingsSubtitle") ||
+          "تخصيص الهوية البصرية، المنطقة الزمنية، وسائل التواصل، ونموذج جمع بيانات الحجز."
+        }
+        icon="settings"
+      />
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}
       {subSettingsTab === "templates" ? (
@@ -398,8 +427,7 @@ export default function WorkspaceSettingsPage() {
       ) : (
         <div
           key={subSettingsTab}
-          className="card animate-tab-card"
-          style={{ padding: 24 }}
+          className="animate-tab-card workspace-page-container"
         >
           {loading ? (
             <TabSettingsSkeleton />

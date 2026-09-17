@@ -108,7 +108,7 @@ export default function WorkspaceRolesPage() {
 
   return (
     <CapabilityGate capabilityCode="TEAM_MEMBERS">
-      <div className="card" style={{ padding: 24 }}>
+      <div className="workspace-page-container">
         <SEO title={t("roles") || "أدوار مساحة العمل"} noindex />
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

@@ -6,6 +6,117 @@ import Icon from "../../../../components/common/Icon";
 import RichTextEditor from "../../../../components/common/RichTextEditor";
 import Flag from "../../../../components/common/Flag";
 
+const CUSTOMER_ICON_PRESETS = [
+  {
+    id: "users",
+    label_ar: "عملاء",
+    label_en: "Clients",
+    singular_ar: "عميل",
+    singular_en: "Client",
+    plural_ar: "عملاء",
+    plural_en: "Clients",
+  },
+  {
+    id: "stethoscope",
+    label_ar: "مرضى",
+    label_en: "Patients",
+    singular_ar: "مريض",
+    singular_en: "Patient",
+    plural_ar: "مرضى",
+    plural_en: "Patients",
+  },
+  {
+    id: "graduation-cap",
+    label_ar: "طلاب",
+    label_en: "Students",
+    singular_ar: "طالب",
+    singular_en: "Student",
+    plural_ar: "طلاب",
+    plural_en: "Students",
+  },
+  {
+    id: "briefcase",
+    label_ar: "موكلون",
+    label_en: "Clients",
+    singular_ar: "موكل",
+    singular_en: "Client",
+    plural_ar: "موكلون",
+    plural_en: "Clients",
+  },
+  {
+    id: "heart",
+    label_ar: "صحة",
+    label_en: "Health",
+    singular_ar: "مراجع",
+    singular_en: "Client",
+    plural_ar: "مراجعون",
+    plural_en: "Clients",
+  },
+  {
+    id: "activity",
+    label_ar: "أبطال",
+    label_en: "Fitness",
+    singular_ar: "بطل",
+    singular_en: "Champion",
+    plural_ar: "أبطال",
+    plural_en: "Champions",
+  },
+  {
+    id: "smile",
+    label_ar: "أطفال/أسنان",
+    label_en: "Smile",
+    singular_ar: "طفل / مراجع",
+    singular_en: "Patient",
+    plural_ar: "أطفال / مراجعون",
+    plural_en: "Patients",
+  },
+  {
+    id: "star",
+    label_ar: "VIP / مميز",
+    label_en: "VIP",
+    singular_ar: "عميل مميز",
+    singular_en: "VIP Client",
+    plural_ar: "عملاء مميزون",
+    plural_en: "VIP Clients",
+  },
+  {
+    id: "award",
+    label_ar: "متدربون",
+    label_en: "Trainees",
+    singular_ar: "متدرب",
+    singular_en: "Trainee",
+    plural_ar: "متدربون",
+    plural_en: "Trainees",
+  },
+  {
+    id: "building",
+    label_ar: "شركات",
+    label_en: "Corporate",
+    singular_ar: "عميل مؤسسي",
+    singular_en: "Corporate Client",
+    plural_ar: "شركات ومؤسسات",
+    plural_en: "Corporate Clients",
+  },
+  {
+    id: "user-check",
+    label_ar: "مشتركون",
+    label_en: "Members",
+    singular_ar: "مشترك",
+    singular_en: "Member",
+    plural_ar: "مشتركون",
+    plural_en: "Members",
+  },
+  {
+    id: "user",
+    label_ar: "فردي",
+    label_en: "Personal",
+    singular_ar: "عميل",
+    singular_en: "Client",
+    plural_ar: "عملاء",
+    plural_en: "Clients",
+  },
+];
+
 export default function BasicInfoTab({
   basicForm,
   setBasicForm,
@@ -256,12 +367,75 @@ export default function BasicInfoTab({
             }
             searchPlaceholder={t("searchWorkspaceType") || "بحث في المجالات..."}
             disabled={!canEdit}
-            onChange={(selectedVal) =>
-              setBasicForm({
+            onChange={(selectedVal) => {
+              const typeId = selectedVal ? Number(selectedVal) : "";
+              const updated = {
                 ...basicForm,
-                workspace_type_id: selectedVal ? Number(selectedVal) : "",
-              })
-            }
+                workspace_type_id: typeId,
+              };
+
+              if (typeId && Array.isArray(workspaceTypes)) {
+                const matched = workspaceTypes.find((wt) => wt.id === typeId);
+                if (matched) {
+                  const nameAr = (
+                    matched.name?.ar ||
+                    matched.name ||
+                    ""
+                  ).toString();
+                  const nameEn = (matched.name?.en || "").toLowerCase();
+
+                  let targetId = "users";
+                  if (
+                    /عياد|طبي/i.test(nameAr) ||
+                    /medical|clinic/i.test(nameEn)
+                  ) {
+                    targetId = "stethoscope";
+                  } else if (
+                    /قانون|إداري/i.test(nameAr) ||
+                    /legal|consulting/i.test(nameEn)
+                  ) {
+                    targetId = "briefcase";
+                  } else if (
+                    /صالون|تجميل|عناية/i.test(nameAr) ||
+                    /beauty|salon/i.test(nameEn)
+                  ) {
+                    targetId = "heart";
+                  } else if (
+                    /تعليم|تدريب/i.test(nameAr) ||
+                    /education|coach/i.test(nameEn)
+                  ) {
+                    targetId = "graduation-cap";
+                  } else if (
+                    /استوديو|تصوير/i.test(nameAr) ||
+                    /creative|photo|studio/i.test(nameEn)
+                  ) {
+                    targetId = "award";
+                  } else if (
+                    /رياض|لياق/i.test(nameAr) ||
+                    /fitness|gym|sport/i.test(nameEn)
+                  ) {
+                    targetId = "activity";
+                  }
+
+                  const preset = CUSTOMER_ICON_PRESETS.find(
+                    (p) => p.id === targetId,
+                  );
+                  if (preset) {
+                    updated.customer_icon = preset.id;
+                    updated.customer_label_singular = {
+                      ar: preset.singular_ar,
+                      en: preset.singular_en,
+                    };
+                    updated.customer_label_plural = {
+                      ar: preset.plural_ar,
+                      en: preset.plural_en,
+                    };
+                  }
+                }
+              }
+
+              setBasicForm(updated);
+            }}
           />
         </div>
 
@@ -503,68 +677,7 @@ export default function BasicInfoTab({
               gap: 10,
             }}
           >
-            {[
-              {
-                id: "users",
-                label_ar: "عملاء",
-                label_en: "Clients",
-              },
-              {
-                id: "stethoscope",
-                label_ar: "مرضى",
-                label_en: "Patients",
-              },
-              {
-                id: "graduation-cap",
-                label_ar: "طلاب",
-                label_en: "Students",
-              },
-              {
-                id: "briefcase",
-                label_ar: "موكلون",
-                label_en: "Clients",
-              },
-              {
-                id: "heart",
-                label_ar: "صحة",
-                label_en: "Health",
-              },
-              {
-                id: "activity",
-                label_ar: "أبطال",
-                label_en: "Fitness",
-              },
-              {
-                id: "smile",
-                label_ar: "أطفال/أسنان",
-                label_en: "Smile",
-              },
-              {
-                id: "star",
-                label_ar: "VIP / مميز",
-                label_en: "VIP",
-              },
-              {
-                id: "award",
-                label_ar: "متدربون",
-                label_en: "Trainees",
-              },
-              {
-                id: "building",
-                label_ar: "شركات",
-                label_en: "Corporate",
-              },
-              {
-                id: "user-check",
-                label_ar: "مشتركون",
-                label_en: "Members",
-              },
-              {
-                id: "user",
-                label_ar: "فردي",
-                label_en: "Personal",
-              },
-            ].map((ico) => {
+            {CUSTOMER_ICON_PRESETS.map((ico) => {
               const isSelected =
                 (basicForm.customer_icon || "users") === ico.id;
               const icoLabel = lang === "ar" ? ico.label_ar : ico.label_en;
@@ -572,10 +685,21 @@ export default function BasicInfoTab({
                 <button
                   key={ico.id}
                   type="button"
-                  onClick={() =>
-                    canEdit &&
-                    setBasicForm({ ...basicForm, customer_icon: ico.id })
-                  }
+                  onClick={() => {
+                    if (!canEdit) return;
+                    setBasicForm({
+                      ...basicForm,
+                      customer_icon: ico.id,
+                      customer_label_singular: {
+                        ar: ico.singular_ar,
+                        en: ico.singular_en,
+                      },
+                      customer_label_plural: {
+                        ar: ico.plural_ar,
+                        en: ico.plural_en,
+                      },
+                    });
+                  }}
                   className={`customer-icon-option-btn ${isSelected ? "selected" : ""}`}
                 >
                   <Icon

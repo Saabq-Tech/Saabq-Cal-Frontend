@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Icon from "./Icon";
 import { useLanguage } from "../../context/LanguageContext";
 
@@ -96,217 +97,281 @@ export default function InstallAppButton({
         <span>{t("installApp") || "Install App"}</span>
       </button>
 
-      {isModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 99999,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "16px",
-            direction: isRtl ? "rtl" : "ltr",
-            animation: "fadeIn 0.2s ease-out",
-          }}
-          onClick={() => setIsModalOpen(false)}
-        >
+      {isModalOpen &&
+        createPortal(
           <div
+            className="modal-backdrop"
             style={{
-              background: "var(--surface, #ffffff)",
-              borderRadius: "24px",
-              padding: "32px",
-              maxWidth: "400px",
-              width: "100%",
-              boxShadow:
-                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              textAlign: "center",
-              border: "1px solid var(--border, #e5e7eb)",
-              animation: "slideUp 0.3s ease-out",
-              position: "relative",
-              overflow: "hidden",
+              zIndex: 99999999,
+              direction: isRtl ? "rtl" : "ltr",
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={() => setIsModalOpen(false)}
           >
-            {/* Top right close button */}
-            <button
-              onClick={() => setIsModalOpen(false)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: isRtl ? "auto" : "16px",
-                left: isRtl ? "16px" : "auto",
-                background: "var(--surface-alt, #f3f4f6)",
-                border: "none",
-                color: "var(--text, #374151)",
-                cursor: "pointer",
-                padding: "8px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--border, #e5e7eb)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background =
-                  "var(--surface-alt, #f3f4f6)")
-              }
-            >
-              <Icon name="x" size={18} />
-            </button>
-
             <div
               style={{
-                marginBottom: "24px",
-                display: "flex",
-                justifyContent: "center",
+                background: "var(--surface, #ffffff)",
+                borderRadius: "24px",
+                padding: "32px",
+                maxWidth: "400px",
+                width: "100%",
+                boxShadow:
+                  "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                textAlign: "center",
+                border: "1px solid var(--border, #e5e7eb)",
+                animation: "slideUp 0.3s ease-out",
+                position: "relative",
+                overflow: "hidden",
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div
+              {/* Top right close button */}
+              <button
+                onClick={() => setIsModalOpen(false)}
                 style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "24px",
-                  background:
-                    "linear-gradient(135deg, var(--primary, #0d9488) 0%, #0f766e 100%)",
+                  position: "absolute",
+                  top: "16px",
+                  right: isRtl ? "auto" : "16px",
+                  left: isRtl ? "16px" : "auto",
+                  background: "var(--surface-alt, #f3f4f6)",
+                  border: "none",
+                  color: "var(--text, #374151)",
+                  cursor: "pointer",
+                  padding: "8px",
+                  borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#ffffff",
-                  boxShadow: "0 10px 15px -3px rgba(13, 148, 136, 0.3)",
-                }}
-              >
-                <Icon name="download" size={40} />
-              </div>
-            </div>
-
-            <h3
-              style={{
-                margin: "0 0 12px 0",
-                fontSize: "1.5rem",
-                fontWeight: 800,
-                color: "var(--text, #1f2937)",
-                lineHeight: 1.2,
-              }}
-            >
-              {t("installAppTitle") || "Install Saabq Cal App"}
-            </h3>
-
-            <p
-              style={{
-                margin: "0 0 32px 0",
-                color: "var(--muted, #6b7280)",
-                fontSize: "0.95rem",
-                lineHeight: 1.6,
-              }}
-            >
-              {t("installAppDesc") ||
-                "Install our application on your device for a faster, full-screen experience and quick access from your home screen."}
-            </p>
-
-            {!deferredPrompt && (
-              <div
-                style={{
-                  margin: "-16px 0 32px 0",
-                  padding: "16px",
-                  background: "var(--surface-alt, #f3f4f6)",
-                  borderRadius: "12px",
-                  color: "var(--text, #374151)",
-                  fontSize: "0.95rem",
-                  fontWeight: 500,
-                  lineHeight: 1.5,
-                }}
-              >
-                {t("installManualInstruction") ||
-                  "Tap your browser menu or the share icon, then select 'Add to Home Screen'."}
-              </div>
-            )}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                style={{
-                  flex: 1,
-                  padding: "12px 20px",
-                  borderRadius: "12px",
-                  border: "1px solid var(--border, #e5e7eb)",
-                  background: "transparent",
-                  color: "var(--text, #374151)",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "var(--border, #e5e7eb)")
+                }
+                onMouseLeave={(e) =>
                   (e.currentTarget.style.background =
                     "var(--surface-alt, #f3f4f6)")
                 }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-                onClick={() => setIsModalOpen(false)}
               >
-                {deferredPrompt
-                  ? t("cancel") || "Cancel"
-                  : t("close") || "Close"}
+                <Icon name="x" size={16} />
               </button>
 
-              {deferredPrompt && (
+              {/* App Icon / Graphic */}
+              <div
+                style={{
+                  width: "72px",
+                  height: "72px",
+                  background: "var(--primary-subtle, rgba(13, 148, 136, 0.1))",
+                  borderRadius: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 20px auto",
+                  color: "var(--primary, #0d9488)",
+                }}
+              >
+                <Icon name="smartphone" size={36} />
+              </div>
+
+              {/* Title & Description */}
+              <h3
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: 700,
+                  color: "var(--text, #111827)",
+                  margin: "0 0 8px 0",
+                }}
+              >
+                {t("installAppTitle") || "Install Saabq App"}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  color: "var(--text-secondary, #6b7280)",
+                  margin: "0 0 24px 0",
+                  lineHeight: 1.5,
+                }}
+              >
+                {t("installAppDesc") ||
+                  "Install Saabq on your home screen for quick and seamless access anytime."}
+              </p>
+
+              {/* iOS vs Non-iOS Instructions */}
+              {!deferredPrompt ? (
+                <div
+                  style={{
+                    background: "var(--surface-alt, #f9fafb)",
+                    borderRadius: "16px",
+                    padding: "16px",
+                    textAlign: "start",
+                    marginBottom: "24px",
+                    border: "1px solid var(--border-subtle, #f3f4f6)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        background: "var(--primary, #0d9488)",
+                        color: "#fff",
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      1
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text, #374151)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {t("iosInstallStep1") || "Tap the Share button"}
+                      <Icon
+                        name="share"
+                        size={16}
+                        style={{ display: "inline" }}
+                      />
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        background: "var(--primary, #0d9488)",
+                        color: "#fff",
+                        width: "24px",
+                        height: "24px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      2
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text, #374151)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {t("iosInstallStep2") || 'Select "Add to Home Screen"'}
+                      <Icon
+                        name="plus-square"
+                        size={16}
+                        style={{ display: "inline" }}
+                      />
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Action Buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "12px",
+                }}
+              >
                 <button
                   style={{
                     flex: 1,
                     padding: "12px 20px",
                     borderRadius: "12px",
-                    border: "none",
-                    background: "var(--primary, #0d9488)",
-                    color: "#ffffff",
-                    fontSize: "1rem",
+                    border: "1px solid var(--border, #e5e7eb)",
+                    background: "transparent",
+                    color: "var(--text, #374151)",
+                    fontSize: "0.95rem",
                     fontWeight: 600,
                     cursor: "pointer",
-                    display: "flex",
-                    gap: "8px",
-                    alignItems: "center",
-                    justifyContent: "center",
                     transition: "all 0.2s",
-                    boxShadow: "0 4px 6px -1px rgba(13, 148, 136, 0.2)",
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.transform = "translateY(-1px)")
+                    (e.currentTarget.style.background =
+                      "var(--surface-alt, #f3f4f6)")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.transform = "translateY(0)")
+                    (e.currentTarget.style.background = "transparent")
                   }
-                  onClick={handleInstallClick}
+                  onClick={() => setIsModalOpen(false)}
                 >
-                  <span>{t("installApp") || "Install App"}</span>
+                  {deferredPrompt
+                    ? t("cancel") || "Cancel"
+                    : t("close") || "Close"}
                 </button>
-              )}
-            </div>
-          </div>
 
-          <style>{`
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            @keyframes slideUp {
-              from { opacity: 0; transform: translateY(20px); }
-              to { opacity: 1; transform: translateY(0); }
-            }
-          `}</style>
-        </div>
-      )}
+                {deferredPrompt && (
+                  <button
+                    style={{
+                      flex: 1,
+                      padding: "12px 20px",
+                      borderRadius: "12px",
+                      border: "none",
+                      background: "var(--primary, #0d9488)",
+                      color: "#ffffff",
+                      fontSize: "1rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                      boxShadow: "0 4px 6px -1px rgba(13, 148, 136, 0.2)",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "translateY(-1px)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "translateY(0)")
+                    }
+                    onClick={handleInstallClick}
+                  >
+                    <span>{t("installApp") || "Install App"}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <style>{`
+              @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+              }
+              @keyframes slideUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+            `}</style>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

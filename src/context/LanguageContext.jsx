@@ -50,6 +50,7 @@ export function LanguageProvider({ children }) {
 
   const value = {
     lang,
+    language: lang,
     dir,
     isRTL: dir === "rtl",
     setLanguage,

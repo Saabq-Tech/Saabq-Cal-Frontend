@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function RolesTab({
   rolesList,
@@ -10,7 +12,8 @@ export default function RolesTab({
   onSaveRole,
   onDeleteRole,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerPlural: custPlural } = useCustomerLabel();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleLangTab, setRoleLangTab] = useState("ar");
   const [roleForm, setRoleForm] = useState({
@@ -56,15 +59,23 @@ export default function RolesTab({
       ],
     },
     {
-      category: t("cat_customers") || "العملاء",
+      category: isCustom ? custPlural : t("cat_customers") || "العملاء",
       permissions: [
         {
           value: "customer_write",
-          label: t("permCustomerWrite") || "إضافة وتعديل العملاء",
+          label: isCustom
+            ? isRTL
+              ? `إضافة وتعديل ${custPlural}`
+              : `Add & edit ${custPlural}`
+            : t("permCustomerWrite") || "إضافة وتعديل العملاء",
         },
         {
           value: "customer_read",
-          label: t("permCustomerRead") || "عرض العملاء",
+          label: isCustom
+            ? isRTL
+              ? `عرض ${custPlural}`
+              : `View ${custPlural}`
+            : t("permCustomerRead") || "عرض العملاء",
         },
       ],
     },
@@ -305,52 +316,80 @@ export default function RolesTab({
 
   return (
     <div className="card-body">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceRoles") || "أدوار مساحة العمل والصلاحيات"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceRolesDesc") ||
-              "إنشاء وتحديد الصلاحيات الخاصة لكل دور مخصص"}
-          </p>
-        </div>
-        {canEdit ? (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>
-            + {t("addRole") || "إضافة دور جديد"}
-          </button>
-        ) : (
-          <span
-            className="profile-badge unverified"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-          >
-            <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
-          </span>
-        )}
-      </div>
+      {/* Header Section & KPI Stats */}
+      <WorkspacePageHeader
+        title={
+          t("workspaceRoles") ||
+          (isRTL ? "الأدوار والصلاحيات" : "Roles & Permissions")
+        }
+        subtitle={
+          t("workspaceRolesDesc") ||
+          (isRTL
+            ? "تخصيص مستويات الوصول وتحديد صلاحيات التحكم والعمليات لأعضاء مساحة العمل."
+            : "Define role permissions and access levels for workspace team members.")
+        }
+        icon="shield"
+        actions={
+          canEdit ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenCreate}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+              }}
+            >
+              <Icon name="plus" size={18} />
+              <span>
+                {t("addRole") || (isRTL ? "إنشاء دور مخصص" : "Create Role")}
+              </span>
+            </button>
+          ) : (
+            <span
+              className="profile-badge unverified"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            >
+              <Icon name="lock" size={12} />
+              {t("readOnlyNotice") ||
+                (isRTL ? "للعرض بس (من غير تعديل)" : "Read-only mode")}
+            </span>
+          )
+        }
+        stats={[
+          {
+            id: "total_roles",
+            label: isRTL ? "إجمالي الأدوار" : "Total Roles",
+            value: roles.length,
+            icon: "shield",
+            iconBg: "rgba(2, 105, 130, 0.12)",
+            iconColor: "var(--primary)",
+          },
+          {
+            id: "custom_roles",
+            label: isRTL ? "الأدوار المخصصة" : "Custom Roles",
+            value: roles.filter((r) => !r.is_system).length,
+            valueColor: "#10b981",
+            icon: "check-circle",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "visible_roles",
+            label: isRTL ? "ظاهرة للعملاء" : "Visible to Customers",
+            value: roles.filter((r) => r.is_visible_to_customers).length,
+            valueColor: "#f59e0b",
+            icon: "users",
+            iconBg: "rgba(245, 158, 11, 0.12)",
+            iconColor: "#f59e0b",
+          },
+        ]}
+      />
 
       <div
         style={{
@@ -668,8 +707,12 @@ export default function RolesTab({
                         accentColor: "var(--primary)",
                       }}
                     />
-                    {t("isVisibleToCustomers") ||
-                      "إظهار هذا الدور للعملاء (عند الحجز)"}
+                    {isCustom
+                      ? isRTL
+                        ? `إظهار هذا الدور لـ ${custPlural} (عند الحجز)`
+                        : `Show this role to ${custPlural} (on booking)`
+                      : t("isVisibleToCustomers") ||
+                        "إظهار هذا الدور للعملاء (عند الحجز)"}
                   </label>
                 </div>
 

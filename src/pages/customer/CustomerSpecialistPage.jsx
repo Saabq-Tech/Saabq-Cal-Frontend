@@ -10,7 +10,10 @@ import {
 } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
-import { applyWorkspaceBranding } from "../../utils/theme";
+import {
+  applyWorkspaceBranding,
+  resetWorkspaceBranding,
+} from "../../utils/theme";
 
 export default function CustomerSpecialistPage() {
   const { idOrSlug, specialistId } = useParams();
@@ -96,22 +99,9 @@ export default function CustomerSpecialistPage() {
   // Apply workspace custom colors to CSS variables & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      applyWorkspaceBranding(
-        workspace.primary_color,
-        workspace.secondary_color,
-        workspace.hover_color,
-      );
+      applyWorkspaceBranding(workspace);
       return () => {
-        const storedUser = localStorage.getItem("saabq_user");
-        let prevWs = null;
-        try {
-          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
-        } catch {}
-        applyWorkspaceBranding(
-          prevWs?.primary_color || null,
-          prevWs?.secondary_color || null,
-          prevWs?.hover_color || null,
-        );
+        resetWorkspaceBranding();
       };
     }
   }, [workspace]);

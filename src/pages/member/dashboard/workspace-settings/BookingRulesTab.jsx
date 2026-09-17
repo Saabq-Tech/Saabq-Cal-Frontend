@@ -1,4 +1,5 @@
 import { useLanguage } from "../../../../context/LanguageContext";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 
 export default function BookingRulesTab({
   bookingRulesForm,
@@ -7,7 +8,8 @@ export default function BookingRulesTab({
   saving,
   canEdit,
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
+  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -107,8 +109,12 @@ export default function BookingRulesTab({
                 lineHeight: 1.4,
               }}
             >
-              {t("enableOnlineBookingDesc") ||
-                "السماح للعملاء بحجز المواعيد أونلاين."}
+              {isCustom
+                ? isRTL
+                  ? `السماح لـ ${customerPlural} بحجز المواعيد أونلاين.`
+                  : `Allow ${customerPlural.toLowerCase()} to book appointments online.`
+                : t("enableOnlineBookingDesc") ||
+                  "السماح للعملاء بحجز المواعيد أونلاين."}
             </div>
           </div>
         </div>
@@ -341,8 +347,12 @@ export default function BookingRulesTab({
               lineHeight: 1.4,
             }}
           >
-            {t("minNoticeHoursDesc") ||
-              "أقل فترة زمنية مسبقة يسمح فيها للعميل بحجز الموعد."}
+            {isCustom
+              ? isRTL
+                ? `أقل فترة زمنية مسبقة يسمح فيها لـ ${customerSingular} بحجز الموعد.`
+                : `Minimum notice required before a ${customerSingular.toLowerCase()} can book an appointment.`
+              : t("minNoticeHoursDesc") ||
+                "أقل فترة زمنية مسبقة يسمح فيها للعميل بحجز الموعد."}
           </span>
         </div>
 
@@ -393,8 +403,12 @@ export default function BookingRulesTab({
               lineHeight: 1.4,
             }}
           >
-            {t("maxAdvanceDaysDesc") ||
-              "أقصى مدى زمني في المستقبل يمكن للعميل حجز المواعيد خلاله."}
+            {isCustom
+              ? isRTL
+                ? `أقصى مدى زمني في المستقبل يمكن لـ ${customerSingular} حجز المواعيد خلاله.`
+                : `Maximum future time window for a ${customerSingular.toLowerCase()} to book appointments.`
+              : t("maxAdvanceDaysDesc") ||
+                "أقصى مدى زمني في المستقبل يمكن للعميل حجز المواعيد خلاله."}
           </span>
         </div>
       </div>

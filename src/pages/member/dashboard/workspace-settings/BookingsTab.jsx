@@ -5,6 +5,7 @@ import { useToast } from "../../../../context/ToastContext";
 import client, { endpoints } from "../../../../api/client";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
+import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 
 export default function BookingsTab({
   bookings,
@@ -19,17 +20,13 @@ export default function BookingsTab({
   const toast = useToast();
   const { user } = useAuth();
   const ws = user?.workspace;
-  const custSingular = (() => {
-    const f = ws?.customer_label_singular;
-    if (f) return typeof f === "object" ? f[lang] || f.ar || f.en || "عميل" : f;
-    return t("customerSingle") || "عميل";
-  })();
-  const custPlural = (() => {
-    const f = ws?.customer_label_plural;
-    if (f)
-      return typeof f === "object" ? f[lang] || f.ar || f.en || "العملاء" : f;
-    return t("navCustomers") || "العملاء";
-  })();
+
+  const {
+    isCustom,
+    customerSingular: custSingular,
+    customerPlural: custPlural,
+    searchCustomerPrompt,
+  } = useCustomerLabel(ws);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -287,10 +284,7 @@ export default function BookingsTab({
           <input
             type="text"
             className="form-input"
-            placeholder={
-              t("searchBookingPlaceholder") ||
-              `بحث باسم ${custSingular} أو البريد...`
-            }
+            placeholder={searchCustomerPrompt}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ paddingInlineEnd: 36, fontSize: "0.86rem" }}
@@ -414,7 +408,9 @@ export default function BookingsTab({
                     color: "var(--heading)",
                   }}
                 >
-                  {t("customerHeader") || custSingular}
+                  {isCustom
+                    ? custSingular
+                    : t("customerHeader") || custSingular}
                 </th>
                 <th
                   style={{
@@ -493,7 +489,11 @@ export default function BookingsTab({
                     onClick={() => onSelectBooking && onSelectBooking(b.id)}
                   >
                     <td
-                      data-label={t("customerHeader") || custSingular}
+                      data-label={
+                        isCustom
+                          ? custSingular
+                          : t("customerHeader") || custSingular
+                      }
                       style={{ padding: "14px 16px" }}
                     >
                       <div

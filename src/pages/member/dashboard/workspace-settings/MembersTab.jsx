@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
 import UserAvatar from "../../../../components/ui/UserAvatar";
 import Icon from "../../../../components/common/Icon";
+import { getLimitInfo } from "../../../../utils/planLimits";
+import {
+  PlanLimitBanner,
+  PlanLimitModal,
+} from "../../../../components/common/PlanLimitAlert";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function MembersTab({
   membersList,
@@ -11,8 +18,10 @@ export default function MembersTab({
   onSaveMember,
   onDeleteMember,
 }) {
+  const { user } = useAuth();
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     editing_id: null,
@@ -24,7 +33,17 @@ export default function MembersTab({
     status: "active",
   });
 
+  const list =
+    Array.isArray(membersList) && membersList.length > 0 ? membersList : [];
+
+  const limitInfo = getLimitInfo(user, "members", list.length);
+
   const handleOpenInvite = () => {
+    if (limitInfo.isReached) {
+      setIsLimitModalOpen(true);
+      return;
+    }
+
     setForm({
       editing_id: null,
       name: "",
@@ -70,57 +89,84 @@ export default function MembersTab({
     setIsModalOpen(false);
   };
 
-  const list =
-    Array.isArray(membersList) && membersList.length > 0 ? membersList : [];
-
   return (
     <div className="card-body">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 20,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-            }}
-          >
-            {t("workspaceMembers") || "أعضاء مساحة العمل"}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.86rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceMembersDesc") ||
-              "إدارة فريق العمل، الأدوار، والصلاحيات الممنوحة لكل عضو"}
-          </p>
-        </div>
-        {canEdit ? (
-          <button className="btn btn-primary btn-sm" onClick={handleOpenInvite}>
-            + {t("inviteMember") || "دعوة عضو جديد"}
-          </button>
-        ) : (
-          <span
-            className="profile-badge unverified"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
-          >
-            <Icon name="lock" size={12} />
-            {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
-          </span>
-        )}
-      </div>
+      <PlanLimitBanner type="members" limitInfo={limitInfo} />
+
+      {/* Header Section & KPI Stats */}
+      <WorkspacePageHeader
+        title={t("workspaceMembers") || "أعضاء وفريق مساحة العمل"}
+        subtitle={
+          t("workspaceMembersDesc") ||
+          "إدارة أعضاء الفريق وتعيين الأدوار والصلاحيات الممنوحة لمتابعة وتنسيق المهام والمواعيد."
+        }
+        icon="users"
+        limitBadge={limitInfo}
+        actions={
+          canEdit ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenInvite}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+              }}
+            >
+              <Icon name="user-plus" size={18} />
+              <span>{t("inviteMember") || "إضافة عضو جديد"}</span>
+            </button>
+          ) : (
+            <span
+              className="profile-badge unverified"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            >
+              <Icon name="lock" size={12} />
+              {t("readOnlyNotice") || "للعرض بس (من غير تعديل)"}
+            </span>
+          )
+        }
+        stats={[
+          {
+            id: "total_members",
+            label: t("totalMembersCount") || "إجمالي الأعضاء",
+            value: list.length,
+            icon: "users",
+            iconBg: "rgba(2, 105, 130, 0.12)",
+            iconColor: "var(--primary)",
+          },
+          {
+            id: "active_members",
+            label: t("activeMembersCount") || "الأعضاء النشطون",
+            value: list.filter((m) => m.status === "active").length,
+            valueColor: "#10b981",
+            icon: "check-circle",
+            iconBg: "rgba(16, 185, 129, 0.12)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "assigned_roles",
+            label: t("assignedRolesCount") || "الأعضاء المعين لهم أدوار",
+            value: list.filter((m) => m.roles && m.roles.length > 0).length,
+            valueColor: "#6366f1",
+            icon: "shield",
+            iconBg: "rgba(99, 102, 241, 0.12)",
+            iconColor: "#6366f1",
+          },
+        ]}
+      />
+
+      <PlanLimitModal
+        isOpen={isLimitModalOpen}
+        onClose={() => setIsLimitModalOpen(false)}
+        type="members"
+        limitInfo={limitInfo}
+      />
 
       <div
         style={{

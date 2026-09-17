@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import ConfirmationModal from "./ConfirmationModal";
+import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 const defaultFormState = {
   id: null,
@@ -197,295 +198,88 @@ export default function ResourcesTab({
 
   return (
     <div className="card-body">
-      {/* Top Section Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 14,
-          marginBottom: 24,
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: "1.3rem",
-              fontWeight: 800,
-              margin: 0,
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon name="package" size={22} color="var(--primary)" />
-            {t("workspaceResources") ||
-              (isRTL
-                ? "إدارة الموارد والمخزون"
-                : "Workspace Resources & Inventory")}
-          </h2>
-          <p
-            style={{
-              fontSize: "0.88rem",
-              color: "var(--text-secondary)",
-              margin: "4px 0 0",
-            }}
-          >
-            {t("workspaceResourcesDesc") ||
-              (isRTL
-                ? "إدارة ومتابعة معدات ومستلزمات مساحة العمل، الأسعار، حدود التنبيه الأدنى للكميات، والموردين."
-                : "Manage workspace assets, equipment, pricing, low-stock threshold limits, and suppliers.")}
-          </p>
-        </div>
-        {canEdit && (
-          <button className="btn btn-primary" onClick={handleOpenCreate}>
-            <Icon name="plus" size={16} />
-            {t("addResource") ||
-              (isRTL ? "+ إضافة مورد جديد" : "+ Add New Resource")}
-          </button>
-        )}
-      </div>
-
-      {/* KPI Stats Overview Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 16,
-          marginBottom: 24,
-        }}
-      >
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(59, 130, 246, 0.1)",
-              color: "#3b82f6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="layers" size={22} />
-          </div>
-          <div>
-            <div
+      {/* Top Section Header & KPI Stats */}
+      <WorkspacePageHeader
+        title={
+          t("workspaceResources") ||
+          (isRTL ? "الموارد والمخزون" : "Resources & Inventory")
+        }
+        subtitle={
+          t("workspaceResourcesDesc") ||
+          (isRTL
+            ? "إدارة ومتابعة معدات ومستلزمات مساحة العمل، حدود التنبيه الأدنى للكميات، والأسعار."
+            : "Manage workspace assets, equipment, stock thresholds, pricing, and suppliers.")
+        }
+        icon="package"
+        actions={
+          canEdit && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenCreate}
               style={{
-                fontSize: "0.8rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                fontWeight: 700,
+                borderRadius: "var(--radius-md, 10px)",
+                boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
               }}
             >
-              {t("totalItems") ||
-                (isRTL ? "إجمالي الأثاث والمعدات" : "Total Items")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-              }}
-            >
-              {calculatedStats.total_resources}{" "}
-              <span
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-muted)",
-                  fontWeight: 500,
-                }}
-              >
-                ({calculatedStats.total_quantity} {isRTL ? "قطعة" : "units"})
+              <Icon name="plus" size={18} />
+              <span>
+                {t("addResource") ||
+                  (isRTL ? "إضافة مورد جديد" : "Add Resource")}
               </span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(16, 185, 129, 0.1)",
-              color: "#10b981",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="dollar-sign" size={22} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {t("totalValue") ||
-                (isRTL ? "القيمة الإجمالية للمخزون" : "Total Inventory Value")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                color: "var(--heading)",
-              }}
-            >
-              ${formatCurrency(calculatedStats.total_inventory_value)}
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background:
+            </button>
+          )
+        }
+        stats={[
+          {
+            id: "total_items",
+            label: isRTL ? "إجمالي الأثاث والمعدات" : "Total Items",
+            value: calculatedStats.total_resources,
+            suffix: `(${calculatedStats.total_quantity} ${isRTL ? "قطعة" : "units"})`,
+            icon: "layers",
+            iconBg: "rgba(59, 130, 246, 0.1)",
+            iconColor: "#3b82f6",
+          },
+          {
+            id: "total_val",
+            label: isRTL ? "القيمة الإجمالية للمخزون" : "Total Inventory Value",
+            value: `$${formatCurrency(calculatedStats.total_inventory_value)}`,
+            valueColor: "#10b981",
+            icon: "dollar-sign",
+            iconBg: "rgba(16, 185, 129, 0.1)",
+            iconColor: "#10b981",
+          },
+          {
+            id: "low_stock",
+            label: isRTL ? "تنبيهات انخفاض المخزون" : "Low Stock Alerts",
+            value: calculatedStats.low_stock_count,
+            valueColor:
               calculatedStats.low_stock_count > 0
-                ? "rgba(245, 158, 11, 0.05)"
-                : "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border:
-              calculatedStats.low_stock_count > 0
-                ? "1px solid rgba(245, 158, 11, 0.3)"
-                : "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(245, 158, 11, 0.15)",
-              color: "#f59e0b",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="alert-triangle" size={22} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {t("lowStockThresholdAlerts") ||
-                (isRTL ? "تنبيهات انخفاض المخزون" : "Low Stock Alerts")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                color:
-                  calculatedStats.low_stock_count > 0
-                    ? "var(--badge-warning-color)"
-                    : "var(--heading)",
-              }}
-            >
-              {calculatedStats.low_stock_count}{" "}
-              <span style={{ fontSize: "0.8rem", fontWeight: 600 }}>
-                {isRTL ? "مواد تجاوزت الحد الأدنى" : "below threshold"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            background:
+                ? "#f59e0b"
+                : "var(--heading)",
+            icon: "alert-triangle",
+            iconBg: "rgba(245, 158, 11, 0.15)",
+            iconColor: "#f59e0b",
+          },
+          {
+            id: "out_of_stock",
+            label: isRTL ? "نفاد المخزون" : "Out of Stock",
+            value: calculatedStats.out_of_stock_count,
+            valueColor:
               calculatedStats.out_of_stock_count > 0
-                ? "rgba(239, 68, 68, 0.05)"
-                : "var(--surface)",
-            padding: "16px 20px",
-            borderRadius: "var(--radius-lg)",
-            border:
-              calculatedStats.out_of_stock_count > 0
-                ? "1px solid rgba(239, 68, 68, 0.3)"
-                : "1px solid var(--border-light)",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "12px",
-              background: "rgba(239, 68, 68, 0.15)",
-              color: "#ef4444",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="x-circle" size={22} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "0.8rem",
-                color: "var(--text-secondary)",
-                fontWeight: 600,
-              }}
-            >
-              {t("outOfStockOrExpired") ||
-                (isRTL ? "نفاد المخزون" : "Out of Stock")}
-            </div>
-            <div
-              style={{
-                fontSize: "1.35rem",
-                fontWeight: 800,
-                color:
-                  calculatedStats.out_of_stock_count > 0
-                    ? "var(--badge-danger-color)"
-                    : "var(--heading)",
-              }}
-            >
-              {calculatedStats.out_of_stock_count}{" "}
-              <span style={{ fontSize: "0.8rem", fontWeight: 600 }}>
-                {isRTL ? "قطع منتهية/منعدمة" : "items unavailable"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+                ? "#ef4444"
+                : "var(--heading)",
+            icon: "x-circle",
+            iconBg: "rgba(239, 68, 68, 0.15)",
+            iconColor: "#ef4444",
+          },
+        ]}
+      />
 
       {/* Threshold Low Stock Warning Alert Banner */}
       {lowStockAlerts.length > 0 && (

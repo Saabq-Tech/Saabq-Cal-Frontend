@@ -55,9 +55,14 @@ export const endpoints = {
   // Public Content
   banners: "/banners",
   features: "/features",
+  capabilities: "/capabilities",
   faqs: "/faqs",
   about: "/about",
+  terms: "/terms",
+  privacy: "/privacy",
   settings: "/settings",
+  newsletterSubscribe: "/newsletter/subscribe",
+  newsletterUnsubscribe: "/newsletter/unsubscribe",
   posts: "/posts",
   postDetail: (slug) => `/posts/${slug}`,
   postCategories: "/posts/categories",
@@ -157,6 +162,8 @@ export const endpoints = {
   workspaceServiceItem: (id) => `/workspace-members/workspace/services/${id}`,
   workspaceSchedules: "/workspace-members/workspace/schedules",
   workspaceScheduleItem: (id) => `/workspace-members/workspace/schedules/${id}`,
+  workspaceScheduleCopySlots: (id) =>
+    `/workspace-members/workspace/schedules/${id}/copy-slots`,
   workspaceMembers: "/workspace-members/workspace/members",
   workspaceMemberItem: (id) => `/workspace-members/workspace/members/${id}`,
   workspaceRoles: "/workspace-members/workspace/roles",
@@ -238,6 +245,15 @@ export function fetchPublicSettings(force = false) {
 
   settingsCacheMap[lang] = promise;
   return promise;
+}
+
+export async function subscribeToNewsletter(email, locale = "ar") {
+  const res = await client.post(endpoints.newsletterSubscribe, {
+    email,
+    locale,
+    source: "website",
+  });
+  return res.data;
 }
 
 export default client;

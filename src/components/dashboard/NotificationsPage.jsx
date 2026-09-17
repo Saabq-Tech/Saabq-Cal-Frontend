@@ -302,7 +302,12 @@ function NotificationItem({
 export default function NotificationsPage() {
   const { t } = useLanguage();
   const toast = useToast();
-  const { userType } = useAuth();
+  const {
+    userType,
+    unreadCount = 0,
+    setUnreadCount,
+    refreshUnreadCounts,
+  } = useAuth();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
@@ -313,7 +318,6 @@ export default function NotificationsPage() {
     last_page: 1,
     total: 0,
   });
-  const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState("all");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [busyIds, setBusyIds] = useState(new Set());
@@ -336,7 +340,12 @@ export default function NotificationsPage() {
         setNotifications((prev) =>
           append ? [...prev, ...data.notifications] : data.notifications,
         );
-        setUnreadCount(data.unread_count ?? 0);
+        if (
+          typeof setUnreadCount === "function" &&
+          typeof data.unread_count === "number"
+        ) {
+          setUnreadCount(data.unread_count);
+        }
         setPagination({
           current_page: meta.current_page ?? 1,
           last_page: meta.last_page ?? 1,
@@ -350,7 +359,7 @@ export default function NotificationsPage() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [toast, t],
+    [toast, t, setUnreadCount],
   );
 
   useEffect(() => {
@@ -359,17 +368,43 @@ export default function NotificationsPage() {
 
   const handleMarkRead = useCallback(
     async (id) => {
+      const target = notifications.find((n) => n.id === id);
+      if (!target || target.read_at) return;
+
+      // 1. Optimistic update: mark as read immediately in list
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, read_at: n.read_at || new Date().toISOString() }
+            : n,
+        ),
+      );
+
+      // 2. Optimistic update: immediately update bell count in navbar and global state (0ms)
+      if (typeof setUnreadCount === "function") {
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+
       setBusyIds((s) => new Set(s).add(id));
       try {
-        await client.post(endpoints.notificationMarkRead(id));
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
-          ),
-        );
-        setUnreadCount((c) => Math.max(0, c - 1));
+        const res = await client.post(endpoints.notificationMarkRead(id));
+        if (
+          typeof res.data?.data?.unread_count === "number" &&
+          typeof setUnreadCount === "function"
+        ) {
+          setUnreadCount(res.data.data.unread_count);
+        }
         toast.success(t("notifMarkedRead"));
       } catch {
+        // Rollback on failure
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === id ? { ...n, read_at: target.read_at } : n,
+          ),
+        );
+        if (typeof refreshUnreadCounts === "function") {
+          refreshUnreadCounts(true);
+        }
         toast.error(t("notifLoadFailed"));
       } finally {
         setBusyIds((s) => {
@@ -379,38 +414,82 @@ export default function NotificationsPage() {
         });
       }
     },
-    [t, toast],
+    [notifications, t, toast, setUnreadCount, refreshUnreadCounts],
   );
 
   const handleMarkAllRead = useCallback(async () => {
-    try {
-      await client.post(endpoints.notificationsMarkAllRead);
-      setNotifications((prev) =>
-        prev.map((n) => ({
-          ...n,
-          read_at: n.read_at ?? new Date().toISOString(),
-        })),
-      );
+    if (unreadCount === 0) return;
+
+    const previousNotifications = notifications;
+    const nowIso = new Date().toISOString();
+
+    // 1. Optimistic update: mark all items as read in list immediately
+    setNotifications((prev) =>
+      prev.map((n) => ({
+        ...n,
+        read_at: n.read_at || nowIso,
+      })),
+    );
+
+    // 2. Optimistic update: reset bell count to 0 in navbar and global state immediately (0ms)
+    if (typeof setUnreadCount === "function") {
       setUnreadCount(0);
+    }
+
+    try {
+      const res = await client.post(endpoints.notificationsMarkAllRead);
+      if (
+        typeof res.data?.data?.unread_count === "number" &&
+        typeof setUnreadCount === "function"
+      ) {
+        setUnreadCount(res.data.data.unread_count);
+      }
       toast.success(t("allNotifsMarkedRead"));
     } catch {
+      // Rollback on failure
+      setNotifications(previousNotifications);
+      if (typeof refreshUnreadCounts === "function") {
+        refreshUnreadCounts(true);
+      }
       toast.error(t("notifLoadFailed"));
     }
-  }, [t, toast]);
+  }, [
+    unreadCount,
+    notifications,
+    t,
+    toast,
+    setUnreadCount,
+    refreshUnreadCounts,
+  ]);
 
   const handleDelete = useCallback(
     async (id) => {
+      const target = notifications.find((n) => n.id === id);
+      const wasUnread = target && !target.read_at;
+
+      // Optimistic delete
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      if (wasUnread && typeof setUnreadCount === "function") {
+        setUnreadCount((c) => Math.max(0, c - 1));
+      }
+
       setBusyIds((s) => new Set(s).add(id));
       try {
-        await client.delete(endpoints.notificationDelete(id));
-        setNotifications((prev) => {
-          const removed = prev.find((n) => n.id === id);
-          if (removed && !removed.read_at)
-            setUnreadCount((c) => Math.max(0, c - 1));
-          return prev.filter((n) => n.id !== id);
-        });
+        const res = await client.delete(endpoints.notificationDelete(id));
+        if (
+          typeof res.data?.data?.unread_count === "number" &&
+          typeof setUnreadCount === "function"
+        ) {
+          setUnreadCount(res.data.data.unread_count);
+        }
         toast.success(t("notifDeletedSuccess"));
       } catch {
+        if (target) {
+          setNotifications((prev) => [target, ...prev]);
+        }
+        if (typeof refreshUnreadCounts === "function") {
+          refreshUnreadCounts(true);
+        }
         toast.error(t("notifLoadFailed"));
       } finally {
         setBusyIds((s) => {
@@ -420,21 +499,36 @@ export default function NotificationsPage() {
         });
       }
     },
-    [t, toast],
+    [notifications, t, toast, setUnreadCount, refreshUnreadCounts],
   );
 
   const handleClearAll = useCallback(async () => {
     setShowClearConfirm(false);
-    try {
-      await client.delete(endpoints.notificationsClear);
-      setNotifications([]);
+    const previousNotifications = notifications;
+
+    setNotifications([]);
+    if (typeof setUnreadCount === "function") {
       setUnreadCount(0);
-      setPagination({ current_page: 1, last_page: 1, total: 0 });
+    }
+    setPagination({ current_page: 1, last_page: 1, total: 0 });
+
+    try {
+      const res = await client.delete(endpoints.notificationsClear);
+      if (
+        typeof res.data?.data?.unread_count === "number" &&
+        typeof setUnreadCount === "function"
+      ) {
+        setUnreadCount(res.data.data.unread_count);
+      }
       toast.success(t("allNotifsCleared"));
     } catch {
+      setNotifications(previousNotifications);
+      if (typeof refreshUnreadCounts === "function") {
+        refreshUnreadCounts(true);
+      }
       toast.error(t("notifLoadFailed"));
     }
-  }, [t, toast]);
+  }, [notifications, t, toast, setUnreadCount, refreshUnreadCounts]);
 
   const handleLoadMore = () => {
     if (pagination.current_page < pagination.last_page) {
@@ -477,16 +571,6 @@ export default function NotificationsPage() {
             <p className="card-subtitle">{t("notificationsInboxDesc")}</p>
           </div>
           <div className="notif-header-actions">
-            {canMarkAll && (
-              <button
-                type="button"
-                className="btn btn-secondary notif-header-btn"
-                onClick={handleMarkAllRead}
-              >
-                <Icon name="check" size={13} />
-                <span>{t("markAllRead")}</span>
-              </button>
-            )}
             {canClear && (
               <button
                 type="button"
@@ -501,43 +585,77 @@ export default function NotificationsPage() {
         </div>
 
         <div className="card-body" style={{ paddingTop: 16 }}>
-          {/* Filter tabs */}
+          {/* Filter toolbar */}
           <div
-            className="notif-filter-tabs"
-            role="tablist"
-            aria-label={t("notificationsInboxTitle")}
-            style={{ marginBottom: 20 }}
+            className="notif-filter-bar"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+              marginBottom: 20,
+            }}
           >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={filter === "all"}
-              className={`notif-filter-tab${filter === "all" ? " active" : ""}`}
-              onClick={() => setFilter("all")}
+            {/* Filter tabs */}
+            <div
+              className="notif-filter-tabs"
+              role="tablist"
+              aria-label={t("notificationsInboxTitle")}
             >
-              {t("notifFilterAll")}
-              <span className="notif-filter-count">{totalAll}</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={filter === "unread"}
-              className={`notif-filter-tab${filter === "unread" ? " active" : ""}`}
-              onClick={() => setFilter("unread")}
-            >
-              {t("notifFilterUnread")}
-              <span className="notif-filter-count">{unreadCount}</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={filter === "read"}
-              className={`notif-filter-tab${filter === "read" ? " active" : ""}`}
-              onClick={() => setFilter("read")}
-            >
-              {t("notifFilterRead")}
-              <span className="notif-filter-count">{readCount}</span>
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={filter === "all"}
+                className={`notif-filter-tab${filter === "all" ? " active" : ""}`}
+                onClick={() => setFilter("all")}
+              >
+                {t("notifFilterAll")}
+                <span className="notif-filter-count">{totalAll}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={filter === "unread"}
+                className={`notif-filter-tab${filter === "unread" ? " active" : ""}`}
+                onClick={() => setFilter("unread")}
+              >
+                {t("notifFilterUnread")}
+                <span className="notif-filter-count">{unreadCount}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={filter === "read"}
+                className={`notif-filter-tab${filter === "read" ? " active" : ""}`}
+                onClick={() => setFilter("read")}
+              >
+                {t("notifFilterRead")}
+                <span className="notif-filter-count">{readCount}</span>
+              </button>
+            </div>
+
+            {/* Action button in the filter toolbar */}
+            <div className="notif-filter-actions">
+              <button
+                type="button"
+                className="btn btn-secondary notif-header-btn"
+                onClick={handleMarkAllRead}
+                disabled={!canMarkAll}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  opacity: canMarkAll ? 1 : 0.45,
+                  cursor: canMarkAll ? "pointer" : "not-allowed",
+                  pointerEvents: canMarkAll ? "auto" : "none",
+                }}
+                title={canMarkAll ? t("markAllRead") : undefined}
+              >
+                <Icon name="check" size={13} />
+                <span>{t("markAllRead")}</span>
+              </button>
+            </div>
           </div>
 
           {/* Content */}

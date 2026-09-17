@@ -47,17 +47,21 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
   const getCustomerLabel = () => {
     if (workspace?.customer_label_plural) {
       if (typeof workspace.customer_label_plural === "object") {
-        return (
+        const val =
           workspace.customer_label_plural[lang] ||
           workspace.customer_label_plural.ar ||
-          workspace.customer_label_plural.en ||
-          t("navCustomers") ||
-          "العملاء"
-        );
+          workspace.customer_label_plural.en;
+        if (typeof val === "string" && val.trim()) {
+          return val.trim();
+        }
+      } else if (
+        typeof workspace.customer_label_plural === "string" &&
+        workspace.customer_label_plural.trim()
+      ) {
+        return workspace.customer_label_plural.trim();
       }
-      return workspace.customer_label_plural;
     }
-    return t("navCustomers") || "العملاء";
+    return t("navCustomers") || (lang === "ar" ? "العملاء" : "Customers");
   };
 
   const customerIcon = workspace?.customer_icon || "users";

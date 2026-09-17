@@ -21,7 +21,7 @@ export default function BookingDetailsPage({
   onReloadBookings,
 }) {
   const { t, isRTL, lang } = useLanguage();
-  const { customerSingular } = useCustomerLabel();
+  const { customerSingular, isCustom } = useCustomerLabel();
   const toast = useToast();
 
   const [booking, setBooking] = useState(initialBooking || null);
@@ -1131,9 +1131,13 @@ export default function BookingDetailsPage({
                   margin: 0,
                 }}
               >
-                {isRTL
-                  ? "ملاحظات الجلسة، التقرير، والتوصيات المتاحة للعميل"
-                  : "Session notes, report, and recommendations available to the customer"}
+                {isCustom
+                  ? isRTL
+                    ? `ملاحظات الجلسة، التقرير، والتوصيات المتاحة لـ ${customerSingular}`
+                    : `Session notes, report, and recommendations available to the ${customerSingular.toLowerCase()}`
+                  : isRTL
+                    ? "ملاحظات الجلسة، التقرير، والتوصيات المتاحة للعميل"
+                    : "Session notes, report, and recommendations available to the customer"}
               </p>
             </div>
           </div>

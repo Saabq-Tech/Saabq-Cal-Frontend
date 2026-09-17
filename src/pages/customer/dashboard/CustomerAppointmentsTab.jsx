@@ -12,6 +12,15 @@ import { extractTranslatableText } from "../../../utils/text";
 import { useAuth } from "../../../context/AuthContext";
 import { getPublicAssetUrl } from "../../../utils/url";
 
+function getWorkspaceCustomerLabel(ws, isRTL, fallback) {
+  const lbl = ws?.customer_label_singular;
+  if (!lbl) return fallback;
+  if (typeof lbl === "object") {
+    return isRTL ? lbl.ar || lbl.en || fallback : lbl.en || lbl.ar || fallback;
+  }
+  return String(lbl) || fallback;
+}
+
 export default function CustomerAppointmentsTab() {
   const { user } = useAuth();
   const { t, isRTL, lang } = useLanguage();
@@ -144,8 +153,12 @@ export default function CustomerAppointmentsTab() {
     const serviceDuration = appt?.service?.duration_minutes || 30;
     const providerName =
       appt?.workspace_member?.name || (isRTL ? "فريق العمل" : "Specialist");
-    const customerName =
-      user?.name || appt?.customer_name || (isRTL ? "العميل" : "Client");
+    const custSingular = getWorkspaceCustomerLabel(
+      appt?.workspace,
+      isRTL,
+      isRTL ? "العميل" : "Client",
+    );
+    const customerName = user?.name || appt?.customer_name || custSingular;
     const customerPhone = user?.phone || appt?.customer_phone || "";
 
     const statusMap = {
@@ -453,7 +466,7 @@ export default function CustomerAppointmentsTab() {
             <!-- Details Grid -->
             <div class="grid-table">
               <div class="grid-cell">
-                <span class="cell-label">${isRTL ? "العميل / المستفيد" : "Customer / Client"}</span>
+                <span class="cell-label">${appt?.workspace?.customer_label_singular ? (isRTL ? `بيانات ${custSingular}` : `${custSingular} Details`) : isRTL ? "العميل / المستفيد" : "Customer / Client"}</span>
                 <span class="cell-value">${customerName} ${customerPhone ? `(${customerPhone})` : ""}</span>
               </div>
               <div class="grid-cell">
@@ -2327,8 +2340,8 @@ export default function CustomerAppointmentsTab() {
                       >
                         📝{" "}
                         {isRTL
-                          ? "ملاحظات العميل / الطلبات الخاصة:"
-                          : "Customer Notes & Special Requests:"}
+                          ? `ملاحظات ${getWorkspaceCustomerLabel(selectedAppointment?.workspace, isRTL, "العميل")} / الطلبات الخاصة:`
+                          : `${getWorkspaceCustomerLabel(selectedAppointment?.workspace, isRTL, "Customer")} Notes / Special Requests:`}
                       </strong>
                       <p
                         style={{

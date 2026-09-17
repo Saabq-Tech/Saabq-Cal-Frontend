@@ -430,74 +430,48 @@ export default function BookingsCalendar({ onSelectBooking }) {
 
           {/* Selected Day Expanded Drawer */}
           {selectedDay && (
-            <div
-              className="cal-selected-day-drawer"
-              style={{
-                background: "var(--surface-alt)",
-                padding: "18px 16px",
-                borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 14,
-                  flexWrap: "wrap",
-                  gap: 10,
-                }}
-              >
-                <h3
-                  style={{
-                    fontSize: "1.05rem",
-                    fontWeight: 800,
-                    margin: 0,
-                    color: "var(--heading)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
+            <div className="cal-selected-day-drawer animate-fade-in-up">
+              <div className="cal-drawer-header">
+                <div className="cal-drawer-title-group">
                   <Icon
                     name="clock"
                     size={18}
                     style={{ color: "var(--primary)" }}
                   />
-                  {isRTL ? "مواعيد يوم" : "Appointments for"}{" "}
-                  {(() => {
-                    const parts = selectedDay.split("-");
-                    const d = new Date(
-                      parseInt(parts[0], 10),
-                      parseInt(parts[1], 10),
-                      parseInt(parts[2], 10),
-                    );
-                    return d.toLocaleDateString(isRTL ? "ar-SA" : "en-US", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    });
-                  })()}
-                </h3>
+                  <h3 className="cal-drawer-title">
+                    <span>{isRTL ? "مواعيد يوم" : "Appointments for"}</span>
+                    <span className="cal-drawer-date-text">
+                      {(() => {
+                        const parts = selectedDay.split("-");
+                        const d = new Date(
+                          parseInt(parts[0], 10),
+                          parseInt(parts[1], 10),
+                          parseInt(parts[2], 10),
+                        );
+                        return d.toLocaleDateString(isRTL ? "ar-SA" : "en-US", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                        });
+                      })()}
+                    </span>
+                  </h3>
+                </div>
 
                 <button
                   type="button"
-                  className="btn btn-secondary btn-xs"
+                  className="btn btn-secondary btn-xs cal-drawer-close-btn"
                   onClick={() => setSelectedDay(null)}
-                  style={{ borderRadius: 6 }}
+                  aria-label={isRTL ? "إغلاق" : "Close"}
                 >
-                  <Icon name="x" size={14} />
+                  <Icon name="x" size={12} />
                   <span>{isRTL ? "إغلاق" : "Close"}</span>
                 </button>
               </div>
 
               {bookingsByDay[selectedDay] &&
               bookingsByDay[selectedDay].length > 0 ? (
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
-                >
+                <div className="cal-drawer-bookings-list">
                   {bookingsByDay[selectedDay].map((b) => {
                     const customerName =
                       b.customer_name_snapshot ||
@@ -524,27 +498,16 @@ export default function BookingsCalendar({ onSelectBooking }) {
                           <UserAvatar
                             name={customerName}
                             avatarUrl={b.customer?.avatar_url}
-                            size={40}
+                            size={38}
                           />
-                          <div style={{ minWidth: 0, flex: 1 }}>
+                          <div className="booking-list-item-info">
                             <div className="booking-list-customer-name">
                               {customerName}
                             </div>
                             <div className="booking-list-service-title">
-                              {serviceTitle}
+                              <span>{serviceTitle}</span>
                               {b.follow_up_to_id && (
-                                <span
-                                  style={{
-                                    display: "inline-block",
-                                    marginInlineStart: 8,
-                                    padding: "2px 6px",
-                                    fontSize: "0.7rem",
-                                    background: "rgba(59, 130, 246, 0.12)",
-                                    color: "#3b82f6",
-                                    borderRadius: 10,
-                                    fontWeight: 700,
-                                  }}
-                                >
+                                <span className="booking-followup-badge">
                                   {isRTL ? "متابعة" : "Follow-up"}
                                 </span>
                               )}
@@ -561,23 +524,18 @@ export default function BookingsCalendar({ onSelectBooking }) {
                               },
                             )}
                           </div>
-                          <div>{renderStatusBadge(b.status)}</div>
+                          <div className="booking-list-status">
+                            {renderStatusBadge(b.status)}
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "16px 12px",
-                    color: "var(--text-secondary)",
-                    fontSize: "0.85rem",
-                  }}
-                >
+                <div className="cal-drawer-empty-state">
                   {isRTL
-                    ? "مفيش مواعيد متسجلة في اليوم ده"
+                    ? "لا توجد مواعيد مسجلة في هذا اليوم"
                     : "No appointments scheduled for this day"}
                 </div>
               )}
@@ -1008,19 +966,57 @@ export default function BookingsCalendar({ onSelectBooking }) {
           }
 
           .cal-selected-day-drawer {
-            padding: 14px 10px !important;
+            padding: 12px 10px !important;
+            border-radius: 12px !important;
+          }
+
+          .cal-drawer-header {
+            align-items: flex-start !important;
+            margin-bottom: 12px !important;
+          }
+
+          .cal-drawer-title {
+            font-size: 0.94rem !important;
+            line-height: 1.35;
           }
 
           .booking-list-item {
-            padding: 10px 12px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 10px !important;
+            gap: 8px !important;
+          }
+
+          .booking-list-item-main {
+            width: 100% !important;
           }
 
           .booking-list-customer-name {
             font-size: 0.88rem !important;
           }
 
-          .booking-list-time {
+          .booking-list-service-title {
             font-size: 0.78rem !important;
+          }
+
+          .booking-list-item-meta {
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            width: 100% !important;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-light);
+          }
+
+          .booking-list-time {
+            font-size: 0.82rem !important;
+          }
+
+          .cal-legend-bar {
+            padding: 10px 12px !important;
+            gap: 10px 14px !important;
+            font-size: 0.74rem !important;
+            border-radius: 10px;
           }
         }
 
@@ -1038,6 +1034,8 @@ export default function BookingsCalendar({ onSelectBooking }) {
           font-size: 0.82rem;
           font-weight: 700;
           color: var(--text-secondary);
+          width: 100%;
+          box-sizing: border-box;
         }
         .cal-legend-item {
           display: flex;
@@ -1051,10 +1049,90 @@ export default function BookingsCalendar({ onSelectBooking }) {
           flex-shrink: 0;
         }
 
-        /* Booking details drawer list */
+        /* Selected Day Drawer & Items */
+        .cal-selected-day-drawer {
+          background: var(--surface-alt);
+          padding: 18px 16px;
+          border-radius: var(--radius-lg);
+          border: 1px solid var(--border);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+          width: 100%;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+
+        .cal-drawer-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 14px;
+          width: 100%;
+        }
+
+        .cal-drawer-title-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+          flex: 1;
+        }
+
+        .cal-drawer-title {
+          font-size: 1.02rem;
+          font-weight: 800;
+          margin: 0;
+          color: var(--heading);
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          flex-wrap: wrap;
+          min-width: 0;
+          line-height: 1.35;
+        }
+
+        .cal-drawer-date-text {
+          color: var(--primary);
+          font-weight: 800;
+        }
+
+        .cal-drawer-close-btn {
+          border-radius: 6px !important;
+          flex-shrink: 0 !important;
+          padding: 3px 8px !important;
+          min-height: 26px !important;
+          height: 26px !important;
+          font-size: 0.72rem !important;
+          font-weight: 700 !important;
+          white-space: nowrap !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 4px !important;
+          line-height: 1 !important;
+          box-shadow: none !important;
+        }
+
+        .cal-drawer-bookings-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          width: 100%;
+        }
+
+        .cal-drawer-empty-state {
+          text-align: center;
+          padding: 16px 12px;
+          color: var(--text-secondary);
+          font-size: 0.85rem;
+          background: var(--surface);
+          border-radius: var(--radius-sm);
+          border: 1px dashed var(--border);
+        }
+
         .booking-list-item {
           display: flex;
-          justifyContent: space-between;
+          justify-content: space-between;
           align-items: center;
           background: var(--surface);
           padding: 12px 16px;
@@ -1063,6 +1141,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
           cursor: pointer;
           transition: all 0.15s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          width: 100%;
+          box-sizing: border-box;
+          gap: 12px;
+          min-width: 0;
         }
         .booking-list-item:hover {
           transform: translateY(-1px);
@@ -1075,6 +1157,10 @@ export default function BookingsCalendar({ onSelectBooking }) {
           gap: 12px;
           flex: 1;
           min-width: 0;
+        }
+        .booking-list-item-info {
+          min-width: 0;
+          flex: 1;
         }
         .booking-list-customer-name {
           font-weight: 800;
@@ -1091,12 +1177,26 @@ export default function BookingsCalendar({ onSelectBooking }) {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .booking-followup-badge {
+          display: inline-block;
+          padding: 1px 6px;
+          font-size: 0.7rem;
+          background: rgba(59, 130, 246, 0.12);
+          color: #3b82f6;
+          border-radius: 8px;
+          font-weight: 700;
+          flex-shrink: 0;
         }
         .booking-list-item-meta {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           gap: 4px;
+          flex-shrink: 0;
         }
         .booking-list-time {
           font-weight: 800;

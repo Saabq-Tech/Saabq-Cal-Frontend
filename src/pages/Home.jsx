@@ -207,13 +207,20 @@ export default function Home() {
   return (
     <main className="main-content">
       <SEO
-        title={t("pageTitleHome")}
+        title={
+          t("pageTitleHome") ||
+          (lang === "ar"
+            ? "الرئيسية — الجدولة وإدارة المواعيد الذكية"
+            : "Home — Smart Scheduling & Appointment Management")
+        }
         description={
           lang === "ar"
             ? "منصة تقويم سابق لجدولة وإدارة المواعيد الذكية — احجز، أدِر، وأتمت مواعيد مساحة عملك بسهولة."
             : "Saabq Cal — Smart scheduling and appointment management platform. Book, manage, and automate your workspace appointments."
         }
         canonical="/"
+        ogType="website"
+        ogImage="/logo.png"
         jsonLd={combinedJsonLd}
       />
 
@@ -519,14 +526,16 @@ export default function Home() {
                     className={`card card-hover feature-card ${isFlagship ? "flagship-card" : ""}`}
                   >
                     <div className="card-icon">
-                      {feature.icon_url ? (
+                      {feature.image || feature.icon_url ? (
                         <img
-                          src={feature.icon_url}
+                          src={feature.image || feature.icon_url}
                           alt=""
                           width={28}
                           height={28}
                           loading="lazy"
                         />
+                      ) : feature.icon ? (
+                        <Icon name={feature.icon} size={28} />
                       ) : (
                         FEATURE_ICONS[i % FEATURE_ICONS.length]
                       )}

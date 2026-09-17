@@ -151,17 +151,27 @@ export default function MemberLoginPage() {
     e.preventDefault();
     setWorkspaceErrors({});
 
+    const errors = {};
     if (!workspaceData.workspace_name.trim()) {
-      setWorkspaceErrors({
-        workspace_name: [t("workspaceNameRequired") || "اسم مساحة العمل مطلوب"],
-      });
+      errors.workspace_name = [
+        t("workspaceNameRequired") || "اسم مساحة العمل مطلوب",
+      ];
+    }
+    if (!workspaceData.workspace_type_id) {
+      errors.workspace_type_id = [
+        t("workspaceTypeRequired") || "تصنيف مساحة العمل مطلوب",
+      ];
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setWorkspaceErrors(errors);
       return;
     }
 
     await executeGoogleAuth(savedGoogleToken, {
       workspace_name: workspaceData.workspace_name,
       workspace_slug: workspaceData.workspace_slug || undefined,
-      workspace_type_id: workspaceData.workspace_type_id || undefined,
+      workspace_type_id: workspaceData.workspace_type_id,
       phone: workspaceData.phone || undefined,
     });
   };
@@ -388,6 +398,45 @@ export default function MemberLoginPage() {
             )}
           </div>
         )}
+
+        <p
+          className="auth-terms-disclaimer"
+          style={{
+            fontSize: "0.82rem",
+            color: "var(--text-secondary)",
+            textAlign: "center",
+            margin: "0 0 16px",
+            lineHeight: 1.5,
+          }}
+        >
+          {t("loginAgreementDisclaimer")}{" "}
+          <Link
+            to="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("termsOfService")}
+          </Link>{" "}
+          {t("andText")}{" "}
+          <Link
+            to="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            {t("privacyPolicy")}
+          </Link>
+          .
+        </p>
 
         <button
           type="submit"

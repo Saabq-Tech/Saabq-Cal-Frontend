@@ -168,7 +168,7 @@ jobs:
 
           REMOTE
 
-      - name: Ensure nginx SPA routing (try_files)
+      - name: Ensure nginx SPA & Social Crawler routing
         continue-on-error: true
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -189,20 +189,36 @@ jobs:
             exit 0
           fi
 
-          if grep -q "try_files.*index\.html" "$CONF"; then
-            echo "✓ SPA try_files already configured in $CONF"
-            exit 0
+          # Ensure backup exists
+          cp "$CONF" "$CONF.bak.$(date +%s)"
+
+          # Check if social crawler proxy is already configured
+          if ! grep -q "social_crawler" "$CONF"; then
+            echo "→ Configuring OpenGraph social crawler proxy in $CONF..."
+            sed -i '/location \/ {/i \    # Social Crawler Detection for Open Graph Previews\n    set $social_crawler 0;\n    if ($http_user_agent ~* "facebookexternalhit|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Discordbot|SkypeUriPreview|Googlebot|bingbot|Applebot") {\n        set $social_crawler 1;\n    }\n    if ($uri ~* "\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp|json|map)$") {\n        set $social_crawler 0;\n    }\n' "$CONF"
+
+            sed -i '/location \/ {/i \    location /preview {\n        proxy_pass http://127.0.0.1;\n        proxy_set_header Host admin.cal.saabq.com;\n        proxy_set_header X-Forwarded-For $remote_addr;\n        proxy_set_header X-Forwarded-Proto $scheme;\n        proxy_set_header X-Real-IP $remote_addr;\n    }\n' "$CONF"
+
+            sed -i '/location \/ {/a \        if ($social_crawler = 1) {\n            rewrite ^ /preview$request_uri? last;\n        }' "$CONF"
           fi
 
-          echo "→ Adding try_files to $CONF..."
-          sed -i '/location \/ {/a\        try_files $uri $uri/ /index.html;' "$CONF"
+          if ! grep -q "try_files.*index\.html" "$CONF"; then
+            echo "→ Adding try_files to $CONF..."
+            sed -i '/location \/ {/a\        try_files $uri $uri/ /index.html;' "$CONF"
+          fi
 
           echo "→ Testing nginx config..."
-          nginx -t
-
-          echo "→ Reloading nginx..."
-          systemctl reload nginx
-
-          echo "✓ nginx SPA routing configured"
+          if nginx -t; then
+            echo "→ Reloading nginx..."
+            systemctl reload nginx
+            echo "✓ nginx SPA and social crawler routing configured successfully"
+          else
+            echo "⚠ nginx -t failed, restoring backup..."
+            LATEST_BAK=$(ls -t "$CONF.bak."* 2>/dev/null | head -1)
+            if [ -n "$LATEST_BAK" ]; then
+              cp "$LATEST_BAK" "$CONF"
+            fi
+            exit 1
+          fi
 
           NGINX_FIX

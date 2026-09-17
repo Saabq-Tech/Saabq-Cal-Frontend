@@ -46,9 +46,13 @@ function ToastBridge({ message }) {
   const shown = React.useRef(false);
 
   React.useEffect(() => {
-    if (message && !shown.current) {
+    if (message && !shown.current && toast) {
       shown.current = true;
-      toast.show(message, "error", 6000);
+      if (typeof toast.error === "function") {
+        toast.error(message, 6000);
+      } else if (typeof toast.show === "function") {
+        toast.show(message, "error", 6000);
+      }
     }
   }, [message, toast]);
 

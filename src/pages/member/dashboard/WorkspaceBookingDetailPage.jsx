@@ -22,7 +22,7 @@ export default function WorkspaceBookingDetailPage() {
 
   return (
     <CapabilityGate capabilityCode="BOOKING">
-      <div className="card workspace-bookings-card">
+      <div className="workspace-page-container">
         <SEO title={`${t("bookings") || "المواعيد"} #${bookingId}`} noindex />
         <BookingDetailsPage
           bookingId={bookingId}

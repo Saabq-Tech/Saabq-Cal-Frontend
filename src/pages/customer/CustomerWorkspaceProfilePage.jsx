@@ -12,7 +12,11 @@ import {
 import Icon from "../../components/common/Icon";
 import { formatCurrency } from "../../utils/currency";
 import { stripHtml } from "../../utils/htmlUtils";
-import { applyWorkspaceBranding } from "../../utils/theme";
+import {
+  applyWorkspaceBranding,
+  resetWorkspaceBranding,
+} from "../../utils/theme";
+import { useCustomerLabel } from "../../hooks/useCustomerLabel";
 
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
@@ -23,6 +27,7 @@ export default function WorkspaceProfilePage() {
   const isBookMode = searchParams.has("book");
 
   const [workspace, setWorkspace] = useState(null);
+  const { customerPlural, isCustom } = useCustomerLabel(workspace);
   const [services, setServices] = useState([]);
   const [specialistRoles, setSpecialistRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,22 +100,9 @@ export default function WorkspaceProfilePage() {
   // Apply workspace custom colors to CSS variables dynamically & sync upper browser theme-color
   useEffect(() => {
     if (workspace) {
-      applyWorkspaceBranding(
-        workspace.primary_color,
-        workspace.secondary_color,
-        workspace.hover_color,
-      );
+      applyWorkspaceBranding(workspace);
       return () => {
-        const storedUser = localStorage.getItem("saabq_user");
-        let prevWs = null;
-        try {
-          prevWs = storedUser ? JSON.parse(storedUser)?.workspace : null;
-        } catch {}
-        applyWorkspaceBranding(
-          prevWs?.primary_color || null,
-          prevWs?.secondary_color || null,
-          prevWs?.hover_color || null,
-        );
+        resetWorkspaceBranding();
       };
     }
   }, [workspace]);
@@ -315,12 +307,12 @@ export default function WorkspaceProfilePage() {
           getTranslatableText(workspace.booking_short_intro) ||
             getTranslatableText(workspace.description) ||
             (isRTL
-              ? `احجز أفضل الخدمات والمواعيد لدى ${getTranslatableText(workspace.name)}`
-              : `Book top services and appointments at ${getTranslatableText(workspace.name)}`),
+              ? `احجز أفضل الخدمات والمواعيد بسهولة لدى ${getTranslatableText(workspace.name)}`
+              : `Book top services and appointments easily at ${getTranslatableText(workspace.name)}`),
         )}
         canonical={`/${workspace.slug}`}
         ogType="business.business"
-        ogImage={workspace.logo_url || workspace.cover_url}
+        ogImage={workspace.cover_url || workspace.logo_url}
         jsonLd={[jsonLd]}
       />
 
@@ -1653,9 +1645,13 @@ export default function WorkspaceProfilePage() {
                 fontSize: "0.95rem",
               }}
             >
-              {isRTL
-                ? "سياسات واضحة لضمان تجربة حجز سلسة ومضمونة لجميع العملاء."
-                : "Clear workspace policies to guarantee a seamless booking experience."}
+              {isCustom
+                ? isRTL
+                  ? `سياسات واضحة لضمان تجربة حجز سلسة ومضمونة لجميع ${customerPlural}.`
+                  : `Clear workspace policies to guarantee a seamless booking experience for all ${customerPlural.toLowerCase()}.`
+                : isRTL
+                  ? "سياسات واضحة لضمان تجربة حجز سلسة ومضمونة لجميع العملاء."
+                  : "Clear workspace policies to guarantee a seamless booking experience."}
             </p>
           </div>
 

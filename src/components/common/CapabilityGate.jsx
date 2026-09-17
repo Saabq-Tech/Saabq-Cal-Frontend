@@ -82,7 +82,7 @@ export default function CapabilityGate({ capabilityCode, children }) {
 
       <div style={{ display: "flex", justifyContent: "center", gap: 12 }}>
         <Link
-          to="/member/workspace/subscriptions"
+          to="/member/dashboard/subscriptions"
           className="btn btn-primary btn-md"
           style={{ gap: 8 }}
         >
