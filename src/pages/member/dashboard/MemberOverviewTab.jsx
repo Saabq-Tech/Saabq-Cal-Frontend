@@ -36,6 +36,7 @@ export default function MemberOverviewTab() {
   const vibe = useMemo(() => getWorkspaceVibe(ws, lang), [ws, lang]);
 
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
+  const isCustomersCapable = checkWorkspaceCapability(user, "CUSTOMERS");
 
   const [bookings, setBookings] = useState([]);
   const [calendarBookings, setCalendarBookings] = useState([]);
@@ -292,7 +293,7 @@ export default function MemberOverviewTab() {
             .then((res) => res.data?.data || [])
             .catch(() => [])
         : Promise.resolve([]),
-      canReadCustomers
+      isCustomersCapable && canReadCustomers
         ? client
             .get(endpoints.workspaceCustomers, { params: { per_page: 1 } })
             .then((res) => res.data?.meta?.total ?? null)

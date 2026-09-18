@@ -236,6 +236,7 @@ export default function IntegrationsSettingsPage() {
   };
 
   const loadSecurityData = async () => {
+    if (!checkWorkspaceCapability(user, "INTEGRATIONS")) return;
     const gRes = await fetchGoogleIntegration();
     if (gRes?.success && gRes.data) {
       setGoogleIntegration(gRes.data);
@@ -344,9 +345,11 @@ export default function IntegrationsSettingsPage() {
   };
 
   useEffect(() => {
-    loadSecurityData();
+    if (checkWorkspaceCapability(user, "INTEGRATIONS")) {
+      loadSecurityData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   // --- Google Integration Handlers ---
   const handleStartGoogleOAuth = () => {

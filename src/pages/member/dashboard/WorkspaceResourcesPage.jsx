@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import client, { endpoints } from "../../../api/client";
@@ -9,8 +10,10 @@ import { TableSkeleton } from "../../../components/ui/Skeleton";
 import { usePermissions } from "../../../hooks/usePermissions";
 
 import CapabilityGate from "../../../components/common/CapabilityGate";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 
 export default function WorkspaceResourcesPage() {
+  const { user } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
   const {
@@ -29,9 +32,11 @@ export default function WorkspaceResourcesPage() {
   const canEdit =
     isOwner || canCreateResources || canUpdateResources || canDeleteResources;
 
+  const isCapAllowed = checkWorkspaceCapability(user, "RESOURCES");
+
   const loadingRef = useRef(false);
   const loadData = async () => {
-    if (!canRead) {
+    if (!isCapAllowed || !canRead) {
       setLoading(false);
       return;
     }
@@ -58,7 +63,7 @@ export default function WorkspaceResourcesPage() {
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canRead]);
+  }, [isCapAllowed, canRead]);
 
   const handleSaveResource = async (resourceForm) => {
     try {

@@ -10,6 +10,7 @@ import Icon from "../../../components/common/Icon";
 import RichTextEditor from "../../../components/common/RichTextEditor";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 import CapabilityGate from "../../../components/common/CapabilityGate";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import { usePermissions } from "../../../hooks/usePermissions";
 
 export default function WorkspaceTemplatesPage({ embedded = false }) {
@@ -23,6 +24,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     canDeleteBookings,
     canUpdateSettings,
   } = usePermissions();
+
+  const isCapAllowed = checkWorkspaceCapability(user, "CUSTOM_TEMPLATES");
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,20 +56,30 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     user?.workspace?.workspace_type_id || user?.workspace_type_id || null;
 
   const loadTemplates = useCallback(async () => {
+    if (!isCapAllowed) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const res = await client.get(endpoints.workspaceTemplates);
       setTemplates(res.data?.data || []);
-    } catch {
-      toast.error(isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates");
+    } catch (err) {
+      if (err?.response?.status !== 403) {
+        toast.error(isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates");
+      }
     } finally {
       setLoading(false);
     }
-  }, [isRTL, toast]);
+  }, [isCapAllowed, isRTL, toast]);
 
   useEffect(() => {
-    loadTemplates();
-  }, [loadTemplates]);
+    if (isCapAllowed) {
+      loadTemplates();
+    } else {
+      setLoading(false);
+    }
+  }, [isCapAllowed, loadTemplates]);
 
   const openCreateModal = () => {
     setEditingTemplate(null);
@@ -172,39 +185,109 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       >
         {!embedded && <SEO pageKey="workspaceTemplates" />}
 
-        {/* Top Standard Header */}
-        <WorkspacePageHeader
-          title={
-            isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"
-          }
-          subtitle={
-            isRTL
-              ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية."
-              : "Manage ready-to-use templates for reports and consultation summaries."
-          }
-          icon="file-text"
-          actions={
-            canEdit && (
+        {/* Header - render compact header when embedded in Settings, or full WorkspacePageHeader when standalone */}
+        {embedded ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 16,
+              marginBottom: 4,
+              paddingBottom: 16,
+              borderBottom: "1px solid var(--border-light)",
+            }}
+          >
+            <div>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: "1.1rem",
+                  fontWeight: 800,
+                  color: "var(--heading)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Icon
+                  name="file-text"
+                  size={18}
+                  style={{ color: "var(--primary)" }}
+                />
+                <span>
+                  {isRTL
+                    ? "قوالب التقارير والملخصات"
+                    : "Report & Summary Templates"}
+                </span>
+              </h3>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: "0.84rem",
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.5,
+                }}
+              >
+                {isRTL
+                  ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية."
+                  : "Manage ready-to-use templates for reports and consultation summaries."}
+              </p>
+            </div>
+            {canEdit && (
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 onClick={openCreateModal}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 8,
-                  padding: "10px 20px",
+                  gap: 6,
+                  padding: "8px 16px",
                   fontWeight: 700,
-                  borderRadius: "var(--radius-md, 10px)",
-                  boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+                  borderRadius: "var(--radius-md, 8px)",
                 }}
               >
-                <Icon name="plus" size={18} />
+                <Icon name="plus" size={16} />
                 <span>{isRTL ? "إضافة قالب جديد" : "Add Template"}</span>
               </button>
-            )
-          }
-        />
+            )}
+          </div>
+        ) : (
+          <WorkspacePageHeader
+            title={
+              isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"
+            }
+            subtitle={
+              isRTL
+                ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية."
+                : "Manage ready-to-use templates for reports and consultation summaries."
+            }
+            icon="file-text"
+            actions={
+              canEdit && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={openCreateModal}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                    fontWeight: 700,
+                    borderRadius: "var(--radius-md, 10px)",
+                    boxShadow: "0 4px 14px rgba(2, 105, 130, 0.25)",
+                  }}
+                >
+                  <Icon name="plus" size={18} />
+                  <span>{isRTL ? "إضافة قالب جديد" : "Add Template"}</span>
+                </button>
+              )
+            }
+          />
+        )}
         {/* SEARCH BAR */}
         <div
           style={{

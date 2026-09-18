@@ -12,6 +12,7 @@ import CapabilityGate from "../../../components/common/CapabilityGate";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import { formatCurrency } from "../../../utils/currency";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
   const { user } = useAuth();
@@ -25,6 +26,7 @@ export default function WorkspaceCustomerProfilePage() {
     canReadPayments,
   } = usePermissions();
 
+  const isCapAllowed = checkWorkspaceCapability(user, "CUSTOMERS");
   const canWrite = isOwner || canUpdateCustomers;
   const canBook = isOwner || canCreateBookings;
 
@@ -93,6 +95,10 @@ export default function WorkspaceCustomerProfilePage() {
 
   // Fetch Customer Profile
   const fetchCustomer = useCallback(async () => {
+    if (!isCapAllowed) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const res = await client.get(endpoints.workspaceCustomerItem(customerId));
@@ -103,16 +109,22 @@ export default function WorkspaceCustomerProfilePage() {
         setInternalNotes(pivot.internal_notes || data.notes || "");
       }
     } catch (err) {
-      console.error("Failed to load customer profile:", err);
-      toast.show(customerNotFound, "error");
+      if (err.response?.status !== 403) {
+        console.error("Failed to load customer profile:", err);
+        toast.show(customerNotFound, "error");
+      }
     } finally {
       setLoading(false);
     }
-  }, [customerId, toast, customerNotFound]);
+  }, [isCapAllowed, customerId, toast, customerNotFound]);
 
   useEffect(() => {
-    fetchCustomer();
-  }, [fetchCustomer]);
+    if (isCapAllowed) {
+      fetchCustomer();
+    } else {
+      setLoading(false);
+    }
+  }, [isCapAllowed, fetchCustomer]);
 
   // Handle Save Staff Notes
   const handleSaveNotes = async () => {

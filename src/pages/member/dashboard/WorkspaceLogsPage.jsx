@@ -29,6 +29,7 @@ export default function WorkspaceLogsPage() {
 
   const canReadLogs = (isOwner || canReadSettings) && isLogsAllowed;
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
+  const isCustomersCapable = checkWorkspaceCapability(user, "CUSTOMERS");
 
   // Tabs: "analytics" (Reports & Analytics) vs "logs" (Audit & Activity Logs)
   const [activeTab, setActiveTab] = useState(() => {
@@ -159,7 +160,7 @@ export default function WorkspaceLogsPage() {
             .then((res) => res.data?.data || [])
             .catch(() => [])
         : Promise.resolve([]),
-      canReadCustomers
+      isCustomersCapable && canReadCustomers
         ? client
             .get(endpoints.workspaceCustomers, { params: { per_page: 1 } })
             .then((res) => res.data?.meta?.total ?? null)
@@ -187,7 +188,7 @@ export default function WorkspaceLogsPage() {
     return () => {
       cancelled = true;
     };
-  }, [isReportsAllowed, isBookingCapable, canReadBookings, canReadCustomers]);
+  }, [isReportsAllowed, isBookingCapable, isCustomersCapable, canReadBookings, canReadCustomers]);
 
   // 2. Fetch Activity Logs
   const loadingLogsRef = useRef(false);

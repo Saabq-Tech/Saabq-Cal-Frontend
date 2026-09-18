@@ -17,6 +17,7 @@ import {
   PlanLimitModal,
 } from "../../../components/common/PlanLimitAlert";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 
 export default function WorkspaceCustomersPage() {
   const { user } = useAuth();
@@ -25,12 +26,15 @@ export default function WorkspaceCustomersPage() {
   const navigate = useNavigate();
   const {
     isOwner: _isOwner,
+    canReadCustomers,
     canCreateCustomers,
     canUpdateCustomers,
     canDeleteCustomers,
     canCreateBookings,
   } = usePermissions();
 
+  const isCapAllowed = checkWorkspaceCapability(user, "CUSTOMERS");
+  const canRead = _isOwner || canReadCustomers;
   const canWrite = _isOwner || canCreateCustomers || canUpdateCustomers;
   const workspace = user?.workspace;
 
@@ -106,6 +110,10 @@ export default function WorkspaceCustomersPage() {
   // Fetch Customers
   const fetchCustomers = useCallback(
     async (page = 1) => {
+      if (!isCapAllowed || !canRead) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const res = await client.get(endpoints.workspaceCustomers, {
@@ -128,25 +136,31 @@ export default function WorkspaceCustomersPage() {
             res.data?.meta?.total || (Array.isArray(data) ? data.length : 0),
         });
       } catch (err) {
-        console.error("Failed to fetch customers:", err);
-        toast.show(
-          t("errorLoadingData") ||
-            `حدث خطأ أثناء تحميل قائمة ${customerPlural}`,
-          "error",
-        );
+        if (err.response?.status !== 403) {
+          console.error("Failed to fetch customers:", err);
+          toast.show(
+            t("errorLoadingData") ||
+              `حدث خطأ أثناء تحميل قائمة ${customerPlural}`,
+            "error",
+          );
+        }
       } finally {
         setLoading(false);
       }
     },
-    [search, statusFilter, sortBy, t, toast, customerPlural],
+    [isCapAllowed, canRead, search, statusFilter, sortBy, t, toast, customerPlural],
   );
 
   useEffect(() => {
+    if (!isCapAllowed || !canRead) {
+      setLoading(false);
+      return;
+    }
     const timer = setTimeout(() => {
       fetchCustomers(1);
     }, 250);
     return () => clearTimeout(timer);
-  }, [fetchCustomers]);
+  }, [isCapAllowed, canRead, fetchCustomers]);
 
   const limitInfo = getLimitInfo(
     user,
@@ -201,15 +215,21 @@ export default function WorkspaceCustomersPage() {
     setSavingCustomer(true);
     setFormErrors({});
     try {
+      const payload = {
+        ...customerForm,
+        email: customerForm.email?.trim() || null,
+        phone: customerForm.phone?.trim() || null,
+        customer_reference: customerForm.customer_reference?.trim() || null,
+      };
       if (isEdit && selectedCustomer) {
         await client.put(
           endpoints.workspaceCustomerItem(selectedCustomer.id),
-          customerForm,
+          payload,
         );
         toast.show(customerUpdatedSuccess, "success");
         setIsEditModalOpen(false);
       } else {
-        await client.post(endpoints.workspaceCustomers, customerForm);
+        await client.post(endpoints.workspaceCustomers, payload);
         toast.show(customerCreatedSuccess, "success");
         setIsAddModalOpen(false);
       }
@@ -1921,7 +1941,7 @@ export default function WorkspaceCustomersPage() {
                   >
                     <div className="form-group">
                       <label className="form-label" style={{ fontWeight: 700 }}>
-                        {t("email") || "البريد الإلكتروني"} *
+                        {t("email") || "البريد الإلكتروني"}
                       </label>
                       <input
                         type="email"
@@ -1934,7 +1954,6 @@ export default function WorkspaceCustomersPage() {
                           })
                         }
                         placeholder="name@example.com"
-                        required
                       />
                       {formErrors.email && (
                         <div className="form-error-msg">

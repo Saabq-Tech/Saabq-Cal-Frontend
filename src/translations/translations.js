@@ -992,6 +992,9 @@ export const translations = {
     memberUpdatedSuccess: "تم تحديث بيانات العضو بنجاح",
     inviteSentSuccess: "تم إرسال الدعوة إلى العضو بنجاح",
     memberDeletedSuccess: "تم حذف العضو من مساحة العمل",
+    deleteMember: "حذف العضو",
+    confirmDeleteMember:
+      "هل أنت متأكد من رغبتك في حذف هذا العضو من مساحة العمل؟ لا يمكن التراجع عن هذا الإجراء.",
     rolesLoadFailed: "حدث خطأ أثناء تحميل أدوار وصلاحيات مساحة العمل",
     roleUpdatedSuccess: "تم تحديث الدور بنجاح",
     roleCreatedSuccess: "تم إنشاء الدور المخصص بنجاح",
@@ -3224,6 +3227,9 @@ export const translations = {
     memberUpdatedSuccess: "Member details updated successfully",
     inviteSentSuccess: "Invitation sent successfully",
     memberDeletedSuccess: "Member removed from workspace",
+    deleteMember: "Delete Member",
+    confirmDeleteMember:
+      "Are you sure you want to remove this member from the workspace? This action cannot be undone.",
     rolesLoadFailed: "Failed to load workspace roles and permissions",
     roleUpdatedSuccess: "Role updated successfully",
     roleCreatedSuccess: "Custom role created successfully",

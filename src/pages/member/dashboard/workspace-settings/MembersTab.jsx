@@ -11,6 +11,8 @@ import {
 } from "../../../../components/common/PlanLimitAlert";
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
+import ConfirmationModal from "./ConfirmationModal";
+
 export default function MembersTab({
   membersList,
   rolesList,
@@ -26,10 +28,19 @@ export default function MembersTab({
   const allowDelete = canDelete !== undefined ? canDelete : canEdit;
 
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    isDanger: true,
+    confirmText: "",
+    cancelText: "",
+    onConfirm: null,
+  });
   const [form, setForm] = useState({
     editing_id: null,
     name: "",
@@ -76,6 +87,28 @@ export default function MembersTab({
     });
     setShowPassword(false);
     setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (member) => {
+    const memberName = member.name || (isRTL ? "هذا العضو" : "this member");
+
+    setConfirmModal({
+      isOpen: true,
+      isDanger: true,
+      title: t("deleteMember") || (isRTL ? "حذف العضو" : "Delete Member"),
+      message:
+        t("confirmDeleteMember") ||
+        (isRTL
+          ? `هل أنت متأكد من رغبتك في حذف "${memberName}" من مساحة العمل؟ لا يمكن التراجع عن هذا الإجراء.`
+          : `Are you sure you want to remove "${memberName}" from the workspace? This action cannot be undone.`),
+      confirmText: t("delete") || (isRTL ? "حذف" : "Delete"),
+      cancelText: t("cancel") || (isRTL ? "إلغاء" : "Cancel"),
+      onConfirm: () => {
+        if (onDeleteMember) {
+          onDeleteMember(member);
+        }
+      },
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -339,7 +372,7 @@ export default function MembersTab({
                             type="button"
                             className="btn btn-ghost btn-sm"
                             style={{ color: "#ef4444" }}
-                            onClick={() => onDeleteMember(m)}
+                            onClick={() => handleDeleteClick(m)}
                           >
                             {t("delete") || "حذف"}
                           </button>
@@ -532,6 +565,11 @@ export default function MembersTab({
           </div>,
           document.body,
         )}
+      {/* Delete Member Confirmation Modal */}
+      <ConfirmationModal
+        modalState={confirmModal}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

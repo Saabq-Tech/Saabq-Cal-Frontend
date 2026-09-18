@@ -11,11 +11,14 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 import { getCurrencySymbol } from "../../../utils/currency";
 import CapabilityGate from "../../../components/common/CapabilityGate";
+import { checkWorkspaceCapability } from "../../../utils/capabilities";
 export default function WorkspacePaymentsPage() {
   const { user } = useAuth();
   const { isOwner, canReadPayments, canUpdatePayments } = usePermissions();
   const { t, isRTL } = useLanguage();
   const toast = useToast();
+
+  const isCapAllowed = checkWorkspaceCapability(user, "PAYMENTS");
 
   const wsCurrency =
     user?.workspace?.currency ||
@@ -44,6 +47,10 @@ export default function WorkspacePaymentsPage() {
   const [lightboxImage, setLightboxImage] = useState(null);
 
   const fetchWallet = useCallback(async () => {
+    if (!isCapAllowed || (!isOwner && !canReadPayments)) {
+      setWalletLoading(false);
+      return;
+    }
     setWalletLoading(true);
     try {
       const res = await client.get(endpoints.workspacePaymentsWallet);
@@ -53,10 +60,14 @@ export default function WorkspacePaymentsPage() {
     } finally {
       setWalletLoading(false);
     }
-  }, []);
+  }, [isCapAllowed, isOwner, canReadPayments]);
 
   const fetchPayments = useCallback(
     async (targetPage = 1) => {
+      if (!isCapAllowed || (!isOwner && !canReadPayments)) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const params = {
@@ -83,10 +94,12 @@ export default function WorkspacePaymentsPage() {
         setPayments(list);
         setMeta(paginationMeta);
       } catch (err) {
-        toast.error(
-          err.response?.data?.message ||
-            (isRTL ? "فشل تحميل سجل المدفوعات" : "Failed to load payments"),
-        );
+        if (err.response?.status !== 403) {
+          toast.error(
+            err.response?.data?.message ||
+              (isRTL ? "فشل تحميل سجل المدفوعات" : "Failed to load payments"),
+          );
+        }
         setPayments([]);
         setMeta(null);
       } finally {
@@ -94,6 +107,9 @@ export default function WorkspacePaymentsPage() {
       }
     },
     [
+      isCapAllowed,
+      isOwner,
+      canReadPayments,
       statusFilter,
       providerFilter,
       payableTypeFilter,
@@ -105,11 +121,14 @@ export default function WorkspacePaymentsPage() {
   );
 
   useEffect(() => {
-    if (isOwner || canReadPayments) {
+    if (isCapAllowed && (isOwner || canReadPayments)) {
       fetchWallet();
       fetchPayments(page);
+    } else {
+      setLoading(false);
+      setWalletLoading(false);
     }
-  }, [fetchWallet, fetchPayments, page, isOwner, canReadPayments]);
+  }, [fetchWallet, fetchPayments, page, isCapAllowed, isOwner, canReadPayments]);
 
   const handleVerify = async (payment) => {
     setActionLoading(true);
