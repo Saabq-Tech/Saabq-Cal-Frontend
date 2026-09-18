@@ -30,7 +30,7 @@ export default function WorkspaceSchedulesPage() {
   const canEdit =
     isOwner || canCreateSchedules || canUpdateSchedules || canDeleteSchedules;
 
-  const isCapAllowed = checkWorkspaceCapability(user, "PER_MEMBER_CALENDAR");
+  const isCapAllowed = checkWorkspaceCapability(user, "SCHEDULES");
 
   const loadingRef = useRef(false);
   const loadSchedules = async () => {
@@ -66,7 +66,7 @@ export default function WorkspaceSchedulesPage() {
   }, [isCapAllowed, canRead]);
 
   return (
-    <CapabilityGate capabilityCode="PER_MEMBER_CALENDAR">
+    <CapabilityGate capabilityCode="SCHEDULES">
       <div className="workspace-page-container">
         <SEO pageKey="workspaceSchedules" />
         {loading ? (
