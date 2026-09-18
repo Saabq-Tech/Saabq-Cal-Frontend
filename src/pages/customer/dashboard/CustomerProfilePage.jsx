@@ -1,17 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
-import CustomerSecurityPage from "./CustomerSecurityPage";
-import CustomerChangePasswordPage from "./CustomerChangePasswordPage";
-import CustomerAppointmentsTab from "./CustomerAppointmentsTab";
-import CustomerOverviewTab from "./CustomerOverviewTab";
-import NotificationsPage from "../../../components/dashboard/NotificationsPage";
-import ChatsPage from "../../../components/dashboard/ChatsPage";
 import SEO from "../../../components/ui/SEO";
 import { ProfileSkeleton } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
+import { lazyWithRetry as lazy } from "../../../utils/lazyWithRetry";
+
+const CustomerSecurityPage = lazy(() => import("./CustomerSecurityPage"));
+const CustomerChangePasswordPage = lazy(
+  () => import("./CustomerChangePasswordPage"),
+);
+const CustomerAppointmentsTab = lazy(() => import("./CustomerAppointmentsTab"));
+const CustomerOverviewTab = lazy(() => import("./CustomerOverviewTab"));
+const NotificationsPage = lazy(
+  () => import("../../../components/dashboard/NotificationsPage"),
+);
+const ChatsPage = lazy(() => import("../../../components/dashboard/ChatsPage"));
 
 export default function CustomerProfilePage() {
   const { user, updateProfile, uploadAvatar, loading } = useAuth();
@@ -87,7 +93,11 @@ export default function CustomerProfilePage() {
   if (!user) return null;
 
   if (currentTab === "overview") {
-    return <CustomerOverviewTab />;
+    return (
+      <Suspense fallback={<ProfileSkeleton />}>
+        <CustomerOverviewTab />
+      </Suspense>
+    );
   }
 
   if (
@@ -95,24 +105,28 @@ export default function CustomerProfilePage() {
     currentTab === "bookings" ||
     currentTab === "payments"
   ) {
-    return <CustomerAppointmentsTab />;
+    return (
+      <Suspense fallback={<ProfileSkeleton />}>
+        <CustomerAppointmentsTab />
+      </Suspense>
+    );
   }
 
   if (currentTab === "security") {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="customerSecurity" />
         <CustomerSecurityPage />
-      </>
+      </Suspense>
     );
   }
 
   if (currentTab === "notifications") {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="notifications" />
         <NotificationsPage />
-      </>
+      </Suspense>
     );
   }
 
@@ -122,19 +136,19 @@ export default function CustomerProfilePage() {
     currentTab === "messages"
   ) {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="chats" />
         <ChatsPage />
-      </>
+      </Suspense>
     );
   }
 
   if (currentTab === "password") {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="customerChangePassword" />
         <CustomerChangePasswordPage />
-      </>
+      </Suspense>
     );
   }
 

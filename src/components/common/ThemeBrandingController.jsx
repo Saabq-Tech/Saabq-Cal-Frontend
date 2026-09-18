@@ -5,6 +5,7 @@ import {
   isWorkspaceRoute,
   applyWorkspaceBranding,
   resetWorkspaceBranding,
+  getSavedWorkspaceBranding,
 } from "../../utils/theme";
 
 /**
@@ -28,7 +29,7 @@ export default function ThemeBrandingController() {
         pathname.toLowerCase() === "/member" ||
         pathname.toLowerCase().startsWith("/member/")
       ) {
-        const ws = user?.workspace;
+        const ws = user?.workspace || getSavedWorkspaceBranding();
         if (ws) {
           applyWorkspaceBranding(ws);
         }

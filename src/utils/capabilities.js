@@ -35,7 +35,28 @@ export function checkWorkspaceCapability(user, capabilityCode) {
     ? user.workspace.active_capabilities
     : [];
 
-  return activeCaps.includes(capabilityCode);
+  if (activeCaps.includes(capabilityCode)) {
+    return true;
+  }
+
+  // Graceful capability fallbacks for backward compatibility
+  if (capabilityCode === "SERVICES") {
+    return activeCaps.includes("BOOKING");
+  }
+  if (capabilityCode === "SCHEDULES") {
+    return (
+      activeCaps.includes("PER_MEMBER_CALENDAR") ||
+      activeCaps.includes("BOOKING")
+    );
+  }
+  if (capabilityCode === "ROLES_PERMISSIONS") {
+    return activeCaps.includes("TEAM_MEMBERS");
+  }
+  if (capabilityCode === "CUSTOMERS") {
+    return activeCaps.includes("BOOKING");
+  }
+
+  return false;
 }
 
 /**

@@ -108,8 +108,14 @@ export default function ScrollReveal() {
     const timeoutId2 = setTimeout(scanAndObserve, 800);
 
     // Watch for DOM mutations (new components, tab switches, cards loaded via API)
+    let mutationRaf = null;
     const mutationObserver = new MutationObserver(() => {
-      scanAndObserve();
+      if (!mutationRaf) {
+        mutationRaf = requestAnimationFrame(() => {
+          scanAndObserve();
+          mutationRaf = null;
+        });
+      }
     });
 
     mutationObserver.observe(document.body, {
@@ -120,6 +126,7 @@ export default function ScrollReveal() {
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(timeoutId2);
+      if (mutationRaf) cancelAnimationFrame(mutationRaf);
       observer.disconnect();
       mutationObserver.disconnect();
     };

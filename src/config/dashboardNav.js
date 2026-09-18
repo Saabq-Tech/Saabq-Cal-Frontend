@@ -106,7 +106,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "schedule_delete",
         "schedule_write",
       ],
-      capability: "PER_MEMBER_CALENDAR",
+      capability: "SCHEDULES",
     },
     {
       id: "customers",
@@ -120,7 +120,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "customer_delete",
         "customer_write",
       ],
-      capability: null,
+      capability: "CUSTOMERS",
     },
     {
       id: "services",
@@ -134,7 +134,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "service_delete",
         "service_write",
       ],
-      capability: "BOOKING",
+      capability: "SERVICES",
     },
     {
       id: "members",
@@ -189,7 +189,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "role_delete",
         "role_write",
       ],
-      capability: "TEAM_MEMBERS",
+      capability: "ROLES_PERMISSIONS",
     },
     {
       id: "subscriptions",

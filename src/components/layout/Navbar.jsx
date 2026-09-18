@@ -13,11 +13,7 @@ import {
   getWorkspaceTabs,
   canViewWorkspaceTab,
 } from "../../config/dashboardNav";
-import {
-  updateMetaThemeColor,
-  isWorkspaceRoute,
-  getSavedWorkspaceBranding,
-} from "../../utils/theme";
+import { updateMetaThemeColor, isWorkspaceRoute } from "../../utils/theme";
 import { checkWorkspaceCapability } from "../../utils/capabilities";
 
 export default function Navbar() {
@@ -117,7 +113,7 @@ export default function Navbar() {
               }
             }
           });
-          setActiveSection(current);
+          setActiveSection((prev) => (prev !== current ? current : prev));
           ticking = false;
         });
         ticking = true;
@@ -171,23 +167,7 @@ export default function Navbar() {
       dark ? "dark" : "light",
     );
     localStorage.setItem("saabq_theme", dark ? "dark" : "light");
-    if (isWorkspaceRoute(location.pathname)) {
-      const saved = getSavedWorkspaceBranding();
-      if (saved) {
-        const bottomColor = dark
-          ? saved.background_color_dark ||
-            saved.surface_color_dark ||
-            saved.secondary_color ||
-            saved.primary_color ||
-            "#034d60"
-          : saved.secondary_color || saved.primary_color || "#033d4b";
-        updateMetaThemeColor(bottomColor);
-      } else {
-        updateMetaThemeColor(dark ? "#034d60" : "#033d4b");
-      }
-    } else {
-      updateMetaThemeColor(dark ? "#034d60" : "#033d4b");
-    }
+    updateMetaThemeColor();
   }, [dark, location.pathname]);
   // Lock scroll when mobile drawer is open
   useEffect(() => {

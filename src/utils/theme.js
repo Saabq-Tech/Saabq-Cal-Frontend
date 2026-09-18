@@ -15,16 +15,49 @@ export function hexToRgba(hex, alpha = 0.12) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+export function getCurrentThemeColor() {
+  if (typeof document === "undefined") return "#026982";
+  const root = document.documentElement;
+  const isDark = root.classList.contains("dark");
+  const currentPath =
+    typeof window !== "undefined" ? window.location.pathname : "";
+
+  if (isWorkspaceRoute(currentPath)) {
+    const saved = getSavedWorkspaceBranding();
+    if (saved) {
+      if (isDark) {
+        return (
+          saved.primary_color ||
+          saved.background_color_dark ||
+          saved.surface_color_dark ||
+          saved.secondary_color ||
+          "#022a35"
+        );
+      }
+      return saved.primary_color || saved.secondary_color || "#026982";
+    }
+    const cssPrimary = root.style.getPropertyValue("--primary");
+    if (cssPrimary && /^#[0-9A-Fa-f]{3,8}$/.test(cssPrimary.trim())) {
+      return cssPrimary.trim();
+    }
+    const savedPrimary = localStorage.getItem("saabq_primary_color");
+    if (savedPrimary && /^#[0-9A-Fa-f]{3,8}$/.test(savedPrimary.trim())) {
+      return savedPrimary.trim();
+    }
+  }
+
+  return isDark ? "#022a35" : "#026982";
+}
+
 export function updateMetaThemeColor(color) {
   try {
-    const isDark = document.documentElement.classList.contains("dark");
     let targetColor = color;
     if (
       !targetColor ||
       typeof targetColor !== "string" ||
       !/^#[0-9A-Fa-f]{3,8}$/.test(targetColor.trim())
     ) {
-      targetColor = isDark ? "#022a35" : "#026982";
+      targetColor = getCurrentThemeColor();
     } else {
       targetColor = targetColor.trim();
     }
@@ -254,16 +287,16 @@ export function applyWorkspaceBranding(
   // Inject full CSS variables (brand, light, and dark) via dynamic style element
   injectWorkspaceBrandingStyle(branding);
 
-  // Dynamically update upper/bottom browser theme color to match bottom color
+  // Dynamically update upper/bottom browser theme color to match workspace primary color
   const isDark = root.classList.contains("dark");
-  const bottomColor = isDark
-    ? branding.background_color_dark ||
+  const targetThemeColor = isDark
+    ? branding.primary_color ||
+      branding.background_color_dark ||
       branding.surface_color_dark ||
       branding.secondary_color ||
-      branding.primary_color ||
-      "#034d60"
-    : branding.secondary_color || branding.primary_color || "#033d4b";
-  updateMetaThemeColor(bottomColor);
+      "#022a35"
+    : branding.primary_color || branding.secondary_color || "#026982";
+  updateMetaThemeColor(targetThemeColor);
 }
 
 export function resetWorkspaceBranding() {
@@ -291,7 +324,8 @@ export function resetWorkspaceBranding() {
   localStorage.removeItem("saabq_secondary_color");
   localStorage.removeItem("saabq_hover_color");
 
-  updateMetaThemeColor(null);
+  const isDark = root.classList.contains("dark");
+  updateMetaThemeColor(isDark ? "#022a35" : "#026982");
 }
 
 export function getSavedWorkspaceBranding() {

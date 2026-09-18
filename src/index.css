@@ -3,8 +3,7 @@
    Mirrors the dashboard teal palette, adapted for a public-facing website.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Google Fonts */
-@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap");
+/* Google Fonts loaded asynchronously in index.html */
 
 /* ── CSS Reset ── */
 *,

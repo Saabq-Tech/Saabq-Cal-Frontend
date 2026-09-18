@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -8,18 +8,27 @@ import client, { endpoints } from "../../../api/client";
 import { applyWorkspaceBranding } from "../../../utils/theme";
 import SEO from "../../../components/ui/SEO";
 import { TabSettingsSkeleton } from "../../../components/ui/Skeleton";
+import { lazyWithRetry as lazy } from "../../../utils/lazyWithRetry";
 
 import CapabilityGate from "../../../components/common/CapabilityGate";
 
-// Sub-tabs
-import BasicInfoTab from "./workspace-settings/BasicInfoTab";
-import BrandingTab from "./workspace-settings/BrandingTab";
-import TimezoneTab from "./workspace-settings/TimezoneTab";
-import SocialLinksTab from "./workspace-settings/SocialLinksTab";
-import BookingFormFieldsTab from "./workspace-settings/BookingFormFieldsTab";
-import PaymentReceiptsTab from "./workspace-settings/PaymentReceiptsTab";
-import NotificationTemplatesTab from "./workspace-settings/NotificationTemplatesTab";
-import WorkspaceTemplatesPage from "./WorkspaceTemplatesPage";
+// Lazy-loaded Sub-tabs
+const BasicInfoTab = lazy(() => import("./workspace-settings/BasicInfoTab"));
+const BrandingTab = lazy(() => import("./workspace-settings/BrandingTab"));
+const TimezoneTab = lazy(() => import("./workspace-settings/TimezoneTab"));
+const SocialLinksTab = lazy(
+  () => import("./workspace-settings/SocialLinksTab"),
+);
+const BookingFormFieldsTab = lazy(
+  () => import("./workspace-settings/BookingFormFieldsTab"),
+);
+const PaymentReceiptsTab = lazy(
+  () => import("./workspace-settings/PaymentReceiptsTab"),
+);
+const NotificationTemplatesTab = lazy(
+  () => import("./workspace-settings/NotificationTemplatesTab"),
+);
+const WorkspaceTemplatesPage = lazy(() => import("./WorkspaceTemplatesPage"));
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceSettingsPage() {
@@ -520,7 +529,9 @@ export default function WorkspaceSettingsPage() {
             boxSizing: "border-box",
           }}
         >
-          <WorkspaceTemplatesPage embedded />
+          <Suspense fallback={<TabSettingsSkeleton />}>
+            <WorkspaceTemplatesPage embedded />
+          </Suspense>
         </div>
       ) : (
         <div
@@ -530,7 +541,7 @@ export default function WorkspaceSettingsPage() {
           {loading ? (
             <TabSettingsSkeleton />
           ) : (
-            <>
+            <Suspense fallback={<TabSettingsSkeleton />}>
               {subSettingsTab === "basic" && (
                 <BasicInfoTab
                   basicForm={basicForm}
@@ -625,7 +636,7 @@ export default function WorkspaceSettingsPage() {
                   />
                 </CapabilityGate>
               )}
-            </>
+            </Suspense>
           )}
         </div>
       )}

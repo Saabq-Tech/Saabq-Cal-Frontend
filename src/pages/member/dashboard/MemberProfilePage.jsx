@@ -1,14 +1,18 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
-import MemberSecurityPage from "./MemberSecurityPage";
-import MemberChangePasswordPage from "./MemberChangePasswordPage";
 import SEO from "../../../components/ui/SEO";
 import { ProfileSkeleton } from "../../../components/ui/Skeleton";
 import Icon from "../../../components/common/Icon";
 import UserAvatar from "../../../components/ui/UserAvatar";
+import { lazyWithRetry as lazy } from "../../../utils/lazyWithRetry";
+
+const MemberSecurityPage = lazy(() => import("./MemberSecurityPage"));
+const MemberChangePasswordPage = lazy(
+  () => import("./MemberChangePasswordPage"),
+);
 
 export default function MemberProfilePage() {
   const { user, updateProfile, uploadAvatar, loading } = useAuth();
@@ -115,19 +119,19 @@ export default function MemberProfilePage() {
 
   if (currentTab === "security") {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="memberSecurity" />
         <MemberSecurityPage />
-      </>
+      </Suspense>
     );
   }
 
   if (currentTab === "password") {
     return (
-      <>
+      <Suspense fallback={<ProfileSkeleton />}>
         <SEO pageKey="memberChangePassword" />
         <MemberChangePasswordPage />
-      </>
+      </Suspense>
     );
   }
 
