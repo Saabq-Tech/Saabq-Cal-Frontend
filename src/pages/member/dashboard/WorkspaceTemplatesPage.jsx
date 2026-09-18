@@ -66,7 +66,9 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       setTemplates(res.data?.data || []);
     } catch (err) {
       if (err?.response?.status !== 403) {
-        toast.error(isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates");
+        toast.error(
+          isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates",
+        );
       }
     } finally {
       setLoading(false);

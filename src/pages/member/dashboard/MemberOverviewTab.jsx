@@ -316,7 +316,7 @@ export default function MemberOverviewTab() {
       .finally(() => {
         setLoading(false);
       });
-  }, [isBookingCapable, canReadBookings, canReadCustomers]);
+  }, [isBookingCapable, isCustomersCapable, canReadBookings, canReadCustomers]);
 
   useEffect(() => {
     fetchDashboardData();

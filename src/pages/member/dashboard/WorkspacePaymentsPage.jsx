@@ -128,7 +128,14 @@ export default function WorkspacePaymentsPage() {
       setLoading(false);
       setWalletLoading(false);
     }
-  }, [fetchWallet, fetchPayments, page, isCapAllowed, isOwner, canReadPayments]);
+  }, [
+    fetchWallet,
+    fetchPayments,
+    page,
+    isCapAllowed,
+    isOwner,
+    canReadPayments,
+  ]);
 
   const handleVerify = async (payment) => {
     setActionLoading(true);

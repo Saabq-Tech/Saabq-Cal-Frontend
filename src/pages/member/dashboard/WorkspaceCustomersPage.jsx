@@ -148,7 +148,16 @@ export default function WorkspaceCustomersPage() {
         setLoading(false);
       }
     },
-    [isCapAllowed, canRead, search, statusFilter, sortBy, t, toast, customerPlural],
+    [
+      isCapAllowed,
+      canRead,
+      search,
+      statusFilter,
+      sortBy,
+      t,
+      toast,
+      customerPlural,
+    ],
   );
 
   useEffect(() => {

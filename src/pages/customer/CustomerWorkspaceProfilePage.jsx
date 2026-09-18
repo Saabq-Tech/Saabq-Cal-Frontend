@@ -855,27 +855,6 @@ export default function WorkspaceProfilePage() {
                 </div>
               )}
             </div>
-
-            {/* Industry Vibe Highlights & Perks Bar */}
-            <div className={`workspace-vibe-perks-container vibe-${vibe.key}`}>
-              <div className="workspace-vibe-perks-grid">
-                {vibe.perks.map((perk, idx) => (
-                  <div key={idx} className="workspace-vibe-perk-item">
-                    <span className="workspace-vibe-perk-icon">
-                      <Icon name={perk.icon} size={18} />
-                    </span>
-                    <div className="workspace-vibe-perk-info">
-                      <strong className="workspace-vibe-perk-title">
-                        {perk.title}
-                      </strong>
-                      <span className="workspace-vibe-perk-desc">
-                        {perk.desc}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 

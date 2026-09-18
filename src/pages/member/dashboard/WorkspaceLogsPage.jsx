@@ -188,7 +188,13 @@ export default function WorkspaceLogsPage() {
     return () => {
       cancelled = true;
     };
-  }, [isReportsAllowed, isBookingCapable, isCustomersCapable, canReadBookings, canReadCustomers]);
+  }, [
+    isReportsAllowed,
+    isBookingCapable,
+    isCustomersCapable,
+    canReadBookings,
+    canReadCustomers,
+  ]);
 
   // 2. Fetch Activity Logs
   const loadingLogsRef = useRef(false);
