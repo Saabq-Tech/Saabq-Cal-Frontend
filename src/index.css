@@ -5086,11 +5086,9 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
   box-sizing: border-box;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
   .member-workspace-tabs-bar {
-    padding: 4px 6px;
-    gap: 6px;
-    margin-bottom: 12px;
+    display: none !important;
   }
 }
 

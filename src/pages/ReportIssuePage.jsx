@@ -9,9 +9,17 @@ import Icon from "../components/common/Icon";
 
 const CATEGORIES = [
   { id: "bug", icon: "alert-circle", labelKey: "reportCategoryBug" },
-  { id: "feature_request", icon: "sparkles", labelKey: "reportCategoryFeatureRequest" },
+  {
+    id: "feature_request",
+    icon: "sparkles",
+    labelKey: "reportCategoryFeatureRequest",
+  },
   { id: "ui_issue", icon: "eye", labelKey: "reportCategoryUiIssue" },
-  { id: "performance", icon: "activity", labelKey: "reportCategoryPerformance" },
+  {
+    id: "performance",
+    icon: "activity",
+    labelKey: "reportCategoryPerformance",
+  },
   { id: "account", icon: "user", labelKey: "reportCategoryAccount" },
   { id: "billing", icon: "credit-card", labelKey: "reportCategoryBilling" },
   { id: "other", icon: "help-circle", labelKey: "reportCategoryOther" },
@@ -49,7 +57,7 @@ export default function ReportIssuePage() {
       if (!email && user.email) setEmail(user.email);
       if (!phone && user.phone) setPhone(user.phone);
     }
-  }, [user]);
+  }, [user, name, email, phone]);
 
   // Clean up object URLs on unmount or file removal
   useEffect(() => {
@@ -87,7 +95,10 @@ export default function ReportIssuePage() {
       addToast?.(t("reportIssueMaxAttachmentsError"), "error");
       const remainingSlots = 5 - attachments.length;
       if (remainingSlots > 0) {
-        setAttachments((prev) => [...prev, ...validImages.slice(0, remainingSlots)]);
+        setAttachments((prev) => [
+          ...prev,
+          ...validImages.slice(0, remainingSlots),
+        ]);
       }
       return;
     }
@@ -129,11 +140,21 @@ export default function ReportIssuePage() {
 
     // Basic client validation
     const errors = {};
-    if (!title.trim()) errors.title = isRTL ? "يرجى كتابة عنوان المشكلة" : "Title is required";
-    if (!description.trim()) errors.description = isRTL ? "يرجى توضيح تفاصيل المشكلة" : "Description is required";
+    if (!title.trim())
+      errors.title = isRTL ? "يرجى كتابة عنوان المشكلة" : "Title is required";
+    if (!description.trim())
+      errors.description = isRTL
+        ? "يرجى توضيح تفاصيل المشكلة"
+        : "Description is required";
     if (!user) {
-      if (!name.trim()) errors.name = isRTL ? "الاسم مطلوب للزوار" : "Name is required for guests";
-      if (!email.trim()) errors.email = isRTL ? "البريد الإلكتروني مطلوب للزوار" : "Email is required for guests";
+      if (!name.trim())
+        errors.name = isRTL
+          ? "الاسم مطلوب للزوار"
+          : "Name is required for guests";
+      if (!email.trim())
+        errors.email = isRTL
+          ? "البريد الإلكتروني مطلوب للزوار"
+          : "Email is required for guests";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -166,7 +187,9 @@ export default function ReportIssuePage() {
     } catch (err) {
       const serverMsg =
         err?.response?.data?.message ||
-        (isRTL ? "حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى." : "An error occurred while submitting the report. Please try again.");
+        (isRTL
+          ? "حدث خطأ أثناء إرسال البلاغ. يرجى المحاولة مرة أخرى."
+          : "An error occurred while submitting the report. Please try again.");
       const serverErrors = err?.response?.data?.errors || {};
 
       setErrorMessage(serverMsg);
@@ -411,7 +434,9 @@ export default function ReportIssuePage() {
                     type="button"
                     onClick={handleCopyTicketId}
                     style={{
-                      background: copiedTicket ? "rgba(16, 185, 129, 0.12)" : "var(--surface)",
+                      background: copiedTicket
+                        ? "rgba(16, 185, 129, 0.12)"
+                        : "var(--surface)",
                       border: "1px solid var(--border)",
                       borderRadius: "8px",
                       padding: "6px 12px",
@@ -426,7 +451,11 @@ export default function ReportIssuePage() {
                     }}
                   >
                     <Icon name={copiedTicket ? "check" : "copy"} size={14} />
-                    <span>{copiedTicket ? t("reportIssueCopied") : t("reportIssueCopyTicket")}</span>
+                    <span>
+                      {copiedTicket
+                        ? t("reportIssueCopied")
+                        : t("reportIssueCopyTicket")}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -503,12 +532,14 @@ export default function ReportIssuePage() {
                     marginBottom: 10,
                   }}
                 >
-                  {t("reportIssueCategory")} <span style={{ color: "#ef4444" }}>*</span>
+                  {t("reportIssueCategory")}{" "}
+                  <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(180px, 1fr))",
                     gap: 10,
                   }}
                 >
@@ -526,7 +557,9 @@ export default function ReportIssuePage() {
                           padding: "12px 14px",
                           borderRadius: "10px",
                           border: `1.5px solid ${isSelected ? "var(--primary)" : "var(--border)"}`,
-                          background: isSelected ? "rgba(var(--primary-rgb, 14, 165, 233), 0.08)" : "var(--bg)",
+                          background: isSelected
+                            ? "rgba(var(--primary-rgb, 14, 165, 233), 0.08)"
+                            : "var(--bg)",
                           color: isSelected ? "var(--primary)" : "var(--text)",
                           cursor: "pointer",
                           textAlign: isRTL ? "right" : "left",
@@ -540,8 +573,12 @@ export default function ReportIssuePage() {
                             width: 28,
                             height: 28,
                             borderRadius: "8px",
-                            background: isSelected ? "var(--primary)" : "rgba(100, 116, 139, 0.12)",
-                            color: isSelected ? "#fff" : "var(--text-secondary)",
+                            background: isSelected
+                              ? "var(--primary)"
+                              : "rgba(100, 116, 139, 0.12)",
+                            color: isSelected
+                              ? "#fff"
+                              : "var(--text-secondary)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -550,7 +587,9 @@ export default function ReportIssuePage() {
                         >
                           <Icon name={cat.icon} size={15} />
                         </div>
-                        <span style={{ lineHeight: 1.3 }}>{t(cat.labelKey)}</span>
+                        <span style={{ lineHeight: 1.3 }}>
+                          {t(cat.labelKey)}
+                        </span>
                       </button>
                     );
                   })}
@@ -569,7 +608,8 @@ export default function ReportIssuePage() {
                     marginBottom: 8,
                   }}
                 >
-                  {t("reportIssueTitle")} <span style={{ color: "#ef4444" }}>*</span>
+                  {t("reportIssueTitle")}{" "}
+                  <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   id="issue-title"
@@ -591,8 +631,17 @@ export default function ReportIssuePage() {
                   }}
                 />
                 {fieldErrors.title && (
-                  <span style={{ color: "#ef4444", fontSize: "0.82rem", marginTop: 4, display: "block" }}>
-                    {Array.isArray(fieldErrors.title) ? fieldErrors.title[0] : fieldErrors.title}
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      fontSize: "0.82rem",
+                      marginTop: 4,
+                      display: "block",
+                    }}
+                  >
+                    {Array.isArray(fieldErrors.title)
+                      ? fieldErrors.title[0]
+                      : fieldErrors.title}
                   </span>
                 )}
               </div>
@@ -609,7 +658,8 @@ export default function ReportIssuePage() {
                     marginBottom: 8,
                   }}
                 >
-                  {t("reportIssueDescription")} <span style={{ color: "#ef4444" }}>*</span>
+                  {t("reportIssueDescription")}{" "}
+                  <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <textarea
                   id="issue-description"
@@ -633,8 +683,17 @@ export default function ReportIssuePage() {
                   }}
                 />
                 {fieldErrors.description && (
-                  <span style={{ color: "#ef4444", fontSize: "0.82rem", marginTop: 4, display: "block" }}>
-                    {Array.isArray(fieldErrors.description) ? fieldErrors.description[0] : fieldErrors.description}
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      fontSize: "0.82rem",
+                      marginTop: 4,
+                      display: "block",
+                    }}
+                  >
+                    {Array.isArray(fieldErrors.description)
+                      ? fieldErrors.description[0]
+                      : fieldErrors.description}
                   </span>
                 )}
               </div>
@@ -663,7 +722,8 @@ export default function ReportIssuePage() {
                       marginBottom: 6,
                     }}
                   >
-                    {t("reportIssueName")} {!user && <span style={{ color: "#ef4444" }}>*</span>}
+                    {t("reportIssueName")}{" "}
+                    {!user && <span style={{ color: "#ef4444" }}>*</span>}
                   </label>
                   <input
                     id="reporter-name"
@@ -684,8 +744,17 @@ export default function ReportIssuePage() {
                     }}
                   />
                   {fieldErrors.name && (
-                    <span style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 4, display: "block" }}>
-                      {Array.isArray(fieldErrors.name) ? fieldErrors.name[0] : fieldErrors.name}
+                    <span
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "0.8rem",
+                        marginTop: 4,
+                        display: "block",
+                      }}
+                    >
+                      {Array.isArray(fieldErrors.name)
+                        ? fieldErrors.name[0]
+                        : fieldErrors.name}
                     </span>
                   )}
                 </div>
@@ -701,7 +770,8 @@ export default function ReportIssuePage() {
                       marginBottom: 6,
                     }}
                   >
-                    {t("reportIssueEmail")} {!user && <span style={{ color: "#ef4444" }}>*</span>}
+                    {t("reportIssueEmail")}{" "}
+                    {!user && <span style={{ color: "#ef4444" }}>*</span>}
                   </label>
                   <input
                     id="reporter-email"
@@ -722,8 +792,17 @@ export default function ReportIssuePage() {
                     }}
                   />
                   {fieldErrors.email && (
-                    <span style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: 4, display: "block" }}>
-                      {Array.isArray(fieldErrors.email) ? fieldErrors.email[0] : fieldErrors.email}
+                    <span
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "0.8rem",
+                        marginTop: 4,
+                        display: "block",
+                      }}
+                    >
+                      {Array.isArray(fieldErrors.email)
+                        ? fieldErrors.email[0]
+                        : fieldErrors.email}
                     </span>
                   )}
                 </div>
@@ -798,7 +877,9 @@ export default function ReportIssuePage() {
                       borderRadius: "12px",
                       padding: "24px 16px",
                       textAlign: "center",
-                      background: dragActive ? "rgba(var(--primary-rgb, 14, 165, 233), 0.05)" : "var(--bg)",
+                      background: dragActive
+                        ? "rgba(var(--primary-rgb, 14, 165, 233), 0.05)"
+                        : "var(--bg)",
                       cursor: "pointer",
                       transition: "all 0.2s ease",
                       marginBottom: attachments.length > 0 ? 16 : 0,
@@ -832,10 +913,22 @@ export default function ReportIssuePage() {
                     >
                       <Icon name="upload-cloud" size={22} />
                     </div>
-                    <div style={{ fontSize: "0.92rem", fontWeight: 600, color: "var(--text)" }}>
+                    <div
+                      style={{
+                        fontSize: "0.92rem",
+                        fontWeight: 600,
+                        color: "var(--text)",
+                      }}
+                    >
                       {t("reportIssueDragDrop")}
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: 4 }}>
+                    <div
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--text-secondary)",
+                        marginTop: 4,
+                      }}
+                    >
                       PNG, JPG, JPEG, WEBP (Max 5MB)
                     </div>
                   </div>
@@ -846,7 +939,8 @@ export default function ReportIssuePage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                      gridTemplateColumns:
+                        "repeat(auto-fill, minmax(140px, 1fr))",
                       gap: 12,
                     }}
                   >
@@ -931,7 +1025,11 @@ export default function ReportIssuePage() {
                 >
                   {submitting ? (
                     <>
-                      <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
                       <span>{t("reportIssueSubmitting")}</span>
                     </>
                   ) : (

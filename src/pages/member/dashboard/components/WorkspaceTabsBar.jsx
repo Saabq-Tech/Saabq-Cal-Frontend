@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import { useLanguage } from "../../../../context/LanguageContext";
@@ -19,9 +25,10 @@ export default function WorkspaceTabsBar() {
   const workspaceId = workspace?.id || "default";
   const userId = user?.id || "guest";
   const isOwner = user?.is_owner === true;
-  const userPermissions = Array.isArray(user?.permissions)
-    ? user.permissions
-    : [];
+  const userPermissions = useMemo(
+    () => (Array.isArray(user?.permissions) ? user.permissions : []),
+    [user?.permissions],
+  );
   const isWorkspaceActive = workspace?.status === "active";
 
   // Build dictionary of all accessible tabs and sub-tabs for this member
@@ -33,7 +40,9 @@ export default function WorkspaceTabsBar() {
     mainTabs.forEach((tab) => {
       const isAllowed =
         canViewWorkspaceTab(tab, isOwner, userPermissions, user) &&
-        (!tab.capability || (isWorkspaceActive && checkWorkspaceCapability(user, tab.capability)));
+        (!tab.capability ||
+          (isWorkspaceActive &&
+            checkWorkspaceCapability(user, tab.capability)));
 
       if (isAllowed) {
         dict[tab.id] = {
@@ -46,13 +55,15 @@ export default function WorkspaceTabsBar() {
     });
 
     // Settings sub-tabs
-    const settingsAllowed =
-      canViewWorkspaceTab(
-        { id: "settings", permissions: ["settings_read", "settings_update", "settings_write"] },
-        isOwner,
-        userPermissions,
-        user
-      );
+    const settingsAllowed = canViewWorkspaceTab(
+      {
+        id: "settings",
+        permissions: ["settings_read", "settings_update", "settings_write"],
+      },
+      isOwner,
+      userPermissions,
+      user,
+    );
 
     if (settingsAllowed) {
       const subTabs = getWorkspaceSettingsSubTabs(t);
@@ -153,10 +164,16 @@ export default function WorkspaceTabsBar() {
   // Close menus on outside click
   useEffect(() => {
     function handleClickOutside(e) {
-      if (favoritesMenuRef.current && !favoritesMenuRef.current.contains(e.target)) {
+      if (
+        favoritesMenuRef.current &&
+        !favoritesMenuRef.current.contains(e.target)
+      ) {
         setFavoritesOpen(false);
       }
-      if (actionsMenuRef.current && !actionsMenuRef.current.contains(e.target)) {
+      if (
+        actionsMenuRef.current &&
+        !actionsMenuRef.current.contains(e.target)
+      ) {
         setActionsOpen(false);
       }
     }
@@ -171,7 +188,7 @@ export default function WorkspaceTabsBar() {
         localStorage.setItem(tabsStorageKey, JSON.stringify(tabs));
       } catch {}
     },
-    [tabsStorageKey]
+    [tabsStorageKey],
   );
 
   // Save favorites to localStorage
@@ -181,7 +198,7 @@ export default function WorkspaceTabsBar() {
         localStorage.setItem(favsStorageKey, JSON.stringify(favs));
       } catch {}
     },
-    [favsStorageKey]
+    [favsStorageKey],
   );
 
   // Synchronize openedTabs with current route & permissions
@@ -202,7 +219,9 @@ export default function WorkspaceTabsBar() {
         updated = [...validTabs, activeMeta];
       } else {
         // Update label or path if changed (e.g. language toggle)
-        updated = validTabs.map((t) => (t.id === activeMeta.id ? { ...t, ...activeMeta } : t));
+        updated = validTabs.map((t) =>
+          t.id === activeMeta.id ? { ...t, ...activeMeta } : t,
+        );
       }
       saveTabs(updated);
       return updated;
@@ -225,7 +244,11 @@ export default function WorkspaceTabsBar() {
     if (!el) return;
     const activeEl = el.querySelector(".tab-bar-item-active");
     if (activeEl) {
-      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
     }
     setTimeout(updateScroll, 200);
   }, [updateScroll]);
@@ -282,7 +305,8 @@ export default function WorkspaceTabsBar() {
 
   // Close other tabs
   const handleCloseOtherTabs = () => {
-    const activeMeta = tabsDict[currentKey] || openedTabs.find((t) => t.id === currentKey);
+    const activeMeta =
+      tabsDict[currentKey] || openedTabs.find((t) => t.id === currentKey);
     const updated = activeMeta ? [activeMeta] : [];
     setOpenedTabs(updated);
     saveTabs(updated);
@@ -376,15 +400,22 @@ export default function WorkspaceTabsBar() {
     const distance = 220;
     const scrollAmount =
       direction === "left"
-        ? isRTL ? distance : -distance
-        : isRTL ? -distance : distance;
+        ? isRTL
+          ? distance
+          : -distance
+        : isRTL
+          ? -distance
+          : distance;
 
     el.scrollBy({ left: scrollAmount, behavior: "smooth" });
     setTimeout(updateScroll, 250);
   };
 
   return (
-    <div className="member-workspace-tabs-bar" aria-label={t("favoritePages") || "شريط التبويبات والمفضلة"}>
+    <div
+      className="member-workspace-tabs-bar"
+      aria-label={t("favoritePages") || "شريط التبويبات والمفضلة"}
+    >
       {/* 1. Favorites Dropdown Button */}
       <div className="tabs-bar-favorites-wrapper" ref={favoritesMenuRef}>
         <button
@@ -492,7 +523,10 @@ export default function WorkspaceTabsBar() {
                   >
                     <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                   </svg>
-                  <p>{t("noFavoritesYet") || "لم تقم بإضافة أي صفحات للمفضلة بعد. انقر على أيقونة النجمة لتثبيت الصفحات هنا!"}</p>
+                  <p>
+                    {t("noFavoritesYet") ||
+                      "لم تقم بإضافة أي صفحات للمفضلة بعد. انقر على أيقونة النجمة لتثبيت الصفحات هنا!"}
+                  </p>
                 </div>
               )}
             </div>
@@ -631,12 +665,7 @@ export default function WorkspaceTabsBar() {
           title={t("closeOtherTabs") || "خيارات التبويبات"}
           aria-expanded={actionsOpen}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="currentColor"
-          >
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
             <circle cx="12" cy="5" r="1.75" />
             <circle cx="12" cy="12" r="1.75" />
             <circle cx="12" cy="19" r="1.75" />
