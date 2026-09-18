@@ -13,6 +13,7 @@ import {
   getWorkspaceSettingsSubTabs,
 } from "../../../config/dashboardNav";
 import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
+import WorkspaceTabsBar from "./components/WorkspaceTabsBar";
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
@@ -247,7 +248,10 @@ export default function WorkspaceLayout() {
           </nav>
         </aside>
 
-        <div key={location.pathname} className="workspace-dashboard-content">
+        <div className="workspace-dashboard-content">
+          {/* Workspace Opened Tabs & Favorites Slider Bar */}
+          <WorkspaceTabsBar />
+
           {/* Settings sub-tabs on mobile: placed right under the workspace tabs, before banners and anything else */}
           {isSettingsOpen && (
             <div className="settings-subtab-strip">
