@@ -60,6 +60,7 @@ export const endpoints = {
   about: "/about",
   terms: "/terms",
   privacy: "/privacy",
+  issueReports: "/issue-reports",
   settings: "/settings",
   newsletterSubscribe: "/newsletter/subscribe",
   newsletterUnsubscribe: "/newsletter/unsubscribe",
@@ -254,6 +255,15 @@ export async function subscribeToNewsletter(email, locale = "ar") {
     email,
     locale,
     source: "website",
+  });
+  return res.data;
+}
+
+export async function submitIssueReport(formData) {
+  const res = await client.post(endpoints.issueReports, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
   return res.data;
 }

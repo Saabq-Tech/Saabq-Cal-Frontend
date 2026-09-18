@@ -24,6 +24,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
 const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
+const ReportIssuePage = lazy(() => import("./pages/ReportIssuePage"));
 
 // Customer Workspace Suite Pages
 const CustomerWorkspacesPage = lazy(
@@ -266,6 +267,14 @@ export default function App() {
                     element={
                       <MainLayout>
                         <HowItWorksPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/report-issue"
+                    element={
+                      <MainLayout>
+                        <ReportIssuePage />
                       </MainLayout>
                     }
                   />

@@ -139,6 +139,9 @@ export default function Footer() {
               <li>
                 <Link to="/terms">{t("termsOfService")}</Link>
               </li>
+              <li>
+                <Link to="/report-issue">{t("navReportIssue")}</Link>
+              </li>
             </ul>
           </div>
 
