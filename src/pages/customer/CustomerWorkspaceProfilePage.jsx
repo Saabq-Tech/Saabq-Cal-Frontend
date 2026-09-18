@@ -172,15 +172,15 @@ export default function WorkspaceProfilePage() {
 
   if (loading) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <ProfileSkeleton />
-      </main>
+      </div>
     );
   }
 
   if (!workspace) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <div
           className="container"
           style={{ padding: "80px 20px", textAlign: "center" }}
@@ -204,19 +204,33 @@ export default function WorkspaceProfilePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 20,
+                margin: "0 auto 20px",
               }}
             >
-              <Icon name="x" size={36} />
+              <Icon name="alert-triangle" size={36} />
             </div>
-            <h1 style={{ fontSize: "1.5rem", marginBottom: 12 }}>
+            <h1
+              style={{
+                fontSize: "1.4rem",
+                fontWeight: 800,
+                color: "var(--text-primary)",
+                marginBottom: 12,
+              }}
+            >
               {t("noWorkspacesFound") ||
-                (isRTL ? "مساحة العمل غير موجودة" : "Workspace Not Found")}
+                (isRTL ? "مساحة العمل غير متوفرة" : "Workspace Not Found")}
             </h1>
-            <p style={{ color: "var(--text-secondary)", marginBottom: 24 }}>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: "0.95rem",
+                lineHeight: 1.6,
+                marginBottom: 28,
+              }}
+            >
               {isRTL
-                ? "عذراً، مساحة العمل المطلوب عرضها غير متاحة أو تم تعطيلها مؤقتاً."
-                : "Sorry, the requested workspace is not available or has been temporarily disabled."}
+                ? "عذراً، مساحة العمل المطلوبة غير متوفرة حالياً أو قد تم إيقافها."
+                : "Sorry, this workspace is unavailable or has been suspended."}
             </p>
             <Link to="/workspaces" className="btn btn-primary btn-lg">
               <Icon name="globe" size={18} />
@@ -227,7 +241,7 @@ export default function WorkspaceProfilePage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -300,8 +314,34 @@ export default function WorkspaceProfilePage() {
     }),
   };
 
+  // Breadcrumb Structured Data
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: t("home"),
+        item: "https://cal.saabq.com/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t("workspaces", "مساحات العمل"),
+        item: "https://cal.saabq.com/workspaces",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: getTranslatableText(workspace.name),
+        item: `https://cal.saabq.com/${workspace.slug}`,
+      },
+    ],
+  };
+
   return (
-    <main
+    <div
       className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
       data-workspace-vibe={vibe.key}
       style={{ background: "var(--background)", minHeight: "100vh" }}
@@ -318,7 +358,7 @@ export default function WorkspaceProfilePage() {
         )}
         canonical={`/${workspace.slug}`}
         ogImage={workspace.cover_url || workspace.logo_url}
-        jsonLd={[jsonLd]}
+        jsonLd={[jsonLd, breadcrumbJsonLd]}
       />
 
       {/* SECTION 1: HERO & BRANDING BANNER */}
@@ -2350,6 +2390,6 @@ export default function WorkspaceProfilePage() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

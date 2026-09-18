@@ -187,7 +187,7 @@ export default function Home() {
   const aboutBody = about?.body || about?.content || "";
 
   return (
-    <main className="main-content">
+    <div className="main-content">
       <SEO pageKey="home" jsonLd={faqJsonLd ? [faqJsonLd] : undefined} />
 
       {/* Hero Section */}
@@ -903,6 +903,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

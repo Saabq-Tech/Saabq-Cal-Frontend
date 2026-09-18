@@ -48,17 +48,17 @@ export default function BlogPostDetailPage() {
 
   if (loading) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <div className="container section-sm">
           <PageSkeleton />
         </div>
-      </main>
+      </div>
     );
   }
 
   if (error || !post) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <section className="section-sm">
           <div className="container">
             <div className="blog-empty-state">
@@ -77,7 +77,7 @@ export default function BlogPostDetailPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
     );
   }
 
@@ -104,8 +104,50 @@ export default function BlogPostDetailPage() {
       : undefined,
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: t("home"),
+        item: "https://cal.saabq.com/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t("blogTitle"),
+        item: "https://cal.saabq.com/blog",
+      },
+      ...(post.category
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: post.category.name,
+              item: `https://cal.saabq.com/blog?category=${post.category.slug}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 4,
+              name: post.title,
+              item: `https://cal.saabq.com/blog/${post.slug}`,
+            },
+          ]
+        : [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: post.title,
+              item: `https://cal.saabq.com/blog/${post.slug}`,
+            },
+          ]),
+    ],
+  };
+
   return (
-    <main className="main-content blog-detail-page">
+    <div className="main-content blog-detail-page">
       <BlogReadingProgress />
 
       <SEO
@@ -114,7 +156,7 @@ export default function BlogPostDetailPage() {
         description={post.seo_description || post.excerpt || ""}
         canonical={`/blog/${post.slug}`}
         image={post.featured_image_url}
-        structuredData={structuredData}
+        structuredData={[structuredData, breadcrumbJsonLd]}
       />
 
       {/* Breadcrumb Bar */}
@@ -293,6 +335,6 @@ export default function BlogPostDetailPage() {
           <BlogCtaBanner />
         </div>
       </section>
-    </main>
+    </div>
   );
 }

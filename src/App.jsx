@@ -170,9 +170,9 @@ function MainLayout({ children }) {
         الانتقال إلى المحتوى الرئيسي / Skip to main content
       </a>
       <Navbar />
-      <div id="main-content" tabIndex="-1">
+      <main id="main-content" tabIndex="-1">
         {children}
-      </div>
+      </main>
       <Footer />
       <MobileTabBar />
     </div>

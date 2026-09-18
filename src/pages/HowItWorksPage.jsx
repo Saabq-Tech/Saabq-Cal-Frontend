@@ -126,9 +126,25 @@ export default function HowItWorksPage() {
 
   const stepsToDisplay = activeTab === "members" ? memberSteps : customerSteps;
 
+  const faqJsonLd =
+    faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
+        }
+      : undefined;
+
   return (
     <div className="main-content">
-      <SEO pageKey="howItWorks" />
+      <SEO pageKey="howItWorks" jsonLd={faqJsonLd} />
 
       {/* Header / Hero */}
       <section

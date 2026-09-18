@@ -125,7 +125,7 @@ export default function Blog() {
   };
 
   return (
-    <main className="main-content blog-page">
+    <div className="main-content blog-page">
       <SEO pageKey="blog" />
 
       {/* Flagship Aurora Hero Header */}
@@ -330,12 +330,12 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Bottom Conversion CTA Banner */}
+      {/* Bottom CTA Banner */}
       <section className="section-sm">
         <div className="container">
           <BlogCtaBanner />
         </div>
       </section>
-    </main>
+    </div>
   );
 }

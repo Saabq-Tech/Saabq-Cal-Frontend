@@ -138,6 +138,70 @@ export const structuredDataSchemas = {
       "@id": url ? (url.startsWith("http") ? url : `${origin}${url}`) : origin,
     },
   }),
+
+  localBusiness: ({
+    name,
+    description,
+    url,
+    image,
+    telephone,
+    email,
+    address,
+    city,
+    country,
+    category = "LocalBusiness",
+    priceRange = "$$",
+    origin = SITE_CONFIG.baseUrl,
+  }) => ({
+    "@context": "https://schema.org",
+    "@type": category,
+    name,
+    url: url ? (url.startsWith("http") ? url : `${origin}${url}`) : origin,
+    ...(description && { description }),
+    ...(image && {
+      image: image.startsWith("http") ? image : `${origin}${image}`,
+    }),
+    ...(telephone && { telephone }),
+    ...(email && { email }),
+    ...(priceRange && { priceRange }),
+    ...(address && {
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: address,
+        ...(city && { addressLocality: city }),
+        ...(country && { addressCountry: country }),
+      },
+    }),
+  }),
+
+  serviceBooking: ({
+    name,
+    description,
+    providerName,
+    url,
+    price,
+    currency = "EGP",
+    origin = SITE_CONFIG.baseUrl,
+  }) => ({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    ...(description && { description }),
+    url: url ? (url.startsWith("http") ? url : `${origin}${url}`) : origin,
+    ...(providerName && {
+      provider: {
+        "@type": "LocalBusiness",
+        name: providerName,
+      },
+    }),
+    ...(price !== undefined && {
+      offers: {
+        "@type": "Offer",
+        price: String(price),
+        priceCurrency: currency,
+      },
+    }),
+  }),
 };
 
 /**
@@ -799,17 +863,41 @@ export function getSEO(pageKey, lang = "ar", overrides = {}) {
         : false;
 
   // Resolve Structured Data
-  let structuredData =
-    overrides.structuredData ||
-    overrides.jsonLd ||
-    config.structuredData ||
-    config.jsonLd;
-  if (typeof structuredData === "function") {
-    structuredData = structuredData({
+  let baseStructuredData = config.structuredData || config.jsonLd;
+  if (typeof baseStructuredData === "function") {
+    baseStructuredData = baseStructuredData({
       origin: SITE_CONFIG.baseUrl,
       lang: currentLang,
       overrides,
     });
+  }
+
+  let overrideStructuredData = overrides.structuredData || overrides.jsonLd;
+  if (typeof overrideStructuredData === "function") {
+    overrideStructuredData = overrideStructuredData({
+      origin: SITE_CONFIG.baseUrl,
+      lang: currentLang,
+      overrides,
+    });
+  }
+
+  let structuredData = [];
+  if (baseStructuredData) {
+    if (Array.isArray(baseStructuredData)) {
+      structuredData.push(...baseStructuredData);
+    } else {
+      structuredData.push(baseStructuredData);
+    }
+  }
+  if (overrideStructuredData) {
+    if (Array.isArray(overrideStructuredData)) {
+      structuredData.push(...overrideStructuredData);
+    } else {
+      structuredData.push(overrideStructuredData);
+    }
+  }
+  if (structuredData.length === 0) {
+    structuredData = null;
   }
 
   return {

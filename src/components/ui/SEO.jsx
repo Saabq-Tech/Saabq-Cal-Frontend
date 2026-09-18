@@ -133,6 +133,8 @@ export default function SEO({
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:image" content={resolvedImageUrl} />
       <meta property="og:image:secure_url" content={resolvedImageUrl} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={fullTitle} />
       <meta property="og:locale" content={lang === "ar" ? "ar_SA" : "en_US"} />
 
@@ -149,11 +151,18 @@ export default function SEO({
       <meta name="twitter:image:alt" content={fullTitle} />
 
       {/* JSON-LD Structured Data */}
-      {activeJsonLd && (
-        <script type="application/ld+json">
-          {JSON.stringify(activeJsonLd)}
-        </script>
-      )}
+      {activeJsonLd &&
+        (Array.isArray(activeJsonLd) ? (
+          activeJsonLd.filter(Boolean).map((item, idx) => (
+            <script key={idx} type="application/ld+json">
+              {JSON.stringify(item)}
+            </script>
+          ))
+        ) : (
+          <script type="application/ld+json">
+            {JSON.stringify(activeJsonLd)}
+          </script>
+        ))}
 
       {children}
     </Helmet>

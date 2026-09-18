@@ -335,7 +335,7 @@ export default function WorkspacesPage() {
       : undefined;
 
   return (
-    <main className="main-content customer-explore-page">
+    <div className="main-content customer-explore-page">
       <SEO pageKey="customerWorkspaces" jsonLd={jsonLd} />
 
       {/* Flagship Aurora Hero Header */}
@@ -1005,6 +1005,6 @@ export default function WorkspacesPage() {
           )}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

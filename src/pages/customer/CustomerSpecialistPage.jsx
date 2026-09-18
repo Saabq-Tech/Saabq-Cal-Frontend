@@ -109,15 +109,15 @@ export default function CustomerSpecialistPage() {
 
   if (loading) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <ProfileSkeleton />
-      </main>
+      </div>
     );
   }
 
   if (!workspace || !specialist) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <div
           className="container"
           style={{ padding: "60px 20px", textAlign: "center" }}
@@ -142,7 +142,7 @@ export default function CustomerSpecialistPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -183,13 +183,13 @@ export default function CustomerSpecialistPage() {
       {
         "@type": "ListItem",
         position: 1,
-        name: isRTL ? "الرئيسية" : "Home",
+        name: t("home"),
         item: "https://cal.saabq.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: isRTL ? "مساحات العمل" : "Workspaces",
+        name: t("workspaces", "مساحات العمل"),
         item: "https://cal.saabq.com/workspaces",
       },
       {
@@ -201,8 +201,24 @@ export default function CustomerSpecialistPage() {
     ],
   };
 
+  // Specialist Person schema
+  const personJsonLd = specialist
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: specialist.name,
+        ...(specialist.avatar_url && { image: specialist.avatar_url }),
+        ...(specialist.bio && { description: specialist.bio }),
+        worksFor: {
+          "@type": "LocalBusiness",
+          name: workspace.name,
+          url: `https://cal.saabq.com/${workspace.slug}`,
+        },
+      }
+    : null;
+
   return (
-    <main
+    <div
       className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
       data-workspace-vibe={vibe.key}
     >
@@ -219,9 +235,9 @@ export default function CustomerSpecialistPage() {
         }
         canonical={`/${workspace.slug}/specialist/${specialistId}`}
         ogImage={
-          specialist?.avatar_url || workspace.logo_url || workspace.cover_url
+          specialist?.avatar_url || workspace.cover_url || workspace.logo_url
         }
-        jsonLd={[jsonLd, breadcrumbJsonLd]}
+        jsonLd={[jsonLd, personJsonLd, breadcrumbJsonLd].filter(Boolean)}
       />
 
       {/* Profile Header Banner Section */}
@@ -835,6 +851,6 @@ export default function CustomerSpecialistPage() {
           )}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

@@ -530,7 +530,7 @@ export default function CustomerBookAppointmentPage() {
 
   if (loading) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <SEO title={isRTL ? "حجز موعد جديد" : "Book Appointment"} noindex />
         <div
           style={{
@@ -540,13 +540,13 @@ export default function CustomerBookAppointmentPage() {
           }}
         />
         <BookingFormSkeleton />
-      </main>
+      </div>
     );
   }
 
   if (!workspace) {
     return (
-      <main className="main-content">
+      <div className="main-content">
         <SEO
           title={isRTL ? "مساحة العمل غير موجودة" : "Workspace Not Found"}
           noindex
@@ -571,7 +571,7 @@ export default function CustomerBookAppointmentPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -596,8 +596,32 @@ export default function CustomerBookAppointmentPage() {
     ? `${monthNamesAr[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`
     : `${monthNamesEn[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
 
+  const serviceJsonLd = selectedService
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: getTranslatableText(selectedService.name),
+        description: getTranslatableText(
+          selectedService.short_description || selectedService.description,
+        ),
+        provider: {
+          "@type": "LocalBusiness",
+          name: getTranslatableText(workspace.name),
+          url: `https://cal.saabq.com/${workspace.slug}`,
+        },
+        offers: {
+          "@type": "Offer",
+          price: String(selectedService.price || "0"),
+          priceCurrency:
+            typeof selectedService.currency === "string"
+              ? selectedService.currency
+              : selectedService.currency?.code || "EGP",
+        },
+      }
+    : null;
+
   return (
-    <main
+    <div
       className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
       data-workspace-vibe={vibe.key}
       style={{
@@ -628,6 +652,7 @@ export default function CustomerBookAppointmentPage() {
         }
         canonical={`/${workspace.slug}${selectedService?.slug ? `/${selectedService.slug}` : "/book"}`}
         ogImage={bannerUrl || workspace.cover_url || workspace.logo_url}
+        jsonLd={serviceJsonLd ? [serviceJsonLd] : undefined}
       />
       {/* Header Banner */}
       <div
@@ -2946,6 +2971,6 @@ export default function CustomerBookAppointmentPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
