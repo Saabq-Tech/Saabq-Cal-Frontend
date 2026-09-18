@@ -26,7 +26,7 @@ const defaultFormState = {
   description_en: "",
   duration_minutes: 30,
   price: 0,
-  currency: "SAR",
+  currency: "EGP",
   buffer_before_minutes: 0,
   buffer_after_minutes: 0,
   capacity: 1,
@@ -130,15 +130,15 @@ export default function ServicesTab({
   const [availableCurrencies, setAvailableCurrencies] = useState(() => [
     {
       id: 1,
-      code: "SAR",
-      name: isRTL ? "ريال سعودي" : "Saudi Riyal",
-      symbol_native: isRTL ? "ر.س" : "SAR",
-    },
-    {
-      id: 2,
       code: "EGP",
       name: isRTL ? "جنيه مصري" : "Egyptian Pound",
       symbol_native: isRTL ? "ج.م" : "EGP",
+    },
+    {
+      id: 2,
+      code: "SAR",
+      name: isRTL ? "ريال سعودي" : "Saudi Riyal",
+      symbol_native: isRTL ? "ر.س" : "SAR",
     },
   ]);
 
@@ -204,7 +204,7 @@ export default function ServicesTab({
       service.currency_code ||
       (availableCurrencies && availableCurrencies.length > 0
         ? availableCurrencies[0].code
-        : "SAR");
+        : "EGP");
 
     const matchedCurr = availableCurrencies?.find(
       (c) =>
@@ -503,7 +503,7 @@ export default function ServicesTab({
               s.currency ||
               user?.workspace?.currency ||
               user?.workspace?.currency_code ||
-              "SAR";
+              "EGP";
             const currencySymbol = getCurrencySymbol(rawCurr, isRTL);
 
             const nameDisplay =
@@ -1577,7 +1577,7 @@ export default function ServicesTab({
                       </label>
                       <select
                         className="form-input"
-                        value={form.currency || "SAR"}
+                        value={form.currency || "EGP"}
                         onChange={(e) => {
                           const selectedCode = e.target.value;
                           const selectedCurr = availableCurrencies.find(

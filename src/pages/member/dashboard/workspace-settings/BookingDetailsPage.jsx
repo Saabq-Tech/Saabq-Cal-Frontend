@@ -574,7 +574,7 @@ export default function BookingDetailsPage({
     b.currency ||
     user?.workspace?.currency ||
     user?.workspace?.currency_code ||
-    "SAR";
+    "EGP";
   const serviceCurrency = getCurrencySymbol(rawCurrency, isRTL);
   const serviceDuration =
     b.service?.duration_minutes || b.snapshot?.duration_minutes || 30;
@@ -1006,8 +1006,8 @@ export default function BookingDetailsPage({
       className="animate-fade-in"
     >
       <SEO
+        pageKey="workspaceBookingDetail"
         title={`${t("appointmentDetails") || "تفاصيل الموعد"} #${b.id}`}
-        noindex
       />
 
       {/* TOP HEADER & ACTION NAVIGATION BAR */}

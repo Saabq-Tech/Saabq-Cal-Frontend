@@ -307,6 +307,7 @@ export default function WorkspaceProfilePage() {
       style={{ background: "var(--background)", minHeight: "100vh" }}
     >
       <SEO
+        pageKey="customerWorkspaceProfile"
         title={getTranslatableText(workspace.name)}
         description={stripHtml(
           getTranslatableText(workspace.booking_short_intro) ||
@@ -316,7 +317,6 @@ export default function WorkspaceProfilePage() {
               : `Book top services and appointments easily at ${getTranslatableText(workspace.name)}`),
         )}
         canonical={`/${workspace.slug}`}
-        ogType="business.business"
         ogImage={workspace.cover_url || workspace.logo_url}
         jsonLd={[jsonLd]}
       />

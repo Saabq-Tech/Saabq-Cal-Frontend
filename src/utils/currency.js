@@ -23,9 +23,9 @@ const CURRENCY_MAP = {
  * @param {boolean} isRTL - layout direction (true for Arabic, false for English)
  * @returns {string} Currency display symbol / code
  */
-export function getCurrencySymbol(currency = "SAR", isRTL = true) {
+export function getCurrencySymbol(currency = "EGP", isRTL = true) {
   if (!currency) {
-    return isRTL ? "ر.س" : "SAR";
+    return isRTL ? "ج.م" : "EGP";
   }
 
   if (typeof currency === "object" && currency !== null) {
@@ -41,7 +41,7 @@ export function getCurrencySymbol(currency = "SAR", isRTL = true) {
           detail.symbol ||
           (typeof detail.name === "object" ? detail.name?.ar : detail.name) ||
           detail.code ||
-          "ر.س"
+          "ج.م"
         );
       }
       return (
@@ -49,7 +49,7 @@ export function getCurrencySymbol(currency = "SAR", isRTL = true) {
         detail.symbol_native ||
         (typeof detail.name === "object" ? detail.name?.en : detail.name) ||
         detail.code ||
-        "SAR"
+        "EGP"
       );
     }
 
@@ -73,14 +73,14 @@ export function getCurrencySymbol(currency = "SAR", isRTL = true) {
 /**
  * Format currency amount with currency code or object.
  * @param {number|string} amount
- * @param {string|object} currency - e.g. 'SAR', 'USD', or { code: 'SAR', symbol_native: 'ر.س', symbol: 'SR' }
+ * @param {string|object} currency - e.g. 'EGP', 'USD', or { code: 'EGP', symbol_native: 'ج.م', symbol: 'EGP' }
  * @param {boolean} isRTL - layout direction
  * @param {string|boolean|null} freeLabel - custom label for 0 (pass false to display 0 with currency)
  * @returns {string} Formatted currency text
  */
 export function formatCurrency(
   amount,
-  currency = "SAR",
+  currency = "EGP",
   isRTL = true,
   freeLabel = null,
 ) {
@@ -115,16 +115,12 @@ export function formatCurrency(
 
 /**
  * Resolve currency object / code from workspace or user context.
- * @param {object} workspace
+ * @param {object} workspaceOrUser
  * @param {string} fallback
  * @returns {string|object}
  */
-export function resolveWorkspaceCurrency(workspace, fallback = "SAR") {
-  if (!workspace) return fallback;
-  return (
-    workspace.currency ||
-    workspace.currency_code ||
-    workspace.currency_symbol ||
-    fallback
-  );
+export function resolveWorkspaceCurrency(workspaceOrUser, fallback = "EGP") {
+  if (!workspaceOrUser) return fallback;
+  const ws = workspaceOrUser.workspace || workspaceOrUser;
+  return ws.currency || ws.currency_code || ws.currency_symbol || fallback;
 }

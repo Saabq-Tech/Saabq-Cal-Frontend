@@ -88,7 +88,7 @@ export default function MemberProfilePage() {
   if (loading && !user) {
     return (
       <>
-        <SEO title={t("pageTitleProfile")} noindex />
+        <SEO pageKey="memberProfile" />
         <ProfileSkeleton />
       </>
     );
@@ -116,7 +116,7 @@ export default function MemberProfilePage() {
   if (currentTab === "security") {
     return (
       <>
-        <SEO title={t("security")} noindex />
+        <SEO pageKey="memberSecurity" />
         <MemberSecurityPage />
       </>
     );
@@ -125,7 +125,7 @@ export default function MemberProfilePage() {
   if (currentTab === "password") {
     return (
       <>
-        <SEO title={t("changePassword")} noindex />
+        <SEO pageKey="memberChangePassword" />
         <MemberChangePasswordPage />
       </>
     );
@@ -133,7 +133,7 @@ export default function MemberProfilePage() {
 
   return (
     <div className="card animate-fade-in-up">
-      <SEO title={t("pageTitleProfile")} noindex />
+      <SEO pageKey="memberProfile" />
       <div
         className="card-header"
         style={{

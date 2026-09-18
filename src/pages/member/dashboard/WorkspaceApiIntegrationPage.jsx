@@ -383,10 +383,7 @@ export default function WorkspaceApiIntegrationPage() {
         dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ padding: "60px 28px", textAlign: "center" }}
       >
-        <SEO
-          title={`${t("apiIntegrationTitle") || "REST API Integration"} - Saabq`}
-          noindex
-        />
+        <SEO pageKey="workspaceApiIntegration" />
         <div style={{ maxWidth: 520, margin: "0 auto" }}>
           <div
             style={{
@@ -437,10 +434,7 @@ export default function WorkspaceApiIntegrationPage() {
         dir={lang === "ar" ? "rtl" : "ltr"}
         style={{ padding: "60px 28px", textAlign: "center" }}
       >
-        <SEO
-          title={`${t("apiIntegrationTitle") || "REST API Integration"} - Saabq`}
-          noindex
-        />
+        <SEO pageKey="workspaceApiIntegration" />
         <div style={{ maxWidth: 520, margin: "0 auto" }}>
           <div
             style={{
@@ -509,10 +503,7 @@ export default function WorkspaceApiIntegrationPage() {
       className="workspace-dashboard-shell animate-fade-in"
       dir={lang === "ar" ? "rtl" : "ltr"}
     >
-      <SEO
-        title={`${t("apiIntegrationTitle") || "REST API Integration"} - Saabq`}
-        description="Connect your business website and apps to your Saabq workspace via secure REST API."
-      />
+      <SEO pageKey="workspaceApiIntegration" />
 
       <div style={{ padding: "0 4px 40px" }}>
         {/* Unified Standard Header */}

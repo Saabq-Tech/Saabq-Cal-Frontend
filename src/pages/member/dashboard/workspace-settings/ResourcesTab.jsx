@@ -45,7 +45,7 @@ export default function ResourcesTab({
     user?.workspace?.currency ||
     user?.workspace?.currency_code ||
     user?.workspace?.currency_symbol ||
-    "SAR";
+    "EGP";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState(defaultFormState);
   const [searchTerm, setSearchTerm] = useState("");
@@ -253,9 +253,14 @@ export default function ResourcesTab({
           {
             id: "total_val",
             label: isRTL ? "القيمة الإجمالية للمخزون" : "Total Inventory Value",
-            value: `$${formatCurrency(calculatedStats.total_inventory_value)}`,
+            value: formatCurrency(
+              calculatedStats.total_inventory_value,
+              wsCurrency,
+              isRTL,
+              "0",
+            ),
             valueColor: "#10b981",
-            icon: "dollar-sign",
+            icon: "credit-card",
             iconBg: "rgba(16, 185, 129, 0.1)",
             iconColor: "#10b981",
           },

@@ -6,6 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
 import client, { endpoints } from "../../api/client";
 import Icon from "../common/Icon";
+import SEO from "../ui/SEO";
 
 /* ---------------------------------------------------------------
    Helpers
@@ -559,6 +560,7 @@ export default function NotificationsPage() {
       )}
 
       <div className="card animate-fade-in-up">
+        <SEO pageKey="notifications" />
         <div
           className="card-header notif-header"
           style={{

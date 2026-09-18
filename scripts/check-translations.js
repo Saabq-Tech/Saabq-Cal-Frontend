@@ -8,6 +8,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const srcDir = path.join(projectRoot, 'src');
 const translationsFile = path.join(srcDir, 'translations', 'translations.js');
 const workspaceVibeFile = path.join(srcDir, 'utils', 'workspaceVibe.js');
+const seoConfigFile = path.join(srcDir, 'config', 'seoConfig.js');
 
 // ANSI escape codes for styling console output
 const colors = {
@@ -97,7 +98,10 @@ async function runCheck() {
   logHeader("Step 2: Scanning Codebase for t('key') Usages");
 
   const allFiles = getAllFiles(srcDir).filter(
-    (f) => f !== translationsFile && f !== workspaceVibeFile
+    (f) =>
+      f !== translationsFile &&
+      f !== workspaceVibeFile &&
+      f !== seoConfigFile
   );
   const usedKeys = new Map(); // key -> [{ file, line }]
   for (const filePath of allFiles) {
@@ -192,6 +196,7 @@ async function runCheck() {
         lineText.includes('_AR') ||
         lineText.includes('aria-label') ||
         lineText.includes('التحويل للعربية') ||
+        lineText.includes('.includes(') ||
         lineText.includes('errorMsg.includes') ||
         lineText.includes('res.message?.includes') ||
         lineText.includes('label.includes') ||

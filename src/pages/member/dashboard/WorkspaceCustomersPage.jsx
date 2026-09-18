@@ -7,6 +7,7 @@ import { useToast } from "../../../context/ToastContext";
 import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
+import SEO from "../../../components/ui/SEO";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import { getLimitInfo } from "../../../utils/planLimits";
@@ -282,6 +283,7 @@ export default function WorkspaceCustomersPage() {
       className="workspace-customers-page animate-fade-in"
       style={{ padding: "0 4px" }}
     >
+      <SEO pageKey="workspaceCustomers" />
       <PlanLimitBanner type="customers" limitInfo={limitInfo} />
 
       <PlanLimitModal

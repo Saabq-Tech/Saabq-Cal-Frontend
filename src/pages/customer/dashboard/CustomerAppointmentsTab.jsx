@@ -896,7 +896,7 @@ export default function CustomerAppointmentsTab() {
 
   return (
     <div className="card animate-fade-in-up">
-      <SEO title={t("myAppointments") || "مواعيدي"} noindex />
+      <SEO pageKey="customerAppointments" />
 
       {/* Header */}
       <div
@@ -1345,7 +1345,7 @@ export default function CustomerAppointmentsTab() {
                             appt.snapshot.price,
                             appt.snapshot.currency ||
                               appt.workspace?.currency ||
-                              "SAR",
+                              "EGP",
                             isRTL,
                             "0",
                           )}
@@ -1993,7 +1993,7 @@ export default function CustomerAppointmentsTab() {
                               0,
                             selectedAppointment.snapshot?.currency ||
                               selectedAppointment.workspace?.currency ||
-                              "SAR",
+                              "EGP",
                             isRTL,
                             "0",
                           )}
@@ -2550,7 +2550,7 @@ export default function CustomerAppointmentsTab() {
                               0,
                             selectedAppointment.snapshot?.currency ||
                               selectedAppointment.workspace?.currency ||
-                              "SAR",
+                              "EGP",
                             isRTL,
                             "0",
                           )}

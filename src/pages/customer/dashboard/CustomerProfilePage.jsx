@@ -26,11 +26,6 @@ export default function CustomerProfilePage() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    document.title = t("pageTitleProfile");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || "",
@@ -83,7 +78,7 @@ export default function CustomerProfilePage() {
   if (loading && !user) {
     return (
       <>
-        <SEO title={t("pageTitleProfile")} noindex />
+        <SEO pageKey="customerProfile" />
         <ProfileSkeleton />
       </>
     );
@@ -106,7 +101,7 @@ export default function CustomerProfilePage() {
   if (currentTab === "security") {
     return (
       <>
-        <SEO title={t("security")} noindex />
+        <SEO pageKey="customerSecurity" />
         <CustomerSecurityPage />
       </>
     );
@@ -115,7 +110,7 @@ export default function CustomerProfilePage() {
   if (currentTab === "notifications") {
     return (
       <>
-        <SEO title={t("notifications")} noindex />
+        <SEO pageKey="notifications" />
         <NotificationsPage />
       </>
     );
@@ -128,7 +123,7 @@ export default function CustomerProfilePage() {
   ) {
     return (
       <>
-        <SEO title={t("supportChat")} noindex />
+        <SEO pageKey="chats" />
         <ChatsPage />
       </>
     );
@@ -137,7 +132,7 @@ export default function CustomerProfilePage() {
   if (currentTab === "password") {
     return (
       <>
-        <SEO title={t("changePassword")} noindex />
+        <SEO pageKey="customerChangePassword" />
         <CustomerChangePasswordPage />
       </>
     );
@@ -145,7 +140,7 @@ export default function CustomerProfilePage() {
 
   return (
     <div className="card animate-fade-in-up">
-      <SEO title={t("pageTitleProfile")} noindex />
+      <SEO pageKey="customerProfile" />
       <div
         className="card-header"
         style={{

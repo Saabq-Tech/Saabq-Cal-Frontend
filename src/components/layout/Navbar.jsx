@@ -250,7 +250,7 @@ export default function Navbar() {
   // Drawer accordions ("حسابي" / "مساحتي") mirror the dashboard sidebars, built
   // from the shared nav config so they stay in sync with the real menus.
   const isWorkspaceActive = user?.workspace?.status === "active";
-  const drawerAccountTabs = getAccountTabs(t, userType);
+  const drawerAccountTabs = getAccountTabs(t, userType, user);
   const drawerWorkspaceTabs = getWorkspaceTabs(t, user?.workspace, lang).filter(
     (tab) => canViewWorkspaceTab(tab, isOwner, userPermissions, user),
   );
@@ -675,28 +675,43 @@ export default function Navbar() {
                         key={tab.id}
                         to={tab.to}
                         onClick={() => setDropdownOpen(false)}
+                        title={tab.lockTooltip || undefined}
                       >
                         <Icon name={tab.icon} size={16} />
-                        <span>{tab.label}</span>
-                        {tab.badge === "unread" && unreadCount > 0 && (
-                          <span
-                            className="drawer-badge"
-                            style={{ marginInlineStart: "auto" }}
-                          >
-                            {unreadCount > 99 ? "99+" : unreadCount}
-                          </span>
-                        )}
-                        {tab.badge === "chat" && unreadChatCount > 0 && (
-                          <span
-                            className="drawer-badge"
+                        <span style={{ flex: 1 }}>{tab.label}</span>
+                        {tab.locked && (
+                          <Icon
+                            name="lock"
+                            size={14}
                             style={{
+                              color: "var(--muted)",
                               marginInlineStart: "auto",
-                              background: "var(--accent)",
                             }}
-                          >
-                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                          </span>
+                          />
                         )}
+                        {tab.badge === "unread" &&
+                          unreadCount > 0 &&
+                          !tab.locked && (
+                            <span
+                              className="drawer-badge"
+                              style={{ marginInlineStart: "auto" }}
+                            >
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </span>
+                          )}
+                        {tab.badge === "chat" &&
+                          unreadChatCount > 0 &&
+                          !tab.locked && (
+                            <span
+                              className="drawer-badge"
+                              style={{
+                                marginInlineStart: "auto",
+                                background: "var(--accent)",
+                              }}
+                            >
+                              {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                            </span>
+                          )}
                       </Link>
                     ))}
                     <div className="dropdown-divider" />
@@ -894,19 +909,36 @@ export default function Navbar() {
                             to={tab.to}
                             className="mobile-drawer-link drawer-sublink"
                             onClick={closeMobileDrawer}
+                            title={tab.lockTooltip || undefined}
                           >
                             <Icon name={tab.icon} />
-                            <span>{tab.label}</span>
-                            {tab.badge === "unread" && unreadCount > 0 && (
-                              <span className="drawer-badge">
-                                {unreadCount > 99 ? "99+" : unreadCount}
-                              </span>
+                            <span style={{ flex: 1 }}>{tab.label}</span>
+                            {tab.locked && (
+                              <Icon
+                                name="lock"
+                                size={14}
+                                style={{
+                                  color: "var(--muted)",
+                                  marginInlineStart: "auto",
+                                }}
+                              />
                             )}
-                            {tab.badge === "chat" && unreadChatCount > 0 && (
-                              <span className="drawer-badge primary">
-                                {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                              </span>
-                            )}
+                            {tab.badge === "unread" &&
+                              unreadCount > 0 &&
+                              !tab.locked && (
+                                <span className="drawer-badge">
+                                  {unreadCount > 99 ? "99+" : unreadCount}
+                                </span>
+                              )}
+                            {tab.badge === "chat" &&
+                              unreadChatCount > 0 &&
+                              !tab.locked && (
+                                <span className="drawer-badge primary">
+                                  {unreadChatCount > 99
+                                    ? "99+"
+                                    : unreadChatCount}
+                                </span>
+                              )}
                           </Link>
                         ))}
                       </div>

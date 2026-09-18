@@ -87,7 +87,7 @@ export default function WorkspaceBookingsPage() {
   return (
     <CapabilityGate capabilityCode="BOOKING">
       <div className="workspace-bookings-container animate-fade-in">
-        <SEO title={t("bookings") || "المواعيد"} noindex />
+        <SEO pageKey="workspaceBookings" />
 
         {selectedBookingId ? (
           <div className="workspace-page-container">

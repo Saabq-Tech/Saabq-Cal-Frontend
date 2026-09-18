@@ -435,7 +435,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
                   s.currency_detail ||
                     s.currency ||
                     user?.workspace?.currency ||
-                    "SAR",
+                    "EGP",
                   lang === "ar",
                 );
                 return (

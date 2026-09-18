@@ -35,8 +35,6 @@ export default function CustomerLoginPage() {
     : defaultRedirect;
 
   useEffect(() => {
-    document.title = t("pageTitleLogin");
-
     if (!document.getElementById("google-gsi-script")) {
       const script = document.createElement("script");
       script.id = "google-gsi-script";
@@ -176,7 +174,7 @@ export default function CustomerLoginPage() {
           : "Sign in as a customer to manage your bookings effortlessly."
       }
     >
-      <SEO title={t("pageTitleLogin")} noindex />
+      <SEO pageKey="customerLogin" />
       <h1>{t("welcomeBack")}</h1>
       <p>
         {t("signInToContinue")} ({t("customer")})

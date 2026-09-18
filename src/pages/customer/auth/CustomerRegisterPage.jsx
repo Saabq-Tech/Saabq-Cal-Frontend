@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -25,11 +25,6 @@ export default function CustomerRegisterPage() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
-
-  useEffect(() => {
-    document.title = t("pageTitleRegister");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -76,7 +71,7 @@ export default function CustomerRegisterPage() {
           : "Create your customer account for easy scheduling."
       }
     >
-      <SEO title={t("pageTitleRegister")} noindex />
+      <SEO pageKey="customerRegister" />
       <h1>{t("createAccount")}</h1>
       <p>
         {t("joinSaabq")} ({t("customer")})

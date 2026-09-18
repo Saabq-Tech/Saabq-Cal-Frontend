@@ -102,7 +102,7 @@ export default function WorkspaceServicesPage() {
   return (
     <CapabilityGate capabilityCode="BOOKING">
       <div className="workspace-page-container">
-        <SEO title={t("services") || "الخدمات"} noindex />
+        <SEO pageKey="workspaceServices" />
         {loading ? (
           <ServiceCardSkeleton count={3} />
         ) : (

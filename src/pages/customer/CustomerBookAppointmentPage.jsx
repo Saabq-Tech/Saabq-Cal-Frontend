@@ -433,7 +433,7 @@ export default function CustomerBookAppointmentPage() {
       const currencyCode =
         typeof serviceCurrency === "string"
           ? serviceCurrency
-          : serviceCurrency?.code || serviceCurrency?.symbol || "SAR";
+          : serviceCurrency?.code || serviceCurrency?.symbol || "EGP";
       const currencyId =
         typeof serviceCurrency === "object"
           ? serviceCurrency?.id
@@ -607,6 +607,7 @@ export default function CustomerBookAppointmentPage() {
       }}
     >
       <SEO
+        pageKey="customerBookAppointment"
         title={
           selectedService
             ? isRTL
@@ -1209,7 +1210,10 @@ export default function CustomerBookAppointmentPage() {
                                   >
                                     {formatCurrency(
                                       srv.price,
-                                      srv.currency_detail || srv.currency,
+                                      srv.currency_detail ||
+                                        srv.currency ||
+                                        workspace?.currency_detail ||
+                                        workspace?.currency,
                                       isRTL,
                                       t("freeService"),
                                     )}

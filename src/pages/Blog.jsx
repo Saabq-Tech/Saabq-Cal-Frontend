@@ -126,16 +126,7 @@ export default function Blog() {
 
   return (
     <main className="main-content blog-page">
-      <SEO
-        title={`${t("blogTitle")} — ${t("appName")}`}
-        description={
-          t("blogSubtitle") ||
-          "مقالات ونصائح حول إدارة المواعيد وجدولة الأعمال والإنتاجية."
-        }
-        canonical="/blog"
-        ogType="website"
-        ogImage="/logo.png"
-      />
+      <SEO pageKey="blog" />
 
       {/* Flagship Aurora Hero Header */}
       <section className="explore-hero blog-hero-aurora">

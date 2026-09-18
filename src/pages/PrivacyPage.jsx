@@ -12,10 +12,6 @@ export default function PrivacyPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = t("pageTitlePrivacy") || "سياسة الخصوصية — تقويم سابق";
-  }, [t]);
-
-  useEffect(() => {
     setLoading(true);
     client
       .get(endpoints.privacy)
@@ -41,13 +37,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="main-content">
-      <SEO
-        title={privacy?.title || t("privacyPolicy") || "سياسة الخصوصية"}
-        description={
-          t("privacyPolicySubtitle") ||
-          "سياسة الخصوصية وحماية البيانات الشخصية في منصة تقويم سابق."
-        }
-      />
+      <SEO pageKey="privacy" title={privacy?.title} />
 
       {/* Hero / Header Section */}
       <section

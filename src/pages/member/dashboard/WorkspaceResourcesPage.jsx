@@ -8,6 +8,8 @@ import { TableSkeleton } from "../../../components/ui/Skeleton";
 
 import { usePermissions } from "../../../hooks/usePermissions";
 
+import CapabilityGate from "../../../components/common/CapabilityGate";
+
 export default function WorkspaceResourcesPage() {
   const { t } = useLanguage();
   const toast = useToast();
@@ -88,25 +90,24 @@ export default function WorkspaceResourcesPage() {
   };
 
   return (
-    <div className="workspace-page-container">
-      <SEO
-        title={t("workspaceResources") || "إدارة الموارد والمخزون"}
-        noindex
-      />
-      {loading ? (
-        <TableSkeleton rows={3} />
-      ) : (
-        <ResourcesTab
-          resources={resources}
-          stats={stats}
-          canEdit={canEdit}
-          canCreate={canCreateResources}
-          canUpdate={canUpdateResources}
-          canDelete={canDeleteResources}
-          onSaveResource={handleSaveResource}
-          onDeleteResource={handleDeleteResource}
-        />
-      )}
-    </div>
+    <CapabilityGate capabilityCode="RESOURCES">
+      <div className="workspace-page-container">
+        <SEO pageKey="workspaceResources" />
+        {loading ? (
+          <TableSkeleton rows={3} />
+        ) : (
+          <ResourcesTab
+            resources={resources}
+            stats={stats}
+            canEdit={canEdit}
+            canCreate={canCreateResources}
+            canUpdate={canUpdateResources}
+            canDelete={canDeleteResources}
+            onSaveResource={handleSaveResource}
+            onDeleteResource={handleDeleteResource}
+          />
+        )}
+      </div>
+    </CapabilityGate>
   );
 }

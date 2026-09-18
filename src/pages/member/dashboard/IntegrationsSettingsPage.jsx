@@ -10,9 +10,13 @@ import Icon from "../../../components/common/Icon";
 import client, { endpoints } from "../../../api/client";
 import PermissionCheck from "../../../components/PermissionCheck";
 import TelegramActionBuilder from "../../../components/dashboard/TelegramActionBuilder";
-import { isApiIntegrationEnabled } from "../../../utils/capabilities";
+import {
+  isApiIntegrationEnabled,
+  checkWorkspaceCapability,
+} from "../../../utils/capabilities";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+import CapabilityGate from "../../../components/common/CapabilityGate";
 
 // Helper function to safely render strings or localized objects
 function _getTranslatableText(textObj, currentLang = "ar") {
@@ -932,15 +936,17 @@ export default function IntegrationsSettingsPage() {
 
   const connectedCount = integrationsList.filter((i) => i.isConnected).length;
 
+  // Integrations requires INTEGRATIONS capability - show locked upgrade view if not allowed
+  if (!checkWorkspaceCapability(user, "INTEGRATIONS")) {
+    return <CapabilityGate capabilityCode="INTEGRATIONS" />;
+  }
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 24 }}
       className="animate-fade-in-up"
     >
-      <SEO
-        title={t("applicationsTitle") || "Applications & Integrations"}
-        noindex
-      />
+      <SEO pageKey="workspaceIntegrations" />
 
       {/* Unified Standard Header */}
       <WorkspacePageHeader
@@ -970,62 +976,63 @@ export default function IntegrationsSettingsPage() {
         }
       />
 
-      {/* Integrations Main Container */}
-      <div className="workspace-page-container">
-        {/* Filter Tabs */}
-        <div
-          style={{
-            padding: "0 24px 20px",
-            display: "flex",
-            gap: 8,
-            overflowX: "auto",
-          }}
-        >
-          {[
-            {
-              id: "all",
-              label: t("allApplications") || "كافة التطبيقات",
-              icon: "grid",
-              count: integrationsList.length,
-            },
-            {
-              id: "google",
-              label: t("googleServicesTab") || "خدمات Google",
-              icon: "globe",
-              count: integrationsList.filter((i) => i.category === "google")
-                .length,
-            },
-            {
-              id: "automation",
-              label: t("automationAndWebhooksTab") || "الأتمتة والـ Webhooks",
-              icon: "zap",
-              count: integrationsList.filter((i) => i.category === "automation")
-                .length,
-            },
-            {
-              id: "notifications",
-              label: t("notificationsTab") || "الإشعارات",
-              icon: "bell",
-              count: integrationsList.filter(
-                (i) => i.category === "notifications",
-              ).length,
-            },
-          ].map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`integrations-tab-pill ${isActive ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <Icon name={tab.icon} size={14} />
-                <span>{tab.label}</span>
-                <span className="integrations-tab-count">{tab.count}</span>
-              </button>
-            );
-          })}
-        </div>
+      {/* Filter Tabs */}
+      <div
+        className="no-scrollbar integrations-tabs-slider"
+        style={{
+          display: "flex",
+          gap: 10,
+          overflowX: "auto",
+          padding: "8px 4px 12px",
+          margin: "-8px -4px 0",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+        }}
+      >
+        {[
+          {
+            id: "all",
+            label: t("allApplications") || "كافة التطبيقات",
+            icon: "grid",
+            count: integrationsList.length,
+          },
+          {
+            id: "google",
+            label: t("googleServicesTab") || "خدمات Google",
+            icon: "globe",
+            count: integrationsList.filter((i) => i.category === "google")
+              .length,
+          },
+          {
+            id: "automation",
+            label: t("automationAndWebhooksTab") || "الأتمتة والـ Webhooks",
+            icon: "zap",
+            count: integrationsList.filter((i) => i.category === "automation")
+              .length,
+          },
+          {
+            id: "notifications",
+            label: t("notificationsTab") || "الإشعارات",
+            icon: "bell",
+            count: integrationsList.filter(
+              (i) => i.category === "notifications",
+            ).length,
+          },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              className={`integrations-tab-pill ${isActive ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon name={tab.icon} size={15} />
+              <span>{tab.label}</span>
+              <span className="integrations-tab-count">{tab.count}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Grid of Applications */}

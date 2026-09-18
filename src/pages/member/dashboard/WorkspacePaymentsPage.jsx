@@ -10,6 +10,7 @@ import Icon from "../../../components/common/Icon";
 import { SkeletonRect } from "../../../components/ui/Skeleton";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 import { getCurrencySymbol } from "../../../utils/currency";
+import CapabilityGate from "../../../components/common/CapabilityGate";
 export default function WorkspacePaymentsPage() {
   const { user } = useAuth();
   const { isOwner, canReadPayments, canUpdatePayments } = usePermissions();
@@ -20,7 +21,7 @@ export default function WorkspacePaymentsPage() {
     user?.workspace?.currency ||
     user?.workspace?.currency_code ||
     user?.workspace?.currency_symbol ||
-    "SAR";
+    "EGP";
 
   const [payments, setPayments] = useState([]);
   const [walletData, setWalletData] = useState(null);
@@ -224,295 +225,427 @@ export default function WorkspacePaymentsPage() {
     });
   };
 
-  if (!isOwner && !canReadPayments) {
-    return (
-      <div
-        className="card"
-        style={{ padding: "48px 24px", textAlign: "center" }}
-      >
-        <SEO
-          title={isRTL ? "سجل المدفوعات والمالية" : "Payments & Finance Log"}
-          noindex
-        />
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            backgroundColor: "rgba(239, 68, 68, 0.1)",
-            color: "#ef4444",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 16px",
-          }}
-        >
-          <Icon name="lock" size={28} />
-        </div>
-        <h3
-          style={{
-            fontSize: "1.15rem",
-            fontWeight: 800,
-            margin: "0 0 8px",
-            color: "var(--heading)",
-          }}
-        >
-          {isRTL ? "غير مصرح لك بعرض السجل المالي" : "Access Denied"}
-        </h3>
-        <p
-          style={{
-            fontSize: "0.88rem",
-            color: "var(--text-secondary)",
-            maxWidth: 440,
-            margin: "0 auto",
-          }}
-        >
-          {isRTL
-            ? "ليس لديك الصلاحيات الكافية للوصول إلى المدفوعات والتحويلات المالية في مساحة العمل هذه."
-            : "You do not have the required permissions to view payments and financial logs in this workspace."}
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="workspace-page-container">
-      <SEO
-        title={isRTL ? "سجل المدفوعات والمالية" : "Payments & Finance Log"}
-        noindex
-      />
-
-      {/* Top Standard Header with Wallet Stats */}
-      <WorkspacePageHeader
-        title={
-          isRTL
-            ? "سجل المدفوعات والتحويلات المالية"
-            : "Payments & Financial Hub"
-        }
-        subtitle={
-          isRTL
-            ? "متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي وإجمالي المحفظة."
-            : "Monitor all payment transactions, transfer receipts, wallet balances, and verifications."
-        }
-        icon="credit-card"
-        stats={[
-          {
-            id: "net_balance",
-            label:
-              t("netBalanceLabel") ||
-              (isRTL ? "صافي رصيد الخزينة" : "Net Balance"),
-            value: walletLoading
-              ? "..."
-              : `${Number(walletData?.net_balance ?? 0).toLocaleString()} ${walletData?.currency || "SAR"}`,
-            icon: "credit-card",
-            iconBg: "rgba(13, 104, 92, 0.15)",
-            iconColor: "#0d685c",
-            valueColor: "#0d685c",
-          },
-          {
-            id: "total_credit",
-            label:
-              t("totalCreditLabel") ||
-              (isRTL ? "إجمالي الإيرادات (دائن)" : "Total Income"),
-            value: walletLoading
-              ? "..."
-              : `${Number(walletData?.total_credit ?? 0).toLocaleString()} ${walletData?.currency || "SAR"}`,
-            icon: "arrow-down-left",
-            iconBg: "rgba(16, 185, 129, 0.12)",
-            iconColor: "#10b981",
-            valueColor: "#10b981",
-          },
-          {
-            id: "total_debit",
-            label:
-              t("totalDebitLabel") ||
-              (isRTL ? "إجمالي المصروفات (مدين)" : "Total Expenses"),
-            value: walletLoading
-              ? "..."
-              : `${Number(walletData?.total_debit ?? 0).toLocaleString()} ${walletData?.currency || "SAR"}`,
-            icon: "arrow-up-right",
-            iconBg: "rgba(239, 68, 68, 0.12)",
-            iconColor: "#ef4444",
-            valueColor: "#ef4444",
-          },
-          {
-            id: "pending_verification",
-            label:
-              t("pendingVerificationLabel") ||
-              (isRTL ? "بانتظار التحقق والمراجعة" : "Pending Verification"),
-            value: walletLoading ? "..." : `${walletData?.pending_count ?? 0}`,
-            suffix: walletData?.pending_amount
-              ? `(${Number(walletData.pending_amount).toLocaleString()} ${walletData?.currency || "SAR"})`
-              : null,
-            icon: "clock",
-            iconBg: "rgba(245, 158, 11, 0.15)",
-            iconColor: "#f59e0b",
-            valueColor: "#f59e0b",
-          },
-        ]}
-      />
-      {/* Responsive Filters Bar */}
-      <div className="responsive-filters-bar">
-        <div className="responsive-filter-input">
-          <input
-            type="text"
-            className="form-input"
-            placeholder={
-              isRTL
-                ? "البحث بالمرجع أو الملاحظات..."
-                : "Search by reference or notes..."
-            }
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            style={{ width: "100%", fontSize: "0.85rem" }}
-          />
-        </div>
-
-        <div className="responsive-filter-select">
-          <select
-            className="form-select"
-            value={typeFilter}
-            onChange={(e) => {
-              setTypeFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{ width: "100%", fontSize: "0.85rem" }}
-          >
-            <option value="">{t("allTypesLabel")}</option>
-            <option value="credit">{t("creditOnlyLabel")}</option>
-            <option value="debit">{t("debitOnlyLabel")}</option>
-          </select>
-        </div>
-
-        <div className="responsive-filter-select">
-          <select
-            className="form-select"
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{ width: "100%", fontSize: "0.85rem" }}
-          >
-            <option value="">{isRTL ? "جميع الحالات" : "All Statuses"}</option>
-            <option value="verifying">
-              {isRTL ? "قيد التحقق" : "Verifying"}
-            </option>
-            <option value="pending">
-              {isRTL ? "قيد الانتظار" : "Pending"}
-            </option>
-            <option value="paid">{isRTL ? "مدفوع ومعتمد" : "Paid"}</option>
-            <option value="failed">{isRTL ? "مرفوض" : "Failed"}</option>
-            <option value="refunded">{isRTL ? "مسترجع" : "Refunded"}</option>
-          </select>
-        </div>
-
-        <div className="responsive-filter-select">
-          <select
-            className="form-select"
-            value={payableTypeFilter}
-            onChange={(e) => {
-              setPayableTypeFilter(e.target.value);
-              setPage(1);
-            }}
-            style={{ width: "100%", fontSize: "0.85rem" }}
-          >
-            <option value="">{isRTL ? "جميع الجهات" : "All Payables"}</option>
-            <option value="Appointment">
-              {isRTL ? "حجوزات المواعيد" : "Appointments"}
-            </option>
-            <option value="Subscription">
-              {isRTL ? "اشتراكات الباقات" : "Subscriptions"}
-            </option>
-          </select>
-        </div>
-
-        {(searchQuery || statusFilter || payableTypeFilter || typeFilter) && (
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => {
-              setSearchQuery("");
-              setStatusFilter("");
-              setPayableTypeFilter("");
-              setTypeFilter("");
-              setPage(1);
-            }}
-            style={{
-              fontSize: "0.8rem",
-              padding: "6px 12px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Icon name="x" size={14} />
-            {isRTL ? "إلغاء التصفية" : "Clear Filters"}
-          </button>
-        )}
-      </div>
-
-      {/* Payments View */}
-      {loading ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <SkeletonRect height={48} />
-          <SkeletonRect height={54} />
-          <SkeletonRect height={54} />
-        </div>
-      ) : !Array.isArray(payments) || payments.length === 0 ? (
+    <CapabilityGate capabilityCode="PAYMENTS">
+      {!isOwner && !canReadPayments ? (
         <div
-          style={{
-            padding: "48px 20px",
-            textAlign: "center",
-            background: "var(--surface-alt)",
-            borderRadius: 12,
-            border: "1px dashed var(--border-light)",
-          }}
+          className="card"
+          style={{ padding: "48px 24px", textAlign: "center" }}
         >
-          <Icon
-            name="credit-card"
-            size={32}
-            style={{ color: "var(--muted)", margin: "0 auto 12px" }}
-          />
-          <h4
+          <SEO pageKey="workspacePayments" />
+          <div
             style={{
-              margin: "0 0 6px",
-              fontSize: "1rem",
-              fontWeight: 700,
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              color: "#ef4444",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+            }}
+          >
+            <Icon name="lock" size={28} />
+          </div>
+          <h3
+            style={{
+              fontSize: "1.15rem",
+              fontWeight: 800,
+              margin: "0 0 8px",
               color: "var(--heading)",
             }}
           >
+            {isRTL ? "غير مصرح لك بعرض السجل المالي" : "Access Denied"}
+          </h3>
+          <p
+            style={{
+              fontSize: "0.88rem",
+              color: "var(--text-secondary)",
+              maxWidth: 440,
+              margin: "0 auto",
+            }}
+          >
             {isRTL
-              ? "لا توجد سجلات مدفوعات مطابقة"
-              : "No matching payment records found"}
-          </h4>
+              ? "ليس لديك الصلاحيات الكافية للوصول إلى المدفوعات والتحويلات المالية في مساحة العمل هذه."
+              : "You do not have the required permissions to view payments and financial logs in this workspace."}
+          </p>
         </div>
       ) : (
-        <>
-          {/* Desktop Table View */}
-          <div className="table-responsive payments-desktop-table">
-            <table
-              className="table"
-              style={{ width: "100%", fontSize: "0.88rem" }}
+        <div className="workspace-page-container">
+          <SEO pageKey="workspacePayments" />
+
+          {/* Top Standard Header with Wallet Stats */}
+          <WorkspacePageHeader
+            title={
+              isRTL
+                ? "سجل المدفوعات والتحويلات المالية"
+                : "Payments & Financial Hub"
+            }
+            subtitle={
+              isRTL
+                ? "متابعة كافة عمليات الدفع، إيصالات التحويل البنكي، والاعتماد المالي وإجمالي المحفظة."
+                : "Monitor all payment transactions, transfer receipts, wallet balances, and verifications."
+            }
+            icon="credit-card"
+            stats={[
+              {
+                id: "net_balance",
+                label:
+                  t("netBalanceLabel") ||
+                  (isRTL ? "صافي رصيد الخزينة" : "Net Balance"),
+                value: walletLoading
+                  ? "..."
+                  : `${Number(walletData?.net_balance ?? 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`,
+                icon: "credit-card",
+                iconBg: "rgba(13, 104, 92, 0.15)",
+                iconColor: "#0d685c",
+                valueColor: "#0d685c",
+              },
+              {
+                id: "total_credit",
+                label:
+                  t("totalCreditLabel") ||
+                  (isRTL ? "إجمالي الإيرادات (دائن)" : "Total Income"),
+                value: walletLoading
+                  ? "..."
+                  : `${Number(walletData?.total_credit ?? 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`,
+                icon: "arrow-down-left",
+                iconBg: "rgba(16, 185, 129, 0.12)",
+                iconColor: "#10b981",
+                valueColor: "#10b981",
+              },
+              {
+                id: "total_debit",
+                label:
+                  t("totalDebitLabel") ||
+                  (isRTL ? "إجمالي المصروفات (مدين)" : "Total Expenses"),
+                value: walletLoading
+                  ? "..."
+                  : `${Number(walletData?.total_debit ?? 0).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)}`,
+                icon: "arrow-up-right",
+                iconBg: "rgba(239, 68, 68, 0.12)",
+                iconColor: "#ef4444",
+                valueColor: "#ef4444",
+              },
+              {
+                id: "pending_verification",
+                label:
+                  t("pendingVerificationLabel") ||
+                  (isRTL ? "بانتظار التحقق والمراجعة" : "Pending Verification"),
+                value: walletLoading
+                  ? "..."
+                  : `${walletData?.pending_count ?? 0}`,
+                suffix: walletData?.pending_amount
+                  ? `(${Number(walletData.pending_amount).toLocaleString()} ${getCurrencySymbol(walletData?.currency || wsCurrency, isRTL)})`
+                  : null,
+                icon: "clock",
+                iconBg: "rgba(245, 158, 11, 0.15)",
+                iconColor: "#f59e0b",
+                valueColor: "#f59e0b",
+              },
+            ]}
+          />
+          {/* Responsive Filters Bar */}
+          <div className="responsive-filters-bar">
+            <div className="responsive-filter-input">
+              <input
+                type="text"
+                className="form-input"
+                placeholder={
+                  isRTL
+                    ? "البحث بالمرجع أو الملاحظات..."
+                    : "Search by reference or notes..."
+                }
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                style={{ width: "100%", fontSize: "0.85rem" }}
+              />
+            </div>
+
+            <div className="responsive-filter-select">
+              <select
+                className="form-select"
+                value={typeFilter}
+                onChange={(e) => {
+                  setTypeFilter(e.target.value);
+                  setPage(1);
+                }}
+                style={{ width: "100%", fontSize: "0.85rem" }}
+              >
+                <option value="">{t("allTypesLabel")}</option>
+                <option value="credit">{t("creditOnlyLabel")}</option>
+                <option value="debit">{t("debitOnlyLabel")}</option>
+              </select>
+            </div>
+
+            <div className="responsive-filter-select">
+              <select
+                className="form-select"
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                style={{ width: "100%", fontSize: "0.85rem" }}
+              >
+                <option value="">
+                  {isRTL ? "جميع الحالات" : "All Statuses"}
+                </option>
+                <option value="verifying">
+                  {isRTL ? "قيد التحقق" : "Verifying"}
+                </option>
+                <option value="pending">
+                  {isRTL ? "قيد الانتظار" : "Pending"}
+                </option>
+                <option value="paid">{isRTL ? "مدفوع ومعتمد" : "Paid"}</option>
+                <option value="failed">{isRTL ? "مرفوض" : "Failed"}</option>
+                <option value="refunded">
+                  {isRTL ? "مسترجع" : "Refunded"}
+                </option>
+              </select>
+            </div>
+
+            <div className="responsive-filter-select">
+              <select
+                className="form-select"
+                value={payableTypeFilter}
+                onChange={(e) => {
+                  setPayableTypeFilter(e.target.value);
+                  setPage(1);
+                }}
+                style={{ width: "100%", fontSize: "0.85rem" }}
+              >
+                <option value="">
+                  {isRTL ? "جميع الجهات" : "All Payables"}
+                </option>
+                <option value="Appointment">
+                  {isRTL ? "حجوزات المواعيد" : "Appointments"}
+                </option>
+                <option value="Subscription">
+                  {isRTL ? "اشتراكات الباقات" : "Subscriptions"}
+                </option>
+              </select>
+            </div>
+
+            {(searchQuery ||
+              statusFilter ||
+              payableTypeFilter ||
+              typeFilter) && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStatusFilter("");
+                  setPayableTypeFilter("");
+                  setTypeFilter("");
+                  setPage(1);
+                }}
+                style={{
+                  fontSize: "0.8rem",
+                  padding: "6px 12px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <Icon name="x" size={14} />
+                {isRTL ? "إلغاء التصفية" : "Clear Filters"}
+              </button>
+            )}
+          </div>
+
+          {/* Payments View */}
+          {loading ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <SkeletonRect height={48} />
+              <SkeletonRect height={54} />
+              <SkeletonRect height={54} />
+            </div>
+          ) : !Array.isArray(payments) || payments.length === 0 ? (
+            <div
+              style={{
+                padding: "48px 20px",
+                textAlign: "center",
+                background: "var(--surface-alt)",
+                borderRadius: 12,
+                border: "1px dashed var(--border-light)",
+              }}
             >
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>{isRTL ? "المستحق له" : "Payable"}</th>
-                  <th>{t("typeFilterLabel")}</th>
-                  <th>{isRTL ? "المبلغ" : "Amount"}</th>
-                  <th>{isRTL ? "وسيلة الدفع" : "Method / Provider"}</th>
-                  <th>{isRTL ? "الحالة" : "Status"}</th>
-                  <th>{isRTL ? "التاريخ" : "Date"}</th>
-                  <th style={{ textAlign: "center" }}>
-                    {isRTL ? "الإجراءات" : "Actions"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+              <Icon
+                name="credit-card"
+                size={32}
+                style={{ color: "var(--muted)", margin: "0 auto 12px" }}
+              />
+              <h4
+                style={{
+                  margin: "0 0 6px",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  color: "var(--heading)",
+                }}
+              >
+                {isRTL
+                  ? "لا توجد سجلات مدفوعات مطابقة"
+                  : "No matching payment records found"}
+              </h4>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="table-responsive payments-desktop-table">
+                <table
+                  className="table"
+                  style={{ width: "100%", fontSize: "0.88rem" }}
+                >
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{isRTL ? "المستحق له" : "Payable"}</th>
+                      <th>{t("typeFilterLabel")}</th>
+                      <th>{isRTL ? "المبلغ" : "Amount"}</th>
+                      <th>{isRTL ? "وسيلة الدفع" : "Method / Provider"}</th>
+                      <th>{isRTL ? "الحالة" : "Status"}</th>
+                      <th>{isRTL ? "التاريخ" : "Date"}</th>
+                      <th style={{ textAlign: "center" }}>
+                        {isRTL ? "الإجراءات" : "Actions"}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.map((p) => {
+                      const badge = getStatusBadge(p.status);
+                      const isSub = p.payable_type?.includes("Subscription");
+                      const isCredit =
+                        p.type === "credit" ||
+                        (!p.type && !isSub && p.status !== "refunded");
+                      return (
+                        <tr key={p.id}>
+                          <td style={{ fontWeight: 700 }}>#{p.id}</td>
+                          <td>
+                            <span
+                              style={{
+                                fontWeight: 700,
+                                color: "var(--heading)",
+                                display: "block",
+                              }}
+                            >
+                              {isSub
+                                ? isRTL
+                                  ? "اشتراك مساحة العمل"
+                                  : "Workspace Subscription"
+                                : isRTL
+                                  ? "حجز موعد"
+                                  : "Appointment Booking"}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "0.78rem",
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              ID: {p.payable_id}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                padding: "4px 10px",
+                                borderRadius: 14,
+                                fontSize: "0.75rem",
+                                fontWeight: 800,
+                                color: isCredit
+                                  ? "var(--badge-success-color)"
+                                  : "var(--badge-danger-color)",
+                                background: isCredit
+                                  ? "var(--badge-success-bg)"
+                                  : "var(--badge-danger-bg)",
+                                border: `1px solid ${
+                                  isCredit
+                                    ? "var(--badge-success-border)"
+                                    : "var(--badge-danger-border)"
+                                }`,
+                                display: "inline-block",
+                              }}
+                            >
+                              {isCredit ? t("creditBadge") : t("debitBadge")}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              fontWeight: 800,
+                              color: isCredit
+                                ? "var(--badge-success-color)"
+                                : "var(--badge-danger-color)",
+                            }}
+                          >
+                            {isCredit ? "+" : "-"}
+                            {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
+                            {getCurrencySymbol(
+                              p.currency_detail || p.currency || wsCurrency,
+                              isRTL,
+                            )}
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600, display: "block" }}>
+                              {p.method || "bank_transfer"}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "0.76rem",
+                                color: "var(--muted)",
+                              }}
+                            >
+                              {p.provider || "manual"}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              style={{
+                                padding: "4px 12px",
+                                borderRadius: 20,
+                                fontSize: "0.78rem",
+                                fontWeight: 700,
+                                color: badge.color,
+                                background: badge.bg,
+                                border: `1px solid ${badge.border}`,
+                                display: "inline-block",
+                              }}
+                            >
+                              {badge.label}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              fontSize: "0.82rem",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            {formatDate(p.created_at)}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => setSelectedPayment(p)}
+                              style={{ gap: 6, fontSize: "0.8rem" }}
+                            >
+                              <Icon name="eye" size={14} />
+                              {isRTL ? "التفاصيل / الإيصال" : "View / Verify"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="payments-mobile-cards">
                 {payments.map((p) => {
                   const badge = getStatusBadge(p.status);
                   const isSub = p.payable_type?.includes("Subscription");
@@ -520,655 +653,556 @@ export default function WorkspacePaymentsPage() {
                     p.type === "credit" ||
                     (!p.type && !isSub && p.status !== "refunded");
                   return (
-                    <tr key={p.id}>
-                      <td style={{ fontWeight: 700 }}>#{p.id}</td>
-                      <td>
-                        <span
+                    <div key={p.id} className="payment-mobile-card">
+                      <div className="payment-mobile-card-header">
+                        <div
                           style={{
-                            fontWeight: 700,
-                            color: "var(--heading)",
-                            display: "block",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
                           }}
                         >
-                          {isSub
-                            ? isRTL
-                              ? "اشتراك مساحة العمل"
-                              : "Workspace Subscription"
-                            : isRTL
-                              ? "حجز موعد"
-                              : "Appointment Booking"}
-                        </span>
-                        <span
+                          <span
+                            style={{
+                              fontWeight: 800,
+                              color: "var(--heading)",
+                              fontSize: "0.9rem",
+                            }}
+                          >
+                            #{p.id}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.78rem",
+                              fontWeight: 600,
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            {isSub
+                              ? isRTL
+                                ? "اشتراك"
+                                : "Subscription"
+                              : isRTL
+                                ? "حجز موعد"
+                                : "Appointment"}{" "}
+                            (ID: {p.payable_id})
+                          </span>
+                        </div>
+                        <div
                           style={{
-                            fontSize: "0.78rem",
-                            color: "var(--text-secondary)",
+                            display: "flex",
+                            gap: 6,
+                            alignItems: "center",
                           }}
                         >
-                          ID: {p.payable_id}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            padding: "4px 10px",
-                            borderRadius: 14,
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                            color: isCredit
-                              ? "var(--badge-success-color)"
-                              : "var(--badge-danger-color)",
-                            background: isCredit
-                              ? "var(--badge-success-bg)"
-                              : "var(--badge-danger-bg)",
-                            border: `1px solid ${
-                              isCredit
-                                ? "var(--badge-success-border)"
-                                : "var(--badge-danger-border)"
-                            }`,
-                            display: "inline-block",
-                          }}
-                        >
-                          {isCredit ? t("creditBadge") : t("debitBadge")}
-                        </span>
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: 800,
-                          color: isCredit
-                            ? "var(--badge-success-color)"
-                            : "var(--badge-danger-color)",
-                        }}
-                      >
-                        {isCredit ? "+" : "-"}
-                        {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
-                        {getCurrencySymbol(
-                          p.currency_detail || p.currency || wsCurrency,
-                          isRTL,
-                        )}
-                      </td>
-                      <td>
-                        <span style={{ fontWeight: 600, display: "block" }}>
-                          {p.method || "bank_transfer"}
-                        </span>
-                        <span
-                          style={{ fontSize: "0.76rem", color: "var(--muted)" }}
-                        >
-                          {p.provider || "manual"}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            padding: "4px 12px",
-                            borderRadius: 20,
-                            fontSize: "0.78rem",
-                            fontWeight: 700,
-                            color: badge.color,
-                            background: badge.bg,
-                            border: `1px solid ${badge.border}`,
-                            display: "inline-block",
-                          }}
-                        >
-                          {badge.label}
-                        </span>
-                      </td>
-                      <td
-                        style={{
-                          fontSize: "0.82rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {formatDate(p.created_at)}
-                      </td>
-                      <td style={{ textAlign: "center" }}>
+                          <span
+                            style={{
+                              padding: "3px 8px",
+                              borderRadius: 12,
+                              fontSize: "0.72rem",
+                              fontWeight: 800,
+                              color: isCredit
+                                ? "var(--badge-success-color)"
+                                : "var(--badge-danger-color)",
+                              background: isCredit
+                                ? "var(--badge-success-bg)"
+                                : "var(--badge-danger-bg)",
+                              border: `1px solid ${
+                                isCredit
+                                  ? "var(--badge-success-border)"
+                                  : "var(--badge-danger-border)"
+                              }`,
+                            }}
+                          >
+                            {isCredit ? t("creditBadge") : t("debitBadge")}
+                          </span>
+                          <span
+                            style={{
+                              padding: "3px 10px",
+                              borderRadius: 20,
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              color: badge.color,
+                              background: badge.bg,
+                              border: `1px solid ${badge.border}`,
+                            }}
+                          >
+                            {badge.label}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="payment-mobile-card-body">
+                        <div>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--muted)",
+                              display: "block",
+                            }}
+                          >
+                            {isRTL ? "المبلغ" : "Amount"}
+                          </span>
+                          <strong
+                            style={{
+                              fontSize: "0.95rem",
+                              color: "var(--primary)",
+                              fontWeight: 800,
+                            }}
+                          >
+                            {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
+                            {getCurrencySymbol(
+                              p.currency_detail || p.currency || wsCurrency,
+                              isRTL,
+                            )}
+                          </strong>
+                        </div>
+                        <div>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--muted)",
+                              display: "block",
+                            }}
+                          >
+                            {isRTL ? "وسيلة الدفع" : "Method"}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.82rem",
+                              fontWeight: 600,
+                              color: "var(--heading)",
+                            }}
+                          >
+                            {p.method || "bank_transfer"}
+                          </span>
+                        </div>
+                        <div style={{ gridColumn: "span 2" }}>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "var(--muted)",
+                              display: "block",
+                            }}
+                          >
+                            {isRTL ? "التاريخ" : "Date"}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.82rem",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            {formatDate(p.created_at)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="payment-mobile-card-footer">
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => setSelectedPayment(p)}
-                          style={{ gap: 6, fontSize: "0.8rem" }}
+                          style={{
+                            width: "100%",
+                            justifyContent: "center",
+                            gap: 6,
+                            fontSize: "0.82rem",
+                            padding: "8px",
+                          }}
                         >
                           <Icon name="eye" size={14} />
                           {isRTL ? "التفاصيل / الإيصال" : "View / Verify"}
                         </button>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </div>
 
-          {/* Mobile Cards View */}
-          <div className="payments-mobile-cards">
-            {payments.map((p) => {
-              const badge = getStatusBadge(p.status);
-              const isSub = p.payable_type?.includes("Subscription");
-              const isCredit =
-                p.type === "credit" ||
-                (!p.type && !isSub && p.status !== "refunded");
-              return (
-                <div key={p.id} className="payment-mobile-card">
-                  <div className="payment-mobile-card-header">
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
-                      <span
-                        style={{
-                          fontWeight: 800,
-                          color: "var(--heading)",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        #{p.id}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.78rem",
-                          fontWeight: 600,
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {isSub
-                          ? isRTL
-                            ? "اشتراك"
-                            : "Subscription"
-                          : isRTL
-                            ? "حجز موعد"
-                            : "Appointment"}{" "}
-                        (ID: {p.payable_id})
-                      </span>
-                    </div>
-                    <div
-                      style={{ display: "flex", gap: 6, alignItems: "center" }}
-                    >
-                      <span
-                        style={{
-                          padding: "3px 8px",
-                          borderRadius: 12,
-                          fontSize: "0.72rem",
-                          fontWeight: 800,
-                          color: isCredit
-                            ? "var(--badge-success-color)"
-                            : "var(--badge-danger-color)",
-                          background: isCredit
-                            ? "var(--badge-success-bg)"
-                            : "var(--badge-danger-bg)",
-                          border: `1px solid ${
-                            isCredit
-                              ? "var(--badge-success-border)"
-                              : "var(--badge-danger-border)"
-                          }`,
-                        }}
-                      >
-                        {isCredit ? t("creditBadge") : t("debitBadge")}
-                      </span>
-                      <span
-                        style={{
-                          padding: "3px 10px",
-                          borderRadius: 20,
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          color: badge.color,
-                          background: badge.bg,
-                          border: `1px solid ${badge.border}`,
-                        }}
-                      >
-                        {badge.label}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="payment-mobile-card-body">
-                    <div>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--muted)",
-                          display: "block",
-                        }}
-                      >
-                        {isRTL ? "المبلغ" : "Amount"}
-                      </span>
-                      <strong
-                        style={{
-                          fontSize: "0.95rem",
-                          color: "var(--primary)",
-                          fontWeight: 800,
-                        }}
-                      >
-                        {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
-                        {getCurrencySymbol(
-                          p.currency_detail || p.currency || wsCurrency,
-                          isRTL,
-                        )}
-                      </strong>
-                    </div>
-                    <div>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--muted)",
-                          display: "block",
-                        }}
-                      >
-                        {isRTL ? "وسيلة الدفع" : "Method"}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.82rem",
-                          fontWeight: 600,
-                          color: "var(--heading)",
-                        }}
-                      >
-                        {p.method || "bank_transfer"}
-                      </span>
-                    </div>
-                    <div style={{ gridColumn: "span 2" }}>
-                      <span
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--muted)",
-                          display: "block",
-                        }}
-                      >
-                        {isRTL ? "التاريخ" : "Date"}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.82rem",
-                          color: "var(--text-secondary)",
-                        }}
-                      >
-                        {formatDate(p.created_at)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="payment-mobile-card-footer">
+              {/* Responsive Pagination */}
+              {meta && meta.last_page > 1 && (
+                <div className="responsive-pagination">
+                  <span
+                    style={{
+                      fontSize: "0.84rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    {(
+                      t("paginationInfo") ||
+                      (isRTL
+                        ? "صفحة {current} من {last} ({total} سجل)"
+                        : "Page {current} of {last} ({total} records)")
+                    )
+                      .replace("{current}", String(meta.current_page || page))
+                      .replace("{last}", String(meta.last_page))
+                      .replace(
+                        "{total}",
+                        String(meta.total || payments.length),
+                      )}
+                  </span>
+                  <div style={{ display: "flex", gap: 8 }}>
                     <button
+                      type="button"
                       className="btn btn-secondary btn-sm"
-                      onClick={() => setSelectedPayment(p)}
-                      style={{
-                        width: "100%",
-                        justifyContent: "center",
-                        gap: 6,
-                        fontSize: "0.82rem",
-                        padding: "8px",
-                      }}
+                      disabled={(meta.current_page || page) <= 1 || loading}
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      style={{ fontSize: "0.8rem", padding: "6px 14px" }}
                     >
-                      <Icon name="eye" size={14} />
-                      {isRTL ? "التفاصيل / الإيصال" : "View / Verify"}
+                      {t("previous") || (isRTL ? "السابق" : "Previous")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      disabled={
+                        (meta.current_page || page) >= meta.last_page || loading
+                      }
+                      onClick={() => setPage((prev) => prev + 1)}
+                      style={{ fontSize: "0.8rem", padding: "6px 14px" }}
+                    >
+                      {t("next") || (isRTL ? "التالي" : "Next")}
                     </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Responsive Pagination */}
-          {meta && meta.last_page > 1 && (
-            <div className="responsive-pagination">
-              <span
-                style={{ fontSize: "0.84rem", color: "var(--text-secondary)" }}
-              >
-                {(
-                  t("paginationInfo") ||
-                  (isRTL
-                    ? "صفحة {current} من {last} ({total} سجل)"
-                    : "Page {current} of {last} ({total} records)")
-                )
-                  .replace("{current}", String(meta.current_page || page))
-                  .replace("{last}", String(meta.last_page))
-                  .replace("{total}", String(meta.total || payments.length))}
-              </span>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={(meta.current_page || page) <= 1 || loading}
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  style={{ fontSize: "0.8rem", padding: "6px 14px" }}
-                >
-                  {t("previous") || (isRTL ? "السابق" : "Previous")}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={
-                    (meta.current_page || page) >= meta.last_page || loading
-                  }
-                  onClick={() => setPage((prev) => prev + 1)}
-                  style={{ fontSize: "0.8rem", padding: "6px 14px" }}
-                >
-                  {t("next") || (isRTL ? "التالي" : "Next")}
-                </button>
-              </div>
-            </div>
+              )}
+            </>
           )}
-        </>
-      )}
 
-      {/* Details & Verification Modal */}
-      {selectedPayment &&
-        createPortal(
-          <div className="modal-backdrop">
-            <div
-              className="modal-card modal-md animate-fade-in-up"
-              style={{ maxWidth: 640, width: "95%" }}
-            >
-              <div className="modal-header">
-                <h3 className="modal-title">
-                  {isRTL
-                    ? "تفاصيل عملية الدفع وإيصال السداد"
-                    : "Payment Details & Receipt Verification"}
-                </h3>
-                <button
-                  type="button"
-                  className="modal-close-btn"
-                  onClick={() => setSelectedPayment(null)}
-                >
-                  <Icon name="x" size={16} />
-                </button>
-              </div>
-
-              <div className="modal-body" style={{ gap: 16 }}>
+          {/* Details & Verification Modal */}
+          {selectedPayment &&
+            createPortal(
+              <div className="modal-backdrop">
                 <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                    gap: 12,
-                    background: "var(--surface-alt)",
-                    padding: 14,
-                    borderRadius: 12,
-                  }}
+                  className="modal-card modal-md animate-fade-in-up"
+                  style={{ maxWidth: 640, width: "95%" }}
                 >
-                  <div>
-                    <span
-                      style={{
-                        fontSize: "0.78rem",
-                        color: "var(--muted)",
-                        display: "block",
-                      }}
+                  <div className="modal-header">
+                    <h3 className="modal-title">
+                      {isRTL
+                        ? "تفاصيل عملية الدفع وإيصال السداد"
+                        : "Payment Details & Receipt Verification"}
+                    </h3>
+                    <button
+                      type="button"
+                      className="modal-close-btn"
+                      onClick={() => setSelectedPayment(null)}
                     >
-                      {isRTL ? "المبلغ" : "Amount"}
-                    </span>
-                    <strong
-                      style={{ fontSize: "1.25rem", color: "var(--primary)" }}
-                    >
-                      {(
-                        parseFloat(selectedPayment.amount) || 0
-                      ).toLocaleString()}{" "}
-                      {getCurrencySymbol(
-                        selectedPayment.currency_detail ||
-                          selectedPayment.currency ||
-                          wsCurrency,
-                        isRTL,
-                      )}
-                    </strong>
+                      <Icon name="x" size={16} />
+                    </button>
                   </div>
-                  <div>
-                    <span
+
+                  <div className="modal-body" style={{ gap: 16 }}>
+                    <div
                       style={{
-                        fontSize: "0.78rem",
-                        color: "var(--muted)",
-                        display: "block",
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(140px, 1fr))",
+                        gap: 12,
+                        background: "var(--surface-alt)",
+                        padding: 14,
+                        borderRadius: 12,
                       }}
                     >
-                      {isRTL ? "الحالة الحالية" : "Current Status"}
-                    </span>
-                    <strong
-                      style={{
-                        color: getStatusBadge(selectedPayment.status).color,
-                      }}
+                      <div>
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "var(--muted)",
+                            display: "block",
+                          }}
+                        >
+                          {isRTL ? "المبلغ" : "Amount"}
+                        </span>
+                        <strong
+                          style={{
+                            fontSize: "1.25rem",
+                            color: "var(--primary)",
+                          }}
+                        >
+                          {(
+                            parseFloat(selectedPayment.amount) || 0
+                          ).toLocaleString()}{" "}
+                          {getCurrencySymbol(
+                            selectedPayment.currency_detail ||
+                              selectedPayment.currency ||
+                              wsCurrency,
+                            isRTL,
+                          )}
+                        </strong>
+                      </div>
+                      <div>
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "var(--muted)",
+                            display: "block",
+                          }}
+                        >
+                          {isRTL ? "الحالة الحالية" : "Current Status"}
+                        </span>
+                        <strong
+                          style={{
+                            color: getStatusBadge(selectedPayment.status).color,
+                          }}
+                        >
+                          {getStatusBadge(selectedPayment.status).label}
+                        </strong>
+                      </div>
+                    </div>
+
+                    {selectedPayment.proof_notes && (
+                      <div
+                        style={{
+                          padding: 12,
+                          borderRadius: 8,
+                          background: "rgba(234, 179, 8, 0.08)",
+                          border: "1px solid rgba(234, 179, 8, 0.25)",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            fontSize: "0.82rem",
+                            color: "#b45309",
+                            display: "block",
+                            marginBottom: 2,
+                          }}
+                        >
+                          📝{" "}
+                          {isRTL
+                            ? "ملاحظات المحوّل / الإيصال:"
+                            : "Transfer Notes:"}
+                        </strong>
+                        <span
+                          style={{
+                            fontSize: "0.86rem",
+                            color: "var(--heading)",
+                          }}
+                        >
+                          {selectedPayment.proof_notes}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedPayment.proof_file ? (
+                      <div
+                        style={{
+                          border: "1px solid var(--border-light)",
+                          borderRadius: 10,
+                          overflow: "hidden",
+                          background: "#0f172a",
+                        }}
+                      >
+                        <div
+                          style={{
+                            padding: "8px 12px",
+                            background: "rgba(255,255,255,0.05)",
+                            color: "#fff",
+                            fontSize: "0.8rem",
+                            fontWeight: 700,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>
+                            📷{" "}
+                            {isRTL
+                              ? "صورة إيصال التحويل"
+                              : "Attached Receipt Proof"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLightboxImage(selectedPayment.proof_file)
+                            }
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              color: "#38bdf8",
+                              cursor: "pointer",
+                              fontWeight: 700,
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            {isRTL ? "تكبير" : "Enlarge"}
+                          </button>
+                        </div>
+                        <div
+                          style={{
+                            padding: 12,
+                            textAlign: "center",
+                            maxHeight: 240,
+                            overflow: "hidden",
+                            cursor: "pointer",
+                          }}
+                          onClick={() =>
+                            setLightboxImage(selectedPayment.proof_file)
+                          }
+                        >
+                          <img
+                            src={selectedPayment.proof_file}
+                            alt="Receipt Proof"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: 220,
+                              objectFit: "contain",
+                              borderRadius: 6,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          padding: 14,
+                          background: "var(--surface-alt)",
+                          borderRadius: 8,
+                          textAlign: "center",
+                          border: "1px dashed var(--border-light)",
+                        }}
+                      >
+                        <span
+                          style={{ fontSize: "0.84rem", color: "var(--muted)" }}
+                        >
+                          {isRTL
+                            ? "لا يوجد ملف إيصال دفع مرفوع"
+                            : "No receipt file attached"}
+                        </span>
+                      </div>
+                    )}
+
+                    {selectedPayment.status !== "paid" &&
+                      (isOwner || canUpdatePayments) && (
+                        <div
+                          style={{
+                            borderTop: "1px solid var(--border-light)",
+                            paddingTop: 14,
+                            marginTop: 4,
+                          }}
+                        >
+                          <label
+                            className="form-label"
+                            style={{
+                              fontSize: "0.84rem",
+                              fontWeight: 700,
+                              marginBottom: 6,
+                              display: "block",
+                            }}
+                          >
+                            {isRTL
+                              ? "سبب الرفض (لو هترفض الإيصال)"
+                              : "Rejection Reason (if rejecting)"}
+                          </label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder={
+                              isRTL
+                                ? "مثال: رقم الحساب أو إيصال التحويل غير صحيح"
+                                : "Reason for rejection..."
+                            }
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                          />
+                        </div>
+                      )}
+                  </div>
+
+                  <div
+                    className="modal-actions"
+                    style={{
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => setSelectedPayment(null)}
+                      disabled={actionLoading}
                     >
-                      {getStatusBadge(selectedPayment.status).label}
-                    </strong>
+                      {t("close") || (isRTL ? "إغلاق" : "Close")}
+                    </button>
+
+                    {selectedPayment.status !== "paid" &&
+                      (isOwner || canUpdatePayments) && (
+                        <div
+                          style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+                        >
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleReject(selectedPayment)}
+                            disabled={actionLoading}
+                          >
+                            {isRTL ? "رفض الإيصال" : "Reject Payment"}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleVerify(selectedPayment)}
+                            disabled={actionLoading}
+                          >
+                            {isRTL ? "اعتماد وتأكيد الدفع" : "Verify & Approve"}
+                          </button>
+                        </div>
+                      )}
                   </div>
                 </div>
+              </div>,
+              document.body,
+            )}
 
-                {selectedPayment.proof_notes && (
-                  <div
-                    style={{
-                      padding: 12,
-                      borderRadius: 8,
-                      background: "rgba(234, 179, 8, 0.08)",
-                      border: "1px solid rgba(234, 179, 8, 0.25)",
-                    }}
-                  >
-                    <strong
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#b45309",
-                        display: "block",
-                        marginBottom: 2,
-                      }}
-                    >
-                      📝{" "}
-                      {isRTL ? "ملاحظات المحوّل / الإيصال:" : "Transfer Notes:"}
-                    </strong>
-                    <span
-                      style={{ fontSize: "0.86rem", color: "var(--heading)" }}
-                    >
-                      {selectedPayment.proof_notes}
-                    </span>
-                  </div>
-                )}
-
-                {selectedPayment.proof_file ? (
-                  <div
-                    style={{
-                      border: "1px solid var(--border-light)",
-                      borderRadius: 10,
-                      overflow: "hidden",
-                      background: "#0f172a",
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: "8px 12px",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "#fff",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span>
-                        📷{" "}
-                        {isRTL
-                          ? "صورة إيصال التحويل"
-                          : "Attached Receipt Proof"}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setLightboxImage(selectedPayment.proof_file)
-                        }
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "#38bdf8",
-                          cursor: "pointer",
-                          fontWeight: 700,
-                          fontSize: "0.8rem",
-                        }}
-                      >
-                        {isRTL ? "تكبير" : "Enlarge"}
-                      </button>
-                    </div>
-                    <div
-                      style={{
-                        padding: 12,
-                        textAlign: "center",
-                        maxHeight: 240,
-                        overflow: "hidden",
-                        cursor: "pointer",
-                      }}
-                      onClick={() =>
-                        setLightboxImage(selectedPayment.proof_file)
-                      }
-                    >
-                      <img
-                        src={selectedPayment.proof_file}
-                        alt="Receipt Proof"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: 220,
-                          objectFit: "contain",
-                          borderRadius: 6,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      padding: 14,
-                      background: "var(--surface-alt)",
-                      borderRadius: 8,
-                      textAlign: "center",
-                      border: "1px dashed var(--border-light)",
-                    }}
-                  >
-                    <span
-                      style={{ fontSize: "0.84rem", color: "var(--muted)" }}
-                    >
-                      {isRTL
-                        ? "لا يوجد ملف إيصال دفع مرفوع"
-                        : "No receipt file attached"}
-                    </span>
-                  </div>
-                )}
-
-                {selectedPayment.status !== "paid" &&
-                  (isOwner || canUpdatePayments) && (
-                    <div
-                      style={{
-                        borderTop: "1px solid var(--border-light)",
-                        paddingTop: 14,
-                        marginTop: 4,
-                      }}
-                    >
-                      <label
-                        className="form-label"
-                        style={{
-                          fontSize: "0.84rem",
-                          fontWeight: 700,
-                          marginBottom: 6,
-                          display: "block",
-                        }}
-                      >
-                        {isRTL
-                          ? "سبب الرفض (لو هترفض الإيصال)"
-                          : "Rejection Reason (if rejecting)"}
-                      </label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder={
-                          isRTL
-                            ? "مثال: رقم الحساب أو إيصال التحويل غير صحيح"
-                            : "Reason for rejection..."
-                        }
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                      />
-                    </div>
-                  )}
-              </div>
-
+          {/* Lightbox Preview */}
+          {lightboxImage &&
+            createPortal(
               <div
-                className="modal-actions"
-                style={{
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: 10,
-                }}
-              >
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setSelectedPayment(null)}
-                  disabled={actionLoading}
-                >
-                  {t("close") || (isRTL ? "إغلاق" : "Close")}
-                </button>
-
-                {selectedPayment.status !== "paid" &&
-                  (isOwner || canUpdatePayments) && (
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleReject(selectedPayment)}
-                        disabled={actionLoading}
-                      >
-                        {isRTL ? "رفض الإيصال" : "Reject Payment"}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => handleVerify(selectedPayment)}
-                        disabled={actionLoading}
-                      >
-                        {isRTL ? "اعتماد وتأكيد الدفع" : "Verify & Approve"}
-                      </button>
-                    </div>
-                  )}
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
-
-      {/* Lightbox Preview */}
-      {lightboxImage &&
-        createPortal(
-          <div
-            className="modal-backdrop"
-            onClick={() => setLightboxImage(null)}
-            style={{ background: "rgba(0,0,0,0.85)" }}
-          >
-            <div
-              style={{
-                position: "relative",
-                maxWidth: "90vw",
-                maxHeight: "90vh",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={lightboxImage}
-                alt="Full Receipt"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "85vh",
-                  objectFit: "contain",
-                  borderRadius: 8,
-                }}
-              />
-              <button
+                className="modal-backdrop"
                 onClick={() => setLightboxImage(null)}
-                style={{
-                  position: "absolute",
-                  top: -36,
-                  right: 0,
-                  background: "#fff",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: 28,
-                  height: 28,
-                  cursor: "pointer",
-                  fontWeight: 800,
-                }}
+                style={{ background: "rgba(0,0,0,0.85)" }}
               >
-                ✕
-              </button>
-            </div>
-          </div>,
-          document.body,
-        )}
-    </div>
+                <div
+                  style={{
+                    position: "relative",
+                    maxWidth: "90vw",
+                    maxHeight: "90vh",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={lightboxImage}
+                    alt="Full Receipt"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "85vh",
+                      objectFit: "contain",
+                      borderRadius: 8,
+                    }}
+                  />
+                  <button
+                    onClick={() => setLightboxImage(null)}
+                    style={{
+                      position: "absolute",
+                      top: -36,
+                      right: 0,
+                      background: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 28,
+                      height: 28,
+                      cursor: "pointer",
+                      fontWeight: 800,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>,
+              document.body,
+            )}
+        </div>
+      )}
+    </CapabilityGate>
   );
 }

@@ -15,7 +15,7 @@ const DAYS_IN_TREND = 30;
 
 export default function CustomerOverviewTab() {
   const { user } = useAuth();
-  const { t, isRTL, lang } = useLanguage();
+  const { isRTL, lang } = useLanguage();
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,7 @@ export default function CustomerOverviewTab() {
     let upcomingCount = 0;
     let completedThisMonth = 0;
     let totalSpend = 0;
-    let currency = "SAR";
+    let currency = "EGP";
     const workspaceIds = new Set();
     const serviceCounts = new Map();
     const trendBuckets = new Array(DAYS_IN_TREND).fill(0);
@@ -198,7 +198,7 @@ export default function CustomerOverviewTab() {
       className="animate-fade-in-up"
       style={{ display: "flex", flexDirection: "column", gap: 20 }}
     >
-      <SEO title={t("home") || (isRTL ? "الرئيسية" : "Home")} noindex />
+      <SEO pageKey="customerOverview" />
 
       {/* Welcome hero */}
       <div

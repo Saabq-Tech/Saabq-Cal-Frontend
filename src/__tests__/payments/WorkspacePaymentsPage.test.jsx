@@ -35,7 +35,12 @@ vi.mock("../../context/AuthContext", () => ({
         "payment_update",
         "payment_delete",
       ],
+      workspace: {
+        has_active_subscription: true,
+        active_capabilities: ["PAYMENTS"],
+      },
     },
+    hasCapability: () => true,
   }),
   AuthProvider: ({ children }) => <div>{children}</div>,
 }));

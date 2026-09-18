@@ -156,7 +156,7 @@ export default function WorkspaceSubscriptionsPage() {
 
   return (
     <div className="workspace-page-container">
-      <SEO title={t("subscription") || "الاشتراكات"} noindex />
+      <SEO pageKey="workspaceSubscriptions" />
       {loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <SkeletonRect height={48} />

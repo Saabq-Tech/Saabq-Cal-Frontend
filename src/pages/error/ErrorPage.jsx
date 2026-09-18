@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../context/LanguageContext";
+import SEO from "../../components/ui/SEO";
 
 function ErrorIllustration({ code, iconType }) {
   const type = iconType || code || "404";
@@ -311,12 +311,13 @@ export default function ErrorPage({
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = t(pageTitleKey, `${code} - ${t(titleKey)}`);
-  }, [t, pageTitleKey, code, titleKey]);
-
   return (
     <div className="main-content">
+      <SEO
+        pageKey={`error${code}`}
+        title={t(pageTitleKey, `${code} - ${t(titleKey)}`)}
+        noindex
+      />
       <section className="section error-page-section animate-page-enter">
         <div className="container">
           <div className="error-card">

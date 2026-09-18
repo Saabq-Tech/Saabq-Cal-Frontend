@@ -12,10 +12,6 @@ export default function HowItWorksPage() {
   const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
-    document.title = t("pageTitleHowItWorks") || "كيف يعمل — تقويم سابق";
-  }, [t]);
-
-  useEffect(() => {
     client
       .get(endpoints.faqs)
       .then((res) => {
@@ -132,13 +128,7 @@ export default function HowItWorksPage() {
 
   return (
     <div className="main-content">
-      <SEO
-        title={t("pageTitleHowItWorks") || "كيف يعمل — تقويم سابق"}
-        description={
-          t("howItWorksPageSubtitle") ||
-          "دليل عملي يوضح كيفية إدارة المواعيد وجدولتها بسهولة وسرعة عبر تقويم سابق."
-        }
-      />
+      <SEO pageKey="howItWorks" />
 
       {/* Header / Hero */}
       <section

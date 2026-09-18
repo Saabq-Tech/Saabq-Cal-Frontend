@@ -14,6 +14,7 @@ import { getCurrencySymbol } from "../../../utils/currency";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
+import CapabilityGate from "../../../components/common/CapabilityGate";
 export default function WorkspaceLogsPage() {
   const { user } = useAuth();
   const { isOwner, canReadSettings, canReadBookings, canReadCustomers } =
@@ -22,15 +23,16 @@ export default function WorkspaceLogsPage() {
   const toast = useToast();
 
   const ws = user?.workspace;
-  const canReadAnalytics =
-    isOwner || canReadBookings || checkWorkspaceCapability(user, "REPORTS");
-  const canReadLogs =
-    isOwner || canReadSettings || checkWorkspaceCapability(user, "LOGS");
+  const isReportsAllowed = checkWorkspaceCapability(user, "REPORTS");
+  const isLogsAllowed = checkWorkspaceCapability(user, "LOGS");
+  const isAnyAllowed = isReportsAllowed || isLogsAllowed;
+
+  const canReadLogs = (isOwner || canReadSettings) && isLogsAllowed;
   const isBookingCapable = checkWorkspaceCapability(user, "BOOKING");
 
   // Tabs: "analytics" (Reports & Analytics) vs "logs" (Audit & Activity Logs)
   const [activeTab, setActiveTab] = useState(() => {
-    if (!isOwner && !canReadAnalytics && canReadLogs) return "logs";
+    if (!isReportsAllowed && isLogsAllowed) return "logs";
     return "analytics";
   });
 
@@ -143,6 +145,10 @@ export default function WorkspaceLogsPage() {
 
   // 1. Fetch Analytics Data
   useEffect(() => {
+    if (!isReportsAllowed) {
+      setAnalyticsLoading(false);
+      return;
+    }
     let cancelled = false;
     setAnalyticsLoading(true);
 
@@ -181,13 +187,13 @@ export default function WorkspaceLogsPage() {
     return () => {
       cancelled = true;
     };
-  }, [isBookingCapable, canReadBookings, canReadCustomers]);
+  }, [isReportsAllowed, isBookingCapable, canReadBookings, canReadCustomers]);
 
   // 2. Fetch Activity Logs
   const loadingLogsRef = useRef(false);
   const loadLogs = useCallback(
     async (currentFilters) => {
-      if (!canReadLogs) {
+      if (!isLogsAllowed || !canReadLogs) {
         setLogsLoading(false);
         return;
       }
@@ -213,14 +219,14 @@ export default function WorkspaceLogsPage() {
         loadingLogsRef.current = false;
       }
     },
-    [canReadLogs, t, toast],
+    [isLogsAllowed, canReadLogs, t, toast],
   );
 
   useEffect(() => {
-    if (activeTab === "logs") {
+    if (activeTab === "logs" && isLogsAllowed) {
       loadLogs(filters);
     }
-  }, [activeTab, filters, loadLogs]);
+  }, [activeTab, isLogsAllowed, filters, loadLogs]);
 
   // Statistics calculation
   const stats = useMemo(() => {
@@ -242,7 +248,7 @@ export default function WorkspaceLogsPage() {
       workspaceSettings?.currency_code ||
       ws?.currency ||
       ws?.currency_code ||
-      "SAR";
+      "EGP";
 
     bookings.forEach((b) => {
       const startsAt = b.starts_at ? new Date(b.starts_at) : null;
@@ -521,80 +527,104 @@ export default function WorkspaceLogsPage() {
     return list;
   }, [bookings, tableFilter, tableSearch, getDateKey, getText]);
 
+  if (!isAnyAllowed) {
+    return <CapabilityGate capabilityCode="REPORTS" />;
+  }
+
+  const showTabs = isReportsAllowed && isLogsAllowed;
+  const currentTab =
+    !isReportsAllowed && isLogsAllowed
+      ? "logs"
+      : !isLogsAllowed && isReportsAllowed
+        ? "analytics"
+        : activeTab;
+
+  const pageTitle =
+    currentTab === "logs"
+      ? lang === "ar"
+        ? "سجل النشاطات والعمليات"
+        : "Audit & Activity Logs"
+      : lang === "ar"
+        ? "التقارير والتحليلات"
+        : "Reports & Analytics";
+
+  const pageSubtitle =
+    currentTab === "logs"
+      ? lang === "ar"
+        ? "تتبع كافة الإجراءات والتغييرات التي تمت داخل مساحة العمل بالتاريخ والوقت."
+        : "Comprehensive audit trails and activity history for all workspace operations."
+      : lang === "ar"
+        ? "لوحة شاملة لمؤشرات الأداء التشغيلي، التحليل المالي وتتبع النشاطات وسجل العمليات."
+        : "Comprehensive hub for operational metrics, financial trajectory, and audit trails.";
+
+  const tabActions = showTabs ? (
+    <div
+      className="analytics-tabs"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        padding: 4,
+        borderRadius: 12,
+        display: "inline-flex",
+      }}
+    >
+      <button
+        type="button"
+        className={`analytics-tab-btn ${currentTab === "analytics" ? "active" : ""}`}
+        onClick={() => setActiveTab("analytics")}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 18px",
+          fontSize: "0.85rem",
+          fontWeight: 700,
+          borderRadius: 8,
+        }}
+      >
+        <Icon name="bar-chart" size={16} />
+        <span>
+          {lang === "ar"
+            ? "لوحة التحليلات وتقارير الأداء"
+            : "Analytics & Performance Hub"}
+        </span>
+      </button>
+      <button
+        type="button"
+        className={`analytics-tab-btn ${currentTab === "logs" ? "active" : ""}`}
+        onClick={() => setActiveTab("logs")}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 18px",
+          fontSize: "0.85rem",
+          fontWeight: 700,
+          borderRadius: 8,
+        }}
+      >
+        <Icon name="shield" size={16} />
+        <span>
+          {lang === "ar" ? "سجل النشاطات والعمليات" : "Audit & Activity Logs"}
+        </span>
+      </button>
+    </div>
+  ) : null;
+
   return (
     <div className="workspace-main-dashboard animate-page-enter">
-      <SEO
-        title={lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
-        noindex
-      />
+      <SEO pageKey="workspaceLogs" />
 
       {/* Standard Workspace Header & Tab Switcher */}
       <WorkspacePageHeader
-        title={lang === "ar" ? "التقارير والتحليلات" : "Reports & Analytics"}
-        subtitle={
-          lang === "ar"
-            ? "لوحة شاملة لمؤشرات الأداء التشغيلي، التحليل المالي وتتبع النشاطات وسجل العمليات."
-            : "Comprehensive hub for operational metrics, financial trajectory, and audit trails."
-        }
-        icon="bar-chart"
-        actions={
-          <div
-            className="analytics-tabs"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              padding: 4,
-              borderRadius: 12,
-              display: "inline-flex",
-            }}
-          >
-            <button
-              type="button"
-              className={`analytics-tab-btn ${activeTab === "analytics" ? "active" : ""}`}
-              onClick={() => setActiveTab("analytics")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 18px",
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                borderRadius: 8,
-              }}
-            >
-              <Icon name="bar-chart" size={16} />
-              <span>
-                {lang === "ar"
-                  ? "لوحة التحليلات وتقارير الأداء"
-                  : "Analytics & Performance Hub"}
-              </span>
-            </button>
-            <button
-              type="button"
-              className={`analytics-tab-btn ${activeTab === "logs" ? "active" : ""}`}
-              onClick={() => setActiveTab("logs")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 18px",
-                fontSize: "0.85rem",
-                fontWeight: 700,
-                borderRadius: 8,
-              }}
-            >
-              <Icon name="shield" size={16} />
-              <span>
-                {lang === "ar"
-                  ? "سجل النشاطات والعمليات"
-                  : "Audit & Activity Logs"}
-              </span>
-            </button>
-          </div>
-        }
+        title={pageTitle}
+        subtitle={pageSubtitle}
+        icon={currentTab === "logs" ? "shield" : "bar-chart"}
+        actions={tabActions}
       />
+
       {/* ── TAB 1: Analytics & Performance Reports ── */}
-      {activeTab === "analytics" &&
+      {currentTab === "analytics" &&
         (analyticsLoading && bookings.length === 0 ? (
           <div className="card" style={{ padding: 32 }}>
             <TableSkeleton rows={4} />
@@ -826,7 +856,9 @@ export default function WorkspaceLogsPage() {
                           <div className="peak-hour-track">
                             <div
                               className={`peak-hour-fill ${h.isPeak ? "is-peak" : ""}`}
-                              style={{ width: `${Math.max(8, h.percentage)}%` }}
+                              style={{
+                                width: `${Math.max(8, h.percentage)}%`,
+                              }}
                             />
                           </div>
                           <span className="peak-hour-count">{h.count}</span>
@@ -1140,7 +1172,11 @@ export default function WorkspaceLogsPage() {
                   }}
                 >
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                   >
                     <span
                       style={{
@@ -1155,7 +1191,11 @@ export default function WorkspaceLogsPage() {
                     </span>
                   </div>
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                   >
                     <span
                       style={{
@@ -1555,7 +1595,7 @@ export default function WorkspaceLogsPage() {
         ))}
 
       {/* ── TAB 2: Activity & Audit Logs ── */}
-      {activeTab === "logs" && (
+      {currentTab === "logs" && (
         <div className="workspace-page-container">
           {logsLoading && logs.length === 0 ? (
             <TableSkeleton rows={5} />

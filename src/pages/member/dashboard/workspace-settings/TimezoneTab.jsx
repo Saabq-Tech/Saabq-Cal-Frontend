@@ -56,15 +56,15 @@ export default function TimezoneTab({
       : [
           {
             id: 1,
-            code: "SAR",
-            name: { ar: "ريال سعودي", en: "Saudi Riyal" },
-            symbol_native: isRTL ? "ر.س" : "SAR",
-          },
-          {
-            id: 2,
             code: "EGP",
             name: { ar: "جنيه مصري", en: "Egyptian Pound" },
             symbol_native: isRTL ? "ج.م" : "EGP",
+          },
+          {
+            id: 2,
+            code: "SAR",
+            name: { ar: "ريال سعودي", en: "Saudi Riyal" },
+            symbol_native: isRTL ? "ر.س" : "SAR",
           },
           {
             id: 3,

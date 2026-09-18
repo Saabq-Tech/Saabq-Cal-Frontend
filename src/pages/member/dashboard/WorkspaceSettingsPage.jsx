@@ -496,7 +496,7 @@ export default function WorkspaceSettingsPage() {
 
   return (
     <div className="workspace-settings-page animate-fade-in">
-      <SEO title={t("settings")} noindex />
+      <SEO pageKey="workspaceSettings" />
 
       {/* Top Unified Header */}
       <WorkspacePageHeader

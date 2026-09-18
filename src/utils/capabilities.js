@@ -39,6 +39,44 @@ export function checkWorkspaceCapability(user, capabilityCode) {
 }
 
 /**
+ * Check if the workspace is on the Free plan (or has no active paid subscription).
+ * @param {object} user - The authenticated user object from AuthContext
+ * @returns {boolean}
+ */
+export function isFreePlan(user) {
+  if (!user || !user.workspace) return true;
+
+  // If explicitly flagged as no active subscription
+  if (user.workspace.has_active_subscription === false) {
+    return true;
+  }
+
+  const sub = user.workspace.subscription;
+  if (!sub || !sub.plan) {
+    // If no subscription record or plan, considered free tier
+    return true;
+  }
+
+  const planType = String(sub.plan.type || "").toUpperCase();
+  const planPrice = Number(sub.plan.price ?? 0);
+
+  if (planType === "FREE" || planPrice === 0) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks whether the workspace can access external Integrations & Connected Apps based on the INTEGRATIONS capability.
+ * @param {object} user - The authenticated user object from AuthContext
+ * @returns {boolean}
+ */
+export function canAccessIntegrations(user) {
+  return checkWorkspaceCapability(user, "INTEGRATIONS");
+}
+
+/**
  * Checks whether external API integration is enabled for this workspace (both master switch and plan capability).
  * @param {object} user - The authenticated user object from AuthContext
  * @returns {boolean}

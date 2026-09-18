@@ -9,6 +9,7 @@ import UserAvatar from "../ui/UserAvatar";
 import Icon from "../common/Icon";
 import PermissionCheck from "../PermissionCheck";
 import { ChatSidebarSkeleton, ChatFeedSkeleton } from "../ui/Skeleton";
+import SEO from "../ui/SEO";
 
 function relativeTime(isoString, t) {
   if (!isoString) return "";
@@ -790,6 +791,7 @@ export default function ChatsPage() {
 
   return (
     <div className="card chat-container animate-fade-in-up">
+      <SEO pageKey="chats" />
       {/* Lightbox Modal for Images */}
       {lightboxImage && (
         <div

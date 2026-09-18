@@ -186,43 +186,9 @@ export default function Home() {
 
   const aboutBody = about?.body || about?.content || "";
 
-  const websiteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Saabq Cal",
-    url: "https://cal.saabq.com",
-    description:
-      lang === "ar"
-        ? "منصة تقويم سابق لجدولة وإدارة المواعيد الذكية"
-        : "Saabq Cal — Smart scheduling and appointment management platform",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://cal.saabq.com/workspaces?search={search_term_string}",
-      "query-input": "required name=search_term_string",
-    },
-  };
-
-  const combinedJsonLd = faqJsonLd ? [websiteJsonLd, faqJsonLd] : websiteJsonLd;
-
   return (
     <main className="main-content">
-      <SEO
-        title={
-          t("pageTitleHome") ||
-          (lang === "ar"
-            ? "الرئيسية — الجدولة وإدارة المواعيد الذكية"
-            : "Home — Smart Scheduling & Appointment Management")
-        }
-        description={
-          lang === "ar"
-            ? "منصة تقويم سابق لجدولة وإدارة المواعيد الذكية — احجز، أدِر، وأتمت مواعيد مساحة عملك بسهولة."
-            : "Saabq Cal — Smart scheduling and appointment management platform. Book, manage, and automate your workspace appointments."
-        }
-        canonical="/"
-        ogType="website"
-        ogImage="/logo.png"
-        jsonLd={combinedJsonLd}
-      />
+      <SEO pageKey="home" jsonLd={faqJsonLd ? [faqJsonLd] : undefined} />
 
       {/* Hero Section */}
       <section id="home" className="hero-lp">

@@ -7,6 +7,7 @@ import { useToast } from "../../../context/ToastContext";
 import { usePermissions } from "../../../hooks/usePermissions";
 import client, { endpoints } from "../../../api/client";
 import Icon from "../../../components/common/Icon";
+import SEO from "../../../components/ui/SEO";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import { formatCurrency } from "../../../utils/currency";
@@ -316,6 +317,7 @@ export default function WorkspaceCustomerProfilePage() {
       className="workspace-customer-profile-page animate-fade-in"
       style={{ padding: "0 4px" }}
     >
+      <SEO pageKey="workspaceCustomerProfile" title={customer?.name} />
       {/* Breadcrumb Navigation */}
       <div
         style={{
@@ -769,7 +771,7 @@ export default function WorkspaceCustomerProfilePage() {
               stats.currency_detail ||
                 stats.currency ||
                 workspace?.currency ||
-                "SAR",
+                "EGP",
               isRTL,
               "0",
             )}
@@ -1806,7 +1808,7 @@ export default function WorkspaceCustomerProfilePage() {
                             apt.price_snapshot ?? apt.service?.price ?? 0,
                             apt.currency_snapshot ||
                               workspace?.currency ||
-                              "SAR",
+                              "EGP",
                             isRTL,
                             "0",
                           )}
@@ -2359,10 +2361,12 @@ export default function WorkspaceCustomerProfilePage() {
                           color: "var(--heading)",
                         }}
                       >
-                        {apt.price_snapshot ?? apt.service?.price ?? 0}{" "}
-                        {apt.currency_snapshot ||
-                          workspace?.currency?.code ||
-                          "EGP"}
+                        {formatCurrency(
+                          apt.price_snapshot ?? apt.service?.price ?? 0,
+                          apt.currency_snapshot || workspace?.currency || "EGP",
+                          isRTL,
+                          "0",
+                        )}
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "center" }}>
                         <span

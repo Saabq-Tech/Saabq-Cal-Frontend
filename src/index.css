@@ -5070,8 +5070,20 @@ html.dark .workspace-dashboard-sidebar::-webkit-scrollbar-thumb:hover {
 
 /* Eliminate excessive gap when banner or dashboard is the first child */
 .workspace-dashboard-content > .warning-banner:first-child,
-.workspace-dashboard-content > *:first-child {
+.workspace-dashboard-content > *:first-child:not(.capability-gate-container) {
   margin-top: 0 !important;
+}
+
+/* Standardized capability locked screen layout across all workspace pages */
+.capability-gate-container,
+.workspace-dashboard-content > .capability-gate-container,
+.workspace-dashboard-content > *:first-child.capability-gate-container,
+.workspace-dashboard-content > div > .capability-gate-container {
+  margin: 80px auto 32px !important;
+  margin-top: 80px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Workspace generic page container (borderless, natural page flow) */
@@ -18189,4 +18201,133 @@ html.dark .blog-card:hover {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ── Integrations & API Tab Pills ── */
+.integrations-tabs-slider,
+.api-tabs-slider {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 4px 12px;
+  margin: -8px -4px 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.integrations-tabs-slider::-webkit-scrollbar,
+.api-tabs-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.integrations-tab-pill,
+.api-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--surface, #ffffff);
+  border: 1.5px solid var(--border, #e2e8f0);
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.22s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.integrations-tab-pill:hover,
+.api-tab-pill:hover {
+  border-color: var(--primary-light, #039ab7);
+  background: var(--surface-alt, #f8fafc);
+  color: var(--primary, #026982);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(2, 105, 130, 0.08);
+}
+
+.integrations-tab-pill.active,
+.api-tab-pill.active {
+  background: linear-gradient(
+    135deg,
+    var(--primary, #026982) 0%,
+    var(--primary-light, #039ab7) 100%
+  );
+  border-color: transparent;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(2, 105, 130, 0.35);
+  transform: translateY(-2px);
+}
+
+.integrations-tab-pill svg,
+.api-tab-pill svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.integrations-tab-pill:hover svg,
+.api-tab-pill:hover svg {
+  transform: scale(1.1);
+}
+
+.integrations-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--surface-alt, #f1f5f9);
+  color: var(--text-secondary, #64748b);
+  border: 1px solid var(--border, #e2e8f0);
+  transition: all 0.2s ease;
+}
+
+.integrations-tab-pill.active .integrations-tab-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+html.dark .integrations-tab-pill,
+html.dark .api-tab-pill,
+[data-theme="dark"] .integrations-tab-pill,
+[data-theme="dark"] .api-tab-pill {
+  background: var(--surface, #0f172a);
+  border-color: var(--border, #1e293b);
+  color: var(--text-secondary, #94a3b8);
+}
+
+html.dark .integrations-tab-pill:hover,
+html.dark .api-tab-pill:hover,
+[data-theme="dark"] .integrations-tab-pill:hover,
+[data-theme="dark"] .api-tab-pill:hover {
+  background: var(--surface-alt, #1e293b);
+  border-color: var(--primary, #05d5f0);
+  color: var(--primary, #05d5f0);
+}
+
+html.dark .integrations-tab-pill.active,
+html.dark .api-tab-pill.active,
+[data-theme="dark"] .integrations-tab-pill.active,
+[data-theme="dark"] .api-tab-pill.active {
+  background: linear-gradient(135deg, #039ab7 0%, #05d5f0 100%);
+  color: #022a35 !important;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(5, 213, 240, 0.3);
+}
+
+html.dark .integrations-tab-pill.active .integrations-tab-count,
+[data-theme="dark"] .integrations-tab-pill.active .integrations-tab-count {
+  background: rgba(2, 42, 53, 0.25);
+  color: #022a35;
+  border-color: rgba(2, 42, 53, 0.4);
 }

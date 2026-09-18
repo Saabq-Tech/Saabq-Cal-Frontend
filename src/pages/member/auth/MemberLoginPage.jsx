@@ -54,8 +54,6 @@ export default function MemberLoginPage() {
   }, []);
 
   useEffect(() => {
-    document.title = t("pageTitleLogin");
-
     if (!document.getElementById("google-gsi-script")) {
       const script = document.createElement("script");
       script.id = "google-gsi-script";
@@ -248,7 +246,7 @@ export default function MemberLoginPage() {
           : "Welcome back to your workspace dashboard."
       }
     >
-      <SEO title={t("pageTitleLogin") + ` (${t("teamMember")})`} noindex />
+      <SEO pageKey="memberLogin" />
       <h1>{t("welcomeBack")}</h1>
       <p>
         {t("signInToContinue")} ({t("teamMember")})

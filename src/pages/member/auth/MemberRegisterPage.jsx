@@ -41,11 +41,6 @@ export default function MemberRegisterPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    document.title = t("pageTitleRegister");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -108,7 +103,7 @@ export default function MemberRegisterPage() {
           : "Create your workspace member account to get started."
       }
     >
-      <SEO title={t("pageTitleRegister") + ` (${t("teamMember")})`} noindex />
+      <SEO pageKey="memberRegister" />
       <h1>{t("createAccount")}</h1>
       <p>
         {t("joinSaabq")} ({t("teamMember")})

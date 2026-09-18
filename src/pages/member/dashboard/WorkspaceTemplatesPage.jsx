@@ -169,14 +169,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       className="workspace-templates-page"
       style={{ display: "flex", flexDirection: "column", gap: 20 }}
     >
-      {!embedded && (
-        <SEO
-          title={
-            isRTL ? "قوالب التقارير والملخصات" : "Report & Summary Templates"
-          }
-          noindex
-        />
-      )}
+      {!embedded && <SEO pageKey="workspaceTemplates" />}
 
       {/* Top Standard Header */}
       <WorkspacePageHeader

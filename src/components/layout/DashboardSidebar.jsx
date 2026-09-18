@@ -6,7 +6,7 @@ import { getAccountTabs } from "../../config/dashboardNav";
 import Icon from "../common/Icon";
 
 export default function DashboardSidebar({ variant }) {
-  const { userType, unreadCount = 0, unreadChatCount = 0 } = useAuth();
+  const { user, userType, unreadCount = 0, unreadChatCount = 0 } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
   const prefix = userType === "member" ? "/member" : "/customer";
@@ -33,7 +33,7 @@ export default function DashboardSidebar({ variant }) {
   };
   const activeTab = getActiveTab();
 
-  const accountTabs = getAccountTabs(t, userType);
+  const accountTabs = getAccountTabs(t, userType, user);
   const isDashboard = variant === "dashboard";
 
   // Mouse drag-to-scroll & wheel scrolling
@@ -122,12 +122,24 @@ export default function DashboardSidebar({ variant }) {
               to={tabItem.to}
               className={`profile-sidebar-link${isActive ? " active" : ""}`}
               aria-current={isActive ? "page" : undefined}
+              title={tabItem.lockTooltip || undefined}
+              style={{ opacity: tabItem.locked ? 0.7 : 1 }}
             >
               <span className="profile-sidebar-icon">
                 <Icon name={tabItem.icon} />
               </span>
-              <span>{tabItem.label}</span>
-              {badgeCount > 0 && (
+              <span style={{ flex: 1 }}>{tabItem.label}</span>
+              {tabItem.locked && (
+                <Icon
+                  name="lock"
+                  size={14}
+                  style={{
+                    color: "var(--muted)",
+                    marginInlineStart: 6,
+                  }}
+                />
+              )}
+              {badgeCount > 0 && !tabItem.locked && (
                 <span
                   className="notif-sidebar-badge"
                   style={

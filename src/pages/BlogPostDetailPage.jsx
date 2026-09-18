@@ -109,10 +109,10 @@ export default function BlogPostDetailPage() {
       <BlogReadingProgress />
 
       <SEO
-        title={`${post.seo_title || post.title} — ${t("appName")}`}
+        pageKey="blogDetail"
+        title={post.seo_title || post.title}
         description={post.seo_description || post.excerpt || ""}
         canonical={`/blog/${post.slug}`}
-        ogType="article"
         image={post.featured_image_url}
         structuredData={structuredData}
       />

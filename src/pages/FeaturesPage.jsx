@@ -24,10 +24,6 @@ export default function FeaturesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = t("pageTitleFeatures") || "المميزات والقدرات — تقويم سابق";
-  }, [t]);
-
-  useEffect(() => {
     setLoading(true);
     Promise.all([
       client.get(endpoints.features).catch(() => ({ data: { data: [] } })),
@@ -42,13 +38,7 @@ export default function FeaturesPage() {
 
   return (
     <div className="main-content">
-      <SEO
-        title={t("pageTitleFeatures") || "المميزات والقدرات — تقويم سابق"}
-        description={
-          t("featuresPageSubtitle") ||
-          "اكتشف جميع الأدوات والمميزات الذكية التي تمكّنك من إدارة المواعيد وتنمية أعمالك."
-        }
-      />
+      <SEO pageKey="features" />
 
       {/* Hero Section */}
       <section

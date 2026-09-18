@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
@@ -20,11 +20,6 @@ export default function MemberVerifyAccountPage() {
   const [email, setEmail] = useState(emailFromState);
   const [otp, setOtp] = useState("");
   const [resending, setResending] = useState(false);
-
-  useEffect(() => {
-    document.title = t("pageTitleVerifyAccount");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,10 +54,7 @@ export default function MemberVerifyAccountPage() {
       illustration="/images/otp.svg"
       illustrationAlt={t("pageTitleVerifyAccount")}
     >
-      <SEO
-        title={t("pageTitleVerifyAccount") + ` (${t("teamMember")})`}
-        noindex
-      />
+      <SEO pageKey="memberVerifyAccount" />
       <div
         style={{
           width: 64,

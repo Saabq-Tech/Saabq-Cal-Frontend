@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Link,
   useNavigate,
@@ -38,12 +38,6 @@ export default function MemberForgotPasswordPage() {
   const [resending, setResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  useEffect(() => {
-    document.title = sent
-      ? t("resetPasswordTitle")
-      : t("pageTitleForgotPassword");
-  }, [sent, t]);
 
   const handleSendCode = async (e) => {
     e.preventDefault();
@@ -109,13 +103,7 @@ export default function MemberForgotPasswordPage() {
       illustration="/images/forgot-password.svg"
       illustrationAlt={t("pageTitleForgotPassword")}
     >
-      <SEO
-        title={
-          (sent ? t("resetPasswordTitle") : t("pageTitleForgotPassword")) +
-          ` (${t("teamMember")})`
-        }
-        noindex
-      />
+      <SEO pageKey="memberForgotPassword" />
       {sent ? (
         <>
           <div

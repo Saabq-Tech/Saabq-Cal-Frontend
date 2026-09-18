@@ -26,7 +26,10 @@ export default function WorkspaceBookingDetailPage() {
   return (
     <CapabilityGate capabilityCode="BOOKING">
       <div className="workspace-page-container">
-        <SEO title={`${t("bookings") || "المواعيد"} #${bookingId}`} noindex />
+        <SEO
+          pageKey="workspaceBookingDetail"
+          title={`${t("bookings") || "المواعيد"} #${bookingId}`}
+        />
         <BookingDetailsPage
           bookingId={bookingId}
           onBack={() => navigate("/member/workspace/bookings")}

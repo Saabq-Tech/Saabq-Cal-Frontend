@@ -12,10 +12,6 @@ export default function TermsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = t("pageTitleTerms") || "شروط الخدمة — تقويم سابق";
-  }, [t]);
-
-  useEffect(() => {
     setLoading(true);
     client
       .get(endpoints.terms)
@@ -41,13 +37,7 @@ export default function TermsPage() {
 
   return (
     <div className="main-content">
-      <SEO
-        title={terms?.title || t("termsOfService") || "شروط الخدمة"}
-        description={
-          t("termsOfServiceSubtitle") ||
-          "الشروط والأحكام الخاصة باستخدام منصة تقويم سابق لجدولة وإدارة المواعيد."
-        }
-      />
+      <SEO pageKey="terms" title={terms?.title} />
 
       {/* Hero / Header Section */}
       <section

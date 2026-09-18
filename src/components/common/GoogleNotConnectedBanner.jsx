@@ -1,14 +1,20 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
+import { checkWorkspaceCapability } from "../../utils/capabilities";
 import Icon from "./Icon";
 
 export default function GoogleNotConnectedBanner() {
   const { user, userType } = useAuth();
   const { t } = useLanguage();
 
-  // Only display for logged-in Workspace Members whose Google account is not connected
-  if (userType !== "member" || !user || user.is_google_connected === true) {
+  // Only display for logged-in Workspace Members whose workspace has INTEGRATIONS capability and Google account is not connected
+  if (
+    userType !== "member" ||
+    !user ||
+    user.is_google_connected === true ||
+    !checkWorkspaceCapability(user, "INTEGRATIONS")
+  ) {
     return null;
   }
 

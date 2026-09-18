@@ -8,7 +8,10 @@
  * its own markup.
  */
 
-import { isApiIntegrationEnabled } from "../utils/capabilities";
+import {
+  isApiIntegrationEnabled,
+  checkWorkspaceCapability,
+} from "../utils/capabilities";
 
 /** The seven settings screens, nested under the workspace "settings" tab. */
 export function getWorkspaceSettingsSubTabs(t) {
@@ -163,7 +166,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "booking_delete",
         "booking_write",
       ],
-      capability: "LOGS",
+      capability: "REPORTS",
     },
     {
       id: "settings",
@@ -214,7 +217,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "resource_delete",
         "resource_write",
       ],
-      capability: null,
+      capability: "RESOURCES",
     },
     {
       id: "payments",
@@ -233,7 +236,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "booking_delete",
         "booking_write",
       ],
-      capability: null,
+      capability: "PAYMENTS",
     },
     {
       id: "api_integration",
@@ -270,8 +273,8 @@ export function canViewWorkspaceTab(
   return tab.permissions.some((perm) => userPermissions.includes(perm));
 }
 
-/** Account (profile) tabs — mirrors DashboardSidebar, gated by userType. */
-export function getAccountTabs(t, userType) {
+/** Account (profile) tabs — mirrors DashboardSidebar, gated by userType and plan. */
+export function getAccountTabs(t, userType, user = null) {
   const prefix = userType === "member" ? "/member" : "/customer";
   return [
     {
@@ -315,6 +318,10 @@ export function getAccountTabs(t, userType) {
       icon: "custom-f362b7da",
       label: t("applicationsTitle") || "التطبيقات",
       show: userType === "member",
+      locked: !checkWorkspaceCapability(user, "INTEGRATIONS"),
+      lockTooltip:
+        t("capabilityLockedDesc") ||
+        "تتطلب هذه الميزة باقة تتضمن ميزة التطبيقات والتكاملات",
     },
     {
       id: "notifications",

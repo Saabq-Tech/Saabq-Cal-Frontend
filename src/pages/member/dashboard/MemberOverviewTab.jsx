@@ -11,6 +11,7 @@ import { SkeletonRect } from "../../../components/ui/Skeleton";
 import { extractTranslatableText } from "../../../utils/text";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
 import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
+import { getCurrencySymbol } from "../../../utils/currency";
 import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import UserAvatar from "../../../components/ui/UserAvatar";
@@ -20,7 +21,7 @@ const TOTAL_HOURS = 24; // 24 hours (00:00 to 23:00)
 
 export default function MemberOverviewTab() {
   const { user } = useAuth();
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const { isOwner, canReadBookings, canCreateBookings, canReadCustomers } =
     usePermissions();
@@ -340,7 +341,7 @@ export default function MemberOverviewTab() {
       workspaceSettings?.currency_code ||
       user?.workspace?.currency ||
       user?.workspace?.currency_code ||
-      "SAR";
+      "EGP";
 
     bookings.forEach((b) => {
       const startsAt = b.starts_at ? new Date(b.starts_at) : null;
@@ -790,7 +791,7 @@ export default function MemberOverviewTab() {
     <div
       className={`workspace-main-dashboard vibe-${vibe.key} animate-fade-in-up`}
     >
-      <SEO title={t("home") || (lang === "ar" ? "الرئيسية" : "Home")} noindex />
+      <SEO pageKey="workspaceOverview" />
 
       {/* Welcome Banner with Integrated Live Clock & Member Info */}
       <div className="workspace-welcome-banner">
@@ -870,7 +871,7 @@ export default function MemberOverviewTab() {
           <div className="workspace-stat-number revenue-number">
             <span>{stats.revenue}</span>
             <span className="currency-unit">
-              {lang === "ar" ? "ر.س" : stats.currency}
+              {getCurrencySymbol(stats.currency, lang === "ar")}
             </span>
           </div>
           <div className="stat-card-footer">

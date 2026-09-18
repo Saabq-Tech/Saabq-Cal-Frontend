@@ -207,17 +207,20 @@ export default function CustomerSpecialistPage() {
       data-workspace-vibe={vibe.key}
     >
       <SEO
-        title={workspace.name}
+        pageKey="customerSpecialist"
+        title={`${specialist?.name || ""} — ${workspace.name}`}
         description={
+          specialist?.bio ||
           workspace.booking_short_intro ||
           workspace.description ||
           (isRTL
-            ? "حجز مواعيد وخدمات في مساحة العمل"
-            : "Book appointments and services at this workspace")
+            ? `احجز موعدك المباشر مع ${specialist?.name || ""} في ${workspace.name}`
+            : `Book your direct session with ${specialist?.name || ""} at ${workspace.name}`)
         }
         canonical={`/${workspace.slug}/specialist/${specialistId}`}
-        ogType="business.business"
-        ogImage={workspace.logo_url || workspace.cover_url}
+        ogImage={
+          specialist?.avatar_url || workspace.logo_url || workspace.cover_url
+        }
         jsonLd={[jsonLd, breadcrumbJsonLd]}
       />
 
