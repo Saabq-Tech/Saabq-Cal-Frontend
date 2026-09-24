@@ -44,10 +44,7 @@ export function checkWorkspaceCapability(user, capabilityCode) {
     return activeCaps.includes("BOOKING");
   }
   if (capabilityCode === "SCHEDULES") {
-    return (
-      activeCaps.includes("PER_MEMBER_CALENDAR") ||
-      activeCaps.includes("BOOKING")
-    );
+    return activeCaps.includes("PER_MEMBER_CALENDAR");
   }
   if (capabilityCode === "ROLES_PERMISSIONS") {
     return activeCaps.includes("TEAM_MEMBERS");

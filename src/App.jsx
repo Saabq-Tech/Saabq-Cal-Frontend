@@ -13,6 +13,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import ScrollReveal from "./components/layout/ScrollReveal";
 import ThemeBrandingController from "./components/common/ThemeBrandingController";
+import GoToTopButton from "./components/common/GoToTopButton";
 import PageLoader from "./components/ui/PageLoader";
 import { lazyWithRetry as lazy } from "./utils/lazyWithRetry";
 
@@ -176,6 +177,7 @@ function MainLayout({ children }) {
       </main>
       <Footer />
       <MobileTabBar />
+      <GoToTopButton />
     </div>
   );
 }

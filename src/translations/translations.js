@@ -48,6 +48,7 @@ export const translations = {
     reportIssueAttachmentsHint:
       "يمكنك إرفاق حتى 5 صور أو لقطات شاشة لتوضيح المشكلة (الحد الأقصى 5 ميجابايت لكل صورة).",
     reportIssueDragDrop: "اسحب الصور وأفلتها هنا أو انقر للاختيار",
+    reportIssuePasteHint: "أو الصق لقطة شاشة من الحافظة (Ctrl+V)",
     reportIssueSubmitBtn: "إرسال البلاغ الآن",
     reportIssueSubmitting: "جارٍ إرسال البلاغ...",
     reportIssueSuccessTitle: "تم إرسال بلاغك بنجاح!",
@@ -58,6 +59,7 @@ export const translations = {
     reportIssueCopied: "تم النسخ!",
     reportIssueSubmitAnother: "إرسال بلاغ آخر",
     reportIssueBackHome: "العودة للرئيسية",
+    backToTop: "العودة للأعلى",
     reportIssueLoggedInNotice: "أنت مسجل الدخول باسم",
     reportIssueLoggedInNoticeSuffix: "وسيتم ربط هذا البلاغ بحسابك تلقائياً.",
     reportIssueMaxAttachmentsError: "الحد الأقصى للمرفقات هو 5 صور فقط.",
@@ -2331,6 +2333,7 @@ export const translations = {
     reportIssueAttachmentsHint:
       "You can attach up to 5 screenshots or images to illustrate the issue (max 5MB per image).",
     reportIssueDragDrop: "Drag & drop screenshots here or click to browse",
+    reportIssuePasteHint: "Or paste a screenshot from clipboard (Ctrl+V)",
     reportIssueSubmitBtn: "Submit Issue Report",
     reportIssueSubmitting: "Submitting Report...",
     reportIssueSuccessTitle: "Issue Reported Successfully!",
@@ -2341,6 +2344,7 @@ export const translations = {
     reportIssueCopied: "Copied!",
     reportIssueSubmitAnother: "Submit Another Report",
     reportIssueBackHome: "Back to Home",
+    backToTop: "Back to top",
     reportIssueLoggedInNotice: "You are logged in as",
     reportIssueLoggedInNoticeSuffix:
       "and this report will be automatically linked to your account.",

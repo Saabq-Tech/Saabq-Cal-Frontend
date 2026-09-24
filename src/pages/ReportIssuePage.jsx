@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -42,6 +42,7 @@ export default function ReportIssuePage() {
   const [phone, setPhone] = useState(user?.phone || "");
   const [attachments, setAttachments] = useState([]); // { file, previewUrl, name, size }
   const [dragActive, setDragActive] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null); // { url, name } for lightbox
 
   // Submission State
   const [submitting, setSubmitting] = useState(false);
@@ -69,42 +70,76 @@ export default function ReportIssuePage() {
   }, [attachments]);
 
   // Handle files selection
-  const handleFiles = (files) => {
-    setErrorMessage("");
-    const fileList = Array.from(files);
-    const validImages = [];
+  const handleFiles = useCallback(
+    (files) => {
+      setErrorMessage("");
+      const fileList = Array.from(files);
+      const validImages = [];
 
-    for (const file of fileList) {
-      if (!file.type.startsWith("image/")) {
-        addToast?.(t("reportIssueInvalidImageError"), "error");
-        continue;
+      for (const file of fileList) {
+        if (!file.type.startsWith("image/")) {
+          addToast?.(t("reportIssueInvalidImageError"), "error");
+          continue;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          addToast?.(t("reportIssueImageSizeError"), "error");
+          continue;
+        }
+        validImages.push({
+          file,
+          previewUrl: URL.createObjectURL(file),
+          name: file.name,
+          size: (file.size / 1024).toFixed(1) + " KB",
+        });
       }
-      if (file.size > 5 * 1024 * 1024) {
-        addToast?.(t("reportIssueImageSizeError"), "error");
-        continue;
-      }
-      validImages.push({
-        file,
-        previewUrl: URL.createObjectURL(file),
-        name: file.name,
-        size: (file.size / 1024).toFixed(1) + " KB",
+
+      if (validImages.length === 0) return;
+
+      setAttachments((prev) => {
+        if (prev.length + validImages.length > 5) {
+          addToast?.(t("reportIssueMaxAttachmentsError"), "error");
+          const remainingSlots = 5 - prev.length;
+          if (remainingSlots > 0) {
+            return [...prev, ...validImages.slice(0, remainingSlots)];
+          }
+          return prev;
+        }
+        return [...prev, ...validImages];
       });
-    }
+    },
+    [addToast, t],
+  );
 
-    if (attachments.length + validImages.length > 5) {
-      addToast?.(t("reportIssueMaxAttachmentsError"), "error");
-      const remainingSlots = 5 - attachments.length;
-      if (remainingSlots > 0) {
-        setAttachments((prev) => [
-          ...prev,
-          ...validImages.slice(0, remainingSlots),
-        ]);
+  // Handle clipboard paste (Ctrl+V / Cmd+V)
+  const handlePaste = useCallback(
+    (e) => {
+      // Only handle paste when not already submitted
+      if (submittedData) return;
+
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const imageFiles = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) imageFiles.push(file);
+        }
       }
-      return;
-    }
 
-    setAttachments((prev) => [...prev, ...validImages]);
-  };
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        handleFiles(imageFiles);
+      }
+    },
+    [submittedData, handleFiles],
+  );
+
+  // Register global paste event listener
+  useEffect(() => {
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
+  }, [handlePaste]);
 
   const handleRemoveAttachment = (indexToRemove) => {
     setAttachments((prev) => {
@@ -924,6 +959,20 @@ export default function ReportIssuePage() {
                     </div>
                     <div
                       style={{
+                        fontSize: "0.82rem",
+                        color: "var(--text-secondary)",
+                        marginTop: 6,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <Icon name="clipboard" size={14} />
+                      <span>{t("reportIssuePasteHint")}</span>
+                    </div>
+                    <div
+                      style={{
                         fontSize: "0.8rem",
                         color: "var(--text-secondary)",
                         marginTop: 4,
@@ -958,11 +1007,19 @@ export default function ReportIssuePage() {
                         <img
                           src={att.previewUrl}
                           alt={att.name}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImage({
+                              url: att.previewUrl,
+                              name: att.name,
+                            });
+                          }}
                           style={{
                             width: "100%",
                             height: 100,
                             objectFit: "cover",
                             display: "block",
+                            cursor: "zoom-in",
                           }}
                         />
                         <button
@@ -1044,6 +1101,106 @@ export default function ReportIssuePage() {
           )}
         </div>
       </section>
+
+      {/* Image Preview Lightbox */}
+      {previewImage && (
+        <div
+          onClick={() => setPreviewImage(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setPreviewImage(null);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={previewImage.name}
+          tabIndex={-1}
+          ref={(el) => el?.focus()}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0, 0, 0, 0.85)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            animation: "fadeIn 0.2s ease",
+            cursor: "zoom-out",
+          }}
+        >
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setPreviewImage(null);
+            }}
+            style={{
+              position: "absolute",
+              top: 20,
+              [isRTL ? "left" : "right"]: 20,
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              color: "#fff",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.2s",
+              zIndex: 10,
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.3)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+            }
+            aria-label="Close preview"
+          >
+            <Icon name="x" size={20} />
+          </button>
+
+          {/* Preview image */}
+          <img
+            src={previewImage.url}
+            alt={previewImage.name}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "85vh",
+              borderRadius: "12px",
+              objectFit: "contain",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+              cursor: "default",
+            }}
+          />
+
+          {/* Filename label */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 20,
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(4px)",
+              padding: "8px 20px",
+              borderRadius: "20px",
+              color: "rgba(255,255,255,0.85)",
+              fontSize: "0.85rem",
+              maxWidth: "80vw",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {previewImage.name}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
