@@ -1422,15 +1422,20 @@ export const translations = {
     hoursAgo: "ساعة مضت",
     daysAgo: "يوم مضى",
     admin_action_status_updated_title: "تحديث حالة مساحة العمل من الإدارة",
-    admin_action_status_updated_body: "تم تغيير حالة مساحة العمل بواسطة أدمن النظام.",
+    admin_action_status_updated_body:
+      "تم تغيير حالة مساحة العمل بواسطة أدمن النظام.",
     admin_action_settings_updated_title: "تحديث إعدادات مساحة العمل من الإدارة",
-    admin_action_settings_updated_body: "قام أدمن النظام بتحديث إعدادات مساحة العمل.",
+    admin_action_settings_updated_body:
+      "قام أدمن النظام بتحديث إعدادات مساحة العمل.",
     admin_action_subscription_updated_title: "تعديل الاشتراك من قبل الإدارة",
-    admin_action_subscription_updated_body: "قام أدمن النظام بإجراء تعديل على اشتراك مساحة العمل.",
+    admin_action_subscription_updated_body:
+      "قام أدمن النظام بإجراء تعديل على اشتراك مساحة العمل.",
     admin_action_capabilities_updated_title: "تحديث إمكانيات مساحة العمل",
-    admin_action_capabilities_updated_body: "قام المشرف بتحديث حالة إمكانيات مساحة العمل.",
+    admin_action_capabilities_updated_body:
+      "قام المشرف بتحديث حالة إمكانيات مساحة العمل.",
     admin_action_generic_title: "تحديث من إدارة النظام لمساحة العمل",
-    admin_action_generic_body: "قام مدير النظام بإجراء تغييرات على مساحة العمل الخاصة بك.",
+    admin_action_generic_body:
+      "قام مدير النظام بإجراء تغييرات على مساحة العمل الخاصة بك.",
     pageTitleChats: "محادثات الدعم — تقويم سابق",
     chatsTab: "محادثات الدعم",
     supportChatsTitle: "محادثات الدعم الفني",
@@ -3734,15 +3739,20 @@ export const translations = {
     hoursAgo: "hr ago",
     daysAgo: "d ago",
     admin_action_status_updated_title: "Workspace Status Updated by Admin",
-    admin_action_status_updated_body: "Workspace status was changed by system admin.",
+    admin_action_status_updated_body:
+      "Workspace status was changed by system admin.",
     admin_action_settings_updated_title: "Workspace Settings Updated by Admin",
-    admin_action_settings_updated_body: "System admin updated settings for workspace.",
+    admin_action_settings_updated_body:
+      "System admin updated settings for workspace.",
     admin_action_subscription_updated_title: "Subscription Action by Admin",
-    admin_action_subscription_updated_body: "System admin performed a subscription update on workspace.",
+    admin_action_subscription_updated_body:
+      "System admin performed a subscription update on workspace.",
     admin_action_capabilities_updated_title: "Workspace Capabilities Updated",
-    admin_action_capabilities_updated_body: "Administrator updated workspace capabilities.",
+    admin_action_capabilities_updated_body:
+      "Administrator updated workspace capabilities.",
     admin_action_generic_title: "System Admin Action on Workspace",
-    admin_action_generic_body: "System admin performed an action on your workspace.",
+    admin_action_generic_body:
+      "System admin performed an action on your workspace.",
     pageTitleChats: "Support Chats — Saabq Cal",
     chatsTab: "Support Chat",
     supportChatsTitle: "Technical Support Chats",
