@@ -1592,7 +1592,7 @@ html.dark textarea:-webkit-autofill {
     gap: 2px;
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
     padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
-    background: var(--secondary);
+    background: var(--primary);
     border-start-start-radius: 18px;
     border-start-end-radius: 18px;
     box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.18);
@@ -1605,7 +1605,7 @@ html.dark textarea:-webkit-autofill {
     inset-inline: 0;
     height: 60px;
     background: inherit;
-    background-color: var(--secondary);
+    background-color: var(--primary);
     pointer-events: none;
   }
 
