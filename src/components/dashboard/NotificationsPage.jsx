@@ -231,11 +231,15 @@ function NotificationItem({
         <div className={`notif-dot-icon${isUnread ? "" : " read"}`}>
           <Icon name="bell" size={18} />
         </div>
-        {notif.title && <div className="notif-title">{notif.title}</div>}
+        {notif.title && (
+          <div className="notif-title">{t(notif.title, notif.title)}</div>
+        )}
       </div>
 
       <div className="notif-content">
-        {notif.body && <div className="notif-body">{notif.body}</div>}
+        {notif.body && (
+          <div className="notif-body">{t(notif.body, notif.body)}</div>
+        )}
         <div className="notif-meta">
           <span className="notif-time">
             {relativeTime(notif.created_at, t)}
