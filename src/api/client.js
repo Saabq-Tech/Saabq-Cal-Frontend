@@ -227,6 +227,35 @@ export const endpoints = {
   chats: "/chats",
   chatDetails: (id) => `/chats/${id}`,
   chatSendMessage: "/chats/messages",
+  chatSsoUrl: "/chats/sso-url",
+  chatContacts: "/chats/contacts",
+  chatInboxes: "/chats/inboxes",
+  chatAutomations: "/chats/automations",
+  chatSla: "/chats/sla",
+  chatCaptainAiTask: "/chats/captain-ai/task",
+  chatReports: "/chats/reports",
+  chatPortals: "/chats/portals",
+  chatSettings: "/chats/settings",
+
+  // Workspace Member Applications: Saabq-Chat
+  workspaceSaabqChatSsoUrl:
+    "/workspace-members/workspace/applications/saabq-chat/sso-url",
+  workspaceSaabqChatContacts:
+    "/workspace-members/workspace/applications/saabq-chat/contacts",
+  workspaceSaabqChatInboxes:
+    "/workspace-members/workspace/applications/saabq-chat/inboxes",
+  workspaceSaabqChatAutomations:
+    "/workspace-members/workspace/applications/saabq-chat/automations",
+  workspaceSaabqChatSla:
+    "/workspace-members/workspace/applications/saabq-chat/sla",
+  workspaceSaabqChatCaptainAiTask:
+    "/workspace-members/workspace/applications/saabq-chat/captain-ai/task",
+  workspaceSaabqChatReports:
+    "/workspace-members/workspace/applications/saabq-chat/reports",
+  workspaceSaabqChatPortals:
+    "/workspace-members/workspace/applications/saabq-chat/portals",
+  workspaceSaabqChatSettings:
+    "/workspace-members/workspace/applications/saabq-chat/settings",
 };
 
 // Cached singleton for public site settings to prevent duplicate network calls

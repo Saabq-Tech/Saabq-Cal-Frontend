@@ -45,6 +45,57 @@ export function getWorkspaceSettingsSubTabs(t) {
   ];
 }
 
+/** The sub-items for Saabq-Chat application. */
+export function getSaabqChatSubTabs(t) {
+  return [
+    {
+      id: "inbox",
+      label: t("saabqChatNavInbox") || "المحادثات الموحدة",
+      icon: "message-square",
+    },
+    {
+      id: "contacts",
+      label: t("saabqChatNavContacts") || "جهات الاتصال",
+      icon: "users",
+    },
+    {
+      id: "inboxes",
+      label: t("saabqChatNavInboxes") || "قنوات الاستقبال",
+      icon: "radio",
+    },
+    {
+      id: "automations",
+      label: t("saabqChatNavAutomations") || "الأتمتة والردود",
+      icon: "zap",
+    },
+    {
+      id: "sla",
+      label: t("saabqChatNavSla") || "اتفاقيات الخدمة",
+      icon: "shield",
+    },
+    {
+      id: "captain-ai",
+      label: t("saabqChatNavCaptainAi") || "كابتن الذكاء الاصطناعي",
+      icon: "sparkles",
+    },
+    {
+      id: "reports",
+      label: t("saabqChatNavReports") || "التقارير والتحليلات",
+      icon: "bar-chart",
+    },
+    {
+      id: "portals",
+      label: t("saabqChatNavPortals") || "مركز المساعدة والمقالات",
+      icon: "book-open",
+    },
+    {
+      id: "settings",
+      label: t("saabqChatNavSettings") || "إعدادات الربط والمنظومة",
+      icon: "settings",
+    },
+  ];
+}
+
 /** All workspace management tabs (before permission/capability gating). */
 export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
   const getCustomerLabel = () => {
@@ -254,6 +305,22 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
         "settings_write",
       ],
       capability: "REST_API",
+    },
+    {
+      id: "saabq_chat",
+      path: "/member/workspace/applications/saabq-chat",
+      label: t("saabqChatAppTitle") || "سابق شات",
+      icon: "message-circle",
+      isApplication: true,
+      permissions: [
+        "chat_read",
+        "chat_create",
+        "chat_update",
+        "chat_delete",
+        "settings_read",
+      ],
+      capability: null,
+      subTabs: getSaabqChatSubTabs(t),
     },
   ];
 }

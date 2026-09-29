@@ -18871,3 +18871,35 @@ html.dark .go-to-top-btn:hover,
     opacity: 1;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SAABQ-CHAT EMBEDDED APPLICATION SUITE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.saabq-chat-application-wrapper {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.saabq-chat-nav-strip {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.saabq-chat-nav-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.saabq-chat-nav-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.saabq-chat-nav-strip::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+
+@media (max-width: 900px) {
+  .saabq-chat-inbox-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

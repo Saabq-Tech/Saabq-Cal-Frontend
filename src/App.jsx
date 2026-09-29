@@ -134,6 +134,48 @@ const WorkspaceCustomersPage = lazy(
 const WorkspaceCustomerProfilePage = lazy(
   () => import("./pages/member/dashboard/WorkspaceCustomerProfilePage"),
 );
+
+// Applications: Saabq-Chat
+const SaabqChatAppLayout = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/SaabqChatAppLayout"),
+);
+const SaabqChatInboxTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatInboxTab"),
+);
+const SaabqChatContactsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatContactsTab"),
+);
+const SaabqChatInboxesTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatInboxesTab"),
+);
+const SaabqChatAutomationsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatAutomationsTab"),
+);
+const SaabqChatSlaTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatSlaTab"),
+);
+const SaabqChatCaptainAiTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatCaptainAiTab"),
+);
+const SaabqChatReportsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatReportsTab"),
+);
+const SaabqChatPortalsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatPortalsTab"),
+);
+const SaabqChatSettingsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatSettingsTab"),
+);
 const WorkspaceHomePage = lazy(
   () => import("./pages/member/dashboard/MemberOverviewTab"),
 );
@@ -571,6 +613,35 @@ export default function App() {
                       path="api-integration"
                       element={<WorkspaceApiIntegrationPage />}
                     />
+
+                    {/* Applications: Saabq-Chat */}
+                    <Route
+                      path="applications/saabq-chat"
+                      element={<SaabqChatAppLayout />}
+                    >
+                      <Route index element={<Navigate to="inbox" replace />} />
+                      <Route path="inbox" element={<SaabqChatInboxTab />} />
+                      <Route
+                        path="contacts"
+                        element={<SaabqChatContactsTab />}
+                      />
+                      <Route path="inboxes" element={<SaabqChatInboxesTab />} />
+                      <Route
+                        path="automations"
+                        element={<SaabqChatAutomationsTab />}
+                      />
+                      <Route path="sla" element={<SaabqChatSlaTab />} />
+                      <Route
+                        path="captain-ai"
+                        element={<SaabqChatCaptainAiTab />}
+                      />
+                      <Route path="reports" element={<SaabqChatReportsTab />} />
+                      <Route path="portals" element={<SaabqChatPortalsTab />} />
+                      <Route
+                        path="settings"
+                        element={<SaabqChatSettingsTab />}
+                      />
+                    </Route>
                   </Route>
 
                   {/* Explicit Error Pages */}

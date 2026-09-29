@@ -11,6 +11,7 @@ import {
   getWorkspaceTabs,
   canViewWorkspaceTab,
   getWorkspaceSettingsSubTabs,
+  getSaabqChatSubTabs,
 } from "../../../config/dashboardNav";
 import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import WorkspaceTabsBar from "./components/WorkspaceTabsBar";
@@ -87,6 +88,17 @@ export default function WorkspaceLayout() {
   const activeSettingsTab =
     new URLSearchParams(location.search).get("sub") || "basic";
 
+  const isSaabqChatOpen = location.pathname.startsWith(
+    "/member/workspace/applications/saabq-chat",
+  );
+  const saabqChatMatch = location.pathname.match(
+    /\/member\/workspace\/applications\/saabq-chat(?:\/([^/]+))?/,
+  );
+  const activeSaabqChatTab = saabqChatMatch?.[1] || "inbox";
+
+  const regularTabs = availableTabs.filter((tab) => !tab.isApplication);
+  const applicationTabs = availableTabs.filter((tab) => tab.isApplication);
+
   if (availableTabs.length === 0) {
     return (
       <div className="workspace-dashboard-shell">
@@ -150,7 +162,8 @@ export default function WorkspaceLayout() {
       <div className="workspace-dashboard-grid">
         <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
           <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
-            {availableTabs.map((wsTab) => {
+            {/* 1. Main Workspace Management Tabs */}
+            {regularTabs.map((wsTab) => {
               const isCapAllowed =
                 isWorkspaceActive &&
                 checkWorkspaceCapability(user, wsTab.capability);
@@ -225,8 +238,7 @@ export default function WorkspaceLayout() {
                     )}
                   </NavLink>
 
-                  {/* Settings' seven screens, nested under it and only while
-                    settings is the open section. */}
+                  {/* Settings' screens */}
                   {wsTab.subTabs && isSettingsOpen && (
                     <div className="workspace-subnav">
                       {wsTab.subTabs.map((sub) => (
@@ -245,6 +257,86 @@ export default function WorkspaceLayout() {
                 </Fragment>
               );
             })}
+
+            {/* 2. Applications Section (Saabq-Chat, etc.) */}
+            {applicationTabs.length > 0 && (
+              <>
+                <div
+                  className="workspace-sidebar-section-header"
+                  style={{
+                    padding: "16px 14px 8px",
+                    fontSize: "0.72rem",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    color: "var(--muted)",
+                    borderTop:
+                      "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+                    marginTop: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <Icon name="grid" size={13} />
+                  <span>{t("navApplications") || "التطبيقات"}</span>
+                </div>
+
+                {applicationTabs.map((appTab) => (
+                  <Fragment key={appTab.path}>
+                    <NavLink
+                      to={appTab.path}
+                      className={({ isActive }) =>
+                        `profile-sidebar-link${
+                          isActive || isSaabqChatOpen ? " active" : ""
+                        }`
+                      }
+                    >
+                      <span className="profile-sidebar-icon">
+                        <Icon name={appTab.icon} />
+                      </span>
+                      <span style={{ flex: 1 }}>{appTab.label}</span>
+                      <span
+                        style={{
+                          fontSize: "0.68rem",
+                          fontWeight: 800,
+                          padding: "2px 6px",
+                          borderRadius: 6,
+                          background: "rgba(59, 130, 246, 0.15)",
+                          color: "#3b82f6",
+                          border: "1px solid rgba(59, 130, 246, 0.3)",
+                        }}
+                      >
+                        APP
+                      </span>
+                    </NavLink>
+
+                    {/* Saabq-Chat nested sub-items in sidebar */}
+                    {appTab.subTabs && isSaabqChatOpen && (
+                      <div className="workspace-subnav">
+                        {appTab.subTabs.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            to={`${appTab.path}/${sub.id}`}
+                            className={`workspace-subnav-item${
+                              activeSaabqChatTab === sub.id ? " active" : ""
+                            }`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                            }}
+                          >
+                            <Icon name={sub.icon} size={13} />
+                            <span>{sub.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </Fragment>
+                ))}
+              </>
+            )}
           </nav>
         </aside>
 
@@ -252,7 +344,7 @@ export default function WorkspaceLayout() {
           {/* Workspace Opened Tabs & Favorites Slider Bar */}
           <WorkspaceTabsBar />
 
-          {/* Settings sub-tabs on mobile: placed right under the workspace tabs, before banners and anything else */}
+          {/* Settings sub-tabs on mobile */}
           {isSettingsOpen && (
             <div className="settings-subtab-strip">
               {getWorkspaceSettingsSubTabs(t).map((sub) => (
@@ -264,6 +356,29 @@ export default function WorkspaceLayout() {
                   }`}
                 >
                   {sub.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Saabq-Chat sub-tabs on mobile */}
+          {isSaabqChatOpen && (
+            <div className="settings-subtab-strip">
+              {getSaabqChatSubTabs(t).map((sub) => (
+                <Link
+                  key={sub.id}
+                  to={`/member/workspace/applications/saabq-chat/${sub.id}`}
+                  className={`settings-subtab${
+                    activeSaabqChatTab === sub.id ? " active" : ""
+                  }`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Icon name={sub.icon} size={14} />
+                  <span>{sub.label}</span>
                 </Link>
               ))}
             </div>

@@ -982,6 +982,23 @@ export default function Navbar() {
                                 >
                                   <Icon name={tab.icon} />
                                   <span style={{ flex: 1 }}>{tab.label}</span>
+                                  {tab.isApplication && (
+                                    <span
+                                      style={{
+                                        fontSize: "0.64rem",
+                                        fontWeight: 800,
+                                        padding: "2px 6px",
+                                        borderRadius: 4,
+                                        background: "rgba(59, 130, 246, 0.15)",
+                                        color: "#3b82f6",
+                                        border:
+                                          "1px solid rgba(59, 130, 246, 0.3)",
+                                        marginInlineStart: "auto",
+                                      }}
+                                    >
+                                      APP
+                                    </span>
+                                  )}
                                   {tab.id === "bookings" &&
                                     pendingBookingsCount > 0 && (
                                       <span

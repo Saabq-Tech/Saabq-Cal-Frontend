@@ -12,6 +12,7 @@ import {
   getWorkspaceTabs,
   canViewWorkspaceTab,
   getWorkspaceSettingsSubTabs,
+  getSaabqChatSubTabs,
 } from "../../../../config/dashboardNav";
 import { checkWorkspaceCapability } from "../../../../utils/capabilities";
 
@@ -89,6 +90,36 @@ export default function WorkspaceTabsBar() {
       });
     }
 
+    // Saabq-Chat application sub-tabs
+    const chatAllowed = canViewWorkspaceTab(
+      {
+        id: "saabq_chat",
+        permissions: [
+          "chat_read",
+          "chat_create",
+          "chat_update",
+          "chat_delete",
+          "settings_read",
+        ],
+      },
+      isOwner,
+      userPermissions,
+      user,
+    );
+
+    if (chatAllowed) {
+      const chatSubTabs = getSaabqChatSubTabs(t);
+      chatSubTabs.forEach((sub) => {
+        const key = `saabq_chat_${sub.id}`;
+        dict[key] = {
+          id: key,
+          label: `${t("saabqChatAppTitle") || "سابق شات"} — ${sub.label}`,
+          path: `/member/workspace/applications/saabq-chat/${sub.id}`,
+          icon: sub.icon || "message-square",
+        };
+      });
+    }
+
     return dict;
   }, [t, workspace, lang, user, isOwner, userPermissions, isWorkspaceActive]);
 
@@ -102,6 +133,11 @@ export default function WorkspaceTabsBar() {
       const params = new URLSearchParams(location.search);
       const sub = params.get("sub") || "basic";
       return `settings_${sub}`;
+    }
+    if (pathname.startsWith("/member/workspace/applications/saabq-chat")) {
+      const parts = pathname.split("/");
+      const sub = parts[5] || "inbox";
+      return `saabq_chat_${sub}`;
     }
     const parts = pathname.split("/");
     // e.g. /member/workspace/bookings -> bookings
