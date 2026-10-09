@@ -4,6 +4,7 @@ import { useLanguage } from "../../../../../context/LanguageContext";
 import Icon from "../../../../../components/common/Icon";
 import client, { endpoints } from "../../../../../api/client";
 import WorkspacePageHeader from "../../../../../components/dashboard/WorkspacePageHeader";
+import ConfirmationModal from "../../../../../components/common/ConfirmationModal";
 
 export default function SaabqChatAppLayout() {
   const { t } = useLanguage();
@@ -14,6 +15,8 @@ export default function SaabqChatAppLayout() {
   const [ssoUrl, setSsoUrl] = useState("");
   const [ssoLoading, setSsoLoading] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  const [disconnectError, setDisconnectError] = useState("");
   const [connectSuccess, setConnectSuccess] = useState(false);
 
   const fetchSettings = useCallback(async () => {
@@ -131,28 +134,22 @@ export default function SaabqChatAppLayout() {
     }
   };
 
-  const handleDisconnectIntegration = async () => {
-    if (
-      !window.confirm(
-        t("confirmDisconnectSaabqChat") ||
-          "هل أنت متأكد من رغبتك في إلغاء ربط سابق شات بهذه المساحة؟",
-      )
-    ) {
-      return;
-    }
+  const handleConfirmDisconnect = async () => {
     setDisconnecting(true);
+    setDisconnectError("");
     try {
       await client.post(
         endpoints.workspaceSaabqChatDisconnect ||
           "/workspace-members/workspace/applications/saabq-chat/disconnect",
       );
+      setShowDisconnectModal(false);
       await fetchSettings();
     } catch (err) {
-      alert(
+      const msg =
         err.response?.data?.message ||
-          t("disconnectFailed") ||
-          "تعذر إلغاء الربط",
-      );
+        t("disconnectFailed") ||
+        "تعذر إلغاء الربط. يرجى المحاولة لاحقاً.";
+      setDisconnectError(msg);
     } finally {
       setDisconnecting(false);
     }
@@ -252,18 +249,20 @@ export default function SaabqChatAppLayout() {
               </button>
               <button
                 type="button"
-                onClick={handleDisconnectIntegration}
+                onClick={() => {
+                  setDisconnectError("");
+                  setShowDisconnectModal(true);
+                }}
                 disabled={disconnecting}
-                className="btn btn-secondary"
+                className="btn btn-danger-subtle"
                 style={{
                   gap: 6,
                   padding: "9px 16px",
                   fontSize: "0.85rem",
                   fontWeight: 600,
                   borderRadius: "var(--radius-md, 10px)",
-                  color: "#dc2626",
-                  borderColor: "rgba(220, 38, 38, 0.25)",
-                  background: "var(--surface)",
+                  display: "inline-flex",
+                  alignItems: "center",
                 }}
                 title={t("disconnectIntegration") || "إلغاء الربط"}
               >
@@ -271,7 +270,7 @@ export default function SaabqChatAppLayout() {
                 <span>
                   {disconnecting
                     ? t("disconnecting") || "جاري الإلغاء..."
-                    : t("disconnect") || "إلغاء الربط"}
+                    : t("disconnectIntegration") || "إلغاء الربط"}
                 </span>
               </button>
             </div>
@@ -520,6 +519,32 @@ export default function SaabqChatAppLayout() {
           <Outlet context={{ settings, refetchSettings: fetchSettings }} />
         </div>
       )}
+
+      {/* Disconnect Integration Confirmation Modal */}
+      <ConfirmationModal
+        modalState={{
+          isOpen: showDisconnectModal,
+          title: t("disconnectIntegration") || "إلغاء ربط سابق شات",
+          message:
+            t("confirmDisconnectSaabqChat") ||
+            "هل أنت متأكد من رغبتك في إلغاء ربط سابق شات بهذه المساحة؟",
+          confirmText: disconnecting
+            ? t("disconnecting") || "جاري الإلغاء..."
+            : t("disconnectIntegration") || "إلغاء الربط",
+          cancelText: t("cancel") || "إلغاء",
+          isDanger: true,
+          loading: disconnecting,
+          error: disconnectError,
+          keepOpenOnConfirm: true,
+          onConfirm: handleConfirmDisconnect,
+        }}
+        onClose={() => {
+          if (!disconnecting) {
+            setShowDisconnectModal(false);
+            setDisconnectError("");
+          }
+        }}
+      />
     </div>
   );
 }

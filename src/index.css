@@ -1957,10 +1957,19 @@ html.dark .btn-outline:hover:not(:disabled) {
   transition: all 0.2s ease;
 }
 
+.btn-danger-subtle svg {
+  stroke: currentColor;
+}
+
 .btn-danger-subtle:hover:not(:disabled) {
   background-color: rgba(239, 68, 68, 0.2) !important;
   border-color: rgba(239, 68, 68, 0.45) !important;
   color: #dc2626 !important;
+}
+
+.btn-danger-subtle:hover:not(:disabled) * {
+  color: #dc2626 !important;
+  stroke: #dc2626 !important;
 }
 
 html.dark .btn-danger-subtle {
@@ -1973,6 +1982,11 @@ html.dark .btn-danger-subtle:hover:not(:disabled) {
   background-color: rgba(239, 68, 68, 0.28) !important;
   border-color: rgba(239, 68, 68, 0.55) !important;
   color: #ffffff !important;
+}
+
+html.dark .btn-danger-subtle:hover:not(:disabled) * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .btn-xs {

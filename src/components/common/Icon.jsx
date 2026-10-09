@@ -21,6 +21,8 @@ const ICON_NAME_MAP = {
   close: "x",
   "rotate-left": "rotate-ccw",
   undo: "rotate-ccw",
+  unlink: "link-2-off",
+  "link-off": "link-2-off",
 };
 
 function normalizeIconName(name) {
