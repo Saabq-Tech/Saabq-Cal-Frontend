@@ -22,7 +22,6 @@ export default function SaabqChatSettingsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-
   const handleOpenSso = async () => {
     setSsoLoading(true);
     try {

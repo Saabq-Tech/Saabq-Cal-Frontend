@@ -1,5 +1,5 @@
 /**
- * Centralized SEO Configuration for Saabq Cal (سابق كول)
+ * Centralized SEO Configuration for Saabq Cal (سابق كال)
  *
  * Provides unified, structured, and bilingual (AR/EN) SEO metadata,
  * OpenGraph, Twitter Cards, and JSON-LD Structured Data for all frontend routes.
@@ -7,8 +7,8 @@
 
 export const SITE_CONFIG = {
   name: {
-    ar: "سابق كول — Saabq Cal",
-    en: "Saabq Cal — سابق كول",
+    ar: "سابق كال — Saabq Cal",
+    en: "Saabq Cal — سابق كال",
   },
   shortName: "Saabq Cal",
   baseUrl: "https://cal.saabq.com",
@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
   twitterHandle: "@SaabqCal",
   companyName: "Saabq Tech",
   defaultKeywords: {
-    ar: "حجز مواعيد, جدولة ذكية, إدارة المواعيد, مساحات عمل, سابق كول, استشارات, عيادات, خدمات أعمال, حجز أونلاين",
+    ar: "حجز مواعيد, جدولة ذكية, إدارة المواعيد, مساحات عمل, سابق كال, استشارات, عيادات, خدمات أعمال, حجز أونلاين",
     en: "appointment scheduling, smart booking, calendar management, workspace booking, saabq cal, consultations, online scheduling software",
   },
 };
@@ -29,7 +29,7 @@ export const structuredDataSchemas = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Saabq Cal",
-    alternateName: "سابق كول",
+    alternateName: "سابق كال",
     url: origin,
     logo: `${origin}/logo.png`,
     sameAs: [
@@ -48,7 +48,7 @@ export const structuredDataSchemas = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Saabq Cal",
-    alternateName: "سابق كول",
+    alternateName: "سابق كال",
     url: origin,
     potentialAction: {
       "@type": "SearchAction",
@@ -60,7 +60,7 @@ export const structuredDataSchemas = {
   softwareApp: (origin = SITE_CONFIG.baseUrl, lang = "ar") => ({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Saabq Cal — سابق كول",
+    name: "Saabq Cal — سابق كال",
     applicationCategory: "BusinessApplication",
     operatingSystem: "All (Web-based)",
     offers: {
@@ -217,11 +217,11 @@ export const PAGE_SEO_CONFIG = {
       en: "Smart Appointment Scheduling & Booking Management",
     },
     description: {
-      ar: "منصة سابق كول الذكية لإدارة المواعيد والجدولة الآلية للشركات والمستشارين والعيادات والمحترفين. نظّم وقتك، استقبل الحجوزات، وضاعف إنتاجيتك بسهولة.",
+      ar: "منصة سابق كال الذكية لإدارة المواعيد والجدولة الآلية للشركات والمستشارين والعيادات والمحترفين. نظّم وقتك، استقبل الحجوزات، وضاعف إنتاجيتك بسهولة.",
       en: "Saabq Cal is the smart appointment scheduling and automated booking platform for businesses, clinics, consultants, and professionals. Organize your time and grow your business.",
     },
     keywords: {
-      ar: "جدولة المواعيد, حجز مواعيد أونلاين, إدارة العيادات, مواعيد استشارات, تقويم ذكي, نظام حجوزات, سابق كول",
+      ar: "جدولة المواعيد, حجز مواعيد أونلاين, إدارة العيادات, مواعيد استشارات, تقويم ذكي, نظام حجوزات, سابق كال",
       en: "appointment booking software, online scheduling, clinic management, consultation bookings, smart calendar, appointment scheduler",
     },
     canonical: "/",
@@ -239,11 +239,11 @@ export const PAGE_SEO_CONFIG = {
       en: "About Us — Our Vision for Smart Scheduling",
     },
     description: {
-      ar: "تعرف على منصة سابق كول ورؤيتنا في تمكين الشركات والمهنيين في العالم العربي بحلول متطورة ومبتكرة لإدارة الوقت وتنظيم المواعيد بكفاءة واحترافية.",
+      ar: "تعرف على منصة سابق كال ورؤيتنا في تمكين الشركات والمهنيين في العالم العربي بحلول متطورة ومبتكرة لإدارة الوقت وتنظيم المواعيد بكفاءة واحترافية.",
       en: "Discover Saabq Cal and our mission to empower businesses and professionals across the region with state-of-the-art scheduling and time management tools.",
     },
     keywords: {
-      ar: "عن سابق كول, من نحن, إدارة الوقت, رؤية سابق, فريق سابق كول",
+      ar: "عن سابق كال, من نحن, إدارة الوقت, رؤية سابق, فريق سابق كال",
       en: "about saabq cal, our mission, scheduling platform company, smart booking team",
     },
     canonical: "/about",
@@ -256,11 +256,11 @@ export const PAGE_SEO_CONFIG = {
       en: "Features & Capabilities — Everything You Need for Smart Scheduling",
     },
     description: {
-      ar: "استكشف مميزات سابق كول الشاملة: جدولة مخصصة، مزامنة مع التقويمات، إشعارات فورية، روابط حجز مخصصة، مدفوعات إلكترونية، وإدارة شاملة للعملاء وفرق العمل.",
+      ar: "استكشف مميزات سابق كال الشاملة: جدولة مخصصة، مزامنة مع التقويمات، إشعارات فورية، روابط حجز مخصصة، مدفوعات إلكترونية، وإدارة شاملة للعملاء وفرق العمل.",
       en: "Explore Saabq Cal features: custom availability schedules, multi-calendar sync, automated SMS & email reminders, custom booking forms, payment gateways, and team management.",
     },
     keywords: {
-      ar: "مميزات سابق كول, مزامنة التقويم, إشعارات الحجز, نماذج الحجز, إدارة الفرق, المدفوعات الإلكترونية",
+      ar: "مميزات سابق كال, مزامنة التقويم, إشعارات الحجز, نماذج الحجز, إدارة الفرق, المدفوعات الإلكترونية",
       en: "booking software features, calendar sync, automated reminders, team scheduling, online payments",
     },
     canonical: "/features",
@@ -269,7 +269,7 @@ export const PAGE_SEO_CONFIG = {
 
   howItWorks: {
     title: {
-      ar: "كيف يعمل سابق كول — خطوات بسيطة لتنظيم مواعيدك",
+      ar: "كيف يعمل سابق كال — خطوات بسيطة لتنظيم مواعيدك",
       en: "How It Works — Simple Steps to Automate Your Bookings",
     },
     description: {
@@ -277,7 +277,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Learn how to set up your services in minutes, share your custom booking link, and receive automated client bookings without double-booking.",
     },
     keywords: {
-      ar: "كيف يعمل سابق كول, خطوات الحجز, دليل الاستخدام, مشاركة رابط الحجز",
+      ar: "كيف يعمل سابق كال, خطوات الحجز, دليل الاستخدام, مشاركة رابط الحجز",
       en: "how saabq cal works, setup booking system, schedule appointments guide",
     },
     canonical: "/how-it-works",
@@ -294,7 +294,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Read the latest insights and expert tips on productivity, client scheduling, business operations, and digital booking automation.",
     },
     keywords: {
-      ar: "مدونة سابق كول, نصائح إدارة الوقت, مقالات الجدولة, تطوير الأعمال, الإنتاجية",
+      ar: "مدونة سابق كال, نصائح إدارة الوقت, مقالات الجدولة, تطوير الأعمال, الإنتاجية",
       en: "saabq blog, time management articles, productivity tips, booking management guides",
     },
     canonical: "/blog",
@@ -307,7 +307,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Blog Post",
     },
     description: {
-      ar: "اقرأ هذا المقال الشامل على مدونة سابق كول وتعرف على أفضل الممارسات في تنظيم الأعمال والجدولة.",
+      ar: "اقرأ هذا المقال الشامل على مدونة سابق كال وتعرف على أفضل الممارسات في تنظيم الأعمال والجدولة.",
       en: "Read this insightful article on Saabq Cal Blog to learn best practices in business organization and scheduling.",
     },
     ogType: "article",
@@ -319,7 +319,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Privacy Policy — Our Commitment to Data Protection & Security",
     },
     description: {
-      ar: "تعرف على سياسة الخصوصية لمنصة سابق كول وكيفية جمع واستخدام وحماية بياناتك ومعلوماتك الشخصية وتشفيرها بأعلى معايير الأمان.",
+      ar: "تعرف على سياسة الخصوصية لمنصة سابق كال وكيفية جمع واستخدام وحماية بياناتك ومعلوماتك الشخصية وتشفيرها بأعلى معايير الأمان.",
       en: "Read the Privacy Policy for Saabq Cal and understand how we protect, handle, and secure your personal and appointment data.",
     },
     canonical: "/privacy",
@@ -328,11 +328,11 @@ export const PAGE_SEO_CONFIG = {
 
   terms: {
     title: {
-      ar: "الشروط والأحكام — اتفاقية استخدام منصة سابق كول",
+      ar: "الشروط والأحكام — اتفاقية استخدام منصة سابق كال",
       en: "Terms of Service — Saabq Cal Platform Agreement",
     },
     description: {
-      ar: "الشروط والأحكام الرسمية الحاكمة لاستخدام خدمات ومنصات سابق كول وحقوق والتزامات المستخدمين ومقدمي الخدمات.",
+      ar: "الشروط والأحكام الرسمية الحاكمة لاستخدام خدمات ومنصات سابق كال وحقوق والتزامات المستخدمين ومقدمي الخدمات.",
       en: "The official terms and conditions governing the use of Saabq Cal services, user rights, and workspace obligations.",
     },
     canonical: "/terms",
@@ -348,7 +348,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Workspaces & Experts Directory — Book Your Appointment",
     },
     description: {
-      ar: "تصفح مساحات العمل والعيادات والمستشارين المتاحين على سابق كول، واستعرض الخدمات والأسعار، واحجز موعدك بسهولة وبشكل فوري.",
+      ar: "تصفح مساحات العمل والعيادات والمستشارين المتاحين على سابق كال، واستعرض الخدمات والأسعار، واحجز موعدك بسهولة وبشكل فوري.",
       en: "Browse verified workspaces, clinics, and professional consultants on Saabq Cal. View available services, pricing, and book your session instantly.",
     },
     keywords: {
@@ -365,7 +365,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Workspace Profile & Available Services",
     },
     description: {
-      ar: "استعرض خدمات مساحة العمل وفريق المختصين والمواعيد المتاحة للحجز الفوري عبر منصة سابق كول.",
+      ar: "استعرض خدمات مساحة العمل وفريق المختصين والمواعيد المتاحة للحجز الفوري عبر منصة سابق كال.",
       en: "View workspace details, specialized team members, and available booking slots on Saabq Cal.",
     },
     ogType: "business.business",
@@ -404,7 +404,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Customer Sign In",
     },
     description: {
-      ar: "سجل الدخول إلى حساب العميل الخاص بك في سابق كول لمتابعة مواعيدك وإدارة حجوزاتك.",
+      ar: "سجل الدخول إلى حساب العميل الخاص بك في سابق كال لمتابعة مواعيدك وإدارة حجوزاتك.",
       en: "Sign in to your customer account on Saabq Cal to view and manage your upcoming appointments.",
     },
     canonical: "/customer/login",
@@ -417,7 +417,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Create Customer Account",
     },
     description: {
-      ar: "أنشئ حسابك في سابق كول لتتمكن من حجز المواعيد وإدارتها ومتابعة تفاصيل جلساتك بسهولة.",
+      ar: "أنشئ حسابك في سابق كال لتتمكن من حجز المواعيد وإدارتها ومتابعة تفاصيل جلساتك بسهولة.",
       en: "Create a new customer account on Saabq Cal to book, manage, and track your reservations.",
     },
     canonical: "/customer/register",
@@ -518,7 +518,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Create Workspace & Join as Service Provider",
     },
     description: {
-      ar: "ابدأ الآن مجاناً وأنشئ مساحة عملك على سابق كول لاستقبال الحجوزات وتنظيم جدولك بذكاء.",
+      ar: "ابدأ الآن مجاناً وأنشئ مساحة عملك على سابق كال لاستقبال الحجوزات وتنظيم جدولك بذكاء.",
       en: "Get started for free on Saabq Cal to create your workspace, customize your booking page, and accept appointments.",
     },
     canonical: "/member/register",
@@ -544,7 +544,7 @@ export const PAGE_SEO_CONFIG = {
       en: "Verify Workspace Account",
     },
     description: {
-      ar: "أدخل رمز التحقق لتأكيد وتفعيل حساب مساحة العمل الخاص بك في سابق كول.",
+      ar: "أدخل رمز التحقق لتأكيد وتفعيل حساب مساحة العمل الخاص بك في سابق كال.",
       en: "Enter verification code to confirm and activate your workspace account.",
     },
     noindex: true,

@@ -254,6 +254,10 @@ export const endpoints = {
     "/workspace-members/workspace/applications/saabq-chat/reports",
   workspaceSaabqChatPortals:
     "/workspace-members/workspace/applications/saabq-chat/portals",
+  workspaceSaabqChatConnect:
+    "/workspace-members/workspace/applications/saabq-chat/connect",
+  workspaceSaabqChatDisconnect:
+    "/workspace-members/workspace/applications/saabq-chat/disconnect",
   workspaceSaabqChatSettings:
     "/workspace-members/workspace/applications/saabq-chat/settings",
 };

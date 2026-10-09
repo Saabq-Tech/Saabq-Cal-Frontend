@@ -13,6 +13,8 @@ export default function SaabqChatAppLayout() {
   const [connectError, setConnectError] = useState("");
   const [ssoUrl, setSsoUrl] = useState("");
   const [ssoLoading, setSsoLoading] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [connectSuccess, setConnectSuccess] = useState(false);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -32,6 +34,31 @@ export default function SaabqChatAppLayout() {
 
   useEffect(() => {
     fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (
+        urlParams.get("success") === "1" ||
+        urlParams.get("chat_connected") === "1"
+      ) {
+        setConnectSuccess(true);
+        fetchSettings();
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      } else if (urlParams.get("error")) {
+        setConnectError(urlParams.get("error"));
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      }
+    } catch {}
   }, [fetchSettings]);
 
   const isIntegrated = Boolean(settings?.is_integrated);
@@ -83,19 +110,51 @@ export default function SaabqChatAppLayout() {
     setConnecting(true);
     setConnectError("");
     try {
-      await client.post(
+      const res = await client.post(
         endpoints.workspaceSaabqChatConnect ||
           "/workspace-members/workspace/applications/saabq-chat/connect",
       );
+      const redirectUrl = res.data?.data?.redirect_url || res.data?.data?.url;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
       await fetchSettings();
     } catch (err) {
       const msg =
         err.response?.data?.message ||
         t("saabqChatConnectError") ||
-        "تعذر ربط مساحة العمل بتطبيق سابق شات. يرجى التحقق من إعدادات الخادم والتوكنات.";
+        "تعذر بدء عملية ربط سابق شات. يرجى المحاولة لاحقاً.";
       setConnectError(msg);
     } finally {
       setConnecting(false);
+    }
+  };
+
+  const handleDisconnectIntegration = async () => {
+    if (
+      !window.confirm(
+        t("confirmDisconnectSaabqChat") ||
+          "هل أنت متأكد من رغبتك في إلغاء ربط سابق شات بهذه المساحة؟",
+      )
+    ) {
+      return;
+    }
+    setDisconnecting(true);
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatDisconnect ||
+          "/workspace-members/workspace/applications/saabq-chat/disconnect",
+      );
+      await fetchSettings();
+    } catch (err) {
+      alert(
+        err.response?.data?.message ||
+          t("disconnectFailed") ||
+          "تعذر إلغاء الربط",
+      );
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -189,6 +248,30 @@ export default function SaabqChatAppLayout() {
                 <Icon name="external-link" size={15} />
                 <span>
                   {ssoLoading ? t("redirecting") : t("saabqChatOpenStandalone")}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnectIntegration}
+                disabled={disconnecting}
+                className="btn btn-secondary"
+                style={{
+                  gap: 6,
+                  padding: "9px 16px",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  borderRadius: "var(--radius-md, 10px)",
+                  color: "#dc2626",
+                  borderColor: "rgba(220, 38, 38, 0.25)",
+                  background: "var(--surface)",
+                }}
+                title={t("disconnectIntegration") || "إلغاء الربط"}
+              >
+                <Icon name="link-2-off" size={15} />
+                <span>
+                  {disconnecting
+                    ? t("disconnecting") || "جاري الإلغاء..."
+                    : t("disconnect") || "إلغاء الربط"}
                 </span>
               </button>
             </div>
@@ -308,6 +391,33 @@ export default function SaabqChatAppLayout() {
             {t("saabqChatNotIntegratedDesc") ||
               "لم يتم ربط مساحة العمل هذه بمنصة سابق شات حتى الآن. لا يمكن عرض أي محادثات أو بيانات أو تنفيذ عمليات حتى يتم تفعيل التكامل بنجاح."}
           </p>
+
+          {connectSuccess && (
+            <div
+              style={{
+                maxWidth: 580,
+                width: "100%",
+                padding: "12px 16px",
+                marginBottom: 20,
+                borderRadius: "var(--radius-md, 10px)",
+                background: "rgba(22, 163, 74, 0.12)",
+                border: "1px solid rgba(22, 163, 74, 0.25)",
+                color: "#16a34a",
+                fontSize: "0.88rem",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                textAlign: "start",
+                lineHeight: 1.5,
+              }}
+            >
+              <Icon name="check-circle" size={16} style={{ flexShrink: 0 }} />
+              <span style={{ fontWeight: 600 }}>
+                {t("saabqChatConnectSuccess") ||
+                  "تم ربط وتفويض منصة سابق شات بنجاح!"}
+              </span>
+            </div>
+          )}
 
           {translatedError && (
             <div

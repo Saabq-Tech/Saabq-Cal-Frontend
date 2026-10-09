@@ -2336,6 +2336,13 @@ export const translations = {
     recheck: "إعادة التحقق",
     saabqChatConnectError:
       "تعذر ربط مساحة العمل بتطبيق سابق شات. يرجى التحقق من إعدادات الخادم ومفاتيح الربط البرمجي.",
+    confirmDisconnectSaabqChat:
+      "هل أنت متأكد من رغبتك في إلغاء ربط سابق شات بهذه المساحة؟",
+    disconnectFailed: "تعذر إلغاء الربط. يرجى المحاولة لاحقاً.",
+    disconnectIntegration: "إلغاء الربط",
+    disconnecting: "جاري الإلغاء...",
+    saabqChatConnectSuccess: "تم ربط وتفويض منصة سابق شات بنجاح!",
+
     redirecting: "جاري التحويل...",
     saabqChatNavInbox: "المحادثات الموحدة",
     saabqChatNavContacts: "جهات الاتصال",
@@ -4822,6 +4829,14 @@ export const translations = {
     recheck: "Recheck Status",
     saabqChatConnectError:
       "Failed to connect workspace with Saabq Chat. Please ensure server API tokens are properly configured.",
+    confirmDisconnectSaabqChat:
+      "Are you sure you want to disconnect Saabq Chat from this workspace?",
+    disconnectFailed:
+      "Failed to disconnect integration. Please try again later.",
+    disconnectIntegration: "Disconnect Integration",
+    disconnecting: "Disconnecting...",
+    saabqChatConnectSuccess: "Saabq Chat integration connected successfully!",
+
     redirecting: "Redirecting...",
     saabqChatNavInbox: "Unified Inbox",
     saabqChatNavContacts: "Contacts Directory",
