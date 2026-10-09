@@ -19,16 +19,25 @@ export default function SaabqChatCaptainAiTab() {
     setAiResult("");
 
     try {
+      let taskToRun = activeTask;
+      if (activeTask === "rewrite") {
+        taskToRun = tone === "friendly" ? "make_friendly" : "rephrase";
+      }
+
       const res = await client.post(
         endpoints.workspaceSaabqChatCaptainAiTask ||
           endpoints.chatCaptainAiTask,
         {
-          task: activeTask,
-          text: inputText,
-          tone: tone,
+          task: taskToRun,
+          message: inputText,
         },
       );
-      setAiResult(res.data?.data?.output || res.data?.data?.result || "");
+      setAiResult(
+        res.data?.data?.result ||
+          res.data?.data?.content ||
+          res.data?.data?.output ||
+          "",
+      );
     } catch (err) {
       setAiResult(
         err.response?.data?.message ||

@@ -89,6 +89,11 @@ export function getSaabqChatSubTabs(t) {
       icon: "book-open",
     },
     {
+      id: "agents-teams",
+      label: t("saabqChatNavAgentsTeams") || "فريق العمل والأدوار",
+      icon: "user-check",
+    },
+    {
       id: "settings",
       label: t("saabqChatNavSettings") || "إعدادات الربط والمنظومة",
       icon: "settings",

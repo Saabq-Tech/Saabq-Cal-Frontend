@@ -237,29 +237,189 @@ export const endpoints = {
   chatPortals: "/chats/portals",
   chatSettings: "/chats/settings",
 
-  // Workspace Member Applications: Saabq-Chat
-  workspaceSaabqChatSsoUrl:
-    "/workspace-members/workspace/applications/saabq-chat/sso-url",
-  workspaceSaabqChatContacts:
-    "/workspace-members/workspace/applications/saabq-chat/contacts",
-  workspaceSaabqChatInboxes:
-    "/workspace-members/workspace/applications/saabq-chat/inboxes",
-  workspaceSaabqChatAutomations:
-    "/workspace-members/workspace/applications/saabq-chat/automations",
-  workspaceSaabqChatSla:
-    "/workspace-members/workspace/applications/saabq-chat/sla",
-  workspaceSaabqChatCaptainAiTask:
-    "/workspace-members/workspace/applications/saabq-chat/captain-ai/task",
-  workspaceSaabqChatReports:
-    "/workspace-members/workspace/applications/saabq-chat/reports",
-  workspaceSaabqChatPortals:
-    "/workspace-members/workspace/applications/saabq-chat/portals",
+  // Workspace Member Applications: Saabq-Chat (Full Interactive Omnichannel Suite)
+  workspaceSaabqChatAuthorizeUrl:
+    "/workspace-members/workspace/applications/saabq-chat/authorize-url",
   workspaceSaabqChatConnect:
     "/workspace-members/workspace/applications/saabq-chat/connect",
   workspaceSaabqChatDisconnect:
     "/workspace-members/workspace/applications/saabq-chat/disconnect",
+  workspaceSaabqChatSsoUrl:
+    "/workspace-members/workspace/applications/saabq-chat/sso-url",
   workspaceSaabqChatSettings:
     "/workspace-members/workspace/applications/saabq-chat/settings",
+
+  // Inboxes
+  workspaceSaabqChatInboxes:
+    "/workspace-members/workspace/applications/saabq-chat/inboxes",
+  workspaceSaabqChatInboxDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/inboxes/${id}`,
+  workspaceSaabqChatInboxMembers: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/inboxes/${id}/members`,
+  workspaceSaabqChatInboxAgentBot: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/inboxes/${id}/agent-bot`,
+
+  // Conversations
+  workspaceSaabqChatConversations:
+    "/workspace-members/workspace/applications/saabq-chat/conversations",
+  workspaceSaabqChatConversationsMeta:
+    "/workspace-members/workspace/applications/saabq-chat/conversations/meta",
+  workspaceSaabqChatConversationsFilter:
+    "/workspace-members/workspace/applications/saabq-chat/conversations/filter",
+  workspaceSaabqChatConversationDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}`,
+  workspaceSaabqChatToggleStatus: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/toggle-status`,
+  workspaceSaabqChatTogglePriority: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/toggle-priority`,
+  workspaceSaabqChatToggleTyping: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/toggle-typing`,
+  workspaceSaabqChatConversationLabels: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/labels`,
+  workspaceSaabqChatConversationCustomAttributes: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/custom-attributes`,
+  workspaceSaabqChatDestroyCustomAttributes: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/destroy-custom-attributes`,
+  workspaceSaabqChatAssign: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/assignments`,
+  workspaceSaabqChatMute: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/mute`,
+  workspaceSaabqChatUnmute: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/unmute`,
+  workspaceSaabqChatReportingEvents: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${id}/reporting-events`,
+
+  // Messages
+  workspaceSaabqChatMessages: (conversationId) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${conversationId}/messages`,
+  workspaceSaabqChatMessageDelete: (conversationId, messageId) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${conversationId}/messages/${messageId}`,
+  workspaceSaabqChatMessageRetry: (conversationId, messageId) =>
+    `/workspace-members/workspace/applications/saabq-chat/conversations/${conversationId}/messages/${messageId}/retry`,
+
+  // Contacts
+  workspaceSaabqChatContacts:
+    "/workspace-members/workspace/applications/saabq-chat/contacts",
+  workspaceSaabqChatContactSearch:
+    "/workspace-members/workspace/applications/saabq-chat/contacts/search",
+  workspaceSaabqChatContactFilter:
+    "/workspace-members/workspace/applications/saabq-chat/contacts/filter",
+  workspaceSaabqChatContactDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/contacts/${id}`,
+  workspaceSaabqChatContactConversations: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/contacts/${id}/conversations`,
+  workspaceSaabqChatContactInboxes: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/contacts/${id}/contact-inboxes`,
+  workspaceSaabqChatContactableInboxes: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/contacts/${id}/contactable-inboxes`,
+  workspaceSaabqChatContactLabels: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/contacts/${id}/labels`,
+  workspaceSaabqChatContactMerge:
+    "/workspace-members/workspace/applications/saabq-chat/contacts/merge",
+
+  // Agents & Teams
+  workspaceSaabqChatAgents:
+    "/workspace-members/workspace/applications/saabq-chat/agents",
+  workspaceSaabqChatAgentDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/agents/${id}`,
+  workspaceSaabqChatTeams:
+    "/workspace-members/workspace/applications/saabq-chat/teams",
+  workspaceSaabqChatTeamDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/teams/${id}`,
+  workspaceSaabqChatTeamMembers: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/teams/${id}/members`,
+
+  // Canned Responses
+  workspaceSaabqChatCannedResponses:
+    "/workspace-members/workspace/applications/saabq-chat/canned-responses",
+  workspaceSaabqChatCannedResponseDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/canned-responses/${id}`,
+
+  // Automation Rules & Macros
+  workspaceSaabqChatAutomationRules:
+    "/workspace-members/workspace/applications/saabq-chat/automation-rules",
+  workspaceSaabqChatAutomationRuleDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/automation-rules/${id}`,
+  workspaceSaabqChatMacros:
+    "/workspace-members/workspace/applications/saabq-chat/macros",
+  workspaceSaabqChatMacroDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/macros/${id}`,
+  workspaceSaabqChatMacroExecute: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/macros/${id}/execute`,
+
+  // SLA Policies
+  workspaceSaabqChatSlaPolicies:
+    "/workspace-members/workspace/applications/saabq-chat/sla-policies",
+  workspaceSaabqChatSlaPolicyDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/sla-policies/${id}`,
+
+  // Help Center (Portals, Categories, Articles)
+  workspaceSaabqChatPortals:
+    "/workspace-members/workspace/applications/saabq-chat/portals",
+  workspaceSaabqChatPortalDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/portals/${id}`,
+  workspaceSaabqChatPortalCategories: (portalId) =>
+    `/workspace-members/workspace/applications/saabq-chat/portals/${portalId}/categories`,
+  workspaceSaabqChatPortalCategoryDetail: (portalId, categoryId) =>
+    `/workspace-members/workspace/applications/saabq-chat/portals/${portalId}/categories/${categoryId}`,
+  workspaceSaabqChatPortalArticles: (portalId) =>
+    `/workspace-members/workspace/applications/saabq-chat/portals/${portalId}/articles`,
+  workspaceSaabqChatPortalArticleDetail: (portalId, articleId) =>
+    `/workspace-members/workspace/applications/saabq-chat/portals/${portalId}/articles/${articleId}`,
+
+  // Labels & Custom Attributes
+  workspaceSaabqChatLabels:
+    "/workspace-members/workspace/applications/saabq-chat/labels",
+  workspaceSaabqChatLabelDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/labels/${id}`,
+  workspaceSaabqChatCustomAttributes:
+    "/workspace-members/workspace/applications/saabq-chat/custom-attributes",
+  workspaceSaabqChatCustomAttributeDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/custom-attributes/${id}`,
+
+  // Webhooks & Agent Bots
+  workspaceSaabqChatWebhooks:
+    "/workspace-members/workspace/applications/saabq-chat/webhooks",
+  workspaceSaabqChatWebhookDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/webhooks/${id}`,
+  workspaceSaabqChatAgentBots:
+    "/workspace-members/workspace/applications/saabq-chat/agent-bots",
+  workspaceSaabqChatAgentBotDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/agent-bots/${id}`,
+
+  // Campaigns & Custom Filters
+  workspaceSaabqChatCampaigns:
+    "/workspace-members/workspace/applications/saabq-chat/campaigns",
+  workspaceSaabqChatCampaignDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/campaigns/${id}`,
+  workspaceSaabqChatCustomFilters:
+    "/workspace-members/workspace/applications/saabq-chat/custom-filters",
+  workspaceSaabqChatCustomFilterDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/custom-filters/${id}`,
+
+  // Reports & CSAT Analytics
+  workspaceSaabqChatReportsSummary:
+    "/workspace-members/workspace/applications/saabq-chat/reports/summary",
+  workspaceSaabqChatReportsDistribution:
+    "/workspace-members/workspace/applications/saabq-chat/reports/first-response-distribution",
+  workspaceSaabqChatReportsTraffic:
+    "/workspace-members/workspace/applications/saabq-chat/reports/conversation-traffic",
+  workspaceSaabqChatReportsCsatMetrics:
+    "/workspace-members/workspace/applications/saabq-chat/reports/csat/metrics",
+  workspaceSaabqChatReportsCsatResponses:
+    "/workspace-members/workspace/applications/saabq-chat/reports/csat/responses",
+
+  // Captain AI
+  workspaceSaabqChatCaptainAiTask:
+    "/workspace-members/workspace/applications/saabq-chat/captain-ai/task",
+
+  // Audit Logs & Dashboard Apps
+  workspaceSaabqChatAuditLogs:
+    "/workspace-members/workspace/applications/saabq-chat/audit-logs",
+  workspaceSaabqChatDashboardApps:
+    "/workspace-members/workspace/applications/saabq-chat/dashboard-apps",
+  workspaceSaabqChatDashboardAppDetail: (id) =>
+    `/workspace-members/workspace/applications/saabq-chat/dashboard-apps/${id}`,
 };
 
 // Cached singleton for public site settings to prevent duplicate network calls

@@ -172,6 +172,10 @@ const SaabqChatPortalsTab = lazy(
   () =>
     import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatPortalsTab"),
 );
+const SaabqChatAgentsTeamsTab = lazy(
+  () =>
+    import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatAgentsTeamsTab"),
+);
 const SaabqChatSettingsTab = lazy(
   () =>
     import("./pages/member/dashboard/applications/saabq-chat/tabs/SaabqChatSettingsTab"),
@@ -637,6 +641,10 @@ export default function App() {
                       />
                       <Route path="reports" element={<SaabqChatReportsTab />} />
                       <Route path="portals" element={<SaabqChatPortalsTab />} />
+                      <Route
+                        path="agents-teams"
+                        element={<SaabqChatAgentsTeamsTab />}
+                      />
                       <Route
                         path="settings"
                         element={<SaabqChatSettingsTab />}

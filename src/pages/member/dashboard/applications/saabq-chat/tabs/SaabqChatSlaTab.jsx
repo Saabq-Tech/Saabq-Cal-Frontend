@@ -1,268 +1,486 @@
 import React, { useState, useEffect } from "react";
-import { useLanguage } from "../../../../../../context/LanguageContext";
 import client, { endpoints } from "../../../../../../api/client";
+import Icon from "../../../../../../components/common/Icon";
 
 export default function SaabqChatSlaTab() {
-  const { t } = useLanguage();
-  const [slaData, setSlaData] = useState(null);
-  const [_loading, setLoading] = useState(false);
+  const [policies, setPolicies] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // Modals
+  const [showModal, setShowModal] = useState(false);
+  const [activePolicy, setActivePolicy] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    first_response_time_threshold: 900, // 15 mins
+    resolution_time_threshold: 86400, // 24 hours
+    only_during_business_hours: true,
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchPolicies = () => {
     setLoading(true);
     client
-      .get(endpoints.workspaceSaabqChatSla || endpoints.chatSla)
+      .get(endpoints.workspaceSaabqChatSlaPolicies)
       .then((res) => {
-        setSlaData(res.data?.data || null);
+        const list = res.data?.data?.payload || res.data?.data || [];
+        setPolicies(Array.isArray(list) ? list : []);
       })
-      .catch(() => {
-        setSlaData(null);
-      })
+      .catch(() => setPolicies([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchPolicies();
   }, []);
 
-  const policies = Array.isArray(slaData?.policies) ? slaData.policies : [];
+  const handleSavePolicy = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim()) return;
+    setSubmitting(true);
+    try {
+      if (activePolicy?.id) {
+        await client.post(
+          endpoints.workspaceSaabqChatSlaPolicyDetail(activePolicy.id),
+          formData,
+        );
+      } else {
+        await client.post(endpoints.workspaceSaabqChatSlaPolicies, formData);
+      }
+      setShowModal(false);
+      setActivePolicy(null);
+      fetchPolicies();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to save SLA policy");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeletePolicy = async (id) => {
+    if (!confirm("هل أنت متأكد من رغبتك في حذف سياسة SLA هذه؟")) return;
+    try {
+      await client.delete(endpoints.workspaceSaabqChatSlaPolicyDetail(id));
+      fetchPolicies();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete SLA policy");
+    }
+  };
+
+  const openCreate = () => {
+    setActivePolicy(null);
+    setFormData({
+      name: "",
+      description: "",
+      first_response_time_threshold: 900,
+      resolution_time_threshold: 86400,
+      only_during_business_hours: true,
+    });
+    setShowModal(true);
+  };
+
+  const openEdit = (p) => {
+    setActivePolicy(p);
+    setFormData({
+      name: p.name || "",
+      description: p.description || "",
+      first_response_time_threshold: p.first_response_time_threshold || 900,
+      resolution_time_threshold: p.resolution_time_threshold || 86400,
+      only_during_business_hours: Boolean(p.only_during_business_hours),
+    });
+    setShowModal(true);
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      {/* Top Metrics Cards */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: 16,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12,
         }}
       >
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: 20,
-            borderRadius: "var(--radius-lg, 16px)",
-            border: "1px solid var(--border)",
-            boxShadow: "var(--shadow-sm)",
-          }}
-        >
-          <div
+        <div>
+          <h3
             style={{
-              fontSize: "0.82rem",
-              color: "var(--text-secondary)",
-              marginBottom: 6,
-            }}
-          >
-            نسبة الالتزام بالاتفاقية (Compliance)
-          </div>
-          <div
-            style={{ fontSize: "1.8rem", fontWeight: 800, color: "#10b981" }}
-          >
-            {slaData?.compliance_rate != null
-              ? `${slaData.compliance_rate}%`
-              : slaData?.overall_compliance || "—"}
-          </div>
-          <div
-            style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: 4 }}
-          >
-            ضمن المعيار المستهدف (&gt; 95%)
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: 20,
-            borderRadius: "var(--radius-lg, 16px)",
-            border: "1px solid var(--border)",
-            boxShadow: "var(--shadow-sm)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.82rem",
-              color: "var(--text-secondary)",
-              marginBottom: 6,
-            }}
-          >
-            المحادثات المتجاوزة للوقت
-          </div>
-          <div
-            style={{ fontSize: "1.8rem", fontWeight: 800, color: "#f59e0b" }}
-          >
-            {slaData?.breached_count ?? 0}
-          </div>
-          <div
-            style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: 4 }}
-          >
-            تم حلها خلال 24 ساعة الماضية
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: "var(--surface)",
-            padding: 20,
-            borderRadius: "var(--radius-lg, 16px)",
-            border: "1px solid var(--border)",
-            boxShadow: "var(--shadow-sm)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "0.82rem",
-              color: "var(--text-secondary)",
-              marginBottom: 6,
-            }}
-          >
-            سياسات الخدمة النشطة
-          </div>
-          <div
-            style={{
-              fontSize: "1.8rem",
+              margin: "0 0 4px",
+              fontSize: "1.15rem",
               fontWeight: 800,
-              color: "var(--primary)",
+              color: "var(--heading)",
             }}
           >
-            {policies.length}
-          </div>
-          <div
-            style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: 4 }}
+            اتفاقيات مستوى الخدمة (SLA Policies)
+          </h3>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.86rem",
+              color: "var(--text-secondary)",
+            }}
           >
-            مطبقة على كافة قنوات المحادثة
-          </div>
+            تحديد معايير سرعة الاستجابة الأولى وحل استفسارات العملاء في المواعيد
+            المحددة
+          </p>
         </div>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={openCreate}
+          style={{ gap: 6 }}
+        >
+          <Icon name="plus" size={15} />
+          <span>إنشاء سياسة SLA</span>
+        </button>
       </div>
 
-      {/* Policies List */}
-      <div
-        style={{
-          background: "var(--surface)",
-          borderRadius: "var(--radius-lg, 16px)",
-          border: "1px solid var(--border)",
-          padding: 24,
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
-        <h3
+      {loading ? (
+        <div
+          style={{ padding: 40, textAlign: "center", color: "var(--muted)" }}
+        >
+          جاري التحميل...
+        </div>
+      ) : policies.length === 0 ? (
+        <div
           style={{
-            margin: "0 0 6px",
-            fontSize: "1.05rem",
-            fontWeight: 800,
-            color: "var(--heading)",
+            background: "var(--surface)",
+            borderRadius: "var(--radius-lg, 16px)",
+            border: "1px solid var(--border)",
+            padding: "48px 24px",
+            textAlign: "center",
+            color: "var(--muted)",
           }}
         >
-          سياسات ومستويات الخدمة (SLA Policies)
-        </h3>
-        <p
+          لا توجد سياسات SLA مسجلة حالياً
+        </div>
+      ) : (
+        <div
           style={{
-            margin: "0 0 20px",
-            fontSize: "0.84rem",
-            color: "var(--text-secondary)",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 18,
           }}
         >
-          تحديد الحدود القصوى لزمن الرد الأول وزمن إغلاق وحل المحادثات حسب
-          الأولوية.
-        </p>
+          {policies.map((p) => {
+            const firstRespMin = Math.round(
+              (p.first_response_time_threshold || 0) / 60,
+            );
+            const resolHours = Math.round(
+              (p.resolution_time_threshold || 0) / 3600,
+            );
 
-        {policies.length === 0 ? (
-          <div
-            style={{
-              padding: "32px 16px",
-              textAlign: "center",
-              color: "var(--muted)",
-              fontSize: "0.88rem",
-            }}
-          >
-            {t("noSlaFound") ||
-              "لم يتم تكوين سياسات مستوى الخدمة (SLA) بعد في حساب سابق شات."}
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {policies.map((p) => (
+            return (
               <div
                 key={p.id}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "16px 20px",
-                  borderRadius: 12,
+                  background: "var(--surface)",
+                  borderRadius: "var(--radius-lg, 16px)",
                   border: "1px solid var(--border)",
-                  background: "var(--surface-subtle, rgba(0,0,0,0.01))",
-                  flexWrap: "wrap",
-                  gap: 16,
+                  padding: 20,
+                  boxShadow: "var(--shadow-sm)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                 }}
               >
                 <div>
-                  <h4
-                    style={{
-                      margin: "0 0 4px",
-                      fontSize: "0.95rem",
-                      fontWeight: 700,
-                      color: "var(--heading)",
-                    }}
-                  >
-                    {p.name}
-                  </h4>
                   <div
                     style={{
                       display: "flex",
-                      gap: 16,
-                      fontSize: "0.8rem",
-                      color: "var(--text-secondary)",
-                      marginTop: 6,
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 12,
                     }}
                   >
-                    <span>
-                      <strong>{t("firstResponse") || "الرد الأول"}:</strong>{" "}
-                      {t("within") || "خلال"}{" "}
-                      {p.first_response_time_minutes ||
-                        p.threshold_first_response ||
-                        "—"}{" "}
-                      {t("minuteUnit") || "دقيقة"}
-                    </span>
-                    <span>
-                      <strong>
-                        {t("resolutionAndClose") || "الحل والإغلاق"}:
-                      </strong>{" "}
-                      {t("within") || "خلال"}{" "}
-                      {p.resolution_time_minutes ||
-                        p.threshold_resolution ||
-                        "—"}{" "}
-                      {t("minuteUnit") || "دقيقة"}
-                    </span>
-                  </div>
-                </div>
+                    <div>
+                      <h4
+                        style={{
+                          margin: "0 0 4px",
+                          fontSize: "1.05rem",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {p.name}
+                      </h4>
+                      <span
+                        style={{
+                          fontSize: "0.72rem",
+                          padding: "2px 8px",
+                          borderRadius: 12,
+                          background: p.only_during_business_hours
+                            ? "rgba(16, 185, 129, 0.1)"
+                            : "rgba(107, 114, 128, 0.1)",
+                          color: p.only_during_business_hours
+                            ? "#059669"
+                            : "var(--muted)",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {p.only_during_business_hours
+                          ? "أوقات العمل فقط"
+                          : "24/7 طوال الوقت"}
+                      </span>
+                    </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ textAlign: "end" }}>
-                    <div style={{ fontSize: "0.74rem", color: "var(--muted)" }}>
-                      {t("complianceRate") || "نسبة الالتزام"}
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        onClick={() => openEdit(p)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: "4px 8px" }}
+                      >
+                        <Icon name="edit-2" size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePolicy(p.id)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: "4px 8px", color: "#dc2626" }}
+                      >
+                        <Icon name="trash-2" size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {p.description && (
+                    <p
+                      style={{
+                        margin: "0 0 14px",
+                        fontSize: "0.82rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {p.description}
+                    </p>
+                  )}
+
+                  <div
+                    style={{
+                      background: "var(--surface-subtle, rgba(0,0,0,0.02))",
+                      padding: 12,
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "0.8rem",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <span style={{ color: "var(--muted)" }}>
+                        زمن أول استجابة:
+                      </span>
+                      <span
+                        style={{ fontWeight: 700, color: "var(--primary)" }}
+                      >
+                        {firstRespMin} دقيقة
+                      </span>
                     </div>
                     <div
                       style={{
-                        fontSize: "1.1rem",
-                        fontWeight: 800,
-                        color: "#10b981",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "0.8rem",
                       }}
                     >
-                      {p.compliance != null ? `${p.compliance}%` : "100%"}
+                      <span style={{ color: "var(--muted)" }}>
+                        زمن الإغلاق المستهدف:
+                      </span>
+                      <span
+                        style={{ fontWeight: 700, color: "var(--heading)" }}
+                      >
+                        {resolHours} ساعة
+                      </span>
                     </div>
                   </div>
-                  <span
-                    style={{
-                      padding: "4px 12px",
-                      borderRadius: 99,
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      background: "rgba(16, 185, 129, 0.12)",
-                      color: "#10b981",
-                    }}
-                  >
-                    مفعلة
-                  </span>
                 </div>
               </div>
-            ))}
+            );
+          })}
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h4 className="modal-title">
+                {activePolicy ? "تعديل سياسة SLA" : "إنشاء سياسة SLA جديدة"}
+              </h4>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSavePolicy} className="modal-body">
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  اسم السياسة *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="مثال: سياسة الدعم القياسي"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  الوصف (اختياري)
+                </label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  حد أول استجابة (بالثواني - 900 ثانية = 15 دقيقة)
+                </label>
+                <input
+                  type="number"
+                  min="60"
+                  value={formData.first_response_time_threshold}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      first_response_time_threshold: Number(e.target.value),
+                    })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  حد حل المحادثة (بالثواني - 86400 ثانية = 24 ساعة)
+                </label>
+                <input
+                  type="number"
+                  min="3600"
+                  value={formData.resolution_time_threshold}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      resolution_time_threshold: Number(e.target.value),
+                    })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 18 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.only_during_business_hours}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        only_during_business_hours: e.target.checked,
+                      })
+                    }
+                  />
+                  <span>احتساب المهلة ضمن ساعات العمل المحددة فقط</span>
+                </label>
+              </div>
+
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn btn-primary"
+                >
+                  {submitting ? "جاري الحفظ..." : "حفظ السياسة"}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

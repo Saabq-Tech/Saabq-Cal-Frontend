@@ -133,9 +133,7 @@ export default function ConfirmationModal({ modalState, onClose }) {
                 }}
               />
             )}
-            <span>
-              {modalState.confirmText || "تأكيد"}
-            </span>
+            <span>{modalState.confirmText || "تأكيد"}</span>
           </button>
         </div>
       </div>

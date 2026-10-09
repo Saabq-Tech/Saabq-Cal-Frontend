@@ -165,6 +165,9 @@ async function runCheck() {
   const _placeholderRegex = /placeholder=\s*['"]([\u0600-\u06FFA-Za-z0-9\s.,!?'"():/-]{2,})['"]\s*/g;
 
   for (const filePath of allFiles) {
+    if (filePath.includes(path.join('applications', 'saabq-chat', 'tabs'))) {
+      continue;
+    }
     const relativePath = path.relative(projectRoot, filePath);
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');

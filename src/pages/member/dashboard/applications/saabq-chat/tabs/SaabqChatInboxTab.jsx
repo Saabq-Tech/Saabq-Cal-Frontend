@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
 import { Link } from "react-router-dom";
@@ -6,30 +6,76 @@ import { useLanguage } from "../../../../../../context/LanguageContext";
 
 export default function SaabqChatInboxTab() {
   const { t } = useLanguage();
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("open");
+  const [assigneeType, setAssigneeType] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [conversations, setConversations] = useState([]);
+  const [metaCounts, setMetaCounts] = useState({
+    all_count: 0,
+    mine_count: 0,
+    unassigned_count: 0,
+  });
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [replyText, setReplyText] = useState("");
   const [isPrivateNote, setIsPrivateNote] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [cannedResponses, setCannedResponses] = useState([]);
   const [showCannedDropdown, setShowCannedDropdown] = useState(false);
+  const [showAiDropdown, setShowAiDropdown] = useState(false);
+  const [agents, setAgents] = useState([]);
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  // Load conversations & canned responses
-  useEffect(() => {
-    setLoading(true);
-    // Fetch conversations list
+  // New Conversation Modal State
+  const [showNewConvModal, setShowNewConvModal] = useState(false);
+  const [inboxes, setInboxes] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [newConvInboxId, setNewConvInboxId] = useState("");
+  const [newConvContactId, setNewConvContactId] = useState("");
+  const [newConvMessage, setNewConvMessage] = useState("");
+  const [creatingConv, setCreatingConv] = useState(false);
+
+  // New Label Modal State
+  const [newLabelInput, setNewLabelInput] = useState("");
+  const [showLabelInput, setShowLabelInput] = useState(false);
+
+  // Fetch Meta Counts
+  const fetchMetaCounts = useCallback(() => {
     client
-      .get(endpoints.chats)
+      .get(endpoints.workspaceSaabqChatConversationsMeta, {
+        params: { status: filter },
+      })
       .then((res) => {
-        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        if (res.data?.data?.meta) {
+          setMetaCounts(res.data.data.meta);
+        }
+      })
+      .catch(() => {});
+  }, [filter]);
+
+  // Fetch Conversations List
+  const fetchConversations = useCallback(() => {
+    setLoading(true);
+    client
+      .get(endpoints.workspaceSaabqChatConversations, {
+        params: {
+          status: filter === "all" ? "all" : filter,
+          assignee_type: assigneeType,
+          q: searchQuery || undefined,
+        },
+      })
+      .then((res) => {
+        const payload = res.data?.data?.payload || res.data?.data || [];
+        const list = Array.isArray(payload) ? payload : [];
         setConversations(list);
         if (list.length > 0) {
-          setActiveConversation(list[0]);
+          setActiveConversation((prev) => prev || list[0]);
+        } else {
+          setActiveConversation(null);
         }
       })
       .catch(() => {
@@ -37,115 +83,260 @@ export default function SaabqChatInboxTab() {
         setActiveConversation(null);
       })
       .finally(() => setLoading(false));
+  }, [filter, assigneeType, searchQuery]);
 
-    // Fetch automations/canned
+  useEffect(() => {
+    fetchConversations();
+    fetchMetaCounts();
+  }, [fetchConversations, fetchMetaCounts]);
+
+  // Load Canned Responses & Agents
+  useEffect(() => {
     client
-      .get(endpoints.workspaceSaabqChatAutomations || endpoints.chatAutomations)
+      .get(endpoints.workspaceSaabqChatCannedResponses)
       .then((res) => {
-        const canned = res.data?.data?.canned_responses || [];
-        setCannedResponses(canned);
+        const list = res.data?.data || [];
+        setCannedResponses(Array.isArray(list) ? list : []);
       })
-      .catch(() => {
-        setCannedResponses([]);
-      });
+      .catch(() => setCannedResponses([]));
+
+    client
+      .get(endpoints.workspaceSaabqChatAgents)
+      .then((res) => {
+        const list = res.data?.data || [];
+        setAgents(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setAgents([]));
   }, []);
 
-  // Load messages when active conversation changes
-  useEffect(() => {
-    if (!activeConversation) return;
+  // Fetch Messages for Active Conversation
+  const fetchMessages = useCallback(() => {
+    if (!activeConversation?.id) return;
+    setMessagesLoading(true);
     client
-      .get(endpoints.chatDetails(activeConversation.id))
+      .get(endpoints.workspaceSaabqChatMessages(activeConversation.id))
       .then((res) => {
-        const msgs = res.data?.data?.messages || [];
-        setMessages(msgs);
+        const payload = res.data?.data?.payload || res.data?.data || [];
+        setMessages(Array.isArray(payload) ? payload : []);
       })
-      .catch(() => {
-        setMessages([]);
-      });
-  }, [activeConversation]);
+      .catch(() => setMessages([]))
+      .finally(() => setMessagesLoading(false));
+  }, [activeConversation?.id]);
 
-  // Send message handler
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
+
+  // Send Message (Supports Public text, Private Notes & Attachments)
   const handleSendMessage = async (e) => {
     e?.preventDefault();
-    if (!replyText.trim() || !activeConversation) return;
+    if ((!replyText.trim() && !attachmentFile) || !activeConversation?.id)
+      return;
 
-    const newMsg = {
-      id: Date.now(),
-      sender_type: isPrivateNote ? "team_note" : "agent",
-      sender_name: isPrivateNote
-        ? t("privateTeamNote") || "ملاحظة فريق خاصة"
-        : t("customerSupport") || "خدمة العملاء",
-      content: replyText.trim(),
-      created_at: t("now") || "الآن",
-      is_private: isPrivateNote,
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
-    const textToSend = replyText;
-    setReplyText("");
     setSending(true);
-
     try {
-      await client.post(endpoints.chatSendMessage, {
-        conversation_id: activeConversation.id,
-        content: textToSend,
-        is_private: isPrivateNote,
-      });
-    } catch {
-      // optimistic update retained
+      const formData = new FormData();
+      if (replyText.trim()) {
+        formData.append("content", replyText.trim());
+      }
+      formData.append("private", isPrivateNote ? "1" : "0");
+      if (attachmentFile) {
+        formData.append("attachments[]", attachmentFile);
+      }
+
+      await client.post(
+        endpoints.workspaceSaabqChatMessages(activeConversation.id),
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      );
+
+      setReplyText("");
+      setAttachmentFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchMessages();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to send message");
     } finally {
       setSending(false);
     }
   };
 
-  // AI Rewrite
-  const handleAiRewrite = async (tone = "friendly") => {
-    if (!replyText.trim()) return;
+  // Toggle Conversation Status (open, resolved, pending, snoozed)
+  const handleToggleStatus = async (newStatus) => {
+    if (!activeConversation?.id) return;
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatToggleStatus(activeConversation.id),
+        { status: newStatus },
+      );
+      setActiveConversation((prev) => ({ ...prev, status: newStatus }));
+      fetchConversations();
+    } catch (err) {
+      alert(
+        err.response?.data?.message || "Failed to update conversation status",
+      );
+    }
+  };
+
+  // Toggle Priority
+  const handleTogglePriority = async (newPriority) => {
+    if (!activeConversation?.id) return;
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatTogglePriority(activeConversation.id),
+        { priority: newPriority },
+      );
+      setActiveConversation((prev) => ({ ...prev, priority: newPriority }));
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update priority");
+    }
+  };
+
+  // Assign Conversation
+  const handleAssignAgent = async (agentId) => {
+    if (!activeConversation?.id) return;
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatAssign(activeConversation.id),
+        { assignee_id: agentId ? Number(agentId) : null },
+      );
+      fetchConversations();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to assign conversation");
+    }
+  };
+
+  // Add Label
+  const handleAddLabel = async () => {
+    if (!newLabelInput.trim() || !activeConversation?.id) return;
+    const currentLabels = activeConversation.labels || [];
+    const updated = [...currentLabels, newLabelInput.trim()];
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatConversationLabels(activeConversation.id),
+        { labels: updated },
+      );
+      setActiveConversation((prev) => ({ ...prev, labels: updated }));
+      setNewLabelInput("");
+      setShowLabelInput(false);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update labels");
+    }
+  };
+
+  // Delete Message
+  const handleDeleteMessage = async (msgId) => {
+    if (
+      !activeConversation?.id ||
+      !confirm("Are you sure you want to delete this message?")
+    )
+      return;
+    try {
+      await client.delete(
+        endpoints.workspaceSaabqChatMessageDelete(activeConversation.id, msgId),
+      );
+      setMessages((prev) => prev.filter((m) => m.id !== msgId));
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete message");
+    }
+  };
+
+  // Retry Failed Message
+  const handleRetryMessage = async (msgId) => {
+    if (!activeConversation?.id) return;
+    try {
+      await client.post(
+        endpoints.workspaceSaabqChatMessageRetry(activeConversation.id, msgId),
+      );
+      fetchMessages();
+    } catch (err) {
+      alert(err.response?.data?.message || "Retry failed");
+    }
+  };
+
+  // Captain AI Tasks
+  const handleCaptainAiTask = async (taskType) => {
+    setShowAiDropdown(false);
     setAiGenerating(true);
     try {
-      const res = await client.post(
-        endpoints.workspaceSaabqChatCaptainAiTask ||
-          endpoints.chatCaptainAiTask,
-        {
-          task: "rewrite",
-          text: replyText,
-          tone,
-        },
-      );
-      if (res.data?.data?.output || res.data?.data?.result) {
-        setReplyText(res.data.data.output || res.data.data.result);
+      const res = await client.post(endpoints.workspaceSaabqChatCaptainAiTask, {
+        task: taskType,
+        message: replyText || undefined,
+        conversation_id: activeConversation?.id || undefined,
+      });
+      const generated =
+        res.data?.data?.result ||
+        res.data?.data?.content ||
+        res.data?.data?.output;
+      if (generated) {
+        setReplyText(generated);
       }
-    } catch {
-      // no mock rewrite fallback
+    } catch (err) {
+      alert(err.response?.data?.message || "AI task failed");
     } finally {
       setAiGenerating(false);
     }
   };
 
-  // Filter conversations
-  const filteredConversations = conversations.filter((c) => {
-    if (filter === "open" && c.status !== "open") return false;
-    if (filter === "resolved" && c.status !== "resolved") return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const name = (c.customer_name || "").toLowerCase();
-      const last = (c.last_message || "").toLowerCase();
-      return name.includes(q) || last.includes(q);
+  // Open New Conversation Modal
+  const openNewConversationModal = async () => {
+    setShowNewConvModal(true);
+    try {
+      const [inboxesRes, contactsRes] = await Promise.all([
+        client.get(endpoints.workspaceSaabqChatInboxes),
+        client.get(endpoints.workspaceSaabqChatContacts),
+      ]);
+      const ibs = inboxesRes.data?.data?.payload || inboxesRes.data?.data || [];
+      const cts =
+        contactsRes.data?.data?.payload || contactsRes.data?.data || [];
+      setInboxes(Array.isArray(ibs) ? ibs : []);
+      setContacts(Array.isArray(cts) ? cts : []);
+      if (ibs.length > 0) setNewConvInboxId(ibs[0].id);
+      if (cts.length > 0) setNewConvContactId(cts[0].id);
+    } catch {
+      // ignore
     }
-    return true;
-  });
+  };
+
+  // Create New Conversation
+  const handleCreateConversation = async (e) => {
+    e.preventDefault();
+    if (!newConvInboxId || !newConvContactId) return;
+    setCreatingConv(true);
+    try {
+      const res = await client.post(endpoints.workspaceSaabqChatConversations, {
+        inbox_id: Number(newConvInboxId),
+        contact_id: Number(newConvContactId),
+        message: newConvMessage.trim()
+          ? { content: newConvMessage.trim() }
+          : undefined,
+      });
+      setShowNewConvModal(false);
+      setNewConvMessage("");
+      fetchConversations();
+      if (res.data?.data?.id) {
+        setActiveConversation(res.data.data);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to create conversation");
+    } finally {
+      setCreatingConv(false);
+    }
+  };
 
   return (
     <div
       className="saabq-chat-inbox-grid"
       style={{
         display: "grid",
-        gridTemplateColumns: "320px 1fr 280px",
+        gridTemplateColumns: "330px 1fr 300px",
         gap: 16,
         background: "var(--surface)",
         borderRadius: "var(--radius-lg, 16px)",
         border: "1px solid var(--border)",
-        minHeight: 680,
+        minHeight: 740,
         boxShadow: "var(--shadow-sm)",
         overflow: "hidden",
       }}
@@ -159,13 +350,43 @@ export default function SaabqChatInboxTab() {
           background: "var(--surface-subtle, rgba(0,0,0,0.02))",
         }}
       >
+        {/* Header with Search & New Conversation button */}
         <div
           style={{
             padding: "14px 16px",
             borderBottom: "1px solid var(--border)",
           }}
         >
-          <div style={{ position: "relative", marginBottom: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "1.05rem",
+                fontWeight: 800,
+                color: "var(--heading)",
+              }}
+            >
+              {t("saabqChatNavInbox") || "المحادثات الموحدة"}
+            </h3>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={openNewConversationModal}
+              style={{ gap: 6, padding: "5px 10px", fontSize: "0.8rem" }}
+            >
+              <Icon name="plus" size={13} />
+              <span>{t("newConversation") || "محادثة جديدة"}</span>
+            </button>
+          </div>
+
+          <div style={{ position: "relative", marginBottom: 10 }}>
             <Icon
               name="search"
               size={14}
@@ -181,7 +402,7 @@ export default function SaabqChatInboxTab() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("searchConversations") || "ابحث في المحادثات..."}
+              placeholder={t("searchConversations") || "بحث في المحادثات..."}
               style={{
                 width: "100%",
                 padding: "8px 12px 8px 32px",
@@ -193,69 +414,128 @@ export default function SaabqChatInboxTab() {
             />
           </div>
 
-          <div style={{ display: "flex", gap: 6 }}>
-            {["all", "open", "resolved"].map((f) => (
+          {/* Status Tabs */}
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              marginBottom: 8,
+              overflowX: "auto",
+            }}
+          >
+            {[
+              { id: "open", label: t("open") || "مفتوحة" },
+              { id: "resolved", label: t("resolved") || "مغلقة" },
+              { id: "pending", label: t("pending") || "معلقة" },
+              { id: "snoozed", label: t("snoozed") || "مؤجلة" },
+              { id: "all", label: t("all") || "الكل" },
+            ].map((st) => (
               <button
-                key={f}
+                key={st.id}
                 type="button"
-                onClick={() => setFilter(f)}
-                className={`btn btn-sm ${filter === f ? "btn-primary" : "btn-secondary"}`}
+                onClick={() => setFilter(st.id)}
                 style={{
-                  fontSize: "0.78rem",
-                  padding: "4px 10px",
-                  borderRadius: 6,
                   flex: 1,
-                  textTransform: "capitalize",
+                  padding: "5px 6px",
+                  fontSize: "0.74rem",
+                  borderRadius: 6,
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: filter === st.id ? 700 : 500,
+                  background:
+                    filter === st.id ? "var(--primary)" : "transparent",
+                  color: filter === st.id ? "#fff" : "var(--text-secondary)",
+                  transition: "all 0.15s ease",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {f === "all"
-                  ? t("all") || "الكل"
-                  : f === "open"
-                    ? t("open") || "مفتوحة"
-                    : t("resolved") || "مغلقة"}
+                {st.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Assignee Filter Tabs */}
+          <div style={{ display: "flex", gap: 6, fontSize: "0.74rem" }}>
+            {[
+              { id: "all", label: `الكل (${metaCounts.all_count || 0})` },
+              { id: "me", label: `محادثاتي (${metaCounts.mine_count || 0})` },
+              {
+                id: "unassigned",
+                label: `غير معينة (${metaCounts.unassigned_count || 0})`,
+              },
+            ].map((as) => (
+              <button
+                key={as.id}
+                type="button"
+                onClick={() => setAssigneeType(as.id)}
+                style={{
+                  padding: "3px 8px",
+                  borderRadius: 12,
+                  border:
+                    assigneeType === as.id
+                      ? "1px solid var(--primary)"
+                      : "1px solid var(--border)",
+                  background:
+                    assigneeType === as.id
+                      ? "rgba(2, 105, 130, 0.08)"
+                      : "var(--surface)",
+                  color:
+                    assigneeType === as.id ? "var(--primary)" : "var(--muted)",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                {as.label}
               </button>
             ))}
           </div>
         </div>
 
+        {/* Conversations Stream */}
         <div style={{ flex: 1, overflowY: "auto" }}>
           {loading ? (
             <div
               style={{
-                padding: 24,
+                padding: 40,
                 textAlign: "center",
                 color: "var(--muted)",
+                fontSize: "0.86rem",
               }}
             >
-              جاري تحميل المحادثات...
+              {t("loading") || "جاري التحميل..."}
             </div>
-          ) : filteredConversations.length === 0 ? (
+          ) : conversations.length === 0 ? (
             <div
               style={{
-                padding: 32,
+                padding: 40,
                 textAlign: "center",
                 color: "var(--muted)",
-                fontSize: "0.88rem",
+                fontSize: "0.86rem",
               }}
             >
-              لا توجد محادثات تطابق البحث
+              {t("noConversationsFound") || "لا توجد محادثات مطابقة"}
             </div>
           ) : (
-            filteredConversations.map((c) => {
-              const isActive = activeConversation?.id === c.id;
+            conversations.map((c) => {
+              const isSelected = activeConversation?.id === c.id;
+              const customerName =
+                c.meta?.sender?.name || c.contact?.name || `عميل #${c.id}`;
+              const lastMessage =
+                c.messages?.[0]?.content ||
+                c.last_non_activity_message?.content ||
+                "محادثة جديدة";
+              const priority = c.priority || "none";
+
               return (
                 <div
                   key={c.id}
                   onClick={() => setActiveConversation(c)}
                   style={{
                     padding: "12px 16px",
-                    borderBottom:
-                      "1px solid var(--border-subtle, rgba(0,0,0,0.05))",
+                    borderBottom: "1px solid var(--border)",
                     cursor: "pointer",
-                    background: isActive
-                      ? "rgba(2, 105, 130, 0.08)"
-                      : "transparent",
-                    borderInlineStart: isActive
+                    background: isSelected ? "var(--surface)" : "transparent",
+                    borderInlineStart: isSelected
                       ? "3px solid var(--primary)"
                       : "3px solid transparent",
                     transition: "all 0.15s ease",
@@ -265,6 +545,7 @@ export default function SaabqChatInboxTab() {
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
+                      alignItems: "center",
                       marginBottom: 4,
                     }}
                   >
@@ -275,12 +556,30 @@ export default function SaabqChatInboxTab() {
                         color: "var(--heading)",
                       }}
                     >
-                      {c.customer_name || "عميل غير معروف"}
+                      {customerName}
                     </span>
                     <span
-                      style={{ fontSize: "0.72rem", color: "var(--muted)" }}
+                      style={{
+                        fontSize: "0.68rem",
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        background:
+                          priority === "urgent"
+                            ? "#fee2e2"
+                            : priority === "high"
+                              ? "#ffedd5"
+                              : "var(--surface-bg)",
+                        color:
+                          priority === "urgent"
+                            ? "#dc2626"
+                            : priority === "high"
+                              ? "#ea580c"
+                              : "var(--muted)",
+                      }}
                     >
-                      {c.created_at || "الآن"}
+                      {priority !== "none" ? priority : `#${c.id}`}
                     </span>
                   </div>
                   <p
@@ -288,56 +587,41 @@ export default function SaabqChatInboxTab() {
                       margin: 0,
                       fontSize: "0.8rem",
                       color: "var(--text-secondary)",
-                      whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {c.last_message || "لا توجد رسائل"}
+                    {lastMessage}
                   </p>
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
                       gap: 6,
                       marginTop: 6,
+                      alignItems: "center",
                     }}
                   >
                     <span
                       style={{
                         fontSize: "0.7rem",
-                        padding: "2px 6px",
-                        borderRadius: 4,
+                        padding: "1px 6px",
+                        borderRadius: 8,
                         background:
-                          c.channel === "whatsapp"
-                            ? "#25D36622"
-                            : c.channel === "telegram"
-                              ? "#0088cc22"
-                              : "rgba(2, 105, 130, 0.12)",
-                        color:
-                          c.channel === "whatsapp"
-                            ? "#25D366"
-                            : c.channel === "telegram"
-                              ? "#0088cc"
-                              : "var(--primary)",
+                          c.status === "open"
+                            ? "rgba(16, 185, 129, 0.15)"
+                            : "rgba(107, 114, 128, 0.15)",
+                        color: c.status === "open" ? "#059669" : "#4b5563",
                         fontWeight: 600,
                       }}
                     >
-                      {c.channel || "Web Widget"}
+                      {c.status}
                     </span>
-                    {c.unread_count > 0 && (
+                    {c.inbox?.name && (
                       <span
-                        style={{
-                          marginInlineStart: "auto",
-                          background: "#ef4444",
-                          color: "#fff",
-                          borderRadius: 99,
-                          fontSize: "0.68rem",
-                          fontWeight: 800,
-                          padding: "1px 6px",
-                        }}
+                        style={{ fontSize: "0.7rem", color: "var(--muted)" }}
                       >
-                        {c.unread_count}
+                        • {c.inbox.name}
                       </span>
                     )}
                   </div>
@@ -348,356 +632,796 @@ export default function SaabqChatInboxTab() {
         </div>
       </div>
 
-      {/* 2. Middle Column: Active Chat Thread & Reply Box */}
-      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* 2. Middle Column: Active Chat Conversation */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          background: "var(--surface)",
+        }}
+      >
         {activeConversation ? (
           <>
-            {/* Header */}
+            {/* Conversation Header & Action Controls */}
             <div
               style={{
-                padding: "14px 20px",
+                padding: "12px 18px",
                 borderBottom: "1px solid var(--border)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                flexWrap: "wrap",
+                gap: 10,
               }}
             >
               <div>
                 <h4
                   style={{
                     margin: 0,
-                    fontSize: "0.98rem",
+                    fontSize: "0.95rem",
                     fontWeight: 800,
                     color: "var(--heading)",
                   }}
                 >
-                  {activeConversation.customer_name}
+                  {activeConversation.meta?.sender?.name ||
+                    activeConversation.contact?.name ||
+                    `محادثة #${activeConversation.id}`}
                 </h4>
-                <span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
-                  قناة المحادثة: {activeConversation.channel || "موقع الويب"}
-                </span>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <span
+                <div
                   style={{
-                    padding: "4px 10px",
-                    borderRadius: 99,
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    background:
-                      activeConversation.status === "open"
-                        ? "rgba(16, 185, 129, 0.12)"
-                        : "rgba(100, 116, 139, 0.12)",
-                    color:
-                      activeConversation.status === "open"
-                        ? "#10b981"
-                        : "#64748b",
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                    marginTop: 3,
                   }}
                 >
-                  {activeConversation.status === "open"
-                    ? t("activeConversation") || "محادثة نشطة"
-                    : t("closedConversation") || "مغلقة"}
-                </span>
+                  <span style={{ fontSize: "0.74rem", color: "var(--muted)" }}>
+                    المعرف: #{activeConversation.id}
+                  </span>
+                  <span style={{ fontSize: "0.74rem", color: "var(--muted)" }}>
+                    •
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.74rem",
+                      color: "var(--primary)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {activeConversation.inbox?.name || "قناة المحادثة"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status / Priority / Assignee Tooling */}
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {/* Priority Selector */}
+                <select
+                  value={activeConversation.priority || "none"}
+                  onChange={(e) => handleTogglePriority(e.target.value)}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: 6,
+                    border: "1px solid var(--border)",
+                    fontSize: "0.76rem",
+                    background: "var(--surface-bg)",
+                    color: "var(--heading)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="none">الأولوية: عادية</option>
+                  <option value="low">منخفضة</option>
+                  <option value="medium">متوسطة</option>
+                  <option value="high">عالية</option>
+                  <option value="urgent">عاجلة</option>
+                </select>
+
+                {/* Status Toggles */}
+                {activeConversation.status === "open" ? (
+                  <button
+                    type="button"
+                    onClick={() => handleToggleStatus("resolved")}
+                    className="btn btn-secondary btn-sm"
+                    style={{
+                      gap: 4,
+                      padding: "5px 10px",
+                      fontSize: "0.78rem",
+                      color: "#059669",
+                    }}
+                  >
+                    <Icon name="check-circle" size={13} />
+                    <span>إغلاق المحادثة</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleToggleStatus("open")}
+                    className="btn btn-primary btn-sm"
+                    style={{ gap: 4, padding: "5px 10px", fontSize: "0.78rem" }}
+                  >
+                    <Icon name="refresh-cw" size={13} />
+                    <span>إعادة فتح</span>
+                  </button>
+                )}
+
+                {/* Assignee Dropdown */}
+                <select
+                  value={activeConversation.meta?.assignee?.id || ""}
+                  onChange={(e) => handleAssignAgent(e.target.value)}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: 6,
+                    border: "1px solid var(--border)",
+                    fontSize: "0.76rem",
+                    background: "var(--surface-bg)",
+                    color: "var(--heading)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="">غير معين</option>
+                  {agents.map((ag) => (
+                    <option key={ag.id} value={ag.id}>
+                      {ag.name || ag.email}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            {/* Messages Body */}
+            {/* Labels Tags Strip */}
+            <div
+              style={{
+                padding: "6px 18px",
+                background: "var(--surface-subtle, rgba(0,0,0,0.015))",
+                borderBottom: "1px solid var(--border)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flexWrap: "wrap",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  color: "var(--muted)",
+                  fontWeight: 600,
+                }}
+              >
+                الوسوم:
+              </span>
+              {(activeConversation.labels || []).map((lb, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    background: "rgba(2, 105, 130, 0.1)",
+                    color: "var(--primary)",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  #{lb}
+                </span>
+              ))}
+
+              {showLabelInput ? (
+                <div style={{ display: "inline-flex", gap: 4 }}>
+                  <input
+                    type="text"
+                    value={newLabelInput}
+                    onChange={(e) => setNewLabelInput(e.target.value)}
+                    placeholder="وسم جديد..."
+                    style={{
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      border: "1px solid var(--border)",
+                      fontSize: "0.72rem",
+                      width: 90,
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddLabel();
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddLabel}
+                    className="btn btn-primary btn-sm"
+                    style={{ padding: "1px 6px", fontSize: "0.68rem" }}
+                  >
+                    حفظ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowLabelInput(false)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--muted)",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowLabelInput(true)}
+                  style={{
+                    background: "transparent",
+                    border: "1px dashed var(--border)",
+                    borderRadius: 10,
+                    padding: "1px 8px",
+                    fontSize: "0.72rem",
+                    color: "var(--muted)",
+                    cursor: "pointer",
+                  }}
+                >
+                  + إضافة وسم
+                </button>
+              )}
+            </div>
+
+            {/* Messages Stream */}
             <div
               style={{
                 flex: 1,
-                padding: 20,
+                padding: "16px 20px",
                 overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
                 gap: 12,
-                background: "var(--surface-bg, rgba(0,0,0,0.01))",
               }}
             >
-              {messages.map((m) => {
-                const isCustomer = m.sender_type === "customer";
-                const isNote = m.is_private || m.sender_type === "team_note";
+              {messagesLoading ? (
+                <div
+                  style={{
+                    padding: 40,
+                    textAlign: "center",
+                    color: "var(--muted)",
+                    fontSize: "0.86rem",
+                  }}
+                >
+                  جاري تحميل الرسائل...
+                </div>
+              ) : messages.length === 0 ? (
+                <div
+                  style={{
+                    padding: 40,
+                    textAlign: "center",
+                    color: "var(--muted)",
+                    fontSize: "0.86rem",
+                  }}
+                >
+                  لا توجد رسائل سابقة في هذه المحادثة
+                </div>
+              ) : (
+                messages.map((m) => {
+                  const isPrivate = Boolean(m.private);
+                  const isAgent =
+                    m.message_type === 1 || m.sender_type === "User";
+                  const senderName =
+                    m.sender?.name || (isAgent ? "فريق العمل" : "العميل");
 
-                if (isNote) {
                   return (
                     <div
                       key={m.id}
                       style={{
-                        background: "rgba(245, 158, 11, 0.1)",
-                        border: "1px dashed rgba(245, 158, 11, 0.35)",
+                        alignSelf: isPrivate
+                          ? "center"
+                          : isAgent
+                            ? "flex-end"
+                            : "flex-start",
+                        maxWidth: isPrivate ? "90%" : "75%",
+                        width: isPrivate ? "100%" : "auto",
+                        background: isPrivate
+                          ? "rgba(245, 158, 11, 0.1)"
+                          : isAgent
+                            ? "var(--primary)"
+                            : "var(--surface-bg)",
+                        color: isPrivate
+                          ? "#92400e"
+                          : isAgent
+                            ? "#ffffff"
+                            : "var(--heading)",
+                        borderRadius: 12,
+                        border: isPrivate
+                          ? "1px solid rgba(245, 158, 11, 0.3)"
+                          : "1px solid var(--border)",
                         padding: "10px 14px",
-                        borderRadius: 8,
-                        fontSize: "0.85rem",
-                        color: "#d97706",
-                        margin: "4px 0",
+                        boxShadow: "var(--shadow-sm)",
+                        position: "relative",
                       }}
                     >
                       <div
                         style={{
                           display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
-                          gap: 6,
-                          fontWeight: 700,
                           marginBottom: 4,
+                          fontSize: "0.7rem",
+                          opacity: 0.85,
+                          gap: 12,
                         }}
                       >
-                        <Icon name="lock" size={13} />
-                        <span>
-                          {t("privateTeamNote") || "ملاحظة فريق خاصة:"}
+                        <span style={{ fontWeight: 700 }}>
+                          {isPrivate ? "🔒 ملاحظة خاصة داخلية" : senderName}
                         </span>
-                        <span
+                        <div
                           style={{
-                            marginInlineStart: "auto",
-                            fontSize: "0.72rem",
-                            opacity: 0.8,
+                            display: "flex",
+                            gap: 6,
+                            alignItems: "center",
                           }}
                         >
-                          {m.created_at}
-                        </span>
+                          <span>
+                            {new Date(
+                              m.created_at * 1000 || m.created_at,
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          <button
+                            type="button"
+                            title="حذف الرسالة"
+                            onClick={() => handleDeleteMessage(m.id)}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "inherit",
+                              padding: 0,
+                              opacity: 0.6,
+                            }}
+                          >
+                            <Icon name="trash-2" size={11} />
+                          </button>
+                          {m.status === "failed" && (
+                            <button
+                              type="button"
+                              title="إعادة المحاولة"
+                              onClick={() => handleRetryMessage(m.id)}
+                              style={{
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                color: "#ef4444",
+                                padding: 0,
+                              }}
+                            >
+                              <Icon name="refresh-cw" size={11} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <div>{m.content}</div>
+
+                      <div
+                        style={{
+                          fontSize: "0.88rem",
+                          lineHeight: 1.6,
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {m.content}
+                      </div>
+
+                      {/* Attachments if any */}
+                      {Array.isArray(m.attachments) &&
+                        m.attachments.length > 0 && (
+                          <div
+                            style={{
+                              marginTop: 8,
+                              display: "flex",
+                              gap: 6,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {m.attachments.map((att, attIdx) => (
+                              <a
+                                key={attIdx}
+                                href={att.data_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  background: "rgba(0,0,0,0.06)",
+                                  color: "inherit",
+                                  fontSize: "0.75rem",
+                                  textDecoration: "none",
+                                }}
+                              >
+                                <Icon name="paperclip" size={12} />
+                                <span>مرفق</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   );
-                }
-
-                return (
-                  <div
-                    key={m.id}
-                    style={{
-                      alignSelf: isCustomer ? "flex-start" : "flex-end",
-                      maxWidth: "75%",
-                      background: isCustomer
-                        ? "var(--surface)"
-                        : "var(--primary)",
-                      color: isCustomer ? "var(--heading)" : "#ffffff",
-                      border: isCustomer ? "1px solid var(--border)" : "none",
-                      padding: "10px 14px",
-                      borderRadius: 12,
-                      boxShadow: "var(--shadow-xs)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "0.75rem",
-                        opacity: 0.8,
-                        marginBottom: 2,
-                      }}
-                    >
-                      {m.sender_name}
-                    </div>
-                    <div style={{ fontSize: "0.88rem", lineHeight: 1.5 }}>
-                      {m.content}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "0.68rem",
-                        opacity: 0.7,
-                        textAlign: "end",
-                        marginTop: 4,
-                      }}
-                    >
-                      {m.created_at}
-                    </div>
-                  </div>
-                );
-              })}
+                })
+              )}
             </div>
 
-            {/* Composer */}
+            {/* Message Composer */}
             <div
               style={{
-                padding: "12px 16px",
+                padding: "12px 18px",
                 borderTop: "1px solid var(--border)",
                 background: "var(--surface)",
               }}
             >
-              {/* Toolbar */}
+              {/* Composer Toolbar */}
               <div
                 style={{
                   display: "flex",
+                  justifyContent: "space-between",
                   alignItems: "center",
-                  gap: 8,
                   marginBottom: 8,
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => setIsPrivateNote(!isPrivateNote)}
-                  style={{
-                    fontSize: "0.76rem",
-                    padding: "3px 10px",
-                    borderRadius: 6,
-                    border: "1px solid var(--border)",
-                    background: isPrivateNote ? "#fef3c7" : "transparent",
-                    color: isPrivateNote ? "#b45309" : "var(--text-secondary)",
-                    fontWeight: isPrivateNote ? 700 : 500,
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <Icon
-                    name={isPrivateNote ? "lock" : "message-circle"}
-                    size={12}
-                  />
-                  <span>
-                    {isPrivateNote
-                      ? t("privateNote") || "ملاحظة خاصة"
-                      : t("directReply") || "رد مباشر"}
-                  </span>
-                </button>
-
-                <div style={{ position: "relative" }}>
+                {/* Mode toggle (Public reply vs Private note) */}
+                <div style={{ display: "flex", gap: 6 }}>
                   <button
                     type="button"
-                    onClick={() => setShowCannedDropdown(!showCannedDropdown)}
+                    onClick={() => setIsPrivateNote(false)}
                     style={{
-                      fontSize: "0.76rem",
-                      padding: "3px 10px",
+                      padding: "4px 10px",
                       borderRadius: 6,
-                      border: "1px solid var(--border)",
-                      background: "transparent",
-                      color: "var(--text-secondary)",
+                      fontSize: "0.76rem",
+                      fontWeight: !isPrivateNote ? 700 : 500,
+                      border: !isPrivateNote
+                        ? "1px solid var(--primary)"
+                        : "1px solid var(--border)",
+                      background: !isPrivateNote
+                        ? "rgba(2, 105, 130, 0.08)"
+                        : "transparent",
+                      color: !isPrivateNote ? "var(--primary)" : "var(--muted)",
                       cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
                     }}
                   >
-                    <Icon name="zap" size={12} />
-                    <span>{t("cannedResponses") || "ردود جاهزة"}</span>
+                    رد للعميل
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsPrivateNote(true)}
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 6,
+                      fontSize: "0.76rem",
+                      fontWeight: isPrivateNote ? 700 : 500,
+                      border: isPrivateNote
+                        ? "1px solid #d97706"
+                        : "1px solid var(--border)",
+                      background: isPrivateNote
+                        ? "rgba(245, 158, 11, 0.1)"
+                        : "transparent",
+                      color: isPrivateNote ? "#d97706" : "var(--muted)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    🔒 ملاحظة خاصة
+                  </button>
+                </div>
+
+                {/* Helper actions: Captain AI, Canned Responses, Attachments */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 6,
+                    alignItems: "center",
+                    position: "relative",
+                  }}
+                >
+                  {/* Captain AI Assistant */}
+                  <button
+                    type="button"
+                    disabled={aiGenerating}
+                    onClick={() => setShowAiDropdown((prev) => !prev)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ gap: 4, padding: "4px 8px", fontSize: "0.76rem" }}
+                  >
+                    <Icon name="sparkles" size={12} />
+                    <span>
+                      {aiGenerating ? "الذكاء الاصطناعي يفكر..." : "كابتن AI"}
+                    </span>
+                  </button>
+
+                  {/* AI Dropdown Menu */}
+                  {showAiDropdown && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: "100%",
+                        insetInlineEnd: 80,
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 8,
+                        boxShadow: "var(--shadow-lg)",
+                        padding: 6,
+                        zIndex: 50,
+                        width: 190,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleCaptainAiTask("reply_suggestion")}
+                        className="dropdown-item"
+                        style={{
+                          padding: "6px 10px",
+                          fontSize: "0.78rem",
+                          textAlign: "start",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        💡 اقتراح رد ذكي
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCaptainAiTask("summarize")}
+                        className="dropdown-item"
+                        style={{
+                          padding: "6px 10px",
+                          fontSize: "0.78rem",
+                          textAlign: "start",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        📝 تلخيص المحادثة
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCaptainAiTask("rephrase")}
+                        className="dropdown-item"
+                        style={{
+                          padding: "6px 10px",
+                          fontSize: "0.78rem",
+                          textAlign: "start",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ✨ إعادة صياغة النص
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCaptainAiTask("make_friendly")}
+                        className="dropdown-item"
+                        style={{
+                          padding: "6px 10px",
+                          fontSize: "0.78rem",
+                          textAlign: "start",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        😊 جعله ودوداً
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCaptainAiTask("fix_spelling_grammar")
+                        }
+                        className="dropdown-item"
+                        style={{
+                          padding: "6px 10px",
+                          fontSize: "0.78rem",
+                          textAlign: "start",
+                          border: "none",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        🔍 تصحيح الإملاء والقواعد
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Canned Responses Shortcut */}
+                  <button
+                    type="button"
+                    onClick={() => setShowCannedDropdown((prev) => !prev)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ gap: 4, padding: "4px 8px", fontSize: "0.76rem" }}
+                  >
+                    <Icon name="message-circle" size={12} />
+                    <span>رد جاهز</span>
+                  </button>
+
+                  {/* Canned dropdown */}
                   {showCannedDropdown && (
                     <div
                       style={{
                         position: "absolute",
                         bottom: "100%",
-                        insetInlineStart: 0,
-                        marginBottom: 6,
+                        insetInlineEnd: 0,
                         background: "var(--surface)",
                         border: "1px solid var(--border)",
                         borderRadius: 8,
-                        boxShadow: "var(--shadow-md)",
-                        width: 240,
-                        zIndex: 20,
+                        boxShadow: "var(--shadow-lg)",
                         padding: 6,
+                        zIndex: 50,
+                        width: 240,
+                        maxHeight: 200,
+                        overflowY: "auto",
                       }}
                     >
-                      {cannedResponses.map((cr, idx) => (
+                      {cannedResponses.length === 0 ? (
                         <div
-                          key={idx}
-                          onClick={() => {
-                            setReplyText((prev) =>
-                              prev ? prev + " " + cr.content : cr.content,
-                            );
-                            setShowCannedDropdown(false);
-                          }}
                           style={{
-                            padding: "6px 8px",
-                            borderRadius: 6,
-                            cursor: "pointer",
-                            fontSize: "0.78rem",
-                            borderBottom:
-                              "1px solid var(--border-subtle, rgba(0,0,0,0.04))",
+                            padding: 10,
+                            fontSize: "0.75rem",
+                            color: "var(--muted)",
+                            textAlign: "center",
                           }}
                         >
-                          <span
-                            style={{ fontWeight: 700, color: "var(--primary)" }}
-                          >
-                            {cr.short_code}
-                          </span>
-                          :{" "}
-                          <span style={{ color: "var(--text-secondary)" }}>
-                            {cr.content.slice(0, 30)}...
-                          </span>
+                          لا توجد ردود جاهزة مسجلة
                         </div>
-                      ))}
+                      ) : (
+                        cannedResponses.map((cr) => (
+                          <div
+                            key={cr.id}
+                            onClick={() => {
+                              setReplyText((prev) =>
+                                prev ? prev + " " + cr.content : cr.content,
+                              );
+                              setShowCannedDropdown(false);
+                            }}
+                            style={{
+                              padding: "6px 8px",
+                              fontSize: "0.76rem",
+                              borderRadius: 4,
+                              cursor: "pointer",
+                              borderBottom: "1px solid var(--border)",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontWeight: 700,
+                                color: "var(--primary)",
+                              }}
+                            >
+                              !{cr.short_code}
+                            </span>
+                            <div
+                              style={{
+                                color: "var(--text-secondary)",
+                                fontSize: "0.72rem",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {cr.content}
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   )}
-                </div>
 
-                <div
-                  style={{ marginInlineStart: "auto", display: "flex", gap: 6 }}
-                >
+                  {/* Attachment Button */}
                   <button
                     type="button"
-                    onClick={() => handleAiRewrite("friendly")}
-                    disabled={aiGenerating || !replyText.trim()}
-                    style={{
-                      fontSize: "0.74rem",
-                      padding: "3px 8px",
-                      borderRadius: "var(--radius-sm, 6px)",
-                      border: "1px solid rgba(2, 105, 130, 0.25)",
-                      background: "rgba(2, 105, 130, 0.08)",
-                      color: "var(--primary)",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "4px 8px" }}
+                    title="إرفاق ملف"
                   >
-                    <Icon name="sparkles" size={12} />
-                    <span>
-                      {aiGenerating
-                        ? t("improving") || "جاري التحسين..."
-                        : t("friendlyTone") || "صياغة ودية"}
-                    </span>
+                    <Icon name="paperclip" size={13} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAiRewrite("formal")}
-                    disabled={aiGenerating || !replyText.trim()}
-                    style={{
-                      fontSize: "0.74rem",
-                      padding: "3px 8px",
-                      borderRadius: "var(--radius-sm, 6px)",
-                      border: "1px solid var(--border)",
-                      background: "transparent",
-                      color: "var(--text-secondary)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t("formalTone") || "رسمي"}
-                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={(e) =>
+                      setAttachmentFile(e.target.files?.[0] || null)
+                    }
+                  />
                 </div>
               </div>
 
-              {/* Input Form */}
+              {/* Attachment Preview Chip */}
+              {attachmentFile && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "4px 10px",
+                    borderRadius: 6,
+                    background: "rgba(2, 105, 130, 0.08)",
+                    color: "var(--primary)",
+                    fontSize: "0.76rem",
+                    marginBottom: 8,
+                    width: "fit-content",
+                  }}
+                >
+                  <Icon name="paperclip" size={12} />
+                  <span>{attachmentFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAttachmentFile(null);
+                      if (fileInputRef.current) fileInputRef.current.value = "";
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "inherit",
+                      padding: 0,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Composer Input Form */}
               <form
                 onSubmit={handleSendMessage}
-                style={{ display: "flex", gap: 8 }}
+                style={{ display: "flex", gap: 10 }}
               >
                 <textarea
-                  rows={2}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder={
                     isPrivateNote
-                      ? t("writeInternalNotePlaceholder") ||
-                        "اكتب ملاحظة للفريق الداخلي فقط..."
-                      : t("writeClientReplyPlaceholder") ||
-                        "اكتب ردك للعميل هنا..."
+                      ? "اكتب ملاحظة خاصة للفريق (لن يراها العميل)..."
+                      : "اكتب ردك للعميل هنا..."
                   }
+                  rows={2}
                   style={{
                     flex: 1,
-                    resize: "none",
+                    padding: "10px 14px",
                     borderRadius: 8,
                     border: isPrivateNote
-                      ? "1px solid #f59e0b"
+                      ? "1px solid #d97706"
                       : "1px solid var(--border)",
-                    padding: "8px 12px",
+                    background: isPrivateNote
+                      ? "rgba(245, 158, 11, 0.03)"
+                      : "var(--surface)",
                     fontSize: "0.88rem",
-                    background: isPrivateNote ? "#fffbeb" : "var(--surface)",
+                    resize: "none",
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
                   }}
                 />
                 <button
                   type="submit"
-                  disabled={sending || !replyText.trim()}
+                  disabled={sending || (!replyText.trim() && !attachmentFile)}
                   className="btn btn-primary"
-                  style={{ padding: "0 18px", alignSelf: "stretch" }}
+                  style={{
+                    padding: "0 18px",
+                    borderRadius: 8,
+                    background: isPrivateNote ? "#d97706" : "var(--primary)",
+                  }}
                 >
-                  <Icon name="send" size={16} />
+                  {sending ? (
+                    <span className="spinner-sm" />
+                  ) : (
+                    <Icon name="send" size={16} />
+                  )}
                 </button>
               </form>
             </div>
@@ -707,17 +1431,20 @@ export default function SaabqChatInboxTab() {
             style={{
               flex: 1,
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               color: "var(--muted)",
+              gap: 12,
             }}
           >
-            اختر محادثة من القائمة للبدء
+            <Icon name="message-square" size={36} />
+            <span>اختر محادثة من القائمة للبدء أو أنشئ محادثة جديدة</span>
           </div>
         )}
       </div>
 
-      {/* 3. Right Column: CRM & Contextual Booking Card */}
+      {/* 3. Right Column: CRM Context & Customer Summary */}
       <div
         style={{
           borderInlineStart: "1px solid var(--border)",
@@ -750,7 +1477,11 @@ export default function SaabqChatInboxTab() {
                   fontSize: "1.2rem",
                 }}
               >
-                {(activeConversation.customer_name || "ع")[0]}
+                {
+                  (activeConversation.meta?.sender?.name ||
+                    activeConversation.contact?.name ||
+                    "ع")[0]
+                }
               </div>
               <h4
                 style={{
@@ -760,7 +1491,9 @@ export default function SaabqChatInboxTab() {
                   color: "var(--heading)",
                 }}
               >
-                {activeConversation.customer_name}
+                {activeConversation.meta?.sender?.name ||
+                  activeConversation.contact?.name ||
+                  "العميل"}
               </h4>
               <p
                 style={{
@@ -769,10 +1502,13 @@ export default function SaabqChatInboxTab() {
                   color: "var(--muted)",
                 }}
               >
-                {activeConversation.customer_email || "لا يوجد بريد مسجل"}
+                {activeConversation.meta?.sender?.email ||
+                  activeConversation.contact?.email ||
+                  "لا يوجد بريد مسجل"}
               </p>
             </div>
 
+            {/* Custom Attributes Viewer */}
             <div
               style={{
                 padding: "14px 0",
@@ -787,91 +1523,56 @@ export default function SaabqChatInboxTab() {
                   color: "var(--heading)",
                 }}
               >
-                سجل المواعيد في سابق
+                السمات والبيانات المخصصة
               </h5>
-              <div
-                style={{
-                  background: "var(--surface)",
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  border: "1px solid var(--border)",
-                  marginBottom: 10,
-                }}
-              >
+              {activeConversation.custom_attributes &&
+              Object.keys(activeConversation.custom_attributes).length > 0 ? (
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "0.8rem",
-                    marginBottom: 4,
+                    flexDirection: "column",
+                    gap: 6,
+                    fontSize: "0.78rem",
                   }}
                 >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    إجمالي الحجوزات:
-                  </span>
-                  <span style={{ fontWeight: 800, color: "var(--primary)" }}>
-                    {activeConversation.bookings_count || 1} مواعيد
-                  </span>
+                  {Object.entries(activeConversation.custom_attributes).map(
+                    ([k, v]) => (
+                      <div
+                        key={k}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span style={{ color: "var(--muted)" }}>{k}:</span>
+                        <span style={{ fontWeight: 600 }}>{String(v)}</span>
+                      </div>
+                    ),
+                  )}
                 </div>
-                <div
+              ) : (
+                <p
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "0.8rem",
+                    margin: 0,
+                    fontSize: "0.76rem",
+                    color: "var(--muted)",
                   }}
                 >
-                  <span style={{ color: "var(--text-secondary)" }}>
-                    الحالة:
-                  </span>
-                  <span style={{ fontWeight: 700, color: "#10b981" }}>
-                    مؤكد
-                  </span>
-                </div>
-              </div>
+                  لا توجد سمات إضافية مسجلة
+                </p>
+              )}
+            </div>
 
+            {/* Link to Full CRM Details */}
+            <div style={{ padding: "14px 0" }}>
               <Link
-                to={`/member/workspace/customers`}
+                to="/member/workspace/applications/saabq-chat/contacts"
                 className="btn btn-secondary btn-sm"
                 style={{ width: "100%", justifyContent: "center", gap: 6 }}
               >
-                <Icon name="user" size={13} />
-                <span>
-                  {t("viewFullCustomerProfile") || "عرض ملف العميل الكامل"}
-                </span>
+                <Icon name="users" size={13} />
+                <span>إدارة جهات الاتصال في CRM</span>
               </Link>
-            </div>
-
-            <div style={{ padding: "14px 0" }}>
-              <h5
-                style={{
-                  margin: "0 0 8px",
-                  fontSize: "0.82rem",
-                  fontWeight: 800,
-                  color: "var(--heading)",
-                }}
-              >
-                {t("channelAndContactData") || "قناة الاتصال والبيانات"}
-              </h5>
-              <div
-                style={{
-                  fontSize: "0.78rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.8,
-                }}
-              >
-                <div>
-                  <strong>{t("phone") || "الهاتف"}:</strong>{" "}
-                  {activeConversation.customer_phone || "+966500000000"}
-                </div>
-                <div>
-                  <strong>{t("channel") || "القناة"}:</strong>{" "}
-                  {activeConversation.channel || "Web Live Chat"}
-                </div>
-                <div>
-                  <strong>{t("identifier") || "المعرف"}:</strong> #
-                  {activeConversation.id}
-                </div>
-              </div>
             </div>
           </div>
         ) : (
@@ -887,6 +1588,129 @@ export default function SaabqChatInboxTab() {
           </div>
         )}
       </div>
+
+      {/* New Conversation Modal */}
+      {showNewConvModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h4 className="modal-title">بدء محادثة جديدة</h4>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setShowNewConvModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleCreateConversation} className="modal-body">
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  قناة الاستقبال (Inbox)
+                </label>
+                <select
+                  value={newConvInboxId}
+                  onChange={(e) => setNewConvInboxId(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  {inboxes.map((ib) => (
+                    <option key={ib.id} value={ib.id}>
+                      {ib.name} ({ib.channel_type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  العميل المستهدف (Contact)
+                </label>
+                <select
+                  value={newConvContactId}
+                  onChange={(e) => setNewConvContactId(e.target.value)}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  {contacts.map((ct) => (
+                    <option key={ct.id} value={ct.id}>
+                      {ct.name} {ct.email ? `(${ct.email})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 18 }}>
+                <label
+                  style={{
+                    fontSize: "0.82rem",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "block",
+                  }}
+                >
+                  الرسالة الافتتاحية (اختياري)
+                </label>
+                <textarea
+                  value={newConvMessage}
+                  onChange={(e) => setNewConvMessage(e.target.value)}
+                  placeholder="مرحباً، نود التواصل معك بشأن..."
+                  rows={3}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border)",
+                  }}
+                />
+              </div>
+
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowNewConvModal(false)}
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingConv}
+                  className="btn btn-primary"
+                >
+                  {creatingConv ? "جاري الإنشاء..." : "بدء المحادثة"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
