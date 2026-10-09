@@ -107,6 +107,26 @@ export default function WorkspaceCustomersPage() {
   const [savingCustomer, setSavingCustomer] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
+  const getFieldError = (field) => {
+    if (!formErrors || !formErrors[field]) return null;
+    const err = formErrors[field];
+    return Array.isArray(err) ? err[0] : err;
+  };
+
+  const handleFieldChange = (field, value) => {
+    setCustomerForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
   // Fetch Customers
   const fetchCustomers = useCallback(
     async (page = 1) => {
@@ -246,6 +266,13 @@ export default function WorkspaceCustomersPage() {
     } catch (err) {
       if (err.response?.status === 422 && err.response?.data?.errors) {
         setFormErrors(err.response.data.errors);
+        toast.show(
+          err.response?.data?.message ||
+            (lang === "ar"
+              ? "يرجى التحقق من صحة البيانات المدخلة وتصحيح الأخطاء"
+              : "Please check the entered data and correct the errors"),
+          "error",
+        );
       } else {
         toast.show(
           err.response?.data?.message ||
@@ -1877,6 +1904,31 @@ export default function WorkspaceCustomersPage() {
                   }}
                   className="modal-body"
                 >
+                  {/* Validation Error Banner */}
+                  {Object.keys(formErrors).length > 0 && (
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        borderRadius: "8px",
+                        background: "rgba(239, 68, 68, 0.1)",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        color: "#ef4444",
+                        fontSize: "0.85rem",
+                        marginBottom: 16,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <Icon name="alert-circle" size={16} />
+                      <span>
+                        {lang === "ar"
+                          ? "يرجى تصحيح الأخطاء الموضحة أدناه للمتابعة"
+                          : "Please correct the errors below to continue"}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Row 1: Name & Reference */}
                   <div
                     className="form-row"
@@ -1893,13 +1945,10 @@ export default function WorkspaceCustomersPage() {
                       </label>
                       <input
                         type="text"
-                        className={`form-input ${formErrors.name ? "input-error" : ""}`}
+                        className={`form-input ${getFieldError("name") ? "is-invalid" : ""}`}
                         value={customerForm.name}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            name: e.target.value,
-                          })
+                          handleFieldChange("name", e.target.value)
                         }
                         placeholder={
                           lang === "ar"
@@ -1908,9 +1957,9 @@ export default function WorkspaceCustomersPage() {
                         }
                         required
                       />
-                      {formErrors.name && (
-                        <div className="form-error-msg">
-                          {formErrors.name[0]}
+                      {getFieldError("name") && (
+                        <div className="form-error">
+                          {getFieldError("name")}
                         </div>
                       )}
                     </div>
@@ -1921,13 +1970,10 @@ export default function WorkspaceCustomersPage() {
                       </label>
                       <input
                         type="text"
-                        className="form-input"
+                        className={`form-input ${getFieldError("customer_reference") ? "is-invalid" : ""}`}
                         value={customerForm.customer_reference}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            customer_reference: e.target.value,
-                          })
+                          handleFieldChange("customer_reference", e.target.value)
                         }
                         placeholder={
                           lang === "ar"
@@ -1935,6 +1981,11 @@ export default function WorkspaceCustomersPage() {
                             : "e.g. #MED-4091 or #STU-102"
                         }
                       />
+                      {getFieldError("customer_reference") && (
+                        <div className="form-error">
+                          {getFieldError("customer_reference")}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1954,19 +2005,16 @@ export default function WorkspaceCustomersPage() {
                       </label>
                       <input
                         type="email"
-                        className={`form-input ${formErrors.email ? "input-error" : ""}`}
+                        className={`form-input ${getFieldError("email") ? "is-invalid" : ""}`}
                         value={customerForm.email}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            email: e.target.value,
-                          })
+                          handleFieldChange("email", e.target.value)
                         }
                         placeholder="name@example.com"
                       />
-                      {formErrors.email && (
-                        <div className="form-error-msg">
-                          {formErrors.email[0]}
+                      {getFieldError("email") && (
+                        <div className="form-error">
+                          {getFieldError("email")}
                         </div>
                       )}
                     </div>
@@ -1977,17 +2025,19 @@ export default function WorkspaceCustomersPage() {
                       </label>
                       <input
                         type="text"
-                        className="form-input"
+                        className={`form-input ${getFieldError("phone") ? "is-invalid" : ""}`}
                         value={customerForm.phone}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            phone: e.target.value,
-                          })
+                          handleFieldChange("phone", e.target.value)
                         }
                         placeholder="+20 10 1234 5678"
                         dir="ltr"
                       />
+                      {getFieldError("phone") && (
+                        <div className="form-error">
+                          {getFieldError("phone")}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -2006,13 +2056,10 @@ export default function WorkspaceCustomersPage() {
                         {t("customerGender") || "الجنس"}
                       </label>
                       <select
-                        className="form-select"
+                        className={`form-select ${getFieldError("gender") ? "is-invalid" : ""}`}
                         value={customerForm.gender || "male"}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            gender: e.target.value,
-                          })
+                          handleFieldChange("gender", e.target.value)
                         }
                       >
                         <option value="male">{t("genderMale") || "ذكر"}</option>
@@ -2021,6 +2068,11 @@ export default function WorkspaceCustomersPage() {
                         </option>
                         <option value="other">{t("other") || "آخر"}</option>
                       </select>
+                      {getFieldError("gender") && (
+                        <div className="form-error">
+                          {getFieldError("gender")}
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -2029,15 +2081,17 @@ export default function WorkspaceCustomersPage() {
                       </label>
                       <input
                         type="date"
-                        className="form-input"
+                        className={`form-input ${getFieldError("date_of_birth") ? "is-invalid" : ""}`}
                         value={customerForm.date_of_birth}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            date_of_birth: e.target.value,
-                          })
+                          handleFieldChange("date_of_birth", e.target.value)
                         }
                       />
+                      {getFieldError("date_of_birth") && (
+                        <div className="form-error">
+                          {getFieldError("date_of_birth")}
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-group">
@@ -2045,13 +2099,10 @@ export default function WorkspaceCustomersPage() {
                         {t("status") || "الحالة"}
                       </label>
                       <select
-                        className="form-select"
+                        className={`form-select ${getFieldError("status") ? "is-invalid" : ""}`}
                         value={customerForm.status || "active"}
                         onChange={(e) =>
-                          setCustomerForm({
-                            ...customerForm,
-                            status: e.target.value,
-                          })
+                          handleFieldChange("status", e.target.value)
                         }
                       >
                         <option value="active">
@@ -2068,6 +2119,11 @@ export default function WorkspaceCustomersPage() {
                           {t("filterStatusBlocked") || "محظور"}
                         </option>
                       </select>
+                      {getFieldError("status") && (
+                        <div className="form-error">
+                          {getFieldError("status")}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -2077,17 +2133,19 @@ export default function WorkspaceCustomersPage() {
                       {t("internalNotes") || "ملاحظات سرية لفريق العمل"}
                     </label>
                     <textarea
-                      className="form-input"
+                      className={`form-input form-textarea ${getFieldError("internal_notes") ? "is-invalid" : ""}`}
                       rows={3}
                       value={customerForm.internal_notes}
                       onChange={(e) =>
-                        setCustomerForm({
-                          ...customerForm,
-                          internal_notes: e.target.value,
-                        })
+                        handleFieldChange("internal_notes", e.target.value)
                       }
                       placeholder={internalNotesPlaceholder}
                     />
+                    {getFieldError("internal_notes") && (
+                      <div className="form-error">
+                        {getFieldError("internal_notes")}
+                      </div>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
