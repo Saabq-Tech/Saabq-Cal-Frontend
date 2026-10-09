@@ -48,24 +48,6 @@ export default defineConfig({
     ),
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom') || id.includes('react-helmet-async')) {
-              return 'vendor-react';
-            }
-            if (id.includes('firebase')) {
-              return 'vendor-firebase';
-            }
-            if (id.includes('axios')) {
-              return 'vendor-axios';
-            }
-            return 'vendor-utils';
-          }
-        },
-      },
-    },
     chunkSizeWarningLimit: 1000,
   },
   server: {
