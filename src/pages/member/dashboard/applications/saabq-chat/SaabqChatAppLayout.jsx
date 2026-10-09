@@ -1,22 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { useLanguage } from "../../../../../context/LanguageContext";
 import Icon from "../../../../../components/common/Icon";
 import client, { endpoints } from "../../../../../api/client";
-import { getSaabqChatSubTabs } from "../../../../../config/dashboardNav";
 import WorkspacePageHeader from "../../../../../components/dashboard/WorkspacePageHeader";
 
 export default function SaabqChatAppLayout() {
   const { t } = useLanguage();
-  const location = useLocation();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState("");
   const [ssoUrl, setSsoUrl] = useState("");
   const [ssoLoading, setSsoLoading] = useState(false);
-
-  const subTabs = getSaabqChatSubTabs(t);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -137,12 +133,6 @@ export default function SaabqChatAppLayout() {
   };
 
   const translatedError = getTranslatedErrorMessage(connectError);
-
-  // Extract current sub-tab
-  const match = location.pathname.match(
-    /\/member\/workspace\/applications\/saabq-chat(?:\/([^/]+))?/,
-  );
-  const activeSubTab = match?.[1] || "inbox";
 
   return (
     <div className="workspace-page-container animate-page-enter">
@@ -415,56 +405,10 @@ export default function SaabqChatAppLayout() {
           </div>
         </div>
       ) : (
-        /* Valid Integration State: Render Navigation Subtabs & View Content */
-        <>
-          {/* Navigation Subtabs Strip */}
-          <div
-            className="saabq-chat-nav-strip"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              background: "var(--surface)",
-              padding: "6px 8px",
-              borderRadius: "var(--radius-lg, 14px)",
-              border: "1px solid var(--border)",
-              overflowX: "auto",
-              boxShadow: "var(--shadow-xs)",
-            }}
-          >
-            {subTabs.map((sub) => {
-              const isActive = activeSubTab === sub.id;
-              return (
-                <Link
-                  key={sub.id}
-                  to={`/member/workspace/applications/saabq-chat/${sub.id}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "8px 14px",
-                    borderRadius: "var(--radius-md, 10px)",
-                    fontSize: "0.84rem",
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "#ffffff" : "var(--text-secondary)",
-                    background: isActive ? "var(--primary)" : "transparent",
-                    textDecoration: "none",
-                    whiteSpace: "nowrap",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  <Icon name={sub.icon} size={15} />
-                  <span>{sub.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Subtab View Content */}
-          <div className="saabq-chat-content-view">
-            <Outlet context={{ settings, refetchSettings: fetchSettings }} />
-          </div>
-        </>
+        /* Valid Integration State: Render View Content */
+        <div className="saabq-chat-content-view">
+          <Outlet context={{ settings, refetchSettings: fetchSettings }} />
+        </div>
       )}
     </div>
   );

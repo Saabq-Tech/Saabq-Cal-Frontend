@@ -7,7 +7,6 @@ export default function SaabqChatSettingsTab() {
   const { t } = useLanguage();
   const [settings, setSettings] = useState(null);
   const [_loading, setLoading] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(null);
   const [ssoLoading, setSsoLoading] = useState(false);
 
   useEffect(() => {
@@ -23,12 +22,6 @@ export default function SaabqChatSettingsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleCopy = (key, text) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 3000);
-  };
 
   const handleOpenSso = async () => {
     setSsoLoading(true);
@@ -187,139 +180,6 @@ export default function SaabqChatSettingsTab() {
                     : t("directSsoLogin") || "تسجيل الدخول المباشر (SSO)"}
                 </span>
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Integration URLs */}
-      <div
-        style={{
-          background: "var(--surface)",
-          borderRadius: "var(--radius-lg, 16px)",
-          border: "1px solid var(--border)",
-          padding: 24,
-          boxShadow: "var(--shadow-sm)",
-        }}
-      >
-        <h4
-          style={{
-            margin: "0 0 16px",
-            fontSize: "1rem",
-            fontWeight: 800,
-            color: "var(--heading)",
-          }}
-        >
-          عناوين الربط البرمجي والويب هوك (Endpoints & Embeds)
-        </h4>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 700,
-                  color: "var(--heading)",
-                }}
-              >
-                رابط استقبال أحداث الويب هوك (Webhook URL):
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  handleCopy(
-                    "webhook",
-                    settings?.webhook_endpoint || settings?.webhook_url || "",
-                  )
-                }
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "var(--primary)",
-                  cursor: "pointer",
-                  fontSize: "0.76rem",
-                  fontWeight: 600,
-                }}
-              >
-                {copiedKey === "webhook"
-                  ? t("copied") || "تم النسخ!"
-                  : t("copyLink") || "نسخ الرابط"}
-              </button>
-            </div>
-            <div
-              style={{
-                background: "var(--surface-subtle, rgba(0,0,0,0.03))",
-                padding: "8px 12px",
-                borderRadius: 8,
-                fontSize: "0.8rem",
-                fontFamily: "monospace",
-                color: "var(--heading)",
-                direction: "ltr",
-                textAlign: "start",
-                border: "1px solid var(--border-subtle, rgba(0,0,0,0.05))",
-              }}
-            >
-              {settings?.webhook_endpoint || settings?.webhook_url || "—"}
-            </div>
-          </div>
-
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.8rem",
-                  fontWeight: 700,
-                  color: "var(--heading)",
-                }}
-              >
-                رابط تطبيق لوحة المعلومات المضمن (Contextual Dashboard App URL):
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  handleCopy("embed", settings?.dashboard_app_url || "")
-                }
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "var(--primary)",
-                  cursor: "pointer",
-                  fontSize: "0.76rem",
-                  fontWeight: 600,
-                }}
-              >
-                {copiedKey === "embed"
-                  ? t("copied") || "تم النسخ!"
-                  : t("copyLink") || "نسخ الرابط"}
-              </button>
-            </div>
-            <div
-              style={{
-                background: "var(--surface-subtle, rgba(0,0,0,0.03))",
-                padding: "8px 12px",
-                borderRadius: 8,
-                fontSize: "0.8rem",
-                fontFamily: "monospace",
-                color: "var(--heading)",
-                direction: "ltr",
-                textAlign: "start",
-                border: "1px solid var(--border-subtle, rgba(0,0,0,0.05))",
-              }}
-            >
-              {settings?.dashboard_app_url || "—"}
             </div>
           </div>
         </div>
