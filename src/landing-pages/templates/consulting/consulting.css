@@ -1,0 +1,282 @@
+.t-consulting {
+  --ink: #1b2433;
+  --muted: #444c5a;
+  --paper: #f7f7f5;
+  --line: #d5d4ce;
+  --ph-a: #e4e3de;
+  --ph-b: #ecebe7;
+  --focus: var(--accent);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Noto Kufi Arabic", sans-serif;
+  font-size: 15px;
+  line-height: 2;
+}
+.t-consulting .wrap {
+  max-width: 1160px;
+  padding-inline: 24px;
+}
+.t-consulting h1,
+.t-consulting h2,
+.t-consulting h3,
+.cs-brand,
+.cs-num,
+.cs-book__line,
+.cs-note {
+  font-family: var(--display);
+  font-weight: 700;
+}
+.t-consulting h2 {
+  font-size: 28px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.t-consulting h3 {
+  font-size: 21px;
+  line-height: 1.5;
+}
+
+.cs-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 24px;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--ink);
+}
+.cs-brand {
+  font-size: 21px;
+}
+.cs-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+  font-size: 13px;
+}
+.cs-nav nav a {
+  text-decoration: none;
+}
+.cs-underline {
+  text-decoration: underline !important;
+  text-underline-offset: 6px;
+  font-weight: 600;
+}
+
+.cs-hero {
+  display: grid;
+  gap: 24px;
+  padding-block: 40px 32px;
+}
+.cs-kicker {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 16px !important;
+}
+.cs-hero h1 {
+  font-size: 34px;
+  line-height: 1.45;
+}
+.cs-lead {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 2.1;
+}
+.cs-wide {
+  aspect-ratio: 16 / 7;
+  min-height: 200px;
+}
+
+.cs-section {
+  padding-block: 48px;
+}
+.cs-three {
+  display: grid;
+  gap: 16px;
+}
+.cs-three p {
+  color: var(--muted);
+}
+
+.cs-dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.cs-practice {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  column-gap: 48px;
+}
+.cs-practice li {
+  display: flex;
+  gap: 18px;
+  padding: 20px 0;
+  border-top: 1px solid #3a4456;
+}
+.cs-num {
+  font-size: 24px;
+  color: var(--accent);
+  min-width: 28px;
+  filter: brightness(1.6);
+}
+.cs-practice p {
+  color: #c3c8d2;
+  font-size: 14px;
+  margin-top: 4px !important;
+}
+
+.cs-steps {
+  display: grid;
+  gap: 20px;
+  border-top: 3px double var(--ink);
+  padding-top: 22px;
+}
+.cs-steps b {
+  font-family: var(--display);
+  font-size: 19px;
+}
+
+.cs-paper {
+  background: #eeede8;
+}
+.cs-people {
+  display: grid;
+  gap: 28px;
+}
+.cs-person {
+  display: flex;
+  gap: 18px;
+}
+.cs-person__img {
+  width: 112px !important;
+  height: 140px !important;
+  flex-shrink: 0;
+}
+.cs-role {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 2px 0 8px !important;
+}
+.cs-person p:last-child {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.cs-notes {
+  display: grid;
+  gap: 24px;
+}
+.cs-note {
+  display: grid;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink);
+  font-size: 20px;
+  line-height: 1.6;
+  text-decoration: none;
+}
+.cs-note span {
+  font-family: "Noto Kufi Arabic", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cs-note:hover {
+  color: var(--accent);
+}
+
+.cs-book {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 28px;
+  display: grid;
+  gap: 22px;
+}
+.cs-book__line {
+  font-size: 24px;
+  line-height: 1.6;
+}
+.cs-book__meta {
+  color: #c3c8d2;
+  font-size: 13px;
+  margin-top: 8px !important;
+}
+.cs-book__btn {
+  background: var(--paper);
+  color: var(--ink) !important;
+  min-height: 52px;
+  font-weight: 600;
+  padding: 0 28px;
+}
+
+.cs-contact {
+  display: grid;
+  gap: 20px;
+  border-top: 1px solid var(--ink);
+  color: var(--muted);
+}
+.cs-contact strong {
+  color: var(--ink);
+}
+.cs-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 24px 40px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@container site (min-width: 760px) {
+  .cs-hero {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: end;
+    gap: 48px;
+    padding-block: 72px 48px;
+  }
+  .cs-hero h1 {
+    font-size: 56px;
+  }
+  .t-consulting h2 {
+    font-size: 32px;
+  }
+  .cs-section {
+    padding-block: 72px;
+  }
+  .cs-three {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+  }
+  .cs-practice {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cs-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .cs-people {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .cs-notes {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .cs-book {
+    grid-template-columns: 1.4fr auto;
+    align-items: center;
+    padding: 48px;
+  }
+  .cs-book__line {
+    font-size: 30px;
+  }
+  .cs-contact {
+    grid-template-columns: repeat(3, 1fr);
+    padding-top: 32px;
+  }
+}

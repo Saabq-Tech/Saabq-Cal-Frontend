@@ -1,8 +1,9 @@
-import { Suspense } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { LayoutChromeContext } from "./context/LayoutChromeContext";
 
 import Navbar from "./components/layout/Navbar";
 import MobileTabBar from "./components/layout/MobileTabBar";
@@ -210,21 +211,26 @@ function AuthLayout({ children }) {
 
 import IconSprite from "./components/common/IconSprite";
 
-// Main layout with Navbar and Footer
+// Main layout with Navbar and Footer (a page can hide them through LayoutChromeContext)
 function MainLayout({ children }) {
+  const [chromeHidden, setChromeHidden] = useState(false);
+  const chrome = useMemo(() => ({ setChromeHidden }), []);
+
   return (
-    <div className="app-layout">
-      <a href="#main-content" className="skip-link">
-        الانتقال إلى المحتوى الرئيسي / Skip to main content
-      </a>
-      <Navbar />
-      <main id="main-content" tabIndex="-1">
-        {children}
-      </main>
-      <Footer />
-      <MobileTabBar />
-      <GoToTopButton />
-    </div>
+    <LayoutChromeContext.Provider value={chrome}>
+      <div className="app-layout">
+        <a href="#main-content" className="skip-link">
+          الانتقال إلى المحتوى الرئيسي / Skip to main content
+        </a>
+        {!chromeHidden && <Navbar />}
+        <main id="main-content" tabIndex="-1">
+          {children}
+        </main>
+        {!chromeHidden && <Footer />}
+        {!chromeHidden && <MobileTabBar />}
+        <GoToTopButton />
+      </div>
+    </LayoutChromeContext.Provider>
   );
 }
 

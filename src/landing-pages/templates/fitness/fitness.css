@@ -1,0 +1,303 @@
+.t-fitness {
+  --bg: #121212;
+  --band: #1a1a1a;
+  --line: #2a2a2a;
+  --ink: #f2f2f2;
+  --muted: #b0b0b0;
+  --ph-a: #1e1e1e;
+  --ph-b: #191919;
+  --ph-ink: #8c8c8c;
+  --focus: var(--accent);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--display);
+  line-height: 1.7;
+}
+.t-fitness h1,
+.t-fitness h2,
+.ft-brand {
+  font-weight: 800;
+}
+.t-fitness h2 {
+  font-size: 26px;
+  margin-bottom: 18px;
+}
+.ft-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 20px;
+  padding-block: 10px;
+}
+.ft-brand {
+  font-size: 21px;
+}
+.ft-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  font-weight: 500;
+}
+.ft-nav nav a:not(.ft-block) {
+  text-decoration: none;
+}
+.ft-block {
+  background: var(--accent);
+  color: var(--bg) !important;
+  font-weight: 800;
+  padding: 0 18px;
+}
+.ft-block--lg {
+  min-height: 52px;
+  padding: 0 28px;
+  margin-top: 20px;
+}
+.ft-outline {
+  border: 1.5px solid var(--accent);
+  color: var(--accent) !important;
+  min-width: 70px;
+  font-weight: 700;
+}
+
+.ft-hero {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--ph-a) 0 12px,
+    var(--ph-b) 12px 24px
+  );
+  isolation: isolate;
+}
+.ft-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.5);
+}
+.ft-hero__text {
+  padding-block: 32px;
+}
+.ft-hero h1 {
+  font-size: 46px;
+  line-height: 1.05;
+  max-width: 11ch;
+}
+.ft-lead {
+  color: #d0d0d0;
+  margin-top: 16px !important;
+  font-size: 17px;
+  max-width: 560px;
+}
+.ft-faint {
+  color: var(--ph-ink);
+  font-size: 12px;
+  margin-bottom: 10px !important;
+}
+
+.ft-section {
+  padding-block: 56px;
+}
+.ft-band {
+  background: var(--band);
+}
+.ft-split {
+  display: grid;
+  gap: 32px;
+}
+.ft-body {
+  color: var(--muted);
+  line-height: 2;
+}
+.ft-body p {
+  margin-bottom: 8px !important;
+}
+.ft-facilities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  align-self: start;
+}
+.ft-facilities div {
+  background: var(--bg);
+  padding: 18px;
+  display: grid;
+}
+.ft-facilities strong {
+  font-size: 17px;
+  font-weight: 800;
+}
+.ft-facilities span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.ft-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.ft-head h2 {
+  margin: 0;
+}
+.ft-days {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.ft-days button {
+  flex-shrink: 0;
+  min-width: 64px;
+  min-height: 52px;
+  border: none;
+  background: #262626;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.ft-days button.is-on {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 800;
+}
+.ft-classes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  column-gap: 40px;
+}
+.ft-classes li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ft-classes li > div {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+.ft-classes li > div span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.ft-classes .is-full {
+  color: #8c8c8c;
+}
+.ft-time {
+  font-size: 30px;
+  font-weight: 800;
+  min-width: 84px;
+  font-variant-numeric: tabular-nums;
+}
+.ft-dash {
+  min-width: 70px;
+  text-align: center;
+}
+
+.ft-coaches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.ft-coaches > div {
+  display: grid;
+}
+.ft-coaches strong {
+  font-weight: 800;
+  margin-top: 10px;
+}
+.ft-coaches span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.ft-coach__img {
+  aspect-ratio: 3 / 4;
+}
+
+.ft-plans {
+  display: grid;
+  gap: 12px;
+}
+.ft-plans > div {
+  border: 1px solid #333;
+  padding: 22px;
+  display: grid;
+  gap: 6px;
+}
+.ft-plans > div.is-pick {
+  border: 2px solid var(--accent);
+}
+.ft-plans strong {
+  font-size: 19px;
+  font-weight: 800;
+}
+.ft-price {
+  font-size: 30px;
+  font-weight: 800;
+}
+.ft-plans span {
+  color: var(--muted);
+}
+.ft-map {
+  min-height: 240px;
+}
+.ft-footer {
+  border-top: 1px solid var(--line);
+  padding-block: 22px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+.ft-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ft-footer strong {
+  color: var(--ink);
+}
+
+@container site (min-width: 760px) {
+  .ft-hero {
+    min-height: 600px;
+  }
+  .ft-hero h1 {
+    font-size: 96px;
+  }
+  .t-fitness h2 {
+    font-size: 34px;
+  }
+  .ft-section {
+    padding-block: 80px;
+  }
+  .ft-split {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .ft-classes {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ft-coaches {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+  .ft-plans {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

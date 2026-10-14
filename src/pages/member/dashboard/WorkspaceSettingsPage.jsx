@@ -29,6 +29,7 @@ const NotificationTemplatesTab = lazy(
   () => import("./workspace-settings/NotificationTemplatesTab"),
 );
 const WorkspaceTemplatesPage = lazy(() => import("./WorkspaceTemplatesPage"));
+const LandingPageTab = lazy(() => import("./workspace-settings/LandingPageTab"));
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceSettingsPage() {
@@ -532,6 +533,17 @@ export default function WorkspaceSettingsPage() {
           <Suspense fallback={<TabSettingsSkeleton />}>
             <WorkspaceTemplatesPage embedded />
           </Suspense>
+        </div>
+      ) : subSettingsTab === "landing_page" ? (
+        <div
+          key={subSettingsTab}
+          className="animate-tab-card workspace-page-container"
+        >
+          <CapabilityGate capabilityCode="LANDING_PAGE">
+            <Suspense fallback={<TabSettingsSkeleton />}>
+              <LandingPageTab />
+            </Suspense>
+          </CapabilityGate>
         </div>
       ) : (
         <div

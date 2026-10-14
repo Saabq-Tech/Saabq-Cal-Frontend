@@ -1,0 +1,367 @@
+.t-dental {
+  --ink: #10222e;
+  --muted: #4f6b7a;
+  --tint: #f2f8fb;
+  --line: #e2edf2;
+  --ph-a: #ddebf2;
+  --ph-b: #e9f2f7;
+  --focus: var(--accent);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--display);
+  line-height: 1.7;
+}
+.t-dental h1,
+.t-dental h2 {
+  font-weight: 700;
+}
+.t-dental h2 {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.dn-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 20px;
+  padding-block: 10px;
+}
+.dn-brand {
+  font-weight: 700;
+  font-size: 18px;
+}
+.dn-nav__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  font-size: 14px;
+}
+.dn-nav__links a:not(.dn-pill) {
+  text-decoration: none;
+}
+
+.dn-pill {
+  background: var(--accent);
+  color: #fff !important;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.dn-pill:hover {
+  filter: brightness(0.9);
+}
+.dn-pill--lg {
+  min-height: 52px;
+  padding: 0 26px;
+}
+.dn-pill--light {
+  background: #fff;
+  color: var(--accent) !important;
+}
+.dn-urgent {
+  background: #fff4ec;
+  color: #7a3412;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  min-height: 52px;
+}
+
+.dn-hero {
+  background: var(--tint);
+}
+.dn-hero__grid {
+  display: grid;
+  gap: 28px;
+  padding-block: 32px 40px;
+}
+.dn-kicker {
+  color: var(--accent);
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 8px !important;
+}
+.dn-hero h1 {
+  font-size: 30px;
+  line-height: 1.35;
+}
+.dn-lead {
+  margin-top: 14px !important;
+  color: var(--muted);
+  font-size: 17px;
+}
+.dn-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.dn-hero__img {
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+}
+
+.dn-section {
+  padding-block: 44px;
+}
+.dn-tint {
+  background: var(--tint);
+}
+.dn-body {
+  color: #33505f;
+  line-height: 2;
+  margin-bottom: 10px !important;
+  max-width: 760px;
+}
+
+.dn-journey {
+  padding-top: 0;
+}
+.dn-journey ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+.dn-journey li {
+  position: relative;
+  padding-inline-start: 28px;
+  padding-bottom: 22px;
+  display: grid;
+}
+.dn-journey li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.dn-journey li::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 5px;
+  top: 22px;
+  bottom: 0;
+  width: 2px;
+  background: #cfe1eb;
+}
+.dn-journey li.is-last::after {
+  display: none;
+}
+.dn-journey span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dn-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.dn-head h2 {
+  margin: 0;
+}
+.dn-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 2px;
+}
+.dn-tabs button {
+  flex-shrink: 0;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid #cfe1eb;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dn-tabs button.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.dn-cards {
+  display: grid;
+  gap: 10px;
+}
+.dn-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 14px;
+}
+.dn-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.dn-card__top span {
+  white-space: nowrap;
+}
+.dn-card p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 4px !important;
+}
+.dn-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 12px !important;
+}
+
+.dn-team {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.dn-team > div {
+  display: grid;
+  gap: 2px;
+}
+.dn-team span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.dn-team__img {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  margin-bottom: 8px;
+}
+
+.dn-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.dn-gallery > * {
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+}
+
+.dn-book {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  display: grid;
+  gap: 18px;
+}
+.dn-book h2 {
+  margin-bottom: 6px;
+}
+.dn-book p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dn-faq details {
+  border-bottom: 1px solid var(--line);
+  padding: 4px 0;
+}
+.dn-faq summary {
+  font-weight: 700;
+}
+.dn-faq p {
+  color: var(--muted);
+  padding-bottom: 10px;
+}
+
+.dn-contact {
+  display: grid;
+  gap: 28px;
+}
+.dn-hours {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.dn-hours th,
+.dn-hours td {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: start;
+  font-weight: 400;
+}
+.dn-hours td {
+  text-align: end;
+}
+.dn-map {
+  min-height: 260px;
+  border-radius: 20px;
+}
+.dn-footer {
+  background: var(--ink);
+  color: #a7bac5;
+  padding-block: 24px;
+  font-size: 13px;
+}
+.dn-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dn-footer strong {
+  color: #fff;
+}
+
+@container site (min-width: 760px) {
+  .dn-hero__grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding-block: 64px;
+    gap: 48px;
+  }
+  .dn-hero h1 {
+    font-size: 46px;
+  }
+  .t-dental h2 {
+    font-size: 30px;
+  }
+  .dn-section {
+    padding-block: 64px;
+  }
+  .dn-cards {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  .dn-team {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+  }
+  .dn-gallery {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .dn-journey ol {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .dn-journey li::after {
+    display: none;
+  }
+  .dn-book {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 40px;
+  }
+  .dn-contact {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+/* Service cards link to booking with the service preselected. */
+.t-dental a.dn-card {
+  display: block;
+  text-decoration: none;
+}

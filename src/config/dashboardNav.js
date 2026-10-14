@@ -22,6 +22,10 @@ export function getWorkspaceSettingsSubTabs(t) {
       label: t("workspaceBranding") || "الهوية والعلامة التجارية",
     },
     {
+      id: "landing_page",
+      label: t("workspaceLandingPage") || "الصفحة التعريفية",
+    },
+    {
       id: "timezone",
       label: t("workspaceTimezone") || "المنطقة الزمنية وتنسيق الوقت",
     },
