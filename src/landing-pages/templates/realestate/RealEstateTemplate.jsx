@@ -1,6 +1,7 @@
 import { tl } from "../../labels";
 import { BookLink, Brand, ContactLine, Media, Sections } from "../shared/parts";
 import { hoursLine, navItems, rootProps } from "../shared/helpers";
+import { UnitsSection } from "../shared/units";
 import "./realestate.css";
 
 export default function RealEstateTemplate({ site }) {
@@ -8,6 +9,7 @@ export default function RealEstateTemplate({ site }) {
   const whatsappDigits = site.whatsapp.replace(/[^\d]/g, "");
   const nav = navItems(site, {
     about: tl(L, "realestateCompany"),
+    units: tl(L, "realestateUnits"),
     gallery: tl(L, "realestateProjects"),
     services: tl(L, "realestateUnits"),
     booking: tl(L, "realestateViewing"),
@@ -61,6 +63,14 @@ export default function RealEstateTemplate({ site }) {
                 {site.aboutMore && <p className="re-body">{site.aboutMore}</p>}
               </div>
             </section>
+          ),
+          units: () => (
+            <UnitsSection
+              site={site}
+              title={
+                site.units.length === 1 ? "" : tl(L, "realestateUnitsTitle")
+              }
+            />
           ),
           gallery: () =>
             site.gallery.length > 0 && (

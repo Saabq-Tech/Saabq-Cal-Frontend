@@ -18,12 +18,14 @@ import {
   defaultSections,
   getLandingTemplate,
   recommendedTemplates,
+  workspaceTypeCode,
   resolveSections,
 } from "../../../../landing-pages/catalog";
 import "../../../../landing-pages/editor.css";
 
 const SECTION_LABEL_KEYS = {
   about: "lpSectionAbout",
+  units: "lpSectionUnits",
   highlights: "lpSectionHighlights",
   services: "lpSectionServices",
   team: "lpSectionTeam",
@@ -132,6 +134,7 @@ export default function LandingPageTab() {
   const [workspace, setWorkspace] = useState(null);
   const [services, setServices] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [units, setUnits] = useState([]);
   const [page, setPage] = useState(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
   const [hasSavedPage, setHasSavedPage] = useState(false);
@@ -143,7 +146,7 @@ export default function LandingPageTab() {
     setLoading(true);
     setLoadError(false);
     try {
-      const [pageRes, wsRes, srvRes, specRes] = await Promise.all([
+      const [pageRes, wsRes, srvRes, specRes, unitsRes] = await Promise.all([
         client.get(endpoints.workspaceSettingsLandingPage),
         client.get(endpoints.publicWorkspaceDetail(slug)),
         client
@@ -152,6 +155,9 @@ export default function LandingPageTab() {
         client
           .get(endpoints.publicWorkspaceSpecialists(slug))
           .catch(() => ({ data: { data: [] } })),
+        client
+          .get(endpoints.publicWorkspaceUnits(slug))
+          .catch(() => ({ data: { data: [] } })),
       ]);
       const ws = wsRes.data?.data || null;
       const state = toEditorState(pageRes.data?.data?.landing_page, ws);
@@ -159,6 +165,7 @@ export default function LandingPageTab() {
       setWorkspace(ws);
       setServices(srvRes.data?.data || []);
       setRoles(specRes.data?.data || []);
+      setUnits(unitsRes.data?.data || []);
       setPage(state);
       setHasSavedPage(Boolean(pageRes.data?.data?.landing_page));
       setSavedSnapshot(JSON.stringify(landingPagePayload(state)));
@@ -180,11 +187,12 @@ export default function LandingPageTab() {
             workspace,
             services,
             roles,
+            units,
             landingPage: page,
             preview: true,
           })
         : null,
-    [page, workspace, services, roles],
+    [page, workspace, services, roles, units],
   );
   const template = page ? getLandingTemplate(page.template_key) : null;
   // The workspace category's templates come first (clinics choose among four).
@@ -349,7 +357,9 @@ export default function LandingPageTab() {
             <>
               {!hasSavedPage && recommended.length > 1 && (
                 <p className="lpe-alert lpe-alert--info">
-                  {t("lpChooseGroupTemplate")}
+                  {workspaceTypeCode(workspace) === "realestate"
+                    ? t("lpChooseRentalsTemplate")
+                    : t("lpChooseGroupTemplate")}
                 </p>
               )}
               <div

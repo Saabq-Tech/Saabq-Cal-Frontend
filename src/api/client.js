@@ -182,6 +182,27 @@ export const endpoints = {
   workspaceCustomerItem: (id) => `/workspace-members/workspace/customers/${id}`,
   workspaceBookings: "/workspace-members/workspace/bookings",
   workspaceBookingSeries: "/workspace-members/workspace/booking-series",
+  // Rentals (units, departures, reservations, finance)
+  rentalUnits: "/workspace-members/workspace/rentals/units",
+  rentalUnit: (id) => `/workspace-members/workspace/rentals/units/${id}`,
+  rentalUnitDepartures: (id) =>
+    `/workspace-members/workspace/rentals/units/${id}/departures`,
+  rentalUnitDeparture: (id, departureId) =>
+    `/workspace-members/workspace/rentals/units/${id}/departures/${departureId}`,
+  rentalReservations: "/workspace-members/workspace/rentals/reservations",
+  rentalReservation: (id) =>
+    `/workspace-members/workspace/rentals/reservations/${id}`,
+  rentalFinanceSummary: "/workspace-members/workspace/rentals/finance/summary",
+  rentalTransactions: "/workspace-members/workspace/rentals/transactions",
+  rentalTransaction: (id) =>
+    `/workspace-members/workspace/rentals/transactions/${id}`,
+  publicWorkspaceUnits: (idOrSlug) => `/customers/workspaces/${idOrSlug}/units`,
+  publicWorkspaceUnit: (idOrSlug, unitId) =>
+    `/customers/workspaces/${idOrSlug}/units/${unitId}`,
+  publicWorkspaceUnitAvailability: (idOrSlug, unitId) =>
+    `/customers/workspaces/${idOrSlug}/units/${unitId}/availability`,
+  publicWorkspaceUnitReserve: (idOrSlug, unitId) =>
+    `/customers/workspaces/${idOrSlug}/units/${unitId}/reservations`,
   workspaceBookingSeriesCancel: (id) =>
     `/workspace-members/workspace/booking-series/${id}/cancel`,
   workspaceCalendarBookings: "/workspace-members/workspace/bookings/calendar",

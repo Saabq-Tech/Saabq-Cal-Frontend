@@ -8,6 +8,7 @@
  * its own markup.
  */
 
+import { workspaceTypeCode } from "../landing-pages/catalog";
 import {
   isApiIntegrationEnabled,
   checkWorkspaceCapability,
@@ -298,6 +299,25 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
       ],
       capability: "PAYMENTS",
     },
+    ...(workspaceTypeCode(workspace) === "realestate"
+      ? [
+          {
+            id: "rentals",
+            path: "/member/workspace/rentals",
+            label: t("navRentals"),
+            icon: "home",
+            permissions: [
+              "booking_read",
+              "booking_create",
+              "booking_update",
+              "booking_write",
+              "payment_read",
+              "payment_write",
+            ],
+            capability: "RENTALS",
+          },
+        ]
+      : []),
     {
       id: "api_integration",
       path: "/member/workspace/api-integration",

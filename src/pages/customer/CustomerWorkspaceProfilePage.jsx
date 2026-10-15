@@ -37,6 +37,7 @@ export default function WorkspaceProfilePage() {
   const { customerPlural, isCustom } = useCustomerLabel(workspace);
   const [services, setServices] = useState([]);
   const [specialistRoles, setSpecialistRoles] = useState([]);
+  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [servicesLoading, setServicesLoading] = useState(true);
 
@@ -87,11 +88,16 @@ export default function WorkspaceProfilePage() {
       client
         .get(endpoints.publicWorkspaceSpecialists(idOrSlug))
         .catch(() => ({ data: { data: [] } })),
+      // 404 unless the workspace's plan includes rentals.
+      client
+        .get(endpoints.publicWorkspaceUnits(idOrSlug))
+        .catch(() => ({ data: { data: [] } })),
     ])
-      .then(([wsRes, srvRes, specRes]) => {
+      .then(([wsRes, srvRes, specRes, unitsRes]) => {
         setWorkspace(wsRes.data?.data || null);
         setServices(srvRes.data?.data || []);
         setSpecialistRoles(specRes.data?.data || []);
+        setUnits(unitsRes.data?.data || []);
       })
       .catch(() => {
         setWorkspace(null);
@@ -180,9 +186,10 @@ export default function WorkspaceProfilePage() {
       workspace,
       services,
       roles: specialistRoles,
+      units,
       landingPage: workspace.landing_page,
     });
-  }, [workspace, services, specialistRoles, isBookMode]);
+  }, [workspace, services, specialistRoles, units, isBookMode]);
   useHideLayoutChrome(Boolean(landingSite));
 
   if (loading) {
@@ -2401,7 +2408,11 @@ export default function WorkspaceProfilePage() {
           ogImage={workspace.cover_url || workspace.logo_url}
           jsonLd={[jsonLd, breadcrumbJsonLd]}
         />
-        <LandingPageRenderer site={landingSite} fallback={classicPage} loading={<ProfileSkeleton />} />
+        <LandingPageRenderer
+          site={landingSite}
+          fallback={classicPage}
+          loading={<ProfileSkeleton />}
+        />
       </>
     );
   }

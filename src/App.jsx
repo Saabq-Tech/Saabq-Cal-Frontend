@@ -126,6 +126,12 @@ const WorkspacePaymentsPage = lazy(
 const WorkspaceResourcesPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceResourcesPage"),
 );
+const CustomerRentalUnitPage = lazy(
+  () => import("./pages/customer/CustomerRentalUnitPage"),
+);
+const WorkspaceRentalsPage = lazy(
+  () => import("./pages/member/dashboard/rentals/WorkspaceRentalsPage"),
+);
 const WorkspaceLogsPage = lazy(
   () => import("./pages/member/dashboard/WorkspaceLogsPage"),
 );
@@ -608,6 +614,7 @@ export default function App() {
                       path="resources"
                       element={<WorkspaceResourcesPage />}
                     />
+                    <Route path="rentals" element={<WorkspaceRentalsPage />} />
                     <Route path="logs" element={<WorkspaceLogsPage />} />
                     <Route path="reports" element={<WorkspaceLogsPage />} />
                     <Route
@@ -855,6 +862,14 @@ export default function App() {
                     element={
                       <MainLayout>
                         <CustomerSpecialistPage />
+                      </MainLayout>
+                    }
+                  />
+                  <Route
+                    path="/:idOrSlug/units/:unitId"
+                    element={
+                      <MainLayout>
+                        <CustomerRentalUnitPage />
                       </MainLayout>
                     }
                   />
