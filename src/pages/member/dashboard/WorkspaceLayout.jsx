@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import GoogleNotConnectedBanner from "../../../components/common/GoogleNotConnectedBanner";
+import "../../../styles/dashboard-shell.css";
 import Icon from "../../../components/common/Icon";
 import client, { endpoints } from "../../../api/client";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";

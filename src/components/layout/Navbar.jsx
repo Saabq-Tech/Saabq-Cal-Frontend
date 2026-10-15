@@ -27,6 +27,14 @@ export default function Navbar() {
   } = useAuth();
   const { lang, toggleLanguage, t } = useLanguage();
   const location = useLocation();
+  // Dashboard pages (account, workspace, customer) get a clean header: no site links or
+  // account/workspace menus, only the logo and the language, theme, notifications and account actions.
+  const dashboardMode =
+    isAuthenticated &&
+    /^\/(member|customer)(\/|$)/.test(location.pathname) &&
+    !/\/(login|register|forgot-password|reset-password|verify-account)$/.test(
+      location.pathname,
+    );
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -238,7 +246,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="navbar"
+        className={`navbar${dashboardMode ? " navbar--dashboard" : ""}`}
         aria-label={t("mainNavigation") || "Main navigation"}
       >
         <div className="container navbar-inner">
@@ -254,6 +262,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
+          {!dashboardMode && (
           <ul className="navbar-nav desktop-nav">
             <li>
               <a
@@ -513,6 +522,7 @@ export default function Navbar() {
               </li>
             )}
           </ul>
+          )}
 
           <div className="navbar-actions">
             <button

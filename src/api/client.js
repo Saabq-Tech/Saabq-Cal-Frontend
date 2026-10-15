@@ -181,6 +181,9 @@ export const endpoints = {
   workspaceCustomers: "/workspace-members/workspace/customers",
   workspaceCustomerItem: (id) => `/workspace-members/workspace/customers/${id}`,
   workspaceBookings: "/workspace-members/workspace/bookings",
+  workspaceBookingSeries: "/workspace-members/workspace/booking-series",
+  workspaceBookingSeriesCancel: (id) =>
+    `/workspace-members/workspace/booking-series/${id}/cancel`,
   workspaceCalendarBookings: "/workspace-members/workspace/bookings/calendar",
   workspaceBookingItem: (id) => `/workspace-members/workspace/bookings/${id}`,
   workspaceBookingStatus: (id) =>
