@@ -37,6 +37,69 @@ export function bookingPath(slug) {
   return `${cleanBase}${encodeURIComponent(slug)}/book`;
 }
 
+/** Public page of one rental unit, honoring the Vite base path. */
+export function unitPath(slug, unitId) {
+  const base = import.meta.env.BASE_URL || "/";
+  const cleanBase = base.endsWith("/") ? base : `${base}/`;
+  return `${cleanBase}${encodeURIComponent(slug)}/units/${encodeURIComponent(unitId)}`;
+}
+
+const MODE_SUFFIX = { nightly: "perNight", date: "perDay", trip: "perSeat" };
+
+/** Public rental units (GET /customers/workspaces/{slug}/units) -> template cards. */
+function unitItems(units, workspace, slug, lang) {
+  const currency = workspace.currency || workspace.currency_code;
+  const price = (value) =>
+    formatCurrency(value, currency, lang === "ar", tl(lang, "free"));
+  return (Array.isArray(units) ? units : [])
+    .map((u) => {
+      const photos = (Array.isArray(u.photos) ? u.photos : [])
+        .map(safeImage)
+        .filter(Boolean);
+      const facts = [
+        u.bedrooms ? `${u.bedrooms} ${tl(lang, "unitBedrooms")}` : "",
+        u.bathrooms ? `${u.bathrooms} ${tl(lang, "unitBathrooms")}` : "",
+        u.area_sqm ? `${u.area_sqm} ${tl(lang, "unitSqm")}` : "",
+        u.capacity ? `${u.capacity} ${tl(lang, "unitGuests")}` : "",
+      ].filter(Boolean);
+      const departures = (Array.isArray(u.departures) ? u.departures : []).map(
+        (d) => ({
+          id: d.id,
+          startsOn: d.starts_on,
+          endsOn: d.ends_on,
+          price: price(d.price),
+          seatsLeft: d.seats_left,
+        }),
+      );
+      let deposit = "";
+      if (u.deposit_required) {
+        deposit =
+          u.deposit_type === "percent"
+            ? `${tl(lang, "unitDeposit")} ${Number(u.deposit_value)}%`
+            : `${tl(lang, "unitDeposit")} ${price(u.deposit_value)}`;
+      }
+      return {
+        id: `u${u.id}`,
+        unitId: u.id,
+        title: clean(extractTranslatableText(u.title, lang)),
+        desc: stripHtml(extractTranslatableText(u.description, lang)),
+        kind: u.kind,
+        mode: u.booking_mode,
+        location: clean(u.location),
+        facts,
+        amenities: (Array.isArray(u.amenities) ? u.amenities : []).map(clean),
+        price: price(u.price),
+        priceSuffix: tl(lang, MODE_SUFFIX[u.booking_mode] || "perNight"),
+        deposit,
+        photo: photos[0],
+        photos,
+        departures,
+        href: slug ? unitPath(slug, u.id) : "#units",
+      };
+    })
+    .filter((u) => u.title);
+}
+
 function serviceDescription(service, lang) {
   const text = stripHtml(
     extractTranslatableText(service.short_description, lang) ||
@@ -236,6 +299,7 @@ export function buildLandingSite({
   workspace,
   services = [],
   roles = [],
+  units = [],
   landingPage,
   preview = false,
 }) {
@@ -297,6 +361,7 @@ export function buildLandingSite({
       href: withParam("member", m.id),
     })),
     gallery: galleryItems(workspace || {}),
+    units: unitItems(units, workspace || {}, slug, lang),
     schedule: fields.schedule,
     teams: fields.teams,
     hours: fields.hours,

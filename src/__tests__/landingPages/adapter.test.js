@@ -162,7 +162,7 @@ describe("landing page adapter", () => {
       "education",
     );
     expect(suggestTemplate({ workspace_type: { code: "realestate" } })).toBe(
-      "realestate",
+      "rentals",
     );
     expect(suggestTemplate(null)).toBe("clinic");
     expect(
@@ -171,6 +171,9 @@ describe("landing page adapter", () => {
     expect(
       recommendedTemplates({ workspace_type: { code: "company" } }),
     ).toEqual(["company"]);
+    expect(
+      recommendedTemplates({ workspace_type: { code: "realestate" } }),
+    ).toEqual(["rentals", "trips", "realestate"]);
   });
 });
 
@@ -189,6 +192,8 @@ describe("landing page catalog", () => {
       "services",
       "company",
       "realestate",
+      "rentals",
+      "trips",
     ];
     expect(LANDING_TEMPLATES.map((tpl) => tpl.id)).toEqual(backendKeys);
     expect(Object.keys(TEMPLATE_COMPONENTS)).toEqual(backendKeys);

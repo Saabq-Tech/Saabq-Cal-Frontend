@@ -15,6 +15,7 @@ export const SECTION_IDS = [
   "booking",
   "faq",
   "contact",
+  "units",
 ];
 
 export const LANDING_TEMPLATES = [
@@ -143,9 +144,33 @@ export const LANDING_TEMPLATES = [
     id: "realestate",
     nameKey: "lpTemplateRealEstate",
     descKey: "lpTemplateRealEstateDesc",
-    sections: ["about", "gallery", "services", "booking", "team", "contact"],
+    sections: [
+      "about",
+      "units",
+      "gallery",
+      "services",
+      "booking",
+      "team",
+      "contact",
+    ],
     accentOptions: ["#23412F", "#2B3A55", "#6B3A22", "#3A3A3A"],
     fonts: { template: "Noto Naskh Arabic", alt: "Cairo", serif: true },
+  },
+  {
+    id: "rentals",
+    nameKey: "lpTemplateRentals",
+    descKey: "lpTemplateRentalsDesc",
+    sections: ["units", "about", "highlights", "gallery", "faq", "contact"],
+    accentOptions: ["#0E7490", "#C2410C", "#15803D", "#7C3AED"],
+    fonts: { template: "Alexandria", alt: "Cairo" },
+  },
+  {
+    id: "trips",
+    nameKey: "lpTemplateTrips",
+    descKey: "lpTemplateTripsDesc",
+    sections: ["units", "highlights", "gallery", "about", "faq", "contact"],
+    accentOptions: ["#EA580C", "#0F766E", "#1D4ED8", "#BE123C"],
+    fonts: { template: "Tajawal", alt: "Cairo" },
   },
 ];
 
@@ -155,6 +180,7 @@ export const getLandingTemplate = (id) =>
 /** Templates that share a workspace category; owners of that category choose among them. */
 export const TEMPLATE_GROUPS = {
   clinic: ["clinic", "dental", "medical", "therapy"],
+  realestate: ["rentals", "trips", "realestate"],
 };
 
 /** Workspace type code (workspace_types.code) -> suggested template. */
@@ -168,7 +194,7 @@ const CODE_TO_TEMPLATE = {
   fitness: "fitness",
   services: "services",
   company: "company",
-  realestate: "realestate",
+  realestate: "rentals",
 };
 
 /** Older payloads without a type code: built-in ids 1-7 match utils/workspaceVibe.js. */

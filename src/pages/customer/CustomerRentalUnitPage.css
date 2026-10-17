@@ -1,0 +1,210 @@
+.rup-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 50vh;
+}
+.rup-wrap {
+  padding-block: 24px 64px;
+}
+.rup-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  color: var(--text-muted, #6b7280);
+  text-decoration: none;
+  font-weight: 600;
+}
+[dir="ltr"] .rup-back svg {
+  transform: scaleX(-1);
+}
+.rup-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+.rup-photo {
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--bg-soft, #f3f4f6);
+  color: var(--text-muted, #9ca3af);
+}
+.rup-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rup-thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  overflow-x: auto;
+}
+.rup-thumbs button {
+  flex: 0 0 80px;
+  height: 60px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+}
+.rup-thumbs button.is-active {
+  border-color: var(--primary);
+}
+.rup-thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rup-title {
+  margin: 20px 0 4px;
+  font-size: 1.8rem;
+}
+.rup-muted {
+  color: var(--text-muted, #6b7280);
+  margin: 0;
+  font-size: 0.9rem;
+}
+.rup-desc {
+  white-space: pre-line;
+  line-height: 1.9;
+}
+.rup-h2 {
+  font-size: 1.1rem;
+  margin: 20px 0 10px;
+}
+.rup-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.rup-chips li {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.rup-chips--soft li {
+  border: 0;
+  background: var(--primary-light, rgba(99, 102, 241, 0.1));
+  color: var(--primary);
+}
+.rup-booked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+.rup-booked li {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--bg-soft, #f3f4f6);
+  text-decoration: line-through;
+  color: var(--text-muted, #6b7280);
+}
+
+.rup-card {
+  position: sticky;
+  top: 90px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card-bg, var(--surface));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rup-price {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+.rup-price small {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted, #6b7280);
+}
+.rup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.rup-problem {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger, #dc2626);
+  font-size: 0.9rem;
+}
+.rup-quote {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--bg-soft, #f3f4f6);
+  margin-bottom: 8px;
+}
+.rup-quote div {
+  display: flex;
+  justify-content: space-between;
+}
+.rup-submit {
+  width: 100%;
+  margin-top: 8px;
+}
+.rup-note {
+  text-align: center;
+  font-size: 0.8rem;
+}
+.rup-done {
+  text-align: center;
+  padding: 16px 0;
+  color: var(--success, #16a34a);
+}
+.rup-done h3 {
+  color: var(--heading, inherit);
+  margin: 8px 0;
+}
+.rup-done p {
+  color: var(--text);
+}
+.rup-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--primary);
+}
+
+@media (max-width: 900px) {
+  .rup-grid {
+    grid-template-columns: 1fr;
+  }
+  .rup-card {
+    position: static;
+  }
+}

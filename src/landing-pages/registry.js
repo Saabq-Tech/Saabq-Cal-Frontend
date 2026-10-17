@@ -15,4 +15,6 @@ export const TEMPLATE_COMPONENTS = {
   services: lazy(() => import("./templates/services/ServicesTemplate")),
   company: lazy(() => import("./templates/company/CompanyTemplate")),
   realestate: lazy(() => import("./templates/realestate/RealEstateTemplate")),
+  rentals: lazy(() => import("./templates/rentals/RentalsTemplate")),
+  trips: lazy(() => import("./templates/trips/TripsTemplate")),
 };

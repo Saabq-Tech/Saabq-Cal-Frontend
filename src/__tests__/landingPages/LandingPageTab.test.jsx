@@ -77,7 +77,7 @@ describe("LandingPageTab", () => {
       name: new RegExp(ar.lpTemplateClinic),
     });
     expect(clinic).toHaveAttribute("aria-checked", "true");
-    expect(screen.getAllByRole("radio")).toHaveLength(12);
+    expect(screen.getAllByRole("radio")).toHaveLength(14);
     // A clinic owner sees the four clinic templates first, marked as suggested, and a prompt to choose.
     expect(screen.getByText(ar.lpChooseGroupTemplate)).toBeInTheDocument();
     expect(
