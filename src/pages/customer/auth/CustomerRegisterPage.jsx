@@ -254,6 +254,7 @@ export default function CustomerRegisterPage() {
             options={{
               theme: "auto",
               size: "flexible",
+              action: "customer-register",
             }}
           />
         </div>
