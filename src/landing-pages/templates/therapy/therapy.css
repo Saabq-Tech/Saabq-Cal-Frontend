@@ -1,0 +1,213 @@
+.t-therapy {
+  --ink: #25302a;
+  --muted: #56645c;
+  --line: #c9d1c5;
+  --ph-a: #d7ded3;
+  --ph-b: #e1e6de;
+  --focus: var(--accent);
+  background: #ecefe9;
+  color: var(--ink);
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+  line-height: 2;
+  font-size: 16px;
+}
+.t-therapy .wrap {
+  max-width: 1040px;
+  padding-inline: 24px;
+}
+.t-therapy h1,
+.t-therapy h2,
+.th-brand {
+  font-family: var(--display);
+  font-weight: 500;
+}
+.t-therapy h2 {
+  font-size: 24px;
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.th-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 20px;
+  padding-block: 16px;
+}
+.th-brand {
+  font-size: 19px;
+}
+.th-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  font-size: 14px;
+}
+.th-nav nav a {
+  text-decoration: none;
+}
+.th-nav nav a:hover {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+.th-hero {
+  padding-block: 48px 40px;
+}
+.th-hero h1 {
+  font-size: 30px;
+  line-height: 1.7;
+  max-width: 760px;
+}
+.th-hero p {
+  margin-top: 20px !important;
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 680px;
+}
+
+.th-facts {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  padding-block: 24px !important;
+  border-block: 1px solid var(--line);
+}
+.th-facts dt {
+  font-size: 13px;
+  color: var(--muted);
+}
+.th-facts dd {
+  margin: 0;
+  font-size: 17px;
+}
+
+.th-section {
+  padding-block: 48px;
+}
+.th-two {
+  display: grid;
+  gap: 16px;
+}
+.th-two p + p {
+  margin-top: 14px !important;
+}
+.th-soft {
+  background: #f7f8f5;
+}
+.th-areas {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  column-gap: 40px;
+}
+.th-areas li {
+  padding: 14px 0;
+  border-bottom: 1px solid #dce2d8;
+  font-size: 17px;
+}
+.th-muted {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.th-me {
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+.th-me__img {
+  aspect-ratio: 4 / 5;
+  max-width: 300px;
+  border-radius: 999px 999px 6px 6px;
+}
+
+.th-faq details {
+  border-bottom: 1px solid var(--line);
+}
+.th-faq summary {
+  font-weight: 500;
+}
+.th-faq p {
+  color: var(--muted);
+  padding-bottom: 12px;
+}
+
+.th-cta {
+  background: var(--accent);
+  color: #f2f4ef;
+  padding-block: 48px;
+}
+.th-cta__row {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+}
+.th-cta__row > p {
+  font-family: var(--display);
+  font-size: 24px;
+  line-height: 1.7;
+}
+.th-cta__actions {
+  display: grid;
+  gap: 6px;
+}
+.th-btn {
+  background: #f2f4ef;
+  color: var(--accent) !important;
+  min-height: 54px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.th-link {
+  color: #f2f4ef;
+}
+.th-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 20px 36px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@container site (min-width: 760px) {
+  .th-hero {
+    padding-block: 88px 56px;
+  }
+  .th-hero h1 {
+    font-size: 48px;
+  }
+  .t-therapy h2 {
+    font-size: 28px;
+  }
+  .th-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .th-section {
+    padding-block: 72px;
+  }
+  .th-two {
+    grid-template-columns: 1fr 1.6fr;
+    gap: 48px;
+  }
+  .th-areas {
+    grid-template-columns: 1fr 1fr;
+  }
+  .th-me {
+    grid-template-columns: 300px 1fr;
+    gap: 56px;
+  }
+  .th-cta__row {
+    grid-template-columns: 1.3fr 1fr;
+    gap: 40px;
+  }
+  .th-cta__row > p {
+    font-size: 32px;
+  }
+}

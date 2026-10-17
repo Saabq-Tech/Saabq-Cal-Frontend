@@ -146,6 +146,8 @@ export const endpoints = {
   workspaceSettingsProfile: "/workspace-members/workspace/settings/profile",
   workspaceSettingsBasic: "/workspace-members/workspace/settings/basic-info",
   workspaceSettingsBranding: "/workspace-members/workspace/settings/branding",
+  workspaceSettingsLandingPage:
+    "/workspace-members/workspace/settings/landing-page",
   workspaceSettingsTimezone:
     "/workspace-members/workspace/settings/timezone-and-format",
   workspaceSettingsSocial: "/workspace-members/workspace/settings/social-links",

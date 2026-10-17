@@ -17,6 +17,9 @@ import {
   applyWorkspaceBranding,
   resetWorkspaceBranding,
 } from "../../utils/theme";
+import { buildLandingSite } from "../../landing-pages/adapter";
+import LandingPageRenderer from "../../landing-pages/LandingPageRenderer";
+import { useHideLayoutChrome } from "../../context/LayoutChromeContext";
 import { useCustomerLabel } from "../../hooks/useCustomerLabel";
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
@@ -170,6 +173,18 @@ export default function WorkspaceProfilePage() {
       .filter((item) => item && item.url);
   }, [workspace]);
 
+  // A published landing page replaces this page (except in ?book mode, which jumps to services).
+  const landingSite = useMemo(() => {
+    if (!workspace?.landing_page || isBookMode) return null;
+    return buildLandingSite({
+      workspace,
+      services,
+      roles: specialistRoles,
+      landingPage: workspace.landing_page,
+    });
+  }, [workspace, services, specialistRoles, isBookMode]);
+  useHideLayoutChrome(Boolean(landingSite));
+
   if (loading) {
     return (
       <div className="main-content">
@@ -294,7 +309,7 @@ export default function WorkspaceProfilePage() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: getTranslatableText(workspace.name),
-    url: `https://cal.saabq.com/${workspace.slug}`,
+    url: `https://saabqcal.com/${workspace.slug}`,
     ...(workspace.booking_short_intro && {
       description: getTranslatableText(workspace.booking_short_intro),
     }),
@@ -323,24 +338,24 @@ export default function WorkspaceProfilePage() {
         "@type": "ListItem",
         position: 1,
         name: t("home"),
-        item: "https://cal.saabq.com/",
+        item: "https://saabqcal.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("workspaces", "مساحات العمل"),
-        item: "https://cal.saabq.com/workspaces",
+        item: "https://saabqcal.com/workspaces",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: getTranslatableText(workspace.name),
-        item: `https://cal.saabq.com/${workspace.slug}`,
+        item: `https://saabqcal.com/${workspace.slug}`,
       },
     ],
   };
 
-  return (
+  const classicPage = (
     <div
       className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
       data-workspace-vibe={vibe.key}
@@ -2371,4 +2386,25 @@ export default function WorkspaceProfilePage() {
       )}
     </div>
   );
+
+  if (landingSite) {
+    return (
+      <>
+        <SEO
+          pageKey="customerWorkspaceProfile"
+          title={getTranslatableText(workspace.name)}
+          description={stripHtml(
+            getTranslatableText(workspace.booking_short_intro) ||
+              getTranslatableText(workspace.description),
+          )}
+          canonical={`/${workspace.slug}`}
+          ogImage={workspace.cover_url || workspace.logo_url}
+          jsonLd={[jsonLd, breadcrumbJsonLd]}
+        />
+        <LandingPageRenderer site={landingSite} fallback={classicPage} loading={<ProfileSkeleton />} />
+      </>
+    );
+  }
+
+  return classicPage;
 }

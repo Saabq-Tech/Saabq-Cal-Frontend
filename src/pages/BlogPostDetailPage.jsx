@@ -112,13 +112,13 @@ export default function BlogPostDetailPage() {
         "@type": "ListItem",
         position: 1,
         name: t("home"),
-        item: "https://cal.saabq.com/",
+        item: "https://saabqcal.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("blogTitle"),
-        item: "https://cal.saabq.com/blog",
+        item: "https://saabqcal.com/blog",
       },
       ...(post.category
         ? [
@@ -126,13 +126,13 @@ export default function BlogPostDetailPage() {
               "@type": "ListItem",
               position: 3,
               name: post.category.name,
-              item: `https://cal.saabq.com/blog?category=${post.category.slug}`,
+              item: `https://saabqcal.com/blog?category=${post.category.slug}`,
             },
             {
               "@type": "ListItem",
               position: 4,
               name: post.title,
-              item: `https://cal.saabq.com/blog/${post.slug}`,
+              item: `https://saabqcal.com/blog/${post.slug}`,
             },
           ]
         : [
@@ -140,7 +140,7 @@ export default function BlogPostDetailPage() {
               "@type": "ListItem",
               position: 3,
               name: post.title,
-              item: `https://cal.saabq.com/blog/${post.slug}`,
+              item: `https://saabqcal.com/blog/${post.slug}`,
             },
           ]),
     ],

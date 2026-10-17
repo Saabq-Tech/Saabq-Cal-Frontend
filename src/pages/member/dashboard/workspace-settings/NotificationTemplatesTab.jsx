@@ -148,7 +148,7 @@ export default function NotificationTemplatesTab({
         /\{\{businessName\}\}/g,
         t("mockCompanyName") || "شركة سابق التقنية",
       )
-      .replace(/\{\{bookingLink\}\}/g, "https://cal.saabq.com/b/x9a2")
+      .replace(/\{\{bookingLink\}\}/g, "https://saabqcal.com/b/x9a2")
       .replace(
         /\{\{when\}\}/g,
         t("mockSampleDate") || "الخميس 25 أغسطس 2026 الساعة 04:00 مساءً",
