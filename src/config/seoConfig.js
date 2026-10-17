@@ -11,7 +11,7 @@ export const SITE_CONFIG = {
     en: "Saabq Cal — سابق كال",
   },
   shortName: "Saabq Cal",
-  baseUrl: "https://cal.saabq.com",
+  baseUrl: "https://saabqcal.com",
   defaultOgImage: "/logo.png",
   twitterHandle: "@SaabqCal",
   companyName: "Saabq Tech",

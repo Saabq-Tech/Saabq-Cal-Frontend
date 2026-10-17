@@ -326,7 +326,7 @@ export default function WorkspacesPage() {
             item: {
               "@type": "LocalBusiness",
               name: ws.name,
-              url: `https://cal.saabq.com/${ws.slug}`,
+              url: `https://saabqcal.com/${ws.slug}`,
               ...(ws.description && { description: ws.description }),
               ...(ws.logo_url && { image: ws.logo_url }),
             },
