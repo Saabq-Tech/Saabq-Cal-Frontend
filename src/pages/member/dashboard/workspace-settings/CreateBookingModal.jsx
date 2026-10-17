@@ -11,6 +11,9 @@ import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import { getLimitInfo } from "../../../../utils/planLimits";
 import { PlanLimitBanner } from "../../../../components/common/PlanLimitAlert";
 import { getCurrencySymbol } from "../../../../utils/currency";
+import RecurrenceFields from "./RecurrenceFields";
+import { DEFAULT_RECURRENCE, recurrencePayload } from "./recurrence";
+import "./recurrence.css";
 export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const { isOwner, canCreateBookings } = usePermissions();
   const { t, lang } = useLanguage();
@@ -55,6 +58,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
   const [status, setStatus] = useState("confirmed");
   const [notes, setNotes] = useState("");
   const [bypassRules, setBypassRules] = useState(false);
+  const [recurrence, setRecurrence] = useState(DEFAULT_RECURRENCE);
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -236,6 +240,49 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
 
   if (!isOpen || (!isOwner && !canCreateBookings)) return null;
 
+  // Recurring weekly booking: the chosen date is the first day, the chosen time repeats.
+  const submitSeries = async (payload) => {
+    if (recurrence.weekdays.length === 0) {
+      setErrorMessage(t("recurrenceDaysRequired"));
+      return;
+    }
+    if (recurrence.period === "until" && !recurrence.ends_on) {
+      setErrorMessage(t("recurrenceEndsOnRequired"));
+      return;
+    }
+    const [startsOn, time = ""] = payload.starts_at.split(" ");
+    const { starts_at: _startsAt, status: _status, ...rest } = payload;
+    try {
+      setSubmitting(true);
+      const res = await client.post(endpoints.workspaceBookingSeries, {
+        ...rest,
+        ...recurrencePayload(recurrence),
+        starts_on: startsOn,
+        start_time: time.slice(0, 5),
+      });
+      const created = res.data?.data?.created ?? 0;
+      const skipped = res.data?.data?.skipped ?? [];
+      toast.success(
+        `${t("recurrenceCreated")} ${created}` +
+          (skipped.length
+            ? ` · ${t("recurrenceSkipped")} ${skipped.map((s) => s.date).join(", ")}`
+            : ""),
+      );
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err) {
+      const errorsObj = err.response?.data?.errors;
+      if (errorsObj) setFieldErrors(errorsObj);
+      setErrorMessage(
+        errorsObj
+          ? Object.values(errorsObj).flat().join(" ")
+          : err.response?.data?.message || t("bookingCreateError"),
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -289,6 +336,11 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
       payload.customer_name = customerName.trim();
       payload.customer_email = customerEmail.trim() || null;
       payload.customer_phone = customerPhone.trim() || null;
+    }
+
+    if (recurrence.enabled) {
+      await submitSeries(payload);
+      return;
     }
 
     try {
@@ -941,6 +993,12 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
             )}
             {renderFieldError("starts_at")}
           </div>
+
+          <RecurrenceFields
+            value={recurrence}
+            onChange={setRecurrence}
+            startDate={selectedDate}
+          />
 
           {/* Status & Bypass Grid */}
           <div

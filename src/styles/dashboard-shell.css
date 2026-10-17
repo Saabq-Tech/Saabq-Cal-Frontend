@@ -1,0 +1,102 @@
+/*
+ * Dashboard shell (account, workspace and customer pages), styled after the admin dashboard:
+ * a slim, flat sidebar on a white surface, a calm page background and one font everywhere.
+ * Selectors are prefixed with html so they win over index.css regardless of load order.
+ */
+
+/* Clean header: logo + actions only (see Navbar dashboardMode). */
+html .navbar.navbar--dashboard {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid var(--border-light);
+}
+html .navbar.navbar--dashboard .navbar-inner {
+  max-width: none;
+  padding-inline: 20px;
+}
+
+/* One font for every piece of text in the dashboard. Landing page previews (.site) keep their own. */
+html .workspace-dashboard-shell,
+html .workspace-dashboard-shell :where(*:not(.site, .site *)) {
+  font-family: var(--font-sans) !important;
+}
+
+/* Page background and grid: narrower sidebar. */
+html .workspace-dashboard-grid {
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  background: var(--background);
+}
+
+/* Sidebar: flat white rail, compact items, plain icons. */
+html .workspace-dashboard-sidebar {
+  background: var(--surface);
+  border-inline-end: 1px solid var(--border-light);
+  padding: 14px 10px;
+  gap: 2px;
+}
+html .workspace-dashboard-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+html .workspace-dashboard-sidebar .profile-sidebar-link {
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  box-shadow: none;
+  border: 1px solid transparent;
+}
+html .workspace-dashboard-sidebar .profile-sidebar-link:hover {
+  background: var(--surface-alt);
+  color: var(--heading);
+}
+html .workspace-dashboard-sidebar .profile-sidebar-link.active {
+  background: var(--sb-accent-subtle);
+  border-color: var(--sb-accent-subtle);
+  color: var(--sb-accent);
+  font-weight: 700;
+  box-shadow: none;
+}
+html .workspace-dashboard-sidebar .profile-sidebar-icon,
+html
+  .workspace-dashboard-sidebar
+  .profile-sidebar-link:hover
+  .profile-sidebar-icon,
+html
+  .workspace-dashboard-sidebar
+  .profile-sidebar-link.active
+  .profile-sidebar-icon {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  color: inherit;
+}
+html .workspace-dashboard-sidebar .profile-sidebar-link svg {
+  width: 18px;
+  height: 18px;
+}
+html .workspace-dashboard-sidebar .workspace-sidebar-section-header {
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  padding: 14px 10px 6px;
+}
+html .workspace-dashboard-sidebar .workspace-subnav-item {
+  font-size: 0.83rem;
+  padding-block: 6px;
+}
+
+/* Content area on the page background, with a little more breathing room. */
+html .workspace-dashboard-content {
+  background: var(--background);
+}
+
+/* Dark mode keeps the same structure with the dark tokens. */
+html.dark .workspace-dashboard-sidebar {
+  background: var(--surface);
+  border-inline-end-color: var(--border);
+}

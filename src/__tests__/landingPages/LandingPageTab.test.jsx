@@ -78,6 +78,22 @@ describe("LandingPageTab", () => {
     });
     expect(clinic).toHaveAttribute("aria-checked", "true");
     expect(screen.getAllByRole("radio")).toHaveLength(12);
+    // A clinic owner sees the four clinic templates first, marked as suggested, and a prompt to choose.
+    expect(screen.getByText(ar.lpChooseGroupTemplate)).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("radio")
+        .slice(0, 4)
+        .map((r) => r.textContent),
+    ).toEqual(
+      [
+        ar.lpTemplateClinic,
+        ar.lpTemplateDental,
+        ar.lpTemplateMedical,
+        ar.lpTemplateTherapy,
+      ].map((name) => expect.stringContaining(name)),
+    );
+    expect(screen.getAllByText(ar.lpRecommended)).toHaveLength(4);
     expect(
       await screen.findByRole("heading", {
         level: 1,

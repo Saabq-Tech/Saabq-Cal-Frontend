@@ -8,6 +8,7 @@ import {
 } from "../../landing-pages/adapter";
 import {
   LANDING_TEMPLATES,
+  recommendedTemplates,
   resolveSections,
   suggestTemplate,
 } from "../../landing-pages/catalog";
@@ -156,8 +157,20 @@ describe("landing page adapter", () => {
     expect(page.is_published).toBe(false);
     expect(page.content.kicker).toBe("عيادة · Heliopolis, Cairo");
     expect(page.content.headline).toBe("Skin care in Heliopolis");
-    expect(suggestTemplate(6)).toBe("fitness");
+    expect(suggestTemplate({ workspace_type_id: 6 })).toBe("fitness");
+    expect(suggestTemplate({ workspace_type: { code: "teacher" } })).toBe(
+      "education",
+    );
+    expect(suggestTemplate({ workspace_type: { code: "realestate" } })).toBe(
+      "realestate",
+    );
     expect(suggestTemplate(null)).toBe("clinic");
+    expect(
+      recommendedTemplates({ workspace_type: { code: "clinic" } }),
+    ).toEqual(["clinic", "dental", "medical", "therapy"]);
+    expect(
+      recommendedTemplates({ workspace_type: { code: "company" } }),
+    ).toEqual(["company"]);
   });
 });
 

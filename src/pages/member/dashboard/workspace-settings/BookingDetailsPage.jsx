@@ -13,6 +13,7 @@ import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import { usePermissions } from "../../../../hooks/usePermissions";
 import RichTextEditor from "../../../../components/common/RichTextEditor";
 import { getPublicAssetUrl } from "../../../../utils/url";
+import "./recurrence.css";
 
 export default function BookingDetailsPage({
   bookingId,
@@ -42,6 +43,8 @@ export default function BookingDetailsPage({
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  // For sessions of a recurring series: cancel only this session or this and all following ones.
+  const [cancelScope, setCancelScope] = useState("single");
   const [showReceiptLightbox, setShowReceiptLightbox] = useState(false);
 
   // Action Confirmation Modal State
@@ -333,10 +336,16 @@ export default function BookingDetailsPage({
         endpoints.workspaceBookingCancel(bookingId),
         {
           cancellation_reason: cancelReason || undefined,
+          scope: booking?.series_id ? cancelScope : undefined,
         },
       );
-      toast.success(t("bookingCancelledSuccess") || "تم إلغاء الموعد بنجاح");
+      toast.success(
+        booking?.series_id && cancelScope === "series"
+          ? t("recurrenceSeriesCancelled")
+          : t("bookingCancelledSuccess") || "تم إلغاء الموعد بنجاح",
+      );
       setCancelReason("");
+      setCancelScope("single");
       setConfirmAction(null);
 
       const updatedData = res.data?.data;
@@ -2429,6 +2438,34 @@ export default function BookingDetailsPage({
                     style={{ width: "100%", resize: "vertical" }}
                   />
                 </div>
+              )}
+
+              {confirmAction.requiresReason && booking?.series_id && (
+                <fieldset className="recurrence-cancel-scope">
+                  <legend className="form-label">
+                    {t("recurrenceCancelScope")}
+                  </legend>
+                  <label>
+                    <input
+                      type="radio"
+                      name="cancel-scope"
+                      value="single"
+                      checked={cancelScope === "single"}
+                      onChange={() => setCancelScope("single")}
+                    />
+                    {t("recurrenceCancelSingle")}
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="cancel-scope"
+                      value="series"
+                      checked={cancelScope === "series"}
+                      onChange={() => setCancelScope("series")}
+                    />
+                    {t("recurrenceCancelSeries")}
+                  </label>
+                </fieldset>
               )}
 
               <div

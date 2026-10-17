@@ -267,3 +267,13 @@
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
+.lpe-template__badge {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--sb-accent-subtle, rgba(2, 105, 130, 0.12));
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}

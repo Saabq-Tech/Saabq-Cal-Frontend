@@ -27,6 +27,14 @@ export default function Navbar() {
   } = useAuth();
   const { lang, toggleLanguage, t } = useLanguage();
   const location = useLocation();
+  // Dashboard pages (account, workspace, customer) get a clean header: no site links or
+  // account/workspace menus, only the logo and the language, theme, notifications and account actions.
+  const dashboardMode =
+    isAuthenticated &&
+    /^\/(member|customer)(\/|$)/.test(location.pathname) &&
+    !/\/(login|register|forgot-password|reset-password|verify-account)$/.test(
+      location.pathname,
+    );
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -238,7 +246,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="navbar"
+        className={`navbar${dashboardMode ? " navbar--dashboard" : ""}`}
         aria-label={t("mainNavigation") || "Main navigation"}
       >
         <div className="container navbar-inner">
@@ -254,265 +262,270 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <ul className="navbar-nav desktop-nav">
-            <li>
-              <a
-                href="/#home"
-                className={
-                  location.pathname === "/" &&
-                  (isAuthenticated ||
-                    !activeSection ||
-                    activeSection === "home" ||
-                    activeSection === "about")
-                    ? "active"
-                    : ""
-                }
-                onClick={(e) => handleSectionClick("home", e)}
-              >
-                {t("home")}
-              </a>
-            </li>
-
-            {!isAuthenticated && (
-              <>
-                <li>
-                  <a
-                    href="/#sectors"
-                    className={
-                      location.pathname === "/" && activeSection === "sectors"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("sectors", e)}
-                  >
-                    {t("navSectors")}
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="/#features"
-                    className={
-                      location.pathname === "/" && activeSection === "features"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("features", e)}
-                  >
-                    {t("navFeatures")}
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="/#how-it-works"
-                    className={
-                      location.pathname === "/" &&
-                      activeSection === "how-it-works"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("how-it-works", e)}
-                  >
-                    {t("navHowItWorks")}
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="/#pricing"
-                    className={
-                      location.pathname === "/" && activeSection === "pricing"
-                        ? "active"
-                        : ""
-                    }
-                    onClick={(e) => handleSectionClick("pricing", e)}
-                  >
-                    {t("navPricingShort")}
-                  </a>
-                </li>
-              </>
-            )}
-
-            <li>
-              <Link
-                to="/blog"
-                className={
-                  location.pathname.startsWith("/blog") ? "active" : ""
-                }
-              >
-                {t("navBlog")}
-              </Link>
-            </li>
-
-            <li>
-              <Link
-                to="/workspaces"
-                className={location.pathname === "/workspaces" ? "active" : ""}
-              >
-                {t("workspaces", "مساحات العمل")}
-              </Link>
-            </li>
-
-            {isAuthenticated && (
-              <li
-                className="navbar-dropdown-container"
-                ref={profileDropdownRef}
-              >
-                <button
-                  className={`navbar-dropdown-trigger${location.pathname.includes("/profile") ? " active" : ""}`}
-                  onClick={() => {
-                    if (!profileDropdownOpen)
-                      navigate(`${profilePrefix}/profile`);
-                    setProfileDropdownOpen(!profileDropdownOpen);
-                    setWsDropdownOpen(false);
-                  }}
-                  aria-expanded={profileDropdownOpen}
-                  aria-haspopup="true"
-                  aria-label={t("myAccount")}
+          {!dashboardMode && (
+            <ul className="navbar-nav desktop-nav">
+              <li>
+                <a
+                  href="/#home"
+                  className={
+                    location.pathname === "/" &&
+                    (isAuthenticated ||
+                      !activeSection ||
+                      activeSection === "home" ||
+                      activeSection === "about")
+                      ? "active"
+                      : ""
+                  }
+                  onClick={(e) => handleSectionClick("home", e)}
                 >
-                  <span>{t("myAccount")}</span>
-                  <Icon
-                    name="chevron-down"
-                    size={14}
-                    style={{
-                      transition: "transform 0.2s",
-                      transform: profileDropdownOpen
-                        ? "rotate(180deg)"
-                        : "none",
-                    }}
-                  />
-                </button>
-                {profileDropdownOpen && (
-                  <div className="navbar-dropdown-menu" role="menu">
-                    {drawerAccountTabs.map((tab) => (
-                      <Link
-                        key={tab.id}
-                        to={tab.to}
-                        role="menuitem"
-                        onClick={() => setProfileDropdownOpen(false)}
-                      >
-                        <Icon name={tab.icon} size={16} />
-                        <span>{tab.label}</span>
-                        {tab.badge === "unread" && unreadCount > 0 && (
-                          <span
-                            className="drawer-badge"
-                            style={{ marginInlineStart: "auto" }}
-                          >
-                            {unreadCount > 99 ? "99+" : unreadCount}
-                          </span>
-                        )}
-                        {tab.badge === "chat" && unreadChatCount > 0 && (
-                          <span
-                            className="drawer-badge"
-                            style={{
-                              marginInlineStart: "auto",
-                              background: "var(--accent)",
-                            }}
-                          >
-                            {unreadChatCount > 99 ? "99+" : unreadChatCount}
-                          </span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                  {t("home")}
+                </a>
               </li>
-            )}
 
-            {isAuthenticated && userType === "member" && (
-              <li className="navbar-dropdown-container" ref={wsDropdownRef}>
-                <button
-                  className={`navbar-dropdown-trigger${location.pathname.includes("/member/workspace") ? " active" : ""}`}
-                  onClick={() => {
-                    if (!wsDropdownOpen) navigate("/member/workspace");
-                    setWsDropdownOpen(!wsDropdownOpen);
-                    setProfileDropdownOpen(false);
-                  }}
-                  aria-expanded={wsDropdownOpen}
-                  aria-haspopup="true"
-                  aria-label={t("myWorkspace")}
-                >
-                  <span>{t("myWorkspace")}</span>
-                  {pendingBookingsCount > 0 && (
-                    <span
-                      style={{
-                        padding: "2px 7px",
-                        borderRadius: 10,
-                        fontSize: "0.72rem",
-                        fontWeight: 800,
-                        background: "#f59e0b",
-                        color: "#ffffff",
-                        lineHeight: 1,
-                        marginInlineStart: 4,
-                      }}
+              {!isAuthenticated && (
+                <>
+                  <li>
+                    <a
+                      href="/#sectors"
+                      className={
+                        location.pathname === "/" && activeSection === "sectors"
+                          ? "active"
+                          : ""
+                      }
+                      onClick={(e) => handleSectionClick("sectors", e)}
                     >
-                      {pendingBookingsCount}
-                    </span>
-                  )}
-                  <Icon
-                    name="chevron-down"
-                    size={14}
-                    style={{
-                      transition: "transform 0.2s",
-                      transform: wsDropdownOpen ? "rotate(180deg)" : "none",
-                    }}
-                  />
-                </button>
-                {wsDropdownOpen && (
-                  <div className="navbar-dropdown-menu" role="menu">
-                    {drawerWorkspaceTabs.map((tab) => {
-                      const isCapAllowed =
-                        isWorkspaceActive &&
-                        checkWorkspaceCapability(user, tab.capability);
+                      {t("navSectors")}
+                    </a>
+                  </li>
 
-                      return (
+                  <li>
+                    <a
+                      href="/#features"
+                      className={
+                        location.pathname === "/" &&
+                        activeSection === "features"
+                          ? "active"
+                          : ""
+                      }
+                      onClick={(e) => handleSectionClick("features", e)}
+                    >
+                      {t("navFeatures")}
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="/#how-it-works"
+                      className={
+                        location.pathname === "/" &&
+                        activeSection === "how-it-works"
+                          ? "active"
+                          : ""
+                      }
+                      onClick={(e) => handleSectionClick("how-it-works", e)}
+                    >
+                      {t("navHowItWorks")}
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="/#pricing"
+                      className={
+                        location.pathname === "/" && activeSection === "pricing"
+                          ? "active"
+                          : ""
+                      }
+                      onClick={(e) => handleSectionClick("pricing", e)}
+                    >
+                      {t("navPricingShort")}
+                    </a>
+                  </li>
+                </>
+              )}
+
+              <li>
+                <Link
+                  to="/blog"
+                  className={
+                    location.pathname.startsWith("/blog") ? "active" : ""
+                  }
+                >
+                  {t("navBlog")}
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/workspaces"
+                  className={
+                    location.pathname === "/workspaces" ? "active" : ""
+                  }
+                >
+                  {t("workspaces", "مساحات العمل")}
+                </Link>
+              </li>
+
+              {isAuthenticated && (
+                <li
+                  className="navbar-dropdown-container"
+                  ref={profileDropdownRef}
+                >
+                  <button
+                    className={`navbar-dropdown-trigger${location.pathname.includes("/profile") ? " active" : ""}`}
+                    onClick={() => {
+                      if (!profileDropdownOpen)
+                        navigate(`${profilePrefix}/profile`);
+                      setProfileDropdownOpen(!profileDropdownOpen);
+                      setWsDropdownOpen(false);
+                    }}
+                    aria-expanded={profileDropdownOpen}
+                    aria-haspopup="true"
+                    aria-label={t("myAccount")}
+                  >
+                    <span>{t("myAccount")}</span>
+                    <Icon
+                      name="chevron-down"
+                      size={14}
+                      style={{
+                        transition: "transform 0.2s",
+                        transform: profileDropdownOpen
+                          ? "rotate(180deg)"
+                          : "none",
+                      }}
+                    />
+                  </button>
+                  {profileDropdownOpen && (
+                    <div className="navbar-dropdown-menu" role="menu">
+                      {drawerAccountTabs.map((tab) => (
                         <Link
                           key={tab.id}
-                          to={tab.path}
+                          to={tab.to}
                           role="menuitem"
-                          onClick={() => setWsDropdownOpen(false)}
-                          style={{
-                            opacity: isCapAllowed ? 1 : 0.6,
-                          }}
+                          onClick={() => setProfileDropdownOpen(false)}
                         >
                           <Icon name={tab.icon} size={16} />
-                          <span style={{ flex: 1 }}>{tab.label}</span>
-                          {tab.id === "bookings" &&
-                            pendingBookingsCount > 0 && (
-                              <span
-                                style={{
-                                  padding: "2px 7px",
-                                  borderRadius: 10,
-                                  fontSize: "0.72rem",
-                                  fontWeight: 800,
-                                  background: "#f59e0b",
-                                  color: "#ffffff",
-                                  lineHeight: 1,
-                                  marginInlineStart: 6,
-                                }}
-                              >
-                                {pendingBookingsCount}
-                              </span>
-                            )}
-                          {!isCapAllowed && (
-                            <Icon
-                              name="lock"
-                              size={13}
+                          <span>{tab.label}</span>
+                          {tab.badge === "unread" && unreadCount > 0 && (
+                            <span
+                              className="drawer-badge"
+                              style={{ marginInlineStart: "auto" }}
+                            >
+                              {unreadCount > 99 ? "99+" : unreadCount}
+                            </span>
+                          )}
+                          {tab.badge === "chat" && unreadChatCount > 0 && (
+                            <span
+                              className="drawer-badge"
                               style={{
-                                color: "var(--muted)",
-                                marginInlineStart: 6,
+                                marginInlineStart: "auto",
+                                background: "var(--accent)",
                               }}
-                            />
+                            >
+                              {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                            </span>
                           )}
                         </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </li>
-            )}
-          </ul>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              )}
+
+              {isAuthenticated && userType === "member" && (
+                <li className="navbar-dropdown-container" ref={wsDropdownRef}>
+                  <button
+                    className={`navbar-dropdown-trigger${location.pathname.includes("/member/workspace") ? " active" : ""}`}
+                    onClick={() => {
+                      if (!wsDropdownOpen) navigate("/member/workspace");
+                      setWsDropdownOpen(!wsDropdownOpen);
+                      setProfileDropdownOpen(false);
+                    }}
+                    aria-expanded={wsDropdownOpen}
+                    aria-haspopup="true"
+                    aria-label={t("myWorkspace")}
+                  >
+                    <span>{t("myWorkspace")}</span>
+                    {pendingBookingsCount > 0 && (
+                      <span
+                        style={{
+                          padding: "2px 7px",
+                          borderRadius: 10,
+                          fontSize: "0.72rem",
+                          fontWeight: 800,
+                          background: "#f59e0b",
+                          color: "#ffffff",
+                          lineHeight: 1,
+                          marginInlineStart: 4,
+                        }}
+                      >
+                        {pendingBookingsCount}
+                      </span>
+                    )}
+                    <Icon
+                      name="chevron-down"
+                      size={14}
+                      style={{
+                        transition: "transform 0.2s",
+                        transform: wsDropdownOpen ? "rotate(180deg)" : "none",
+                      }}
+                    />
+                  </button>
+                  {wsDropdownOpen && (
+                    <div className="navbar-dropdown-menu" role="menu">
+                      {drawerWorkspaceTabs.map((tab) => {
+                        const isCapAllowed =
+                          isWorkspaceActive &&
+                          checkWorkspaceCapability(user, tab.capability);
+
+                        return (
+                          <Link
+                            key={tab.id}
+                            to={tab.path}
+                            role="menuitem"
+                            onClick={() => setWsDropdownOpen(false)}
+                            style={{
+                              opacity: isCapAllowed ? 1 : 0.6,
+                            }}
+                          >
+                            <Icon name={tab.icon} size={16} />
+                            <span style={{ flex: 1 }}>{tab.label}</span>
+                            {tab.id === "bookings" &&
+                              pendingBookingsCount > 0 && (
+                                <span
+                                  style={{
+                                    padding: "2px 7px",
+                                    borderRadius: 10,
+                                    fontSize: "0.72rem",
+                                    fontWeight: 800,
+                                    background: "#f59e0b",
+                                    color: "#ffffff",
+                                    lineHeight: 1,
+                                    marginInlineStart: 6,
+                                  }}
+                                >
+                                  {pendingBookingsCount}
+                                </span>
+                              )}
+                            {!isCapAllowed && (
+                              <Icon
+                                name="lock"
+                                size={13}
+                                style={{
+                                  color: "var(--muted)",
+                                  marginInlineStart: 6,
+                                }}
+                              />
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </li>
+              )}
+            </ul>
+          )}
 
           <div className="navbar-actions">
             <button
@@ -772,261 +785,269 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Drawer Navigation Links */}
-            <div className="mobile-drawer-content">
-              <nav className="mobile-drawer-nav">
-                <a
-                  href="/#home"
-                  className={`mobile-drawer-link${
-                    location.pathname === "/" &&
-                    (isAuthenticated ||
-                      !activeSection ||
-                      activeSection === "home")
-                      ? " active"
-                      : ""
-                  }`}
-                  onClick={(e) => handleSectionClick("home", e)}
-                >
-                  <Icon name="custom-5992beed" />
-                  <span>{t("home")}</span>
-                </a>
+            {/* Drawer Navigation Links: hidden on dashboard pages, like the desktop header */}
+            {!dashboardMode && (
+              <div className="mobile-drawer-content">
+                <nav className="mobile-drawer-nav">
+                  <a
+                    href="/#home"
+                    className={`mobile-drawer-link${
+                      location.pathname === "/" &&
+                      (isAuthenticated ||
+                        !activeSection ||
+                        activeSection === "home")
+                        ? " active"
+                        : ""
+                    }`}
+                    onClick={(e) => handleSectionClick("home", e)}
+                  >
+                    <Icon name="custom-5992beed" />
+                    <span>{t("home")}</span>
+                  </a>
 
-                <Link
-                  to="/blog"
-                  className={`mobile-drawer-link${location.pathname.startsWith("/blog") ? " active" : ""}`}
-                  onClick={closeMobileDrawer}
-                >
-                  <Icon name="book-open" />
-                  <span>{t("navBlog")}</span>
-                </Link>
+                  <Link
+                    to="/blog"
+                    className={`mobile-drawer-link${location.pathname.startsWith("/blog") ? " active" : ""}`}
+                    onClick={closeMobileDrawer}
+                  >
+                    <Icon name="book-open" />
+                    <span>{t("navBlog")}</span>
+                  </Link>
 
-                <Link
-                  to="/workspaces"
-                  className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
-                  onClick={closeMobileDrawer}
-                >
-                  <Icon name="monitor" />
-                  <span>{t("workspaces", "مساحات العمل")}</span>
-                </Link>
+                  <Link
+                    to="/workspaces"
+                    className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                    onClick={closeMobileDrawer}
+                  >
+                    <Icon name="monitor" />
+                    <span>{t("workspaces", "مساحات العمل")}</span>
+                  </Link>
 
-                {!isAuthenticated && (
-                  <>
-                    <a
-                      href="/#sectors"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("sectors", e)}
-                    >
-                      <Icon name="briefcase" />
-                      <span>{t("navSectors")}</span>
-                    </a>
+                  {!isAuthenticated && (
+                    <>
+                      <a
+                        href="/#sectors"
+                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
+                        onClick={(e) => handleSectionClick("sectors", e)}
+                      >
+                        <Icon name="briefcase" />
+                        <span>{t("navSectors")}</span>
+                      </a>
 
-                    <a
-                      href="/#about"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "about" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("about", e)}
-                    >
-                      <Icon name="custom-34f286e2" />
-                      <span>{t("about")}</span>
-                    </a>
+                      <a
+                        href="/#about"
+                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "about" ? " active" : ""}`}
+                        onClick={(e) => handleSectionClick("about", e)}
+                      >
+                        <Icon name="custom-34f286e2" />
+                        <span>{t("about")}</span>
+                      </a>
 
-                    <a
-                      href="/#features"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "features" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("features", e)}
-                    >
-                      <Icon name="custom-5768860f" />
-                      <span>{t("navFeatures")}</span>
-                    </a>
+                      <a
+                        href="/#features"
+                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "features" ? " active" : ""}`}
+                        onClick={(e) => handleSectionClick("features", e)}
+                      >
+                        <Icon name="custom-5768860f" />
+                        <span>{t("navFeatures")}</span>
+                      </a>
 
-                    <a
-                      href="/#how-it-works"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "how-it-works" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("how-it-works", e)}
-                    >
-                      <Icon name="custom-bd500d73" />
-                      <span>{t("navHowItWorks")}</span>
-                    </a>
+                      <a
+                        href="/#how-it-works"
+                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "how-it-works" ? " active" : ""}`}
+                        onClick={(e) => handleSectionClick("how-it-works", e)}
+                      >
+                        <Icon name="custom-bd500d73" />
+                        <span>{t("navHowItWorks")}</span>
+                      </a>
 
-                    <a
-                      href="/#pricing"
-                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "pricing" ? " active" : ""}`}
-                      onClick={(e) => handleSectionClick("pricing", e)}
-                    >
-                      <Icon name="credit-card" />
-                      <span>{t("navPricing")}</span>
-                    </a>
-                  </>
-                )}
+                      <a
+                        href="/#pricing"
+                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "pricing" ? " active" : ""}`}
+                        onClick={(e) => handleSectionClick("pricing", e)}
+                      >
+                        <Icon name="credit-card" />
+                        <span>{t("navPricing")}</span>
+                      </a>
+                    </>
+                  )}
 
-                {isAuthenticated && (
-                  <>
-                    {/* حسابي — navigates to the profile and reveals its pages */}
-                    <button
-                      type="button"
-                      className={`mobile-drawer-link drawer-accordion-head${
-                        location.pathname.includes("/profile") ? " active" : ""
-                      }${drawerAccountOpen ? " open" : ""}`}
-                      aria-expanded={drawerAccountOpen}
-                      onClick={() => {
-                        if (!drawerAccountOpen)
-                          navigate(`${profilePrefix}/profile`);
-                        setDrawerAccountOpen((v) => !v);
-                      }}
-                    >
-                      <Icon name="user" />
-                      <span>{t("myAccount")}</span>
-                      <Icon
-                        name="chevron-down"
-                        size={16}
-                        className="drawer-accordion-chevron"
-                      />
-                    </button>
-                    {drawerAccountOpen && (
-                      <div className="drawer-subnav">
-                        {drawerAccountTabs.map((tab) => (
-                          <Link
-                            key={tab.id}
-                            to={tab.to}
-                            className="mobile-drawer-link drawer-sublink"
-                            onClick={closeMobileDrawer}
-                            title={tab.lockTooltip || undefined}
+                  {isAuthenticated && (
+                    <>
+                      {/* حسابي — navigates to the profile and reveals its pages */}
+                      <button
+                        type="button"
+                        className={`mobile-drawer-link drawer-accordion-head${
+                          location.pathname.includes("/profile")
+                            ? " active"
+                            : ""
+                        }${drawerAccountOpen ? " open" : ""}`}
+                        aria-expanded={drawerAccountOpen}
+                        onClick={() => {
+                          if (!drawerAccountOpen)
+                            navigate(`${profilePrefix}/profile`);
+                          setDrawerAccountOpen((v) => !v);
+                        }}
+                      >
+                        <Icon name="user" />
+                        <span>{t("myAccount")}</span>
+                        <Icon
+                          name="chevron-down"
+                          size={16}
+                          className="drawer-accordion-chevron"
+                        />
+                      </button>
+                      {drawerAccountOpen && (
+                        <div className="drawer-subnav">
+                          {drawerAccountTabs.map((tab) => (
+                            <Link
+                              key={tab.id}
+                              to={tab.to}
+                              className="mobile-drawer-link drawer-sublink"
+                              onClick={closeMobileDrawer}
+                              title={tab.lockTooltip || undefined}
+                            >
+                              <Icon name={tab.icon} />
+                              <span style={{ flex: 1 }}>{tab.label}</span>
+                              {tab.locked && (
+                                <Icon
+                                  name="lock"
+                                  size={14}
+                                  style={{
+                                    color: "var(--muted)",
+                                    marginInlineStart: "auto",
+                                  }}
+                                />
+                              )}
+                              {tab.badge === "unread" &&
+                                unreadCount > 0 &&
+                                !tab.locked && (
+                                  <span className="drawer-badge">
+                                    {unreadCount > 99 ? "99+" : unreadCount}
+                                  </span>
+                                )}
+                              {tab.badge === "chat" &&
+                                unreadChatCount > 0 &&
+                                !tab.locked && (
+                                  <span className="drawer-badge primary">
+                                    {unreadChatCount > 99
+                                      ? "99+"
+                                      : unreadChatCount}
+                                  </span>
+                                )}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* مساحتي — navigates to the workspace and reveals its pages */}
+                      {userType === "member" && (
+                        <>
+                          <button
+                            type="button"
+                            className={`mobile-drawer-link drawer-accordion-head${
+                              location.pathname.startsWith("/member/workspace")
+                                ? " active"
+                                : ""
+                            }${drawerWorkspaceOpen ? " open" : ""}`}
+                            aria-expanded={drawerWorkspaceOpen}
+                            onClick={() => {
+                              if (!drawerWorkspaceOpen)
+                                navigate("/member/workspace");
+                              setDrawerWorkspaceOpen((v) => !v);
+                            }}
                           >
-                            <Icon name={tab.icon} />
-                            <span style={{ flex: 1 }}>{tab.label}</span>
-                            {tab.locked && (
-                              <Icon
-                                name="lock"
-                                size={14}
-                                style={{
-                                  color: "var(--muted)",
-                                  marginInlineStart: "auto",
-                                }}
-                              />
-                            )}
-                            {tab.badge === "unread" &&
-                              unreadCount > 0 &&
-                              !tab.locked && (
-                                <span className="drawer-badge">
-                                  {unreadCount > 99 ? "99+" : unreadCount}
-                                </span>
-                              )}
-                            {tab.badge === "chat" &&
-                              unreadChatCount > 0 &&
-                              !tab.locked && (
-                                <span className="drawer-badge primary">
-                                  {unreadChatCount > 99
-                                    ? "99+"
-                                    : unreadChatCount}
-                                </span>
-                              )}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* مساحتي — navigates to the workspace and reveals its pages */}
-                    {userType === "member" && (
-                      <>
-                        <button
-                          type="button"
-                          className={`mobile-drawer-link drawer-accordion-head${
-                            location.pathname.startsWith("/member/workspace")
-                              ? " active"
-                              : ""
-                          }${drawerWorkspaceOpen ? " open" : ""}`}
-                          aria-expanded={drawerWorkspaceOpen}
-                          onClick={() => {
-                            if (!drawerWorkspaceOpen)
-                              navigate("/member/workspace");
-                            setDrawerWorkspaceOpen((v) => !v);
-                          }}
-                        >
-                          <Icon name="briefcase" />
-                          <span>{t("myWorkspace")}</span>
-                          <Icon
-                            name="chevron-down"
-                            size={16}
-                            className="drawer-accordion-chevron"
-                          />
-                        </button>
-                        {drawerWorkspaceOpen && (
-                          <div className="drawer-subnav">
-                            {drawerWorkspaceTabs.map((tab) => {
-                              const enabled =
-                                isWorkspaceActive &&
-                                checkWorkspaceCapability(user, tab.capability);
-                              if (!enabled) {
+                            <Icon name="briefcase" />
+                            <span>{t("myWorkspace")}</span>
+                            <Icon
+                              name="chevron-down"
+                              size={16}
+                              className="drawer-accordion-chevron"
+                            />
+                          </button>
+                          {drawerWorkspaceOpen && (
+                            <div className="drawer-subnav">
+                              {drawerWorkspaceTabs.map((tab) => {
+                                const enabled =
+                                  isWorkspaceActive &&
+                                  checkWorkspaceCapability(
+                                    user,
+                                    tab.capability,
+                                  );
+                                if (!enabled) {
+                                  return (
+                                    <span
+                                      key={tab.id}
+                                      className="mobile-drawer-link drawer-sublink drawer-sublink-disabled"
+                                      aria-disabled="true"
+                                    >
+                                      <Icon name={tab.icon} />
+                                      <span>{tab.label}</span>
+                                      <Icon name="lock" size={13} />
+                                    </span>
+                                  );
+                                }
                                 return (
-                                  <span
+                                  <NavLink
                                     key={tab.id}
-                                    className="mobile-drawer-link drawer-sublink drawer-sublink-disabled"
-                                    aria-disabled="true"
+                                    to={tab.path}
+                                    end={tab.end}
+                                    className={({ isActive }) =>
+                                      `mobile-drawer-link drawer-sublink${
+                                        isActive ? " active" : ""
+                                      }`
+                                    }
+                                    onClick={closeMobileDrawer}
                                   >
                                     <Icon name={tab.icon} />
-                                    <span>{tab.label}</span>
-                                    <Icon name="lock" size={13} />
-                                  </span>
-                                );
-                              }
-                              return (
-                                <NavLink
-                                  key={tab.id}
-                                  to={tab.path}
-                                  end={tab.end}
-                                  className={({ isActive }) =>
-                                    `mobile-drawer-link drawer-sublink${
-                                      isActive ? " active" : ""
-                                    }`
-                                  }
-                                  onClick={closeMobileDrawer}
-                                >
-                                  <Icon name={tab.icon} />
-                                  <span style={{ flex: 1 }}>{tab.label}</span>
-                                  {tab.isApplication && (
-                                    <span
-                                      style={{
-                                        fontSize: "0.64rem",
-                                        fontWeight: 800,
-                                        padding: "2px 6px",
-                                        borderRadius: 4,
-                                        background: "rgba(59, 130, 246, 0.15)",
-                                        color: "#3b82f6",
-                                        border:
-                                          "1px solid rgba(59, 130, 246, 0.3)",
-                                        marginInlineStart: "auto",
-                                      }}
-                                    >
-                                      APP
-                                    </span>
-                                  )}
-                                  {tab.id === "bookings" &&
-                                    pendingBookingsCount > 0 && (
+                                    <span style={{ flex: 1 }}>{tab.label}</span>
+                                    {tab.isApplication && (
                                       <span
                                         style={{
-                                          marginInlineStart: "auto",
-                                          padding: "2px 7px",
-                                          borderRadius: 10,
-                                          fontSize: "0.72rem",
+                                          fontSize: "0.64rem",
                                           fontWeight: 800,
-                                          background: "#f59e0b",
-                                          color: "#ffffff",
-                                          lineHeight: 1,
+                                          padding: "2px 6px",
+                                          borderRadius: 4,
+                                          background:
+                                            "rgba(59, 130, 246, 0.15)",
+                                          color: "#3b82f6",
+                                          border:
+                                            "1px solid rgba(59, 130, 246, 0.3)",
+                                          marginInlineStart: "auto",
                                         }}
                                       >
-                                        {pendingBookingsCount}
+                                        APP
                                       </span>
                                     )}
-                                </NavLink>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </nav>
-            </div>
+                                    {tab.id === "bookings" &&
+                                      pendingBookingsCount > 0 && (
+                                        <span
+                                          style={{
+                                            marginInlineStart: "auto",
+                                            padding: "2px 7px",
+                                            borderRadius: 10,
+                                            fontSize: "0.72rem",
+                                            fontWeight: 800,
+                                            background: "#f59e0b",
+                                            color: "#ffffff",
+                                            lineHeight: 1,
+                                          }}
+                                        >
+                                          {pendingBookingsCount}
+                                        </span>
+                                      )}
+                                  </NavLink>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </nav>
+              </div>
+            )}
 
             {/* Drawer Footer: Controls & Actions */}
             <div className="mobile-drawer-footer">

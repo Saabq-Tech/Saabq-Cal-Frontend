@@ -17,6 +17,7 @@ import {
   LANDING_TEMPLATES,
   defaultSections,
   getLandingTemplate,
+  recommendedTemplates,
   resolveSections,
 } from "../../../../landing-pages/catalog";
 import "../../../../landing-pages/editor.css";
@@ -133,6 +134,7 @@ export default function LandingPageTab() {
   const [roles, setRoles] = useState([]);
   const [page, setPage] = useState(null);
   const [savedSnapshot, setSavedSnapshot] = useState("");
+  const [hasSavedPage, setHasSavedPage] = useState(false);
   const [panel, setPanel] = useState("template");
   const [device, setDevice] = useState("mobile");
 
@@ -158,6 +160,7 @@ export default function LandingPageTab() {
       setServices(srvRes.data?.data || []);
       setRoles(specRes.data?.data || []);
       setPage(state);
+      setHasSavedPage(Boolean(pageRes.data?.data?.landing_page));
       setSavedSnapshot(JSON.stringify(landingPagePayload(state)));
     } catch {
       setLoadError(true);
@@ -184,6 +187,12 @@ export default function LandingPageTab() {
     [page, workspace, services, roles],
   );
   const template = page ? getLandingTemplate(page.template_key) : null;
+  // The workspace category's templates come first (clinics choose among four).
+  const recommended = workspace ? recommendedTemplates(workspace) : [];
+  const orderedTemplates = [
+    ...LANDING_TEMPLATES.filter((tpl) => recommended.includes(tpl.id)),
+    ...LANDING_TEMPLATES.filter((tpl) => !recommended.includes(tpl.id)),
+  ];
   const dirty = page
     ? JSON.stringify(landingPagePayload(page)) !== savedSnapshot
     : false;
@@ -337,31 +346,43 @@ export default function LandingPageTab() {
           </div>
 
           {panel === "template" && (
-            <div
-              className="lpe-templates"
-              role="radiogroup"
-              aria-label={t("lpStepTemplate")}
-            >
-              {LANDING_TEMPLATES.map((tpl) => (
-                <button
-                  key={tpl.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={tpl.id === page.template_key}
-                  className={`lpe-template ${tpl.id === page.template_key ? "is-on" : ""}`}
-                  onClick={() => chooseTemplate(tpl.id)}
-                  disabled={readOnly}
-                >
-                  <span
-                    className="lpe-template__swatch"
-                    style={{ background: tpl.accentOptions[0] }}
-                    aria-hidden="true"
-                  />
-                  <strong>{t(tpl.nameKey)}</strong>
-                  <span>{t(tpl.descKey)}</span>
-                </button>
-              ))}
-            </div>
+            <>
+              {!hasSavedPage && recommended.length > 1 && (
+                <p className="lpe-alert lpe-alert--info">
+                  {t("lpChooseGroupTemplate")}
+                </p>
+              )}
+              <div
+                className="lpe-templates"
+                role="radiogroup"
+                aria-label={t("lpStepTemplate")}
+              >
+                {orderedTemplates.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={tpl.id === page.template_key}
+                    className={`lpe-template ${tpl.id === page.template_key ? "is-on" : ""}`}
+                    onClick={() => chooseTemplate(tpl.id)}
+                    disabled={readOnly}
+                  >
+                    <span
+                      className="lpe-template__swatch"
+                      style={{ background: tpl.accentOptions[0] }}
+                      aria-hidden="true"
+                    />
+                    <strong>{t(tpl.nameKey)}</strong>
+                    <span>{t(tpl.descKey)}</span>
+                    {recommended.includes(tpl.id) && (
+                      <span className="lpe-template__badge">
+                        {t("lpRecommended")}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
 
           {panel === "content" && (

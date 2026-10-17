@@ -152,8 +152,27 @@ export const LANDING_TEMPLATES = [
 export const getLandingTemplate = (id) =>
   LANDING_TEMPLATES.find((tpl) => tpl.id === id);
 
-/** workspace_types ids 1-7 match the categories in utils/workspaceVibe.js. */
-const TYPE_TO_TEMPLATE = {
+/** Templates that share a workspace category; owners of that category choose among them. */
+export const TEMPLATE_GROUPS = {
+  clinic: ["clinic", "dental", "medical", "therapy"],
+};
+
+/** Workspace type code (workspace_types.code) -> suggested template. */
+const CODE_TO_TEMPLATE = {
+  clinic: "clinic",
+  consulting: "consulting",
+  beauty: "beauty",
+  education: "education",
+  teacher: "education",
+  creative: "creative",
+  fitness: "fitness",
+  services: "services",
+  company: "company",
+  realestate: "realestate",
+};
+
+/** Older payloads without a type code: built-in ids 1-7 match utils/workspaceVibe.js. */
+const ID_TO_CODE = {
   1: "clinic",
   2: "consulting",
   3: "beauty",
@@ -163,8 +182,23 @@ const TYPE_TO_TEMPLATE = {
   7: "services",
 };
 
-export function suggestTemplate(workspaceTypeId) {
-  return TYPE_TO_TEMPLATE[Number(workspaceTypeId)] || "clinic";
+/** The workspace's type code, from workspace_type.code or the legacy id. */
+export function workspaceTypeCode(workspace) {
+  return (
+    workspace?.workspace_type?.code ||
+    ID_TO_CODE[Number(workspace?.workspace_type_id)] ||
+    null
+  );
+}
+
+export function suggestTemplate(workspace) {
+  return CODE_TO_TEMPLATE[workspaceTypeCode(workspace)] || "clinic";
+}
+
+/** Templates recommended for the workspace: its category's group, or the single suggestion. */
+export function recommendedTemplates(workspace) {
+  const code = workspaceTypeCode(workspace);
+  return TEMPLATE_GROUPS[code] || [suggestTemplate(workspace)];
 }
 
 /** All of the template's sections, switched on, in its default order. */

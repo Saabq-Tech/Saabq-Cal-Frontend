@@ -1,0 +1,82 @@
+/* "Repeat weekly" block in the create booking modal. */
+.recurrence-fields {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+}
+.recurrence-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.recurrence-toggle input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+}
+.recurrence-toggle span {
+  display: grid;
+  gap: 2px;
+}
+.recurrence-toggle small,
+.recurrence-hint {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin: 0;
+}
+.recurrence-body {
+  display: grid;
+  gap: 12px;
+}
+.recurrence-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.recurrence-days button {
+  min-width: 52px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.recurrence-days button.is-on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.recurrence-period {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 12px;
+}
+
+/* Cancel dialog of a recurring session: this session only, or the whole series from here on. */
+.recurrence-cancel-scope {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+.recurrence-cancel-scope label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.recurrence-cancel-scope input {
+  accent-color: var(--primary);
+}

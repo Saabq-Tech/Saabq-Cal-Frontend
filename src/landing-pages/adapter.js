@@ -206,7 +206,7 @@ export function initialLandingPage(workspace) {
   const typeName = clean(
     extractTranslatableText(workspace?.workspace_type?.name, lang),
   );
-  const templateId = suggestTemplate(workspace?.workspace_type_id);
+  const templateId = suggestTemplate(workspace);
   return {
     template_key: templateId,
     is_published: false,
