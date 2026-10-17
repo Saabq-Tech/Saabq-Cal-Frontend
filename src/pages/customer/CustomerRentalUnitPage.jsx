@@ -451,7 +451,7 @@ export default function CustomerRentalUnitPage() {
                   onSuccess={setToken}
                   onError={() => setToken("")}
                   onExpire={() => setToken("")}
-                  options={{ theme: "auto", size: "flexible" }}
+                  options={{ theme: "auto", size: "flexible", action: "rental-reservation" }}
                 />
 
                 <button

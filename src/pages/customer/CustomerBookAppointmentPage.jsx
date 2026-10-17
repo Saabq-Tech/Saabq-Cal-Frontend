@@ -2336,6 +2336,7 @@ export default function CustomerBookAppointmentPage() {
                         options={{
                           theme: "auto",
                           size: "flexible",
+                          action: "customer-appointment",
                         }}
                       />
                     </div>

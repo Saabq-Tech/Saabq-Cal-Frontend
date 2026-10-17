@@ -347,6 +347,7 @@ export default function MemberRegisterPage() {
             options={{
               theme: "auto",
               size: "flexible",
+              action: "member-register",
             }}
           />
         </div>
