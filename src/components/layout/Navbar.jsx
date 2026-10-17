@@ -263,6 +263,16 @@ export default function Navbar() {
       >
         <div className="container navbar-inner">
           <div className="navbar-brand-group">
+            <Link
+              to="/"
+              className="navbar-brand"
+              onClick={(e) => handleSectionClick("home", e)}
+            >
+              <AppLogo
+                height={32}
+                forceOriginalColors={isWorkspaceRoute(location.pathname)}
+              />
+            </Link>
             {dashboardMode && (
               <button
                 type="button"
@@ -279,19 +289,9 @@ export default function Navbar() {
                     : t("collapseSidebar") || "طي القائمة الجانبية"
                 }
               >
-                <Icon name="sidebar" size={20} />
+                <Icon name="menu" size={20} />
               </button>
             )}
-            <Link
-              to="/"
-              className="navbar-brand"
-              onClick={(e) => handleSectionClick("home", e)}
-            >
-              <AppLogo
-                height={32}
-                forceOriginalColors={isWorkspaceRoute(location.pathname)}
-              />
-            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -779,16 +779,18 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Mobile Hamburger Button */}
-            <button
-              className="navbar-toggle"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={t("toggleMenu") || "فتح القائمة الرئيسية"}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-drawer-dialog"
-            >
-              <Icon name="custom-4d0dde3d" />
-            </button>
+            {/* Mobile Hamburger Button — only on non-dashboard pages */}
+            {!dashboardMode && (
+              <button
+                className="navbar-toggle"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label={t("toggleMenu") || "فتح القائمة الرئيسية"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-drawer-dialog"
+              >
+                <Icon name="custom-4d0dde3d" />
+              </button>
+            )}
           </div>
         </div>
       </nav>
