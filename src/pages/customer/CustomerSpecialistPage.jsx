@@ -155,7 +155,7 @@ export default function CustomerSpecialistPage() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: workspace.name,
-    url: `https://cal.saabq.com/${workspace.slug}`,
+    url: `https://saabqcal.com/${workspace.slug}`,
     ...(workspace.booking_short_intro && {
       description: workspace.booking_short_intro,
     }),
@@ -184,19 +184,19 @@ export default function CustomerSpecialistPage() {
         "@type": "ListItem",
         position: 1,
         name: t("home"),
-        item: "https://cal.saabq.com/",
+        item: "https://saabqcal.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("workspaces", "مساحات العمل"),
-        item: "https://cal.saabq.com/workspaces",
+        item: "https://saabqcal.com/workspaces",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: workspace.name,
-        item: `https://cal.saabq.com/${workspace.slug}`,
+        item: `https://saabqcal.com/${workspace.slug}`,
       },
     ],
   };
@@ -212,7 +212,7 @@ export default function CustomerSpecialistPage() {
         worksFor: {
           "@type": "LocalBusiness",
           name: workspace.name,
-          url: `https://cal.saabq.com/${workspace.slug}`,
+          url: `https://saabqcal.com/${workspace.slug}`,
         },
       }
     : null;
