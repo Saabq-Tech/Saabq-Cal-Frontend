@@ -374,6 +374,16 @@ export function getAccountTabs(t, userType, user = null) {
   const prefix = userType === "member" ? "/member" : "/customer";
   return [
     {
+      id: "workspace",
+      to: userType === "member" ? "/member/workspace" : "/workspaces",
+      icon: "grid",
+      label:
+        userType === "member"
+          ? t("myWorkspace") || "مساحة العمل"
+          : t("workspaces") || "مساحات العمل",
+      show: true,
+    },
+    {
       id: "overview",
       to: `${prefix}/profile?tab=overview`,
       icon: "home",

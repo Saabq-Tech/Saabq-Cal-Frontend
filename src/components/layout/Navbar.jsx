@@ -15,6 +15,7 @@ import {
 } from "../../config/dashboardNav";
 import { updateMetaThemeColor, isWorkspaceRoute } from "../../utils/theme";
 import { checkWorkspaceCapability } from "../../utils/capabilities";
+import { useSidebar } from "../../context/SidebarContext";
 
 export default function Navbar() {
   const {
@@ -25,6 +26,7 @@ export default function Navbar() {
     unreadCount = 0,
     unreadChatCount = 0,
   } = useAuth();
+  const { isSidebarCollapsed, toggleSidebar } = useSidebar();
   const { lang, toggleLanguage, t } = useLanguage();
   const location = useLocation();
   // Dashboard pages (account, workspace, customer) get a clean header: no site links or
@@ -35,6 +37,16 @@ export default function Navbar() {
     !/\/(login|register|forgot-password|reset-password|verify-account)$/.test(
       location.pathname,
     );
+
+  const isProfilePage =
+    isAuthenticated &&
+    (/^\/(member|customer)\/profile(\/|$)/.test(location.pathname) ||
+      /^\/member\/(security|change-password|integrations|api-integration|notifications|chats)(\/|$)/.test(
+        location.pathname,
+      ) ||
+      /^\/customer\/(security|change-password|notifications|chats|appointments)(\/|$)/.test(
+        location.pathname,
+      ));
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -250,16 +262,37 @@ export default function Navbar() {
         aria-label={t("mainNavigation") || "Main navigation"}
       >
         <div className="container navbar-inner">
-          <Link
-            to="/"
-            className="navbar-brand"
-            onClick={(e) => handleSectionClick("home", e)}
-          >
-            <AppLogo
-              height={32}
-              forceOriginalColors={isWorkspaceRoute(location.pathname)}
-            />
-          </Link>
+          <div className="navbar-brand-group">
+            {dashboardMode && (
+              <button
+                type="button"
+                className={`sidebar-toggler-btn${isSidebarCollapsed ? " collapsed" : ""}`}
+                onClick={toggleSidebar}
+                aria-label={
+                  isSidebarCollapsed
+                    ? t("expandSidebar") || "توسيع القائمة الجانبية"
+                    : t("collapseSidebar") || "طي القائمة الجانبية"
+                }
+                title={
+                  isSidebarCollapsed
+                    ? t("expandSidebar") || "توسيع القائمة الجانبية"
+                    : t("collapseSidebar") || "طي القائمة الجانبية"
+                }
+              >
+                <Icon name="sidebar" size={20} />
+              </button>
+            )}
+            <Link
+              to="/"
+              className="navbar-brand"
+              onClick={(e) => handleSectionClick("home", e)}
+            >
+              <AppLogo
+                height={32}
+                forceOriginalColors={isWorkspaceRoute(location.pathname)}
+              />
+            </Link>
+          </div>
 
           {/* Desktop Navigation */}
           {!dashboardMode && (
@@ -528,6 +561,26 @@ export default function Navbar() {
           )}
 
           <div className="navbar-actions">
+            {/* Quick Link to Workspace on Profile Pages */}
+            {isProfilePage && (
+              <Link
+                to={userType === "member" ? "/member/workspace" : "/workspaces"}
+                className="btn btn-outline-primary btn-sm navbar-workspace-link"
+                title={
+                  userType === "member"
+                    ? t("myWorkspace") || "مساحة العمل"
+                    : t("workspaces") || "مساحات العمل"
+                }
+              >
+                <Icon name="grid" size={15} />
+                <span>
+                  {userType === "member"
+                    ? t("myWorkspace") || "مساحة العمل"
+                    : t("workspaces") || "مساحات العمل"}
+                </span>
+              </Link>
+            )}
+
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}

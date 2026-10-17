@@ -100,3 +100,149 @@ html.dark .workspace-dashboard-sidebar {
   background: var(--surface);
   border-inline-end-color: var(--border);
 }
+
+/* Header brand group with sidebar toggler */
+html .navbar-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Sidebar toggler button in header */
+html .sidebar-toggler-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light, rgba(0, 0, 0, 0.08));
+  background: var(--surface, #ffffff);
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+html.dark .sidebar-toggler-btn {
+  border-color: var(--border, rgba(255, 255, 255, 0.1));
+  background: var(--surface, #1e293b);
+  color: var(--text-secondary, #94a3b8);
+}
+html .sidebar-toggler-btn:hover {
+  background: var(--surface-alt, #f1f5f9);
+  color: var(--heading, #0f172a);
+  border-color: var(--border, rgba(0, 0, 0, 0.15));
+}
+html.dark .sidebar-toggler-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--heading, #ffffff);
+}
+html .sidebar-toggler-btn.collapsed {
+  background: var(--sb-accent-subtle, rgba(2, 132, 199, 0.1));
+  color: var(--sb-accent, #0284c7);
+  border-color: var(--sb-accent, #0284c7);
+}
+[dir="rtl"] html .sidebar-toggler-btn svg {
+  transform: scaleX(-1);
+}
+
+/* Header link to workspace on profile pages */
+html .navbar-workspace-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 99px);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+/* Collapsed Grid */
+html .workspace-dashboard-grid {
+  transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html .workspace-dashboard-grid.sidebar-collapsed {
+  grid-template-columns: 68px minmax(0, 1fr) !important;
+}
+
+/* Collapsed Sidebar Rail */
+html .workspace-dashboard-sidebar {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease;
+}
+html .workspace-dashboard-sidebar.collapsed {
+  width: 68px !important;
+  min-width: 68px !important;
+  max-width: 68px !important;
+  padding: 14px 6px !important;
+  overflow-x: hidden !important;
+  align-items: center;
+}
+html .workspace-dashboard-sidebar.collapsed nav {
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+}
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-link {
+  width: 44px;
+  height: 44px;
+  padding: 0 !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: 10px;
+  position: relative;
+}
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-link > span:not(.profile-sidebar-icon):not(.notif-sidebar-badge) {
+  display: none !important;
+}
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-icon {
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-link svg:not(:first-child) {
+  display: none !important;
+}
+html .workspace-dashboard-sidebar.collapsed .workspace-sidebar-section-header,
+html .workspace-dashboard-sidebar.collapsed .workspace-subnav,
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-header {
+  display: none !important;
+}
+html .workspace-dashboard-sidebar.collapsed .notif-sidebar-badge {
+  position: absolute !important;
+  top: 4px !important;
+  inset-inline-end: 4px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  padding: 0 4px !important;
+  font-size: 0.62rem !important;
+  line-height: 16px !important;
+  border-radius: 99px !important;
+}
+html .workspace-dashboard-sidebar.collapsed .profile-sidebar-link span[style*="f59e0b"] {
+  position: absolute !important;
+  top: 4px !important;
+  inset-inline-end: 4px !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  font-size: 0.62rem !important;
+  line-height: 16px !important;
+  border-radius: 99px !important;
+}
+
+/* Mobile & tablet (<= 1024px): horizontal bar collapses / hides */
+@media (max-width: 1024px) {
+  html .workspace-dashboard-sidebar.collapsed {
+    display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+}

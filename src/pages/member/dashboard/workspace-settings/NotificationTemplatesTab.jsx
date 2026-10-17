@@ -186,71 +186,66 @@ export default function NotificationTemplatesTab({
 
   return (
     <div className="card-body">
-      {/* Top Standard Header */}
-      <WorkspacePageHeader
-        title={
-          t("notificationTemplates") ||
-          (isRTL ? "قوالب الإشعارات والرسائل" : "Notification Templates")
-        }
-        subtitle={
-          isRTL
-            ? "تخصيص جميع إشعارات وتنبيهات الحجوزات، المدفوعات، والجلسات الموجهة للعملاء وفريق العمل."
-            : "Customize automated email and SMS notification templates for bookings and payments."
-        }
-        icon="bell"
-        actions={
-          <div
+      {/* Language Switcher Toolbar */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            background: "var(--surface)",
+            padding: 3,
+            borderRadius: "var(--radius-md, 10px)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <button
+            type="button"
+            className={`btn btn-sm ${templateLang === "ar" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setTemplateLang("ar")}
             style={{
-              display: "flex",
-              background: "var(--surface)",
-              padding: 3,
-              borderRadius: "var(--radius-md, 10px)",
-              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-sm)",
+              padding: "6px 16px",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
             }}
           >
-            <button
-              type="button"
-              className={`btn btn-sm ${templateLang === "ar" ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setTemplateLang("ar")}
-              style={{
-                borderRadius: "var(--radius-sm)",
-                padding: "6px 16px",
-                fontSize: "0.82rem",
-                fontWeight: 700,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Flag
-                country="eg"
-                style={{ width: 18, height: 12, borderRadius: 2 }}
-              />
-              <span>{isRTL ? "العربية" : "Arabic"}</span>
-            </button>
-            <button
-              type="button"
-              className={`btn btn-sm ${templateLang === "en" ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setTemplateLang("en")}
-              style={{
-                borderRadius: "var(--radius-sm)",
-                padding: "6px 16px",
-                fontSize: "0.82rem",
-                fontWeight: 700,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <Flag
-                country="us"
-                style={{ width: 18, height: 12, borderRadius: 2 }}
-              />
-              <span>{isRTL ? "الإنجليزية" : "English"}</span>
-            </button>
-          </div>
-        }
-      />
+            <Flag
+              country="eg"
+              style={{ width: 18, height: 12, borderRadius: 2 }}
+            />
+            <span>{isRTL ? "العربية" : "Arabic"}</span>
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${templateLang === "en" ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setTemplateLang("en")}
+            style={{
+              borderRadius: "var(--radius-sm)",
+              padding: "6px 16px",
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <Flag
+              country="us"
+              style={{ width: 18, height: 12, borderRadius: 2 }}
+            />
+            <span>{isRTL ? "الإنجليزية" : "English"}</span>
+          </button>
+        </div>
+      </div>
 
       {/* Read-Only Notice Banner when editing is disabled */}
       {!canEdit && (

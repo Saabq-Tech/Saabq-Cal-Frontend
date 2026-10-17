@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { LayoutChromeContext } from "./context/LayoutChromeContext";
+import { SidebarProvider } from "./context/SidebarContext";
 
 import Navbar from "./components/layout/Navbar";
 import MobileTabBar from "./components/layout/MobileTabBar";
@@ -266,8 +267,9 @@ export default function App() {
         <AuthProvider>
           <ThemeBrandingController />
           <ToastProvider>
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader />}>
+            <SidebarProvider>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public pages — with Navbar/Footer */}
                   <Route
@@ -910,6 +912,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </ErrorBoundary>
+            </SidebarProvider>
           </ToastProvider>
         </AuthProvider>
       </LanguageProvider>

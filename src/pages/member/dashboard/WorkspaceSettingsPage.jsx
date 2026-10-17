@@ -504,18 +504,103 @@ export default function WorkspaceSettingsPage() {
     }
   };
 
+  const getSettingsPageMeta = () => {
+    switch (subSettingsTab) {
+      case "branding":
+        return {
+          title: t("workspaceBranding") || "الهوية والعلامة التجارية",
+          subtitle:
+            t("workspaceBrandingDesc") ||
+            t("brandingAndIdentityDesc") ||
+            "تخصيص الاسم والشعار والألوان وهوية مساحة العمل في لوحة التحكم والبوابة ورسائل البريد.",
+          icon: "palette",
+        };
+      case "landing_page":
+        return {
+          title: t("workspaceLandingPage") || "الصفحة التعريفية",
+          subtitle:
+            t("workspaceLandingPageDesc") ||
+            "تخصيص وتصميم ونشر الصفحة التعريفية العامة لمساحة العمل.",
+          icon: "globe",
+        };
+      case "timezone":
+        return {
+          title: t("workspaceTimezone") || "المنطقة الزمنية وتنسيق الوقت",
+          subtitle:
+            t("workspaceTimezoneDesc") ||
+            "ضبط المنطقة الزمنية، تنسيق التاريخ والوقت، والعملة الافتراضية لمساحة العمل.",
+          icon: "clock",
+        };
+      case "social":
+        return {
+          title: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والروابط",
+          subtitle:
+            t("workspaceSocialLinksDesc") ||
+            "روابط حسابات التواصل الاجتماعي والموقع الإلكتروني التي تظهر للعملاء في صفحة الحجز والإيميلات.",
+          icon: "share-2",
+        };
+      case "form_fields":
+        return {
+          title: t("workspaceFormFields") || "منشئ نموذج الحجز",
+          subtitle:
+            t("workspaceFormFieldsDesc") ||
+            "تخصيص الحقول والبيانات والأسئلة الإلزامية والاختيارية المطلوبة من العملاء عند الحجز.",
+          icon: "file-text",
+        };
+      case "payment":
+        return {
+          title: t("workspacePaymentReceipts") || "إيصالات الدفع",
+          subtitle:
+            t("workspacePaymentReceiptsDesc") ||
+            "تخصيص بيانات وإعدادات إيصالات الدفع والتحويلات البنكية وإلزامية إرفاق الإيصال.",
+          icon: "credit-card",
+        };
+      case "notifications":
+        return {
+          title:
+            t("workspaceNotificationTemplates") || "قوالب الإشعارات والرسائل",
+          subtitle:
+            t("workspaceNotificationTemplatesDesc") ||
+            "تخصيص جميع إشعارات وتنبيهات الحجوزات والمدفوعات والجلسات الموجهة للعملاء وفريق العمل.",
+          icon: "bell",
+        };
+      case "templates":
+        return {
+          title: t("prescriptionTemplates") || "قوالب التقارير والملخصات",
+          subtitle:
+            t("prescriptionTemplatesDesc") ||
+            "إدارة وتخصيص قوالب التقارير الطبية والمستندات والملخصات السريرية.",
+          icon: "file-text",
+        };
+      case "basic":
+      default:
+        return {
+          title: t("workspaceBasicInfo") || "معلومات مساحة العمل الأساسية",
+          subtitle:
+            t("workspaceBasicInfoDesc") ||
+            "تعديل تفاصيل مساحة العمل الأساسية، بيانات التواصل، والموقع الجغرافي.",
+          icon: "custom-34f286e2",
+        };
+    }
+  };
+
+  const currentMeta = getSettingsPageMeta();
+
+  useEffect(() => {
+    if (currentMeta?.title) {
+      document.title = `${currentMeta.title} — ${t("appName") || "تقويم سابق"}`;
+    }
+  }, [currentMeta?.title, t]);
+
   return (
     <div className="workspace-settings-page animate-fade-in">
       <SEO pageKey="workspaceSettings" />
 
-      {/* Top Unified Header */}
+      {/* Top Dynamic Header for Active Settings Page */}
       <WorkspacePageHeader
-        title={t("workspaceSettings") || "إعدادات مساحة العمل"}
-        subtitle={
-          t("workspaceSettingsSubtitle") ||
-          "تخصيص الهوية البصرية، المنطقة الزمنية، وسائل التواصل، ونموذج جمع بيانات الحجز."
-        }
-        icon="settings"
+        title={currentMeta.title}
+        subtitle={currentMeta.subtitle}
+        icon={currentMeta.icon}
       />
 
       {/* Main Settings Card with Dynamic Smooth Tab Transition Animation */}

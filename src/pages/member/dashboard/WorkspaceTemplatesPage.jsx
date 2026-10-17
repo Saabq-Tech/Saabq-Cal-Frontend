@@ -187,57 +187,17 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
       >
         {!embedded && <SEO pageKey="workspaceTemplates" />}
 
-        {/* Header - render compact header when embedded in Settings, or full WorkspacePageHeader when standalone */}
+        {/* Header - render action toolbar when embedded in Settings, or full WorkspacePageHeader when standalone */}
         {embedded ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 16,
-              marginBottom: 4,
-              paddingBottom: 16,
-              borderBottom: "1px solid var(--border-light)",
-            }}
-          >
-            <div>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: "1.1rem",
-                  fontWeight: 800,
-                  color: "var(--heading)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
-                <Icon
-                  name="file-text"
-                  size={18}
-                  style={{ color: "var(--primary)" }}
-                />
-                <span>
-                  {isRTL
-                    ? "قوالب التقارير والملخصات"
-                    : "Report & Summary Templates"}
-                </span>
-              </h3>
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  fontSize: "0.84rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.5,
-                }}
-              >
-                {isRTL
-                  ? "إدارة النماذج الجاهزة لاستخدامها مباشرة أثناء كتابة التقارير والملخصات الاستشارية."
-                  : "Manage ready-to-use templates for reports and consultation summaries."}
-              </p>
-            </div>
-            {canEdit && (
+          canEdit && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+            >
               <button
                 type="button"
                 className="btn btn-primary btn-sm"
@@ -254,8 +214,8 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
                 <Icon name="plus" size={16} />
                 <span>{isRTL ? "إضافة قالب جديد" : "Add Template"}</span>
               </button>
-            )}
-          </div>
+            </div>
+          )
         ) : (
           <WorkspacePageHeader
             title={

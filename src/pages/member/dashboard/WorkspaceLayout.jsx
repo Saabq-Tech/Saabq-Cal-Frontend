@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useLanguage } from "../../../context/LanguageContext";
+import { useSidebar } from "../../../context/SidebarContext";
 import GoogleNotConnectedBanner from "../../../components/common/GoogleNotConnectedBanner";
 import "../../../styles/dashboard-shell.css";
 import Icon from "../../../components/common/Icon";
@@ -19,6 +20,7 @@ import WorkspaceTabsBar from "./components/WorkspaceTabsBar";
 
 export default function WorkspaceLayout() {
   const { user } = useAuth();
+  const { isSidebarCollapsed } = useSidebar();
   const { t, lang } = useLanguage();
   const location = useLocation();
   const vibe = getWorkspaceVibe(user?.workspace, lang);
@@ -160,8 +162,17 @@ export default function WorkspaceLayout() {
       data-workspace-vibe={vibe.key}
     >
       {/* Two-column dashboard grid */}
-      <div className="workspace-dashboard-grid">
-        <aside ref={sidebarRef} className="workspace-dashboard-sidebar">
+      <div
+        className={`workspace-dashboard-grid${
+          isSidebarCollapsed ? " sidebar-collapsed" : ""
+        }`}
+      >
+        <aside
+          ref={sidebarRef}
+          className={`workspace-dashboard-sidebar${
+            isSidebarCollapsed ? " collapsed" : ""
+          }`}
+        >
           <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
             {/* 1. Main Workspace Management Tabs */}
             {regularTabs.map((wsTab) => {
@@ -202,6 +213,7 @@ export default function WorkspaceLayout() {
                   <NavLink
                     to={wsTab.path}
                     end={wsTab.end}
+                    title={wsTab.label}
                     className={({ isActive }) =>
                       `profile-sidebar-link${isActive ? " active" : ""}`
                     }
@@ -287,6 +299,7 @@ export default function WorkspaceLayout() {
                   <Fragment key={appTab.path}>
                     <NavLink
                       to={appTab.path}
+                      title={appTab.label}
                       className={({ isActive }) =>
                         `profile-sidebar-link${
                           isActive || isSaabqChatOpen ? " active" : ""

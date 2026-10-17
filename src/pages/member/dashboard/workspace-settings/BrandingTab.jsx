@@ -201,43 +201,6 @@ export default function BrandingTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit} style={{ gap: 24 }}>
-      {/* Header */}
-      <div
-        style={{
-          borderBottom: "1px solid var(--border-light)",
-          paddingBottom: 12,
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 800,
-            margin: "0 0 4px",
-            color: "var(--heading)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <Icon
-            name="custom-ecd73178"
-            size={20}
-            style={{ color: "var(--primary)" }}
-          />
-          {t("brandingAndIdentity") || "الهوية والعلامة التجارية"}
-        </h3>
-        <p
-          style={{
-            fontSize: "0.84rem",
-            color: "var(--text-secondary)",
-            margin: 0,
-          }}
-        >
-          {t("brandingAndIdentityDesc") ||
-            "الاسم والشعار والألوان التي تظهر في لوحة التحكم والبوابة ورسائل البريد الإلكتروني والمستندات."}
-        </p>
-      </div>
-
       {/* 3 Upload Cards (Logo, Cover, Favicon) - 3 Columns Grid */}
       <div
         style={{

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useSearchParams, Navigate } from "react-router-dom";
+import { Link, useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
@@ -144,6 +144,8 @@ export default function MemberProfilePage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
         }}
       >
         <div>
@@ -152,25 +154,35 @@ export default function MemberProfilePage() {
           </h2>
           <p className="card-subtitle">{t("updatePersonalDetails")}</p>
         </div>
-        {!editing ? (
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => setEditing(true)}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <Link
+            to="/member/workspace"
+            className="btn btn-secondary btn-sm"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            <Icon name="custom-b1d51d5f" size={14} />
-            {t("edit")}
-          </button>
-        ) : (
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => {
-              setEditing(false);
-              setErrors({});
-            }}
-          >
-            {t("cancel")}
-          </button>
-        )}
+            <Icon name="grid" size={14} />
+            <span>{t("myWorkspace") || "مساحة العمل"}</span>
+          </Link>
+          {!editing ? (
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => setEditing(true)}
+            >
+              <Icon name="custom-b1d51d5f" size={14} />
+              {t("edit")}
+            </button>
+          ) : (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setEditing(false);
+                setErrors({});
+              }}
+            >
+              {t("cancel")}
+            </button>
+          )}
+        </div>
       </div>
 
       {editing ? (

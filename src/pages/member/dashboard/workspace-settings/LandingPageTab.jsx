@@ -284,14 +284,7 @@ export default function LandingPageTab() {
 
   return (
     <div className="card-body lpe">
-      <div className="lpe-head">
-        <div>
-          <h3 className="lpe-title">
-            <Icon name="globe" size={20} style={{ color: "var(--primary)" }} />
-            {t("lpTabTitle")}
-          </h3>
-          <p className="lpe-desc">{t("lpTabDesc")}</p>
-        </div>
+      <div className="lpe-head" style={{ justifyContent: "flex-end" }}>
         <div className="lpe-head__actions">
           <span
             className={`badge-status ${page.is_published ? "badge-status-success" : "badge-status-neutral"}`}

@@ -213,63 +213,6 @@ export default function BasicInfoTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit}>
-      {/* Header with Circle Icon Badge & Subtitle */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          marginBottom: 24,
-          paddingBottom: 16,
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              marginBottom: 4,
-            }}
-          >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "var(--primary-subtle)",
-                color: "var(--primary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name="custom-34f286e2" size={18} />
-            </div>
-            <h3
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: 800,
-                margin: 0,
-                color: "var(--heading)",
-              }}
-            >
-              {t("workspaceBasicInfo") || "المعلومات الأساسية"}
-            </h3>
-          </div>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "0.86rem",
-              margin: 0,
-            }}
-          >
-            {t("workspaceBasicInfoDesc") ||
-              "تعديل تفاصيل مساحة العمل الأساسية، بيانات التواصل، والموقع الجغرافي."}
-          </p>
-        </div>
-      </div>
 
       {/* Row 1: Name & Slug (50% each) */}
       <div

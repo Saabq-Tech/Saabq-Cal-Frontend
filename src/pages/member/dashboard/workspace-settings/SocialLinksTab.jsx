@@ -141,43 +141,6 @@ export default function SocialLinksTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit} style={{ gap: 20 }}>
-      {/* Top Header */}
-      <div
-        style={{
-          borderBottom: "1px solid var(--border-light)",
-          paddingBottom: 12,
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 800,
-            margin: 0,
-            color: "var(--heading)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <Icon name="link" size={20} style={{ color: "var(--primary)" }} />
-          {t("socialMediaLinks") || "وسائل التواصل الاجتماعي والروابط"}
-        </h3>
-        <p
-          style={{
-            fontSize: "0.84rem",
-            color: "var(--text-secondary)",
-            margin: "4px 0 0",
-          }}
-        >
-          {isCustom
-            ? isRTL
-              ? `روابط حساباتك وموقعك التي تظهر لـ ${customerPlural} في صفحة الحجز والإيميلات`
-              : `Your social media and links displayed to ${customerPlural.toLowerCase()} on booking pages and emails`
-            : t("socialMediaLinksDesc") ||
-              "روابط حساباتك وموقعك التي تظهر للعملاء في صفحة الحجز والإيميلات"}
-        </p>
-      </div>
-
       {/* Dynamic Links List */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {links.map((linkItem, idx) => {

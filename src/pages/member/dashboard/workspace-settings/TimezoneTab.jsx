@@ -92,10 +92,6 @@ export default function TimezoneTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit}>
-      <h3 style={{ fontSize: "1.1rem", marginBottom: 16 }}>
-        {t("workspaceTimezone") || "إعدادات التوقيت والتاريخ والعملة"}
-      </h3>
-
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">

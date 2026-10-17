@@ -334,50 +334,16 @@ export default function BookingFormFieldsTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit} style={{ gap: 24 }}>
-      {/* Form Builder Top Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid var(--border-light)",
-          paddingBottom: 14,
-          flexWrap: "wrap",
-          gap: 12,
-        }}
-      >
-        <div>
-          <h3
-            style={{
-              fontSize: "1.1rem",
-              fontWeight: 800,
-              margin: "0 0 4px",
-              color: "var(--heading)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Icon name="edit" size={20} style={{ color: "var(--primary)" }} />
-            {t("formBuilder") || "منشئ نموذج الحجز"}
-          </h3>
-          <p
-            style={{
-              fontSize: "0.84rem",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
-            {isCustom
-              ? isRTL
-                ? `تخصيص الحقول المطلوبة والاختيارية والمخفية في نموذج حجز ${customerPlural}، مع معاينة مباشرة.`
-                : `Customize required, optional, and hidden fields in the ${customerSingular.toLowerCase()} booking form, with live preview.`
-              : t("formBuilderDesc") ||
-                "تخصيص الحقول المطلوبة والاختيارية والمخفية في نموذج حجز العملاء، مع معاينة مباشرة."}
-          </p>
-        </div>
-
-        {canEdit && (
+      {/* Form Builder Top Actions */}
+      {canEdit && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            marginBottom: 4,
+          }}
+        >
           <button
             type="submit"
             className="btn btn-primary btn-md"
@@ -400,8 +366,8 @@ export default function BookingFormFieldsTab({
               t("saveChanges") || "حفظ التغييرات"
             )}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Main 2-Columns Grid Layout */}
       <div

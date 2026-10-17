@@ -45,33 +45,6 @@ export default function PaymentReceiptsTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit} style={{ gap: 20 }}>
-      {/* Top Header with Inline Icon */}
-      <div
-        style={{
-          borderBottom: "1px solid var(--border-light)",
-          paddingBottom: 12,
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: 800,
-            margin: 0,
-            color: "var(--heading)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <Icon
-            name="custom-7ee2c360"
-            size={20}
-            style={{ color: "var(--primary)" }}
-          />
-          {t("paymentReceipts") || "إيصالات الدفع"}
-        </h3>
-      </div>
-
       {/* Subheading / Field Label */}
       <div>
         <label
