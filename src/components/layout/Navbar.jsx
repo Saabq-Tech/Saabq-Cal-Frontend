@@ -38,15 +38,6 @@ export default function Navbar() {
       location.pathname,
     );
 
-  const isProfilePage =
-    isAuthenticated &&
-    (/^\/(member|customer)\/profile(\/|$)/.test(location.pathname) ||
-      /^\/member\/(security|change-password|integrations|api-integration|notifications|chats)(\/|$)/.test(
-        location.pathname,
-      ) ||
-      /^\/customer\/(security|change-password|notifications|chats|appointments)(\/|$)/.test(
-        location.pathname,
-      ));
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -263,16 +254,6 @@ export default function Navbar() {
       >
         <div className="container navbar-inner">
           <div className="navbar-brand-group">
-            <Link
-              to="/"
-              className="navbar-brand"
-              onClick={(e) => handleSectionClick("home", e)}
-            >
-              <AppLogo
-                height={32}
-                forceOriginalColors={isWorkspaceRoute(location.pathname)}
-              />
-            </Link>
             {dashboardMode && (
               <button
                 type="button"
@@ -292,6 +273,16 @@ export default function Navbar() {
                 <Icon name="menu" size={20} />
               </button>
             )}
+            <Link
+              to="/"
+              className="navbar-brand"
+              onClick={(e) => handleSectionClick("home", e)}
+            >
+              <AppLogo
+                height={32}
+                forceOriginalColors={isWorkspaceRoute(location.pathname)}
+              />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -561,25 +552,6 @@ export default function Navbar() {
           )}
 
           <div className="navbar-actions">
-            {/* Quick Link to Workspace on Profile Pages */}
-            {isProfilePage && (
-              <Link
-                to={userType === "member" ? "/member/workspace" : "/workspaces"}
-                className="btn btn-outline-primary btn-sm navbar-workspace-link"
-                title={
-                  userType === "member"
-                    ? t("myWorkspace") || "مساحة العمل"
-                    : t("workspaces") || "مساحات العمل"
-                }
-              >
-                <Icon name="grid" size={15} />
-                <span>
-                  {userType === "member"
-                    ? t("myWorkspace") || "مساحة العمل"
-                    : t("workspaces") || "مساحات العمل"}
-                </span>
-              </Link>
-            )}
 
             <button
               className="language-toggle-btn"
