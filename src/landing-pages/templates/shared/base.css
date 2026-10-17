@@ -1,0 +1,133 @@
+/* Shared foundation for every template. Mobile first; wider layouts use container queries
+   so the same page responds correctly inside the editor's phone and desktop frames. */
+.site {
+  container-type: inline-size;
+  container-name: site;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.site *,
+.site *::before,
+.site *::after {
+  box-sizing: border-box;
+}
+/* Grid and flex children default to min-width:auto and can push a column wider than a phone.
+   Letting them shrink keeps every template inside 320px. */
+.site
+  :where(
+    div,
+    section,
+    header,
+    nav,
+    article,
+    aside,
+    dl,
+    ul,
+    ol,
+    li,
+    form,
+    fieldset,
+    label,
+    table
+  ) {
+  min-width: 0;
+}
+.site img {
+  max-width: 100%;
+  display: block;
+}
+.site h1,
+.site h2,
+.site h3,
+.site p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.site a {
+  color: inherit;
+}
+/* index.css styles bare h1-h6, p and a:hover for the app. Inside a landing page those
+   properties fall back to the browser defaults so each template's own CSS decides.
+   :where() keeps these at the specificity of ".site", below the templates' rules. */
+.site :where(h1, h2, h3, h4, h5, h6) {
+  color: revert;
+  font-size: revert;
+  font-weight: revert;
+  line-height: revert;
+}
+.site :where(p) {
+  line-height: revert;
+}
+.site a:where(:hover) {
+  color: inherit;
+}
+.site :focus-visible {
+  outline: 3px solid var(--focus, #1d4ed8);
+  outline-offset: 3px;
+}
+.site .wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+.site .media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.site .media--empty {
+  display: flex;
+  align-items: flex-end;
+  padding: 10px 12px;
+  font-size: 12px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--ph-a, #e3e7ea) 0 10px,
+    var(--ph-b, #edf0f2) 10px 20px
+  );
+  color: var(--ph-ink, #5b6670);
+}
+.site .brand-logo {
+  height: 32px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  margin-inline-end: 8px;
+}
+.site details summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.site .tap {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .site .tap {
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+}
+/* Missing optional image on the public page: a calm accent tint instead of placeholder text. */
+.site .media--blank {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* The app's global scroll-reveal (index.css, section:not(.no-reveal)) hides every <section>
+   until it scrolls into view and gives it will-change layers. Landing pages show their sections
+   immediately; the extra class in the selector keeps this rule ahead of index.css in any load order. */
+.site section:not(.no-reveal) {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  will-change: auto;
+}

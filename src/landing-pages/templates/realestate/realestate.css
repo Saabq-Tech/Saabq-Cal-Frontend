@@ -1,0 +1,297 @@
+.t-realestate {
+  --ink: #1e241f;
+  --muted: #4c534d;
+  --sand: #e9e6df;
+  --line: #d6d1c7;
+  --ph-a: #dcd8cf;
+  --ph-b: #e5e2da;
+  --ph-ink: #5e5a50;
+  --focus: var(--accent);
+  background: #f3f1ec;
+  color: var(--ink);
+  font-family: "Cairo", sans-serif;
+  line-height: 1.8;
+}
+.t-realestate .wrap {
+  max-width: 1240px;
+}
+.t-realestate h1,
+.t-realestate h2,
+.re-brand {
+  font-family: var(--display);
+  font-weight: 700;
+}
+.t-realestate h2 {
+  font-size: 26px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.re-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 20px;
+  padding-block: 10px;
+}
+.re-brand {
+  font-size: 20px;
+}
+.re-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.re-nav nav a {
+  text-decoration: none;
+}
+
+.re-hero__img {
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  max-height: 620px;
+}
+.re-hero__card {
+  background: #f3f1ec;
+  padding: 20px 0 8px;
+}
+.re-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.re-hero h1 {
+  font-size: 30px;
+  line-height: 1.4;
+  margin-top: 6px;
+}
+.re-lead {
+  color: var(--muted);
+  font-size: 17px;
+  margin-top: 12px !important;
+}
+.re-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.re-btn {
+  background: var(--accent);
+  color: #f3f1ec !important;
+  min-height: 50px;
+  padding: 0 24px;
+  font-weight: 700;
+  border: 1px solid var(--accent);
+}
+.re-btn--ghost {
+  background: transparent;
+  color: var(--accent) !important;
+}
+.re-btn--light {
+  background: #f3f1ec;
+  color: var(--accent) !important;
+  border-color: #f3f1ec;
+  width: 100%;
+}
+
+.re-section {
+  padding-block: 48px;
+}
+.re-split {
+  display: grid;
+  gap: 32px;
+}
+.re-body {
+  color: #3e453f;
+  line-height: 2;
+  margin-bottom: 10px !important;
+  max-width: 720px;
+}
+.re-sand {
+  background: var(--sand);
+}
+.re-projects {
+  display: grid;
+  gap: 18px;
+}
+.re-project {
+  text-decoration: none;
+  display: grid;
+  gap: 10px;
+  font-size: 18px;
+}
+.re-project__img {
+  aspect-ratio: 16 / 10;
+}
+.re-project:hover strong {
+  color: var(--accent);
+}
+
+.re-table-wrap {
+  overflow-x: auto;
+}
+.re-units {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.re-units th,
+.re-units td {
+  padding: 14px 6px;
+  border-bottom: 1px solid #e2ded5;
+  text-align: start;
+}
+.re-units thead th {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+}
+.re-units td:last-child,
+.re-units thead th:last-child {
+  text-align: end;
+}
+.re-terms {
+  margin: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: #e2ded5;
+  border: 1px solid #e2ded5;
+}
+.re-terms div {
+  background: #f3f1ec;
+  padding: 12px;
+}
+.re-terms dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.re-terms dd {
+  margin: 0;
+  font-weight: 700;
+}
+.re-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px !important;
+}
+.re-media {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  align-content: start;
+}
+.re-media > * {
+  aspect-ratio: 4 / 3;
+}
+.re-media__wide {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 7 !important;
+}
+
+.re-green {
+  background: var(--accent);
+  color: #f3f1ec;
+}
+.re-dim {
+  color: rgba(243, 241, 236, 0.8);
+  margin-bottom: 12px !important;
+}
+.re-places {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.re-places button {
+  border: 1px solid rgba(243, 241, 236, 0.4);
+  background: transparent;
+  color: #f3f1ec;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.re-places button.is-on {
+  background: #f3f1ec;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.re-advisors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  column-gap: 40px;
+}
+.re-advisors li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.re-advisors li > div {
+  flex: 1;
+  display: grid;
+}
+.re-advisors span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.re-advisors a {
+  font-weight: 700;
+  font-size: 14px;
+}
+.re-avatar {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50%;
+  padding: 0 !important;
+  flex-shrink: 0;
+}
+.re-contact {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.re-footer {
+  padding-block: 0 32px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@container site (min-width: 760px) {
+  .re-hero__card {
+    margin-top: -96px;
+    position: relative;
+    max-width: 760px;
+    padding: 36px;
+  }
+  .re-hero h1 {
+    font-size: 50px;
+  }
+  .t-realestate h2 {
+    font-size: 34px;
+  }
+  .re-section {
+    padding-block: 72px;
+  }
+  .re-split {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .re-projects {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .re-advisors {
+    grid-template-columns: 1fr 1fr;
+  }
+  .re-contact {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -17,6 +17,9 @@ import {
   applyWorkspaceBranding,
   resetWorkspaceBranding,
 } from "../../utils/theme";
+import { buildLandingSite } from "../../landing-pages/adapter";
+import LandingPageRenderer from "../../landing-pages/LandingPageRenderer";
+import { useHideLayoutChrome } from "../../context/LayoutChromeContext";
 import { useCustomerLabel } from "../../hooks/useCustomerLabel";
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
@@ -169,6 +172,18 @@ export default function WorkspaceProfilePage() {
       )
       .filter((item) => item && item.url);
   }, [workspace]);
+
+  // A published landing page replaces this page (except in ?book mode, which jumps to services).
+  const landingSite = useMemo(() => {
+    if (!workspace?.landing_page || isBookMode) return null;
+    return buildLandingSite({
+      workspace,
+      services,
+      roles: specialistRoles,
+      landingPage: workspace.landing_page,
+    });
+  }, [workspace, services, specialistRoles, isBookMode]);
+  useHideLayoutChrome(Boolean(landingSite));
 
   if (loading) {
     return (
@@ -340,7 +355,7 @@ export default function WorkspaceProfilePage() {
     ],
   };
 
-  return (
+  const classicPage = (
     <div
       className={`main-content workspace-vibe-shell vibe-${vibe.key}`}
       data-workspace-vibe={vibe.key}
@@ -2371,4 +2386,25 @@ export default function WorkspaceProfilePage() {
       )}
     </div>
   );
+
+  if (landingSite) {
+    return (
+      <>
+        <SEO
+          pageKey="customerWorkspaceProfile"
+          title={getTranslatableText(workspace.name)}
+          description={stripHtml(
+            getTranslatableText(workspace.booking_short_intro) ||
+              getTranslatableText(workspace.description),
+          )}
+          canonical={`/${workspace.slug}`}
+          ogImage={workspace.cover_url || workspace.logo_url}
+          jsonLd={[jsonLd, breadcrumbJsonLd]}
+        />
+        <LandingPageRenderer site={landingSite} fallback={classicPage} loading={<ProfileSkeleton />} />
+      </>
+    );
+  }
+
+  return classicPage;
 }

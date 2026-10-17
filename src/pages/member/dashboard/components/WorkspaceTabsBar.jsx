@@ -71,6 +71,7 @@ export default function WorkspaceTabsBar() {
       const subIcons = {
         basic: "info",
         branding: "image",
+        landing_page: "globe",
         timezone: "clock",
         social: "share",
         form_fields: "clipboard-list",

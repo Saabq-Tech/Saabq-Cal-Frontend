@@ -1,0 +1,255 @@
+.t-beauty {
+  --bg: #23151c;
+  --deep: #2c1b23;
+  --ink: #f5eae6;
+  --muted: #d9c6c0;
+  --faint: #a8909a;
+  --ph-a: #3a2530;
+  --ph-b: #33202a;
+  --ph-ink: #a8909a;
+  --focus: var(--accent);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Tajawal", sans-serif;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.t-beauty h1,
+.t-beauty h2,
+.bt-brand {
+  font-family: var(--display);
+  font-weight: 600;
+}
+.t-beauty h2 {
+  font-size: 28px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.bt-hero {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--ph-a) 0 12px,
+    var(--ph-b) 12px 24px
+  );
+  isolation: isolate;
+}
+.bt-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.6);
+}
+.bt-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 20px;
+  padding-block: 12px;
+}
+.bt-brand {
+  font-size: 21px;
+}
+.bt-nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  font-size: 15px;
+}
+.bt-nav nav a {
+  text-decoration: none;
+}
+.bt-hero__ph {
+  text-align: center;
+  font-size: 12px;
+  color: var(--faint);
+}
+.bt-hero__text {
+  padding-block: 32px;
+}
+.bt-hero__text h1 {
+  font-size: 44px;
+  line-height: 1.25;
+  max-width: 12ch;
+}
+.bt-hero__text p {
+  color: var(--muted);
+  margin-top: 12px !important;
+}
+
+.bt-pill {
+  background: var(--accent);
+  color: var(--bg) !important;
+  border-radius: 999px;
+  padding: 0 20px;
+  font-weight: 700;
+}
+.bt-pill:hover {
+  filter: brightness(1.08);
+}
+.bt-pill--lg {
+  min-height: 54px;
+  padding: 0 32px;
+  font-size: 17px;
+  margin-top: 8px;
+}
+
+.bt-section {
+  padding-block: 56px;
+}
+.bt-deep {
+  background: var(--deep);
+}
+.bt-eyebrow {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px !important;
+}
+.bt-body {
+  color: var(--muted);
+  line-height: 2;
+  margin-bottom: 12px !important;
+}
+.bt-story {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+.bt-arch {
+  aspect-ratio: 3 / 4;
+  max-height: 480px;
+  border-radius: 999px 999px 0 0;
+}
+
+.bt-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 24px;
+}
+.bt-head h2 {
+  margin: 0;
+}
+.bt-head span {
+  font-size: 13px;
+  color: var(--faint);
+}
+.bt-menu {
+  display: grid;
+  gap: 32px;
+}
+.bt-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 0;
+}
+.bt-dots {
+  flex: 1;
+  border-bottom: 1px dotted #6b5560;
+  min-width: 16px;
+}
+
+.bt-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 160px;
+  gap: 6px;
+}
+.bt-gallery > :nth-child(1),
+.bt-gallery > :nth-child(4) {
+  grid-row: span 2;
+}
+
+.bt-team {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.bt-team > div {
+  display: grid;
+}
+.bt-team span {
+  color: #c7b3ad;
+  font-size: 14px;
+}
+.bt-team__img {
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px 0 0;
+  margin-bottom: 10px;
+}
+
+.bt-book {
+  display: grid;
+  gap: 32px;
+}
+.bt-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  font-size: 15px;
+}
+.bt-footer {
+  border-top: 1px solid #4a3540;
+  padding: 28px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--faint);
+}
+.bt-footer .bt-brand {
+  font-size: 22px;
+  color: var(--ink);
+}
+
+@container site (min-width: 760px) {
+  .bt-hero {
+    min-height: 680px;
+  }
+  .bt-hero__text h1 {
+    font-size: 80px;
+  }
+  .t-beauty h2 {
+    font-size: 36px;
+  }
+  .bt-section {
+    padding-block: 80px;
+  }
+  .bt-story {
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+  }
+  .bt-menu {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  .bt-gallery {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 220px;
+    gap: 8px;
+  }
+  .bt-team {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 28px;
+  }
+  .bt-book {
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+  }
+}
+/* Each service line links to booking with the service preselected. */
+.t-beauty a.bt-line {
+  text-decoration: none;
+}
