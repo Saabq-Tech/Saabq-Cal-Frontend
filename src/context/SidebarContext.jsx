@@ -60,6 +60,7 @@ export function SidebarProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components, react/only-export-components
 export function useSidebar() {
   return useContext(SidebarContext);
 }

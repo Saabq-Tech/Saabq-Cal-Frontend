@@ -31,7 +31,7 @@ export default function BookingFormFieldsTab({
   const canDeleteQuestion =
     propCanEdit ?? (isOwner || canDeleteBookingForms || canUpdateBookingForms);
 
-  const { isCustom, customerSingular, customerPlural } = useCustomerLabel();
+  const { isCustom, customerPlural } = useCustomerLabel();
   // Standard system field statuses (required | optional | disabled)
   const [fieldStatuses, setFieldStatuses] = useState(() => {
     const fs = formFieldsForm.field_statuses || {};

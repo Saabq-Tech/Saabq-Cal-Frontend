@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../../../../context/LanguageContext";
-import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import Icon from "../../../../components/common/Icon";
 
 export default function SocialLinksTab({
@@ -10,8 +9,7 @@ export default function SocialLinksTab({
   saving,
   canEdit,
 }) {
-  const { t, isRTL } = useLanguage();
-  const { customerPlural, isCustom } = useCustomerLabel();
+  const { t } = useLanguage();
 
   // Initialize links state
   const [links, setLinks] = useState(() => {

@@ -3,7 +3,6 @@ import { useLanguage } from "../../../../context/LanguageContext";
 import Icon from "../../../../components/common/Icon";
 import Flag from "../../../../components/common/Flag";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
-import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
 
 export default function NotificationTemplatesTab({
   templates,
