@@ -18,4 +18,4 @@ Disallow: /403
 Disallow: /500
 Disallow: /503
 
-Sitemap: https://cal.saabq.com/sitemap.xml
+Sitemap: https://saabqcal.com/sitemap.xml

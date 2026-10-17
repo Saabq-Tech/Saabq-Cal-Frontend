@@ -294,7 +294,7 @@ export default function WorkspaceProfilePage() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: getTranslatableText(workspace.name),
-    url: `https://cal.saabq.com/${workspace.slug}`,
+    url: `https://saabqcal.com/${workspace.slug}`,
     ...(workspace.booking_short_intro && {
       description: getTranslatableText(workspace.booking_short_intro),
     }),
@@ -323,19 +323,19 @@ export default function WorkspaceProfilePage() {
         "@type": "ListItem",
         position: 1,
         name: t("home"),
-        item: "https://cal.saabq.com/",
+        item: "https://saabqcal.com/",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("workspaces", "مساحات العمل"),
-        item: "https://cal.saabq.com/workspaces",
+        item: "https://saabqcal.com/workspaces",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: getTranslatableText(workspace.name),
-        item: `https://cal.saabq.com/${workspace.slug}`,
+        item: `https://saabqcal.com/${workspace.slug}`,
       },
     ],
   };

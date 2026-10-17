@@ -607,7 +607,7 @@ export default function CustomerBookAppointmentPage() {
         provider: {
           "@type": "LocalBusiness",
           name: getTranslatableText(workspace.name),
-          url: `https://cal.saabq.com/${workspace.slug}`,
+          url: `https://saabqcal.com/${workspace.slug}`,
         },
         offers: {
           "@type": "Offer",
