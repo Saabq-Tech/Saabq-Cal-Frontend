@@ -180,7 +180,14 @@ const LABELS = {
   realestateProjects: { ar: "المشروعات", en: "Projects" },
   realestateUnits: { ar: "الوحدات", en: "Units" },
   realestateUnitsTitle: { ar: "الوحدات المتاحة", en: "Available units" },
-  realestateUnitsPrices: { ar: "الوحدات والأسعار", en: "Units & prices" },
+  realestateUnitsPrices: { ar: "الخدمات والأسعار", en: "Services & prices" },
+  // The services table is a separate section from the units grid, so it carries its own wording.
+  realestateServicesNav: { ar: "الخدمات", en: "Services" },
+  realestateServicesTitle: {
+    ar: "المعاينات والخدمات",
+    en: "Viewings & services",
+  },
+  realestateService: { ar: "الخدمة", en: "Service" },
   realestateType: { ar: "النوع", en: "Type" },
   realestateArea: { ar: "التفاصيل", en: "Details" },
   realestateFrom: { ar: "يبدأ من", en: "From" },

@@ -11,7 +11,7 @@ export default function RealEstateTemplate({ site }) {
     about: tl(L, "realestateCompany"),
     units: tl(L, "realestateUnits"),
     gallery: tl(L, "realestateProjects"),
-    services: tl(L, "realestateUnits"),
+    services: tl(L, "realestateServicesNav"),
     booking: tl(L, "realestateViewing"),
   });
 
@@ -96,12 +96,12 @@ export default function RealEstateTemplate({ site }) {
           services: () =>
             site.services.length > 0 && (
               <section id="services" className="wrap re-section">
-                <h2>{tl(L, "realestateUnitsTitle")}</h2>
+                <h2>{tl(L, "realestateServicesTitle")}</h2>
                 <div className="re-table-wrap">
                   <table className="re-units">
                     <thead>
                       <tr>
-                        <th scope="col">{tl(L, "realestateType")}</th>
+                        <th scope="col">{tl(L, "realestateService")}</th>
                         <th scope="col">{tl(L, "realestateArea")}</th>
                         <th scope="col">{tl(L, "realestateFrom")}</th>
                       </tr>

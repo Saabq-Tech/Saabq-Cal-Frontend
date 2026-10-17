@@ -140,9 +140,21 @@
 }
 .re-units th,
 .re-units td {
-  padding: 14px 6px;
+  padding: 14px 10px;
   border-bottom: 1px solid #e2ded5;
   text-align: start;
+}
+/* Name and price keep their own width; the details column absorbs the rest. */
+.re-units th:first-child,
+.re-units td:first-child {
+  width: 26%;
+  padding-inline-start: 0;
+}
+.re-units th:last-child,
+.re-units td:last-child {
+  width: 1%;
+  white-space: nowrap;
+  padding-inline-end: 0;
 }
 .re-units thead th {
   font-size: 13px;
