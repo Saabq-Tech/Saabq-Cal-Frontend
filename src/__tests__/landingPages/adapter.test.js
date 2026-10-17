@@ -153,50 +153,52 @@ describe("landing page adapter", () => {
 
   it("starts new pages from the workspace type", () => {
     const page = initialLandingPage(workspaceFixture);
-    expect(page.template_key).toBe("clinic");
+    expect(page.template_key).toBe("serene");
     expect(page.is_published).toBe(false);
     expect(page.content.kicker).toBe("عيادة · Heliopolis, Cairo");
     expect(page.content.headline).toBe("Skin care in Heliopolis");
-    expect(suggestTemplate({ workspace_type_id: 6 })).toBe("fitness");
+    expect(suggestTemplate({ workspace_type_id: 6 })).toBe("pulse");
     expect(suggestTemplate({ workspace_type: { code: "teacher" } })).toBe(
-      "education",
+      "pathway",
     );
     expect(suggestTemplate({ workspace_type: { code: "realestate" } })).toBe(
-      "rentals",
+      "haven",
     );
-    expect(suggestTemplate(null)).toBe("clinic");
+    expect(suggestTemplate(null)).toBe("serene");
     expect(
       recommendedTemplates({ workspace_type: { code: "clinic" } }),
-    ).toEqual(["clinic", "dental", "medical", "therapy"]);
+    ).toEqual(["serene", "radiant", "atlas", "oasis"]);
     expect(
       recommendedTemplates({ workspace_type: { code: "company" } }),
-    ).toEqual(["company"]);
+    ).toEqual(["synergy"]);
     expect(
       recommendedTemplates({ workspace_type: { code: "realestate" } }),
-    ).toEqual(["rentals", "trips", "realestate"]);
+    ).toEqual(["haven", "voyage", "panorama"]);
   });
 });
 
 describe("landing page catalog", () => {
   it("matches the backend LandingPageTemplate enum and the registry", () => {
     const backendKeys = [
-      "clinic",
-      "dental",
-      "medical",
-      "therapy",
-      "consulting",
-      "beauty",
-      "education",
-      "creative",
-      "fitness",
-      "services",
-      "company",
-      "realestate",
-      "rentals",
-      "trips",
+      "serene",
+      "radiant",
+      "atlas",
+      "oasis",
+      "prestige",
+      "elegance",
+      "pathway",
+      "canvas",
+      "pulse",
+      "direct",
+      "synergy",
+      "panorama",
+      "haven",
+      "voyage",
     ];
     expect(LANDING_TEMPLATES.map((tpl) => tpl.id)).toEqual(backendKeys);
-    expect(Object.keys(TEMPLATE_COMPONENTS)).toEqual(backendKeys);
+    for (const key of backendKeys) {
+      expect(TEMPLATE_COMPONENTS[key]).toBeDefined();
+    }
   });
 
   it("uses the template defaults when nothing is saved", () => {

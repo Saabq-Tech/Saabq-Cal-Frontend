@@ -18,11 +18,33 @@ export const SECTION_IDS = [
   "units",
 ];
 
+export const TEMPLATE_KEY_ALIASES = {
+  clinic: "serene",
+  dental: "radiant",
+  medical: "atlas",
+  therapy: "oasis",
+  consulting: "prestige",
+  beauty: "elegance",
+  education: "pathway",
+  creative: "canvas",
+  fitness: "pulse",
+  services: "direct",
+  company: "synergy",
+  realestate: "panorama",
+  rentals: "haven",
+  trips: "voyage",
+};
+
+export function normalizeTemplateId(id) {
+  return TEMPLATE_KEY_ALIASES[id] || id;
+}
+
 export const LANDING_TEMPLATES = [
   {
-    id: "clinic",
-    nameKey: "lpTemplateClinic",
-    descKey: "lpTemplateClinicDesc",
+    id: "serene",
+    legacyId: "clinic",
+    nameKey: "lpTemplateSerene",
+    descKey: "lpTemplateSereneDesc",
     sections: [
       "about",
       "services",
@@ -36,9 +58,10 @@ export const LANDING_TEMPLATES = [
     fonts: { template: "Readex Pro", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "dental",
-    nameKey: "lpTemplateDental",
-    descKey: "lpTemplateDentalDesc",
+    id: "radiant",
+    legacyId: "dental",
+    nameKey: "lpTemplateRadiant",
+    descKey: "lpTemplateRadiantDesc",
     sections: [
       "about",
       "highlights",
@@ -53,25 +76,28 @@ export const LANDING_TEMPLATES = [
     fonts: { template: "Rubik", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "medical",
-    nameKey: "lpTemplateMedical",
-    descKey: "lpTemplateMedicalDesc",
+    id: "atlas",
+    legacyId: "medical",
+    nameKey: "lpTemplateAtlas",
+    descKey: "lpTemplateAtlasDesc",
     sections: ["about", "highlights", "teams", "faq", "gallery", "contact"],
     accentOptions: ["#17507A", "#0F5E59", "#4A3A8C", "#8A2E3B"],
     fonts: { template: "Alexandria", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "therapy",
-    nameKey: "lpTemplateTherapy",
-    descKey: "lpTemplateTherapyDesc",
+    id: "oasis",
+    legacyId: "therapy",
+    nameKey: "lpTemplateOasis",
+    descKey: "lpTemplateOasisDesc",
     sections: ["about", "services", "team", "faq", "booking", "contact"],
     accentOptions: ["#2F4A3E", "#3E4A6B", "#5A4636", "#4B3B5C"],
     fonts: { template: "Reem Kufi", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "consulting",
-    nameKey: "lpTemplateConsulting",
-    descKey: "lpTemplateConsultingDesc",
+    id: "prestige",
+    legacyId: "consulting",
+    nameKey: "lpTemplatePrestige",
+    descKey: "lpTemplatePrestigeDesc",
     sections: [
       "about",
       "services",
@@ -85,17 +111,19 @@ export const LANDING_TEMPLATES = [
     fonts: { template: "Amiri", alt: "Noto Naskh Arabic", serif: true },
   },
   {
-    id: "beauty",
-    nameKey: "lpTemplateBeauty",
-    descKey: "lpTemplateBeautyDesc",
+    id: "elegance",
+    legacyId: "beauty",
+    nameKey: "lpTemplateElegance",
+    descKey: "lpTemplateEleganceDesc",
     sections: ["about", "services", "gallery", "team", "booking"],
     accentOptions: ["#E9B9A8", "#D9C08A", "#B8D0C4", "#C9B6E4"],
     fonts: { template: "El Messiri", alt: "Tajawal" },
   },
   {
-    id: "education",
-    nameKey: "lpTemplateEducation",
-    descKey: "lpTemplateEducationDesc",
+    id: "pathway",
+    legacyId: "education",
+    nameKey: "lpTemplatePathway",
+    descKey: "lpTemplatePathwayDesc",
     sections: [
       "about",
       "highlights",
@@ -109,41 +137,46 @@ export const LANDING_TEMPLATES = [
     fonts: { template: "IBM Plex Sans Arabic", alt: "Cairo" },
   },
   {
-    id: "creative",
-    nameKey: "lpTemplateCreative",
-    descKey: "lpTemplateCreativeDesc",
+    id: "canvas",
+    legacyId: "creative",
+    nameKey: "lpTemplateCanvas",
+    descKey: "lpTemplateCanvasDesc",
     sections: ["gallery", "about", "services", "highlights", "booking"],
     accentOptions: ["#111111", "#2B2B6B", "#6B2B2B", "#2B5B4B"],
     fonts: { template: "Readex Pro", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "fitness",
-    nameKey: "lpTemplateFitness",
-    descKey: "lpTemplateFitnessDesc",
+    id: "pulse",
+    legacyId: "fitness",
+    nameKey: "lpTemplatePulse",
+    descKey: "lpTemplatePulseDesc",
     sections: ["about", "schedule", "team", "services", "contact"],
     accentOptions: ["#FF6A2B", "#C8F03C", "#3CC8F0", "#F03C78"],
     fonts: { template: "Tajawal", alt: "Cairo" },
   },
   {
-    id: "services",
-    nameKey: "lpTemplateServices",
-    descKey: "lpTemplateServicesDesc",
+    id: "direct",
+    legacyId: "services",
+    nameKey: "lpTemplateDirect",
+    descKey: "lpTemplateDirectDesc",
     sections: ["booking", "about", "services", "gallery", "contact", "faq"],
     accentOptions: ["#1D4ED8", "#0F766E", "#B45309", "#7C3AED"],
     fonts: { template: "IBM Plex Sans Arabic", alt: "Cairo" },
   },
   {
-    id: "company",
-    nameKey: "lpTemplateCompany",
-    descKey: "lpTemplateCompanyDesc",
+    id: "synergy",
+    legacyId: "company",
+    nameKey: "lpTemplateSynergy",
+    descKey: "lpTemplateSynergyDesc",
     sections: ["about", "services", "teams", "team", "faq", "contact"],
     accentOptions: ["#0E6B5C", "#1D4ED8", "#7A3B8C", "#B45309"],
     fonts: { template: "Almarai", alt: "IBM Plex Sans Arabic" },
   },
   {
-    id: "realestate",
-    nameKey: "lpTemplateRealEstate",
-    descKey: "lpTemplateRealEstateDesc",
+    id: "panorama",
+    legacyId: "realestate",
+    nameKey: "lpTemplatePanorama",
+    descKey: "lpTemplatePanoramaDesc",
     sections: [
       "about",
       "units",
@@ -157,44 +190,50 @@ export const LANDING_TEMPLATES = [
     fonts: { template: "Noto Naskh Arabic", alt: "Cairo", serif: true },
   },
   {
-    id: "rentals",
-    nameKey: "lpTemplateRentals",
-    descKey: "lpTemplateRentalsDesc",
+    id: "haven",
+    legacyId: "rentals",
+    nameKey: "lpTemplateHaven",
+    descKey: "lpTemplateHavenDesc",
     sections: ["units", "about", "highlights", "gallery", "faq", "contact"],
     accentOptions: ["#0E7490", "#C2410C", "#15803D", "#7C3AED"],
     fonts: { template: "Alexandria", alt: "Cairo" },
   },
   {
-    id: "trips",
-    nameKey: "lpTemplateTrips",
-    descKey: "lpTemplateTripsDesc",
+    id: "voyage",
+    legacyId: "trips",
+    nameKey: "lpTemplateVoyage",
+    descKey: "lpTemplateVoyageDesc",
     sections: ["units", "highlights", "gallery", "about", "faq", "contact"],
     accentOptions: ["#EA580C", "#0F766E", "#1D4ED8", "#BE123C"],
     fonts: { template: "Tajawal", alt: "Cairo" },
   },
 ];
 
-export const getLandingTemplate = (id) =>
-  LANDING_TEMPLATES.find((tpl) => tpl.id === id);
-
-/** Templates that share a workspace category; owners of that category choose among them. */
-export const TEMPLATE_GROUPS = {
-  clinic: ["clinic", "dental", "medical", "therapy"],
-  realestate: ["rentals", "trips", "realestate"],
+export const getLandingTemplate = (id) => {
+  const norm = normalizeTemplateId(id);
+  return LANDING_TEMPLATES.find(
+    (tpl) => tpl.id === norm || tpl.legacyId === id,
+  );
 };
 
-/** Workspace type code (workspace_types.code) -> suggested template. */
+/** All templates are available to all workspaces; style recommendations remain flexible. */
+export const TEMPLATE_GROUPS = {
+  clinic: ["serene", "radiant", "atlas", "oasis"],
+  realestate: ["haven", "voyage", "panorama"],
+};
+
+/** Workspace type code (workspace_types.code) -> suggested starting template. */
 const CODE_TO_TEMPLATE = {
-  clinic: "clinic",
-  consulting: "consulting",
-  beauty: "beauty",
-  education: "education",
-  teacher: "education",
-  creative: "creative",
-  fitness: "fitness",
-  services: "services",
-  company: "company",
-  realestate: "rentals",
+  clinic: "serene",
+  consulting: "prestige",
+  beauty: "elegance",
+  education: "pathway",
+  teacher: "pathway",
+  creative: "canvas",
+  fitness: "pulse",
+  services: "direct",
+  company: "synergy",
+  realestate: "haven",
 };
 
 /** Older payloads without a type code: built-in ids 1-7 match utils/workspaceVibe.js. */
@@ -218,13 +257,18 @@ export function workspaceTypeCode(workspace) {
 }
 
 export function suggestTemplate(workspace) {
-  return CODE_TO_TEMPLATE[workspaceTypeCode(workspace)] || "clinic";
+  const code = workspaceTypeCode(workspace);
+  const found = CODE_TO_TEMPLATE[code] || "serene";
+  return normalizeTemplateId(found);
 }
 
-/** Templates recommended for the workspace: its category's group, or the single suggestion. */
+/** Templates recommended for the workspace: all templates are selectable. */
 export function recommendedTemplates(workspace) {
   const code = workspaceTypeCode(workspace);
-  return TEMPLATE_GROUPS[code] || [suggestTemplate(workspace)];
+  if (TEMPLATE_GROUPS[code]) {
+    return TEMPLATE_GROUPS[code];
+  }
+  return [suggestTemplate(workspace)];
 }
 
 /** All of the template's sections, switched on, in its default order. */

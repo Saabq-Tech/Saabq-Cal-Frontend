@@ -17,14 +17,22 @@ export const translations = {
     toggleSidebar: "تبديل القائمة الجانبية",
     collapseSidebar: "طي القائمة الجانبية",
     expandSidebar: "توسيع القائمة الجانبية",
-    workspaceBrandingDesc: "تخصيص الاسم والشعار والألوان وهوية مساحة العمل في لوحة التحكم والبوابة ورسائل البريد.",
-    workspaceLandingPageDesc: "تخصيص وتصميم ونشر الصفحة التعريفية العامة لمساحة العمل.",
-    workspaceTimezoneDesc: "ضبط المنطقة الزمنية، تنسيق التاريخ والوقت، والعملة الافتراضية لمساحة العمل.",
-    workspaceSocialLinksDesc: "روابط حسابات التواصل الاجتماعي والموقع الإلكتروني التي تظهر للعملاء في صفحة الحجز والإيميلات.",
-    workspaceFormFieldsDesc: "تخصيص الحقول والبيانات والأسئلة الإلزامية والاختيارية المطلوبة من العملاء عند الحجز.",
-    workspacePaymentReceiptsDesc: "تخصيص بيانات وإعدادات إيصالات الدفع والتحويلات البنكية وإلزامية إرفاق الإيصال.",
-    workspaceNotificationTemplatesDesc: "تخصيص جميع إشعارات وتنبيهات الحجوزات والمدفوعات والجلسات الموجهة للعملاء وفريق العمل.",
-    prescriptionTemplatesDesc: "إدارة وتخصيص قوالب التقارير الطبية والمستندات والملخصات السريرية.",
+    workspaceBrandingDesc:
+      "تخصيص الاسم والشعار والألوان وهوية مساحة العمل في لوحة التحكم والبوابة ورسائل البريد.",
+    workspaceLandingPageDesc:
+      "تخصيص وتصميم ونشر الصفحة التعريفية العامة لمساحة العمل.",
+    workspaceTimezoneDesc:
+      "ضبط المنطقة الزمنية، تنسيق التاريخ والوقت، والعملة الافتراضية لمساحة العمل.",
+    workspaceSocialLinksDesc:
+      "روابط حسابات التواصل الاجتماعي والموقع الإلكتروني التي تظهر للعملاء في صفحة الحجز والإيميلات.",
+    workspaceFormFieldsDesc:
+      "تخصيص الحقول والبيانات والأسئلة الإلزامية والاختيارية المطلوبة من العملاء عند الحجز.",
+    workspacePaymentReceiptsDesc:
+      "تخصيص بيانات وإعدادات إيصالات الدفع والتحويلات البنكية وإلزامية إرفاق الإيصال.",
+    workspaceNotificationTemplatesDesc:
+      "تخصيص جميع إشعارات وتنبيهات الحجوزات والمدفوعات والجلسات الموجهة للعملاء وفريق العمل.",
+    prescriptionTemplatesDesc:
+      "إدارة وتخصيص قوالب التقارير الطبية والمستندات والملخصات السريرية.",
     pageTitleChangePassword: "تغيير كلمة المرور — تقويم سابق",
     pageTitlePrivacy: "سياسة الخصوصية — تقويم سابق",
     pageTitleTerms: "شروط الخدمة — تقويم سابق",
@@ -2463,13 +2471,17 @@ export const translations = {
     complianceRate: "نسبة الالتزام",
     workspaceLandingPage: "الصفحة التعريفية",
     lpTabTitle: "الصفحة التعريفية",
-    lpTabDesc: "اختر قالبًا جاهزًا لصفحة نشاطك العامة، وعدّل المحتوى الخاص بها، ثم انشرها على رابط مساحة العمل.",
+    lpTabDesc:
+      "اختر قالبًا جاهزًا لصفحة نشاطك العامة، وعدّل المحتوى الخاص بها، ثم انشرها على رابط مساحة العمل.",
     lpPublished: "منشورة",
     lpDraft: "مسودة",
     lpViewPublic: "فتح الصفحة العامة",
-    lpNotAvailable: "الصفحة التعريفية غير متاحة في باقتك الحالية. يمكنك معاينة القوالب، والحفظ والنشر يحتاجان ترقية الباقة.",
-    lpReadOnly: "ليس لديك صلاحية تعديل إعدادات مساحة العمل، يمكنك المعاينة فقط.",
-    lpLinkedNotice: "الاسم والوصف والشعار والغلاف والألوان والمميزات والصور والخدمات والفريق تُقرأ تلقائيًا من إعدادات مساحة العمل.",
+    lpNotAvailable:
+      "الصفحة التعريفية غير متاحة في باقتك الحالية. يمكنك معاينة القوالب، والحفظ والنشر يحتاجان ترقية الباقة.",
+    lpReadOnly:
+      "ليس لديك صلاحية تعديل إعدادات مساحة العمل، يمكنك المعاينة فقط.",
+    lpLinkedNotice:
+      "الاسم والوصف والشعار والغلاف والألوان والمميزات والصور والخدمات والفريق تُقرأ تلقائيًا من إعدادات مساحة العمل.",
     lpEditBasicInfo: "تعديل المعلومات الأساسية",
     lpEditBranding: "تعديل الهوية والصور",
     lpEditServices: "تعديل الخدمات",
@@ -2523,7 +2535,8 @@ export const translations = {
     lpSectionFaq: "الأسئلة المتكررة",
     lpSectionContact: "العنوان والتواصل",
     lpPublishToggle: "نشر الصفحة على رابط مساحة العمل",
-    lpPublishHint: "عند النشر تظهر هذه الصفحة بدل صفحة النشاط الحالية على الرابط العام.",
+    lpPublishHint:
+      "عند النشر تظهر هذه الصفحة بدل صفحة النشاط الحالية على الرابط العام.",
     lpUnsaved: "تغييرات غير محفوظة",
     lpSave: "حفظ الصفحة",
     lpSaved: "تم حفظ الصفحة التعريفية",
@@ -2536,32 +2549,89 @@ export const translations = {
     lpDesktop: "ديسكتوب",
     lpPreviewError: "تعذّر عرض القالب",
     lpPreviewLoading: "جارٍ تحميل القالب…",
-    lpTemplateClinic: "العيادة",
-    lpTemplateClinicDesc: "هادئ ومنظم لعيادة طبيب فرد أو تخصص واحد.",
-    lpTemplateDental: "عيادة أسنان",
-    lpTemplateDentalDesc: "فاتح ومستدير، مع موعد عاجل للحالات الطارئة.",
-    lpTemplateMedical: "مركز طبي",
-    lpTemplateMedicalDesc: "دليل أقسام وأطباء للمراكز متعددة التخصصات.",
-    lpTemplateTherapy: "علاج نفسي",
-    lpTemplateTherapyDesc: "هادئ ومتسع، يركز على الخصوصية والجلسة الأولى.",
-    lpTemplateConsulting: "مكتب استشارات",
-    lpTemplateConsultingDesc: "تحريري بخط نسخي لمكاتب المحاماة والاستشارات.",
-    lpTemplateBeauty: "صالون",
-    lpTemplateBeautyDesc: "داكن دافئ مع قائمة أسعار وصور أعمال.",
-    lpTemplateEducation: "أكاديمية",
-    lpTemplateEducationDesc: "برامج وجدول أسبوعي ومدرسون لمراكز التدريب.",
-    lpTemplateCreative: "استوديو",
-    lpTemplateCreativeDesc: "أبيض وأسود والمعرض أولًا للمصورين والمصممين.",
-    lpTemplateFitness: "نادي رياضي",
-    lpTemplateFitnessDesc: "داكن وجريء مع كلاسات اليوم والاشتراكات.",
-    lpTemplateServices: "شركة صيانة",
-    lpTemplateServicesDesc: "عملي مع اختيار الخدمة والحجز من أول الصفحة.",
-    lpTemplateCompany: "شركة وفرق",
-    lpTemplateCompanyDesc: "مؤسسي مع حجز اجتماعات مع الفريق المناسب.",
-    lpTemplateRealEstate: "تطوير عقاري",
-    lpTemplateRealEstateDesc: "صور واسعة وجدول وحدات وحجز معاينات.",
+    lpChooseTemplateHint:
+      "اختر التصميم الأنسب لأسلوب نشاطك وعلامتك التجارية، ويمكنك تبديل القالب وتخصيص الأقسام في أي وقت.",
+    lpTemplateSerene: "صفاء",
+    lpTemplateSereneDesc:
+      "تصميم متوازن وأنيق يبرز الخدمات وفريق العمل والمواعيد بوضوح وانسيابية.",
+    lpTemplateRadiant: "إشراق",
+    lpTemplateRadiantDesc:
+      "تصميم حيوي بحواف ناعمة وإبراز مميز لأهم الخدمات ومواعيد الحجز السريعة.",
+    lpTemplateAtlas: "أطلس",
+    lpTemplateAtlasDesc:
+      "تصميم شامل ومنظم يتيح تقسيم الخدمات إلى فئات وفرق عمل متعددة.",
+    lpTemplateOasis: "واحة",
+    lpTemplateOasisDesc:
+      "تصميم رحب وهادئ يركز على راحة العميل والخصوصية وحجز الموعد الأول بسهولة.",
+    lpTemplatePrestige: "أصيل",
+    lpTemplatePrestigeDesc:
+      "طابع تحريري راقٍ بخطوط كلاسيكية متناسقة يمنح حضوراً موثوقاً ومؤثراً.",
+    lpTemplateElegance: "رونق",
+    lpTemplateEleganceDesc:
+      "تصميم عصري جذاب يعرض قائمة الخدمات والأسعار مع معرض صور متميز.",
+    lpTemplatePathway: "مسار",
+    lpTemplatePathwayDesc:
+      "تصميم متكامل يعرض البرامج والجداول والمواعيد وقائمة الخبراء والمختصين.",
+    lpTemplateCanvas: "كانفاس",
+    lpTemplateCanvasDesc:
+      "تصميم أحادي اللون يضع معرض الأعمال والوسائط في الصدارة لجاذبية بصرية قصوى.",
+    lpTemplatePulse: "نبض",
+    lpTemplatePulseDesc:
+      "تصميم داكن وجريء بحيوية عالية لعرض المواعيد اليومية والاشتراكات والأنشطة.",
+    lpTemplateDirect: "مباشر",
+    lpTemplateDirectDesc:
+      "تصميم عملي سريع يضع نموذج الحجز واختيار الخدمة في قمة الصفحة فوراً.",
+    lpTemplateSynergy: "سينرجي",
+    lpTemplateSynergyDesc:
+      "تصميم مؤسسي حديث يربط الزوار بفرق العمل المختلفة ويسهّل حجز الاجتماعات.",
+    lpTemplatePanorama: "بانوراما",
+    lpTemplatePanoramaDesc:
+      "تصميم واسع ببطاقات عريضة لاستعراض المساحات والوحدات وحجز المعاينات والزيارات.",
+    lpTemplateHaven: "ملاذ",
+    lpTemplateHavenDesc:
+      "تصميم رحب مخصص للإقامات والوحدات مع صور غامرة وحجز مرن باليوم والليلة.",
+    lpTemplateVoyage: "رحاب",
+    lpTemplateVoyageDesc:
+      "تصميم تفاعلي يبرز مواعيد الانطلاق والفعاليات القادمة وحجز المقاعد بكل سهولة.",
+    lpTemplateClinic: "صفاء",
+    lpTemplateClinicDesc:
+      "تصميم متوازن وأنيق يبرز الخدمات وفريق العمل والمواعيد بوضوح وانسيابية.",
+    lpTemplateDental: "إشراق",
+    lpTemplateDentalDesc:
+      "تصميم حيوي بحواف ناعمة وإبراز مميز لأهم الخدمات ومواعيد الحجز السريعة.",
+    lpTemplateMedical: "أطلس",
+    lpTemplateMedicalDesc:
+      "تصميم شامل ومنظم يتيح تقسيم الخدمات إلى فئات وفرق عمل متعددة.",
+    lpTemplateTherapy: "واحة",
+    lpTemplateTherapyDesc:
+      "تصميم رحب وهادئ يركز على راحة العميل والخصوصية وحجز الموعد الأول بسهولة.",
+    lpTemplateConsulting: "أصيل",
+    lpTemplateConsultingDesc:
+      "طابع تحريري راقٍ بخطوط كلاسيكية متناسقة يمنح حضوراً موثوقاً ومؤثراً.",
+    lpTemplateBeauty: "رونق",
+    lpTemplateBeautyDesc:
+      "تصميم عصري جذاب يعرض قائمة الخدمات والأسعار مع معرض صور متميز.",
+    lpTemplateEducation: "مسار",
+    lpTemplateEducationDesc:
+      "تصميم متكامل يعرض البرامج والجداول والمواعيد وقائمة الخبراء والمختصين.",
+    lpTemplateCreative: "كانفاس",
+    lpTemplateCreativeDesc:
+      "تصميم أحادي اللون يضع معرض الأعمال والوسائط في الصدارة لجاذبية بصرية قصوى.",
+    lpTemplateFitness: "نبض",
+    lpTemplateFitnessDesc:
+      "تصميم داكن وجريء بحيوية عالية لعرض المواعيد اليومية والاشتراكات والأنشطة.",
+    lpTemplateServices: "مباشر",
+    lpTemplateServicesDesc:
+      "تصميم عملي سريع يضع نموذج الحجز واختيار الخدمة في قمة الصفحة فوراً.",
+    lpTemplateCompany: "سينرجي",
+    lpTemplateCompanyDesc:
+      "تصميم مؤسسي حديث يربط الزوار بفرق العمل المختلفة ويسهّل حجز الاجتماعات.",
+    lpTemplateRealEstate: "بانوراما",
+    lpTemplateRealEstateDesc:
+      "تصميم واسع ببطاقات عريضة لاستعراض المساحات والوحدات وحجز المعاينات والزيارات.",
     recurrenceRepeatWeekly: "تكرار الموعد أسبوعيًا",
-    recurrenceRepeatHint: "ثبّت نفس الموعد في أيام محددة كل أسبوع، مثل حصة كل سبت وثلاثاء.",
+    recurrenceRepeatHint:
+      "ثبّت نفس الموعد في أيام محددة كل أسبوع، مثل حصة كل سبت وثلاثاء.",
     recurrenceDays: "أيام التكرار",
     recurrenceSun: "الأحد",
     recurrenceMon: "الاثنين",
@@ -2577,7 +2647,8 @@ export const translations = {
     recurrenceOpenEnded: "مفتوح بدون نهاية",
     recurrenceMonthsCount: "عدد الشهور",
     recurrenceEndsOn: "تاريخ آخر موعد",
-    recurrenceOpenHint: "تُضاف المواعيد تلقائيًا قبلها بثلاثة أشهر، ويمكنك إيقاف السلسلة في أي وقت.",
+    recurrenceOpenHint:
+      "تُضاف المواعيد تلقائيًا قبلها بثلاثة أشهر، ويمكنك إيقاف السلسلة في أي وقت.",
     recurrenceDaysRequired: "اختر يومًا واحدًا على الأقل للتكرار",
     recurrenceEndsOnRequired: "اختر تاريخ آخر موعد",
     recurrenceCreated: "تم حجز المواعيد المتكررة:",
@@ -2586,14 +2657,16 @@ export const translations = {
     recurrenceCancelSingle: "هذا الموعد فقط",
     recurrenceCancelSeries: "هذا الموعد وكل المواعيد التالية في السلسلة",
     recurrenceSeriesCancelled: "تم إلغاء المواعيد المتكررة",
-    lpRecommended: "مقترح لنشاطك",
-    lpChooseGroupTemplate: "اختر القالب الأنسب لعيادتك: عيادة، أسنان، مركز طبي، أو علاج نفسي.",
+    lpRecommended: "مقترح كبداية",
+    lpChooseGroupTemplate:
+      "اختر التصميم الأنسب لأسلوب نشاطك وعلامتك التجارية، ويمكنك تبديل القالب وتخصيص الأقسام في أي وقت.",
     navRentals: "الوحدات والإيجارات",
     rentalPageSubtitle: "إدارة الوحدات والحجوزات والإيرادات والمصروفات",
     rentalTabUnits: "الوحدات",
     rentalTabReservations: "الحجوزات",
     rentalTabFinance: "الحسابات",
-    rentalUnitsHint: "أضف شققك أو شاليهاتك أو كامباتك أو رحلاتك، وحدد طريقة الحجز والعربون لكل وحدة.",
+    rentalUnitsHint:
+      "أضف شققك أو شاليهاتك أو كامباتك أو رحلاتك، وحدد طريقة الحجز والعربون لكل وحدة.",
     rentalAddUnit: "إضافة وحدة",
     rentalEditUnit: "تعديل الوحدة",
     rentalNoUnits: "لا توجد وحدات بعد",
@@ -2621,9 +2694,11 @@ export const translations = {
     rentalModeNightly: "بالليلة",
     rentalModeDate: "بالتاريخ (يوم)",
     rentalModeTrip: "رحلة (مقاعد)",
-    rentalModeNightlyHint: "الضيف يختار تاريخ الوصول والمغادرة، والسعر لكل ليلة.",
+    rentalModeNightlyHint:
+      "الضيف يختار تاريخ الوصول والمغادرة، والسعر لكل ليلة.",
     rentalModeDateHint: "الضيف يحجز يومًا كاملًا، والسعر لليوم.",
-    rentalModeTripHint: "تضيف مواعيد انطلاق بعدد مقاعد، والضيف يحجز مقاعد، والسعر للمقعد.",
+    rentalModeTripHint:
+      "تضيف مواعيد انطلاق بعدد مقاعد، والضيف يحجز مقاعد، والسعر للمقعد.",
     rentalModeNightlyPrice: "سعر الليلة",
     rentalModeDatePrice: "سعر اليوم",
     rentalModeTripPrice: "سعر المقعد",
@@ -2702,12 +2777,15 @@ export const translations = {
     rentalCategory: "البند",
     rentalCategoryHint: "نظافة، صيانة، كهرباء…",
     rentalAddEntry: "إضافة قيد",
-    lpTemplateRentals: "إيجارات وشاليهات",
-    lpTemplateRentalsDesc: "صور كبيرة للوحدات وحجز بالليلة أو باليوم مع عربون.",
-    lpTemplateTrips: "رحلات وكامبات",
-    lpTemplateTripsDesc: "مواعيد الرحلات القادمة وحجز المقاعد.",
+    lpTemplateRentals: "ملاذ",
+    lpTemplateRentalsDesc:
+      "تصميم رحب مخصص للإقامات والوحدات مع صور غامرة وحجز مرن باليوم والليلة.",
+    lpTemplateTrips: "رحاب",
+    lpTemplateTripsDesc:
+      "تصميم تفاعلي يبرز مواعيد الانطلاق والفعاليات القادمة وحجز المقاعد بكل سهولة.",
     lpSectionUnits: "الوحدات",
-    lpChooseRentalsTemplate: "اختر القالب الأنسب: إيجارات وشاليهات، رحلات وكامبات، أو تطوير عقاري.",
+    lpChooseRentalsTemplate:
+      "اختر التصميم الأنسب لأسلوب نشاطك وعلامتك التجارية، ويمكنك تبديل القالب وتخصيص الأقسام في أي وقت.",
     free: "مجانًا",
     rentalErrCheckout: "تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول",
     rentalErrTaken: "هذه التواريخ محجوزة، اختر تواريخ أخرى",
@@ -2717,10 +2795,12 @@ export const translations = {
     rentalBackToWorkspace: "العودة للصفحة الرئيسية",
     rentalBookedDates: "تواريخ محجوزة",
     rentalRequestSent: "تم إرسال طلب الحجز",
-    rentalRequestSentText: "سيتواصل معك المالك لتأكيد الحجز وطريقة دفع العربون.",
+    rentalRequestSentText:
+      "سيتواصل معك المالك لتأكيد الحجز وطريقة دفع العربون.",
     rentalDepositDue: "العربون المطلوب",
     rentalSendRequest: "إرسال طلب الحجز",
-    rentalRequestNote: "لن يتم خصم أي مبلغ الآن، الحجز يتأكد بعد موافقة المالك.",
+    rentalRequestNote:
+      "لن يتم خصم أي مبلغ الآن، الحجز يتأكد بعد موافقة المالك.",
     rentalBookCallInstead: "عندك سؤال؟ احجز مكالمة",
   },
   en: {
@@ -2741,14 +2821,22 @@ export const translations = {
     toggleSidebar: "Toggle sidebar",
     collapseSidebar: "Collapse sidebar",
     expandSidebar: "Expand sidebar",
-    workspaceBrandingDesc: "Customize workspace name, logo, colors, and identity across dashboard and emails.",
-    workspaceLandingPageDesc: "Customize, design, and publish your workspace public landing page.",
-    workspaceTimezoneDesc: "Configure timezone, date and time format, and default currency.",
-    workspaceSocialLinksDesc: "Social media and website links displayed to customers on booking pages and emails.",
-    workspaceFormFieldsDesc: "Customize required and optional fields and questions collected during booking.",
-    workspacePaymentReceiptsDesc: "Configure payment receipt verification, bank transfer rules, and requirements.",
-    workspaceNotificationTemplatesDesc: "Customize automated email and SMS notification templates for bookings and payments.",
-    prescriptionTemplatesDesc: "Manage and customize medical reports, summaries, and document templates.",
+    workspaceBrandingDesc:
+      "Customize workspace name, logo, colors, and identity across dashboard and emails.",
+    workspaceLandingPageDesc:
+      "Customize, design, and publish your workspace public landing page.",
+    workspaceTimezoneDesc:
+      "Configure timezone, date and time format, and default currency.",
+    workspaceSocialLinksDesc:
+      "Social media and website links displayed to customers on booking pages and emails.",
+    workspaceFormFieldsDesc:
+      "Customize required and optional fields and questions collected during booking.",
+    workspacePaymentReceiptsDesc:
+      "Configure payment receipt verification, bank transfer rules, and requirements.",
+    workspaceNotificationTemplatesDesc:
+      "Customize automated email and SMS notification templates for bookings and payments.",
+    prescriptionTemplatesDesc:
+      "Manage and customize medical reports, summaries, and document templates.",
     pageTitleChangePassword: "Change Password — Saabq Cal",
     pageTitlePrivacy: "Privacy Policy — Saabq Cal",
     pageTitleTerms: "Terms of Service — Saabq Cal",
@@ -5235,13 +5323,17 @@ export const translations = {
     complianceRate: "Compliance Rate",
     workspaceLandingPage: "Landing page",
     lpTabTitle: "Landing page",
-    lpTabDesc: "Choose a ready-made template for your public workspace page, edit its own content, then publish it on your workspace link.",
+    lpTabDesc:
+      "Choose a ready-made template for your public workspace page, edit its own content, then publish it on your workspace link.",
     lpPublished: "Published",
     lpDraft: "Draft",
     lpViewPublic: "Open public page",
-    lpNotAvailable: "Landing pages are not included in your current plan. You can preview templates; saving and publishing require an upgrade.",
-    lpReadOnly: "You don't have permission to edit workspace settings. You can only preview.",
-    lpLinkedNotice: "Name, description, logo, cover, colors, highlights, gallery, services and team are read automatically from your workspace settings.",
+    lpNotAvailable:
+      "Landing pages are not included in your current plan. You can preview templates; saving and publishing require an upgrade.",
+    lpReadOnly:
+      "You don't have permission to edit workspace settings. You can only preview.",
+    lpLinkedNotice:
+      "Name, description, logo, cover, colors, highlights, gallery, services and team are read automatically from your workspace settings.",
     lpEditBasicInfo: "Edit basic info",
     lpEditBranding: "Edit branding & photos",
     lpEditServices: "Edit services",
@@ -5281,7 +5373,8 @@ export const translations = {
     lpMeetingsHint: "One per line: name | duration",
     lpAddRow: "Add",
     lpRemove: "Remove",
-    lpSectionsHint: "Reorder the page sections and hide the ones you don't need.",
+    lpSectionsHint:
+      "Reorder the page sections and hide the ones you don't need.",
     lpMoveUp: "Move up",
     lpMoveDown: "Move down",
     lpSectionAbout: "About",
@@ -5295,7 +5388,8 @@ export const translations = {
     lpSectionFaq: "FAQs",
     lpSectionContact: "Location & contact",
     lpPublishToggle: "Publish on the workspace link",
-    lpPublishHint: "When published, this page replaces the current workspace page on your public link.",
+    lpPublishHint:
+      "When published, this page replaces the current workspace page on your public link.",
     lpUnsaved: "Unsaved changes",
     lpSave: "Save page",
     lpSaved: "Landing page saved",
@@ -5308,32 +5402,89 @@ export const translations = {
     lpDesktop: "Desktop",
     lpPreviewError: "Could not render the template",
     lpPreviewLoading: "Loading template…",
-    lpTemplateClinic: "Clinic",
-    lpTemplateClinicDesc: "Calm and structured, for a single doctor or specialty.",
-    lpTemplateDental: "Dental",
-    lpTemplateDentalDesc: "Light and rounded, with an urgent visit call to action.",
-    lpTemplateMedical: "Medical center",
-    lpTemplateMedicalDesc: "A directory of departments and doctors for multi-specialty centers.",
-    lpTemplateTherapy: "Therapy",
-    lpTemplateTherapyDesc: "Quiet and spacious, focused on privacy and the first session.",
-    lpTemplateConsulting: "Consulting",
-    lpTemplateConsultingDesc: "Editorial, with a serif face, for law and advisory firms.",
-    lpTemplateBeauty: "Salon",
-    lpTemplateBeautyDesc: "Warm and dark, with a price menu and portfolio shots.",
-    lpTemplateEducation: "Academy",
-    lpTemplateEducationDesc: "Programs, a weekly schedule and teachers for training centers.",
-    lpTemplateCreative: "Studio",
-    lpTemplateCreativeDesc: "Black and white, gallery first, for photographers and designers.",
-    lpTemplateFitness: "Fitness club",
-    lpTemplateFitnessDesc: "Dark and bold, with today's classes and memberships.",
-    lpTemplateServices: "Home services",
-    lpTemplateServicesDesc: "Practical, with service selection and booking up front.",
-    lpTemplateCompany: "Company & teams",
-    lpTemplateCompanyDesc: "Corporate, with meetings booked with the right team.",
-    lpTemplateRealEstate: "Real estate",
-    lpTemplateRealEstateDesc: "Wide imagery, a units table and viewing bookings.",
+    lpChooseTemplateHint:
+      "Choose the design template that best fits your brand style. You can switch templates and customize sections at any time.",
+    lpTemplateSerene: "Serene",
+    lpTemplateSereneDesc:
+      "A clean, balanced layout highlighting services, team members, and bookings.",
+    lpTemplateRadiant: "Radiant",
+    lpTemplateRadiantDesc:
+      "Luminous and soft-cornered, with prominent highlights and quick booking access.",
+    lpTemplateAtlas: "Atlas",
+    lpTemplateAtlasDesc:
+      "Comprehensive structured layout with organized categories and multi-team routing.",
+    lpTemplateOasis: "Oasis",
+    lpTemplateOasisDesc:
+      "A calm, spacious design focused on comfort, privacy, and smooth onboarding.",
+    lpTemplatePrestige: "Classic",
+    lpTemplatePrestigeDesc:
+      "An elegant editorial design with classic typography for a distinguished presence.",
+    lpTemplateElegance: "Elegance",
+    lpTemplateEleganceDesc:
+      "Chic, warm layout featuring a curated service menu and visual portfolio.",
+    lpTemplatePathway: "Pathway",
+    lpTemplatePathwayDesc:
+      "Structured layout showcasing programs, timetables, and expert profiles.",
+    lpTemplateCanvas: "Canvas",
+    lpTemplateCanvasDesc:
+      "A visual-first monochrome design putting creative works and media front and center.",
+    lpTemplatePulse: "Pulse",
+    lpTemplatePulseDesc:
+      "Bold, energetic dark design built for schedules, passes, and high-impact activities.",
+    lpTemplateDirect: "Direct",
+    lpTemplateDirectDesc:
+      "Action-first layout placing direct booking and service selection right at the top.",
+    lpTemplateSynergy: "Synergy",
+    lpTemplateSynergyDesc:
+      "Modern corporate design connecting visitors to dedicated teams and scheduled meetings.",
+    lpTemplatePanorama: "Panorama",
+    lpTemplatePanoramaDesc:
+      "Expansive layout with wide cards to showcase spaces, units, and tour bookings.",
+    lpTemplateHaven: "Haven",
+    lpTemplateHavenDesc:
+      "Spacious hospitality design with immersive unit imagery and flexible daily/nightly booking.",
+    lpTemplateVoyage: "Voyage",
+    lpTemplateVoyageDesc:
+      "Engaging layout highlighting upcoming dates, group events, and instant seat reservations.",
+    lpTemplateClinic: "Serene",
+    lpTemplateClinicDesc:
+      "A clean, balanced layout highlighting services, team members, and bookings.",
+    lpTemplateDental: "Radiant",
+    lpTemplateDentalDesc:
+      "Luminous and soft-cornered, with prominent highlights and quick booking access.",
+    lpTemplateMedical: "Atlas",
+    lpTemplateMedicalDesc:
+      "Comprehensive structured layout with organized categories and multi-team routing.",
+    lpTemplateTherapy: "Oasis",
+    lpTemplateTherapyDesc:
+      "A calm, spacious design focused on comfort, privacy, and smooth onboarding.",
+    lpTemplateConsulting: "Classic",
+    lpTemplateConsultingDesc:
+      "An elegant editorial design with classic typography for a distinguished presence.",
+    lpTemplateBeauty: "Elegance",
+    lpTemplateBeautyDesc:
+      "Chic, warm layout featuring a curated service menu and visual portfolio.",
+    lpTemplateEducation: "Pathway",
+    lpTemplateEducationDesc:
+      "Structured layout showcasing programs, timetables, and expert profiles.",
+    lpTemplateCreative: "Canvas",
+    lpTemplateCreativeDesc:
+      "A visual-first monochrome design putting creative works and media front and center.",
+    lpTemplateFitness: "Pulse",
+    lpTemplateFitnessDesc:
+      "Bold, energetic dark design built for schedules, passes, and high-impact activities.",
+    lpTemplateServices: "Direct",
+    lpTemplateServicesDesc:
+      "Action-first layout placing direct booking and service selection right at the top.",
+    lpTemplateCompany: "Synergy",
+    lpTemplateCompanyDesc:
+      "Modern corporate design connecting visitors to dedicated teams and scheduled meetings.",
+    lpTemplateRealEstate: "Panorama",
+    lpTemplateRealEstateDesc:
+      "Expansive layout with wide cards to showcase spaces, units, and tour bookings.",
     recurrenceRepeatWeekly: "Repeat weekly",
-    recurrenceRepeatHint: "Book the same time on chosen days every week, e.g. a lesson every Saturday and Tuesday.",
+    recurrenceRepeatHint:
+      "Book the same time on chosen days every week, e.g. a lesson every Saturday and Tuesday.",
     recurrenceDays: "Repeat on",
     recurrenceSun: "Sun",
     recurrenceMon: "Mon",
@@ -5349,7 +5500,8 @@ export const translations = {
     recurrenceOpenEnded: "No end date",
     recurrenceMonthsCount: "Number of months",
     recurrenceEndsOn: "Last date",
-    recurrenceOpenHint: "Sessions are added automatically three months ahead; you can stop the series at any time.",
+    recurrenceOpenHint:
+      "Sessions are added automatically three months ahead; you can stop the series at any time.",
     recurrenceDaysRequired: "Choose at least one day to repeat on",
     recurrenceEndsOnRequired: "Choose the last date",
     recurrenceCreated: "Recurring sessions booked:",
@@ -5358,14 +5510,16 @@ export const translations = {
     recurrenceCancelSingle: "This session only",
     recurrenceCancelSeries: "This and all following sessions",
     recurrenceSeriesCancelled: "Recurring sessions cancelled",
-    lpRecommended: "Suggested for you",
-    lpChooseGroupTemplate: "Choose the template that fits your clinic: clinic, dental, medical center or therapy.",
+    lpRecommended: "Suggested start",
+    lpChooseGroupTemplate:
+      "Choose the design template that best fits your brand style. You can switch templates and customize sections at any time.",
     navRentals: "Units & Rentals",
     rentalPageSubtitle: "Manage units, reservations, income and expenses",
     rentalTabUnits: "Units",
     rentalTabReservations: "Reservations",
     rentalTabFinance: "Finance",
-    rentalUnitsHint: "Add your apartments, chalets, camps or trips, and set the booking mode and deposit for each unit.",
+    rentalUnitsHint:
+      "Add your apartments, chalets, camps or trips, and set the booking mode and deposit for each unit.",
     rentalAddUnit: "Add unit",
     rentalEditUnit: "Edit unit",
     rentalNoUnits: "No units yet",
@@ -5393,9 +5547,11 @@ export const translations = {
     rentalModeNightly: "Per night",
     rentalModeDate: "Per date (day)",
     rentalModeTrip: "Trip (seats)",
-    rentalModeNightlyHint: "Guests pick check-in and check-out; the price is per night.",
+    rentalModeNightlyHint:
+      "Guests pick check-in and check-out; the price is per night.",
     rentalModeDateHint: "Guests book a full day; the price is per day.",
-    rentalModeTripHint: "You add departures with seats; guests book seats and the price is per seat.",
+    rentalModeTripHint:
+      "You add departures with seats; guests book seats and the price is per seat.",
     rentalModeNightlyPrice: "Price per night",
     rentalModeDatePrice: "Price per day",
     rentalModeTripPrice: "Price per seat",
@@ -5474,12 +5630,15 @@ export const translations = {
     rentalCategory: "Category",
     rentalCategoryHint: "Cleaning, maintenance, power…",
     rentalAddEntry: "Add entry",
-    lpTemplateRentals: "Vacation rentals",
-    lpTemplateRentalsDesc: "Big unit photos with nightly or daily booking and deposits.",
-    lpTemplateTrips: "Trips & camps",
-    lpTemplateTripsDesc: "Upcoming departures and seat booking.",
+    lpTemplateRentals: "Haven",
+    lpTemplateRentalsDesc:
+      "Spacious hospitality design with immersive unit imagery and flexible daily/nightly booking.",
+    lpTemplateTrips: "Voyage",
+    lpTemplateTripsDesc:
+      "Engaging layout highlighting upcoming dates, group events, and instant seat reservations.",
     lpSectionUnits: "Units",
-    lpChooseRentalsTemplate: "Choose the template that fits: vacation rentals, trips & camps, or real estate.",
+    lpChooseRentalsTemplate:
+      "Choose the design template that best fits your brand style. You can switch templates and customize sections at any time.",
     free: "Free",
     rentalErrCheckout: "Check-out must be after check-in",
     rentalErrTaken: "These dates are taken, please choose others",
@@ -5489,10 +5648,12 @@ export const translations = {
     rentalBackToWorkspace: "Back to the main page",
     rentalBookedDates: "Booked dates",
     rentalRequestSent: "Reservation request sent",
-    rentalRequestSentText: "The owner will contact you to confirm and arrange the deposit.",
+    rentalRequestSentText:
+      "The owner will contact you to confirm and arrange the deposit.",
     rentalDepositDue: "Deposit due",
     rentalSendRequest: "Send reservation request",
-    rentalRequestNote: "Nothing is charged now; the owner confirms the reservation.",
+    rentalRequestNote:
+      "Nothing is charged now; the owner confirms the reservation.",
     rentalBookCallInstead: "Have a question? Book a call",
   },
 };

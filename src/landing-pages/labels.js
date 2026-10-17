@@ -84,8 +84,8 @@ const LABELS = {
     en: "If you are in danger right now, do not wait for an appointment: contact your local emergency services immediately.",
   },
 
-  consultingOffice: { ar: "المكتب", en: "The firm" },
-  consultingAbout: { ar: "عن المكتب", en: "About the firm" },
+  consultingOffice: { ar: "نبذة عنا", en: "About us" },
+  consultingAbout: { ar: "من نحن", en: "About us" },
   consultingPractice: { ar: "مجالات الممارسة", en: "Practice areas" },
   consultingPracticeNav: { ar: "مجالات العمل", en: "Practice" },
   consultingHow: { ar: "كيف نعمل معك", en: "How we work with you" },
@@ -126,7 +126,7 @@ const LABELS = {
   educationFaq: { ar: "أسئلة أولياء الأمور", en: "Parent questions" },
 
   creativeWork: { ar: "الأعمال", en: "Work" },
-  creativeAbout: { ar: "عن الاستوديو", en: "About the studio" },
+  creativeAbout: { ar: "نبذة عنا", en: "About us" },
   creativePackages: { ar: "الباقات", en: "Packages" },
   creativeBigger: {
     ar: "مشروع أكبر أو فيديو؟ احجز مكالمة لتحديد النطاق.",
@@ -134,8 +134,8 @@ const LABELS = {
   },
   creativeAsk: { ar: "عندك مشروع؟", en: "Have a project?" },
 
-  fitnessClub: { ar: "النادي", en: "The club" },
-  fitnessAbout: { ar: "عن النادي", en: "About the club" },
+  fitnessClub: { ar: "نبذة عنا", en: "About us" },
+  fitnessAbout: { ar: "من نحن", en: "About us" },
   fitnessClasses: { ar: "الكلاسات", en: "Classes" },
   fitnessWeek: { ar: "كلاسات الأسبوع", en: "This week's classes" },
   fitnessCoaches: { ar: "المدربون", en: "Coaches" },

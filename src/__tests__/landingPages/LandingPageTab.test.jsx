@@ -74,26 +74,11 @@ describe("LandingPageTab", () => {
     renderTab();
 
     const clinic = await screen.findByRole("radio", {
-      name: new RegExp(ar.lpTemplateClinic),
+      name: new RegExp(ar.lpTemplateSerene),
     });
     expect(clinic).toHaveAttribute("aria-checked", "true");
     expect(screen.getAllByRole("radio")).toHaveLength(14);
-    // A clinic owner sees the four clinic templates first, marked as suggested, and a prompt to choose.
     expect(screen.getByText(ar.lpChooseGroupTemplate)).toBeInTheDocument();
-    expect(
-      screen
-        .getAllByRole("radio")
-        .slice(0, 4)
-        .map((r) => r.textContent),
-    ).toEqual(
-      [
-        ar.lpTemplateClinic,
-        ar.lpTemplateDental,
-        ar.lpTemplateMedical,
-        ar.lpTemplateTherapy,
-      ].map((name) => expect.stringContaining(name)),
-    );
-    expect(screen.getAllByText(ar.lpRecommended)).toHaveLength(4);
     expect(
       await screen.findByRole("heading", {
         level: 1,
@@ -116,7 +101,7 @@ describe("LandingPageTab", () => {
 
     fireEvent.click(
       await screen.findByRole("radio", {
-        name: new RegExp(ar.lpTemplateBeauty),
+        name: new RegExp(ar.lpTemplateElegance),
       }),
     );
     fireEvent.click(
@@ -128,7 +113,7 @@ describe("LandingPageTab", () => {
     const [url, payload] = client.put.mock.calls[0];
     expect(url).toBe(endpoints.workspaceSettingsLandingPage);
     expect(payload).toMatchObject({
-      template_key: "beauty",
+      template_key: "elegance",
       is_published: true,
     });
     expect(payload.sections.map((s) => s.id)).toEqual([
@@ -147,7 +132,7 @@ describe("LandingPageTab", () => {
 
     expect(await screen.findByText(ar.lpNotAvailable)).toBeInTheDocument();
     expect(
-      screen.getByRole("radio", { name: new RegExp(ar.lpTemplateClinic) }),
+      screen.getByRole("radio", { name: new RegExp(ar.lpTemplateSerene) }),
     ).toBeDisabled();
     expect(screen.getByRole("button", { name: ar.lpSave })).toBeDisabled();
   });
@@ -155,7 +140,7 @@ describe("LandingPageTab", () => {
   it("loads a saved page", async () => {
     mockApi({
       landingPage: {
-        template_key: "fitness",
+        template_key: "pulse",
         is_published: true,
         sections: [{ id: "schedule", enabled: true }],
         content: { locale: "en", headline: "Train with us" },
@@ -165,7 +150,7 @@ describe("LandingPageTab", () => {
 
     expect(
       await screen.findByRole("radio", {
-        name: new RegExp(ar.lpTemplateFitness),
+        name: new RegExp(ar.lpTemplatePulse),
       }),
     ).toHaveAttribute("aria-checked", "true");
     expect(

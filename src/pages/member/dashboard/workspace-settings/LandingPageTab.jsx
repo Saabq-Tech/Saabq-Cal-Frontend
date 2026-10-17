@@ -17,8 +17,6 @@ import {
   LANDING_TEMPLATES,
   defaultSections,
   getLandingTemplate,
-  recommendedTemplates,
-  workspaceTypeCode,
   resolveSections,
 } from "../../../../landing-pages/catalog";
 import "../../../../landing-pages/editor.css";
@@ -195,12 +193,7 @@ export default function LandingPageTab() {
     [page, workspace, services, roles, units],
   );
   const template = page ? getLandingTemplate(page.template_key) : null;
-  // The workspace category's templates come first (clinics choose among four).
-  const recommended = workspace ? recommendedTemplates(workspace) : [];
-  const orderedTemplates = [
-    ...LANDING_TEMPLATES.filter((tpl) => recommended.includes(tpl.id)),
-    ...LANDING_TEMPLATES.filter((tpl) => !recommended.includes(tpl.id)),
-  ];
+  const orderedTemplates = LANDING_TEMPLATES;
   const dirty = page
     ? JSON.stringify(landingPagePayload(page)) !== savedSnapshot
     : false;
@@ -348,11 +341,9 @@ export default function LandingPageTab() {
 
           {panel === "template" && (
             <>
-              {!hasSavedPage && recommended.length > 1 && (
+              {!hasSavedPage && (
                 <p className="lpe-alert lpe-alert--info">
-                  {workspaceTypeCode(workspace) === "realestate"
-                    ? t("lpChooseRentalsTemplate")
-                    : t("lpChooseGroupTemplate")}
+                  {t("lpChooseTemplateHint") || t("lpChooseGroupTemplate")}
                 </p>
               )}
               <div
@@ -377,11 +368,6 @@ export default function LandingPageTab() {
                     />
                     <strong>{t(tpl.nameKey)}</strong>
                     <span>{t(tpl.descKey)}</span>
-                    {recommended.includes(tpl.id) && (
-                      <span className="lpe-template__badge">
-                        {t("lpRecommended")}
-                      </span>
-                    )}
                   </button>
                 ))}
               </div>
