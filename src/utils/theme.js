@@ -115,14 +115,12 @@ function injectWorkspaceBrandingStyle(branding) {
     const s = branding.secondary_color.trim();
     rootVars.push(`--secondary: ${s};`);
     rootVars.push(`--secondary-color: ${s};`);
-    rootVars.push(`--accent: ${s};`);
     rootVars.push(`--secondary-subtle: ${hexToRgba(s, 0.14)};`);
   }
   if (isHex(branding.hover_color)) {
     const h = branding.hover_color.trim();
     rootVars.push(`--hover-color: ${h};`);
     rootVars.push(`--primary-hover: ${h};`);
-    rootVars.push(`--accent-hover: ${h};`);
     rootVars.push(`--tertiary: ${h};`);
     rootVars.push(`--tertiary-subtle: ${hexToRgba(h, 0.14)};`);
   }
@@ -251,7 +249,6 @@ export function applyWorkspaceBranding(
   if (isHex(branding.secondary_color)) {
     root.style.setProperty("--secondary", branding.secondary_color);
     root.style.setProperty("--secondary-color", branding.secondary_color);
-    root.style.setProperty("--accent", branding.secondary_color);
     root.style.setProperty(
       "--secondary-subtle",
       hexToRgba(branding.secondary_color, 0.14),
@@ -260,7 +257,6 @@ export function applyWorkspaceBranding(
   } else {
     root.style.removeProperty("--secondary");
     root.style.removeProperty("--secondary-color");
-    root.style.removeProperty("--accent");
     root.style.removeProperty("--secondary-subtle");
     localStorage.removeItem("saabq_secondary_color");
   }
@@ -268,7 +264,6 @@ export function applyWorkspaceBranding(
   if (isHex(branding.hover_color)) {
     root.style.setProperty("--hover-color", branding.hover_color);
     root.style.setProperty("--primary-hover", branding.hover_color);
-    root.style.setProperty("--accent-hover", branding.hover_color);
     root.style.setProperty("--tertiary", branding.hover_color);
     root.style.setProperty(
       "--tertiary-subtle",
@@ -278,10 +273,19 @@ export function applyWorkspaceBranding(
   } else {
     root.style.removeProperty("--hover-color");
     root.style.removeProperty("--primary-hover");
-    root.style.removeProperty("--accent-hover");
     root.style.removeProperty("--tertiary");
     root.style.removeProperty("--tertiary-subtle");
     localStorage.removeItem("saabq_hover_color");
+  }
+
+  if (isHex(branding.accent_color)) {
+    root.style.setProperty("--accent", branding.accent_color);
+    root.style.setProperty("--accent-hover", branding.accent_color);
+    localStorage.setItem("saabq_accent_color", branding.accent_color);
+  } else {
+    root.style.removeProperty("--accent");
+    root.style.removeProperty("--accent-hover");
+    localStorage.removeItem("saabq_accent_color");
   }
 
   // Inject full CSS variables (brand, light, and dark) via dynamic style element
@@ -323,6 +327,7 @@ export function resetWorkspaceBranding() {
   localStorage.removeItem("saabq_primary_color");
   localStorage.removeItem("saabq_secondary_color");
   localStorage.removeItem("saabq_hover_color");
+  localStorage.removeItem("saabq_accent_color");
 
   const isDark = root.classList.contains("dark");
   updateMetaThemeColor(isDark ? "#022a35" : "#026982");

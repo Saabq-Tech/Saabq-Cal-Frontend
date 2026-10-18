@@ -751,18 +751,16 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Mobile Hamburger Button — only on non-dashboard pages */}
-            {!dashboardMode && (
-              <button
-                className="navbar-toggle"
-                onClick={() => setMobileOpen(!mobileOpen)}
-                aria-label={t("toggleMenu") || "فتح القائمة الرئيسية"}
-                aria-expanded={mobileOpen}
-                aria-controls="mobile-drawer-dialog"
-              >
-                <Icon name="custom-4d0dde3d" />
-              </button>
-            )}
+            {/* Mobile Hamburger Button */}
+            <button
+              className="navbar-toggle"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={t("toggleMenu") || "فتح القائمة الرئيسية"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-drawer-dialog"
+            >
+              <Icon name="custom-4d0dde3d" />
+            </button>
           </div>
         </div>
       </nav>
@@ -812,9 +810,8 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Drawer Navigation Links: hidden on dashboard pages, like the desktop header */}
-            {!dashboardMode && (
-              <div className="mobile-drawer-content">
+            {/* Drawer Navigation Links */}
+            <div className="mobile-drawer-content">
                 <nav className="mobile-drawer-nav">
                   <a
                     href="/#home"
@@ -1074,7 +1071,6 @@ export default function Navbar() {
                   )}
                 </nav>
               </div>
-            )}
 
             {/* Drawer Footer: Controls & Actions */}
             <div className="mobile-drawer-footer">
