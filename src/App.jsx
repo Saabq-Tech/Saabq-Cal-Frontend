@@ -142,6 +142,9 @@ const WorkspaceCustomersPage = lazy(
 const WorkspaceCustomerProfilePage = lazy(
   () => import("./pages/member/dashboard/WorkspaceCustomerProfilePage"),
 );
+const WorkspaceRecordsPage = lazy(
+  () => import("./pages/member/dashboard/WorkspaceRecordsPage"),
+);
 
 // Applications: Saabq-Chat
 const SaabqChatAppLayout = lazy(
@@ -590,6 +593,10 @@ export default function App() {
                       <Route
                         path="customers/:customerId"
                         element={<WorkspaceCustomerProfilePage />}
+                      />
+                      <Route
+                        path="records"
+                        element={<WorkspaceRecordsPage />}
                       />
                       <Route
                         path="settings"

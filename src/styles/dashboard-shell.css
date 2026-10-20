@@ -383,3 +383,285 @@ html
     height: 34px !important;
   }
 }
+
+/* ── Sidebar layout: setup shortcut, pinned block, scrolling sections, footer ── */
+@media (min-width: 861px) {
+  html .workspace-dashboard-sidebar {
+    overflow: hidden;
+  }
+  html .workspace-dashboard-sidebar .ws-sidebar-sections {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
+html .workspace-dashboard-sidebar .ws-sidebar-pinned {
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-light);
+}
+html .workspace-dashboard-sidebar button.profile-sidebar-link {
+  width: 100%;
+  background: none;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-chevron {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.6;
+}
+html[dir="ltr"] .workspace-dashboard-sidebar .ws-sidebar-chevron,
+html[dir="ltr"] .ws-settings-panel-back svg {
+  transform: scaleX(-1);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-badge {
+  margin-inline-start: auto;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: var(--warning, #f59e0b);
+  color: #fff;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-app-tag {
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+/* Yellow "complete setup" shortcut shown at the top during onboarding. */
+html .ws-setup-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+html .ws-setup-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 10px;
+  background: #facc15;
+  color: #422006;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(250, 204, 21, 0.35);
+  transition: background 0.15s ease;
+}
+html .ws-setup-btn:hover {
+  background: #eab308;
+}
+html .ws-setup-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+html .ws-setup-dismiss:hover {
+  background: var(--surface-alt);
+}
+
+/* Settings panel: replaces the nav with its own list of screens. */
+html .ws-settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: ws-panel-in 0.18s ease;
+}
+html .ws-settings-panel nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+html .ws-settings-panel-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 12px;
+  margin-bottom: 6px;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  background: none;
+  color: var(--heading);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: start;
+}
+html .ws-settings-panel .workspace-subnav-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+html .ws-settings-panel .workspace-subnav-item:hover {
+  background: var(--surface-alt);
+}
+html .ws-settings-panel .workspace-subnav-item.active {
+  background: var(--sb-accent-subtle);
+  color: var(--sb-accent);
+  font-weight: 700;
+}
+@keyframes ws-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Mobile: the sidebar is a horizontal strip, so flatten the sections. */
+@media (max-width: 860px) {
+  html .workspace-dashboard-sidebar .ws-sidebar-pinned,
+  html .workspace-dashboard-sidebar .ws-sidebar-sections,
+  html .workspace-dashboard-sidebar .ws-sidebar-section,
+  html .workspace-dashboard-sidebar .ws-sidebar-footer {
+    display: contents;
+  }
+  html .workspace-dashboard-sidebar .workspace-sidebar-section-header,
+  html .workspace-dashboard-sidebar .ws-setup-card,
+  html .workspace-dashboard-sidebar .ws-sidebar-chevron {
+    display: none;
+  }
+  html .ws-settings-panel,
+  html .ws-settings-panel nav {
+    flex-direction: row;
+  }
+  html .ws-settings-panel-back {
+    border-bottom: none;
+    padding-bottom: 8px;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+  /* The settings-subtab-strip above the content already lists the screens. */
+  html .ws-settings-panel nav {
+    display: none;
+  }
+}
+
+/* Collapsible sections: a toggle row, then a tree of items with a guide line. */
+html .workspace-dashboard-sidebar .ws-sidebar-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.87rem;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-toggle:hover {
+  background: var(--surface-alt);
+  color: var(--heading);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-toggle.has-active {
+  color: var(--heading);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-chevron {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.6;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+html[dir="rtl"] .workspace-dashboard-sidebar .ws-sidebar-section-chevron {
+  transform: rotate(90deg);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section.open .ws-sidebar-section-chevron {
+  transform: none;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-inline-start: 19px;
+  padding-inline-start: 8px;
+  border-inline-start: 1px solid var(--border);
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-items.empty {
+  display: none;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-item.collapsed {
+  display: none;
+}
+html .workspace-dashboard-sidebar .ws-sidebar-section-items .profile-sidebar-link {
+  padding-block: 7px;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 860px) {
+  html .workspace-dashboard-sidebar .ws-sidebar-section-toggle {
+    display: none;
+  }
+  html .workspace-dashboard-sidebar .ws-sidebar-section-items,
+  html .workspace-dashboard-sidebar .ws-sidebar-section-items.empty,
+  html .workspace-dashboard-sidebar .ws-sidebar-section-item,
+  html .workspace-dashboard-sidebar .ws-sidebar-section-item.collapsed {
+    display: contents;
+  }
+}
+
+/* Collapsed (icon-only) sidebar: flatten sections so every item shows as an icon. */
+html .workspace-dashboard-sidebar.collapsed .ws-setup-card,
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-section-toggle,
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-chevron,
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-app-tag,
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-badge {
+  display: none;
+}
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-section-items,
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-section-items.empty {
+  display: flex;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  border-inline-start: none;
+}
+html .workspace-dashboard-sidebar.collapsed .ws-sidebar-section-item.collapsed {
+  display: block;
+}

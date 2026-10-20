@@ -13,6 +13,8 @@ import CreateBookingModal from "./workspace-settings/CreateBookingModal";
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import { formatCurrency } from "../../../utils/currency";
 import { checkWorkspaceCapability } from "../../../utils/capabilities";
+import CustomerRecordTab from "./components/CustomerRecordTab";
+import { getRecordTitle } from "./components/recordTypes";
 export default function WorkspaceCustomerProfilePage() {
   const { customerId } = useParams();
   const { user } = useAuth();
@@ -1499,6 +1501,37 @@ export default function WorkspaceCustomerProfilePage() {
 
           <button
             type="button"
+            onClick={() => setActiveTab("record")}
+            style={{
+              padding: "12px 4px",
+              background: "none",
+              border: "none",
+              borderBottom:
+                activeTab === "record"
+                  ? "3px solid var(--primary)"
+                  : "3px solid transparent",
+              color:
+                activeTab === "record"
+                  ? "var(--primary)"
+                  : "var(--text-secondary)",
+              fontWeight: activeTab === "record" ? 800 : 600,
+              fontSize: "0.96rem",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: -2,
+              transition: "all 0.15s ease",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Icon name="file" size={18} />
+            <span>{getRecordTitle(workspace, lang)}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("workspace_data")}
             style={{
               padding: "12px 4px",
@@ -1563,6 +1596,14 @@ export default function WorkspaceCustomerProfilePage() {
             </button>
           )}
         </div>
+
+        {activeTab === "record" && (
+          <CustomerRecordTab
+            customerId={customerId}
+            workspace={workspace}
+            canWrite={canWrite}
+          />
+        )}
 
         {/* Tab 1: Timeline & Appointments */}
         {activeTab === "timeline" && (
