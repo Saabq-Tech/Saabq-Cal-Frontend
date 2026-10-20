@@ -213,7 +213,6 @@ export default function BasicInfoTab({
 
   return (
     <form className="card-body" onSubmit={handleSubmit}>
-
       {/* Row 1: Name & Slug (50% each) */}
       <div
         className="form-row grid grid-2"

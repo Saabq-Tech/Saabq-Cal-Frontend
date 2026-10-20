@@ -123,24 +123,35 @@ export default function MemberLoginPage() {
       navigate(from, { replace: true });
     } else {
       const errors = res.errors || {};
-      setWorkspaceErrors(errors);
 
-      if (res.message) {
-        toast.error(res.message);
-      } else {
-        toast.error("Google authentication failed.");
-      }
-
-      if (
-        errors.workspace_name ||
-        errors.workspace_slug ||
-        errors.workspace_type_id ||
-        errors.phone ||
+      const isWorkspaceRequired =
+        Boolean(errors.workspace_name) ||
+        Boolean(errors.workspace_slug) ||
+        Boolean(errors.workspace_type_id) ||
+        Boolean(errors.phone) ||
         res.message?.includes("مساحة العمل") ||
-        Object.keys(errors).length > 0
-      ) {
+        res.message?.toLowerCase().includes("workspace");
+
+      if (isWorkspaceRequired) {
         setSavedGoogleToken(googleToken);
         setShowWorkspaceModal(true);
+
+        // Only display form field errors and error toast if the user was actively submitting the modal
+        if (extraPayload.workspace_name) {
+          setWorkspaceErrors(errors);
+          if (res.message) {
+            toast.error(res.message);
+          }
+        } else {
+          setWorkspaceErrors({});
+        }
+      } else {
+        setWorkspaceErrors(errors);
+        if (res.message) {
+          toast.error(res.message);
+        } else {
+          toast.error("Google authentication failed.");
+        }
       }
     }
   };

@@ -171,7 +171,14 @@ export default function CustomerProfilePage() {
           </h2>
           <p className="card-subtitle">{t("updatePersonalDetails")}</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
           <Link
             to="/workspaces"
             className="btn btn-secondary btn-sm"

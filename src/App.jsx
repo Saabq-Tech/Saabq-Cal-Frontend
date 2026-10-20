@@ -270,187 +270,529 @@ export default function App() {
             <SidebarProvider>
               <ErrorBoundary>
                 <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  {/* Public pages — with Navbar/Footer */}
-                  <Route
-                    path="/"
-                    element={
-                      <MainLayout>
-                        <Home />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/about"
-                    element={<Navigate to="/#about" replace />}
-                  />
-                  <Route
-                    path="/blog"
-                    element={
-                      <MainLayout>
-                        <Blog />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/blog/:slug"
-                    element={
-                      <MainLayout>
-                        <BlogPostDetailPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/privacy"
-                    element={
-                      <MainLayout>
-                        <PrivacyPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/terms"
-                    element={
-                      <MainLayout>
-                        <TermsPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/features"
-                    element={
-                      <MainLayout>
-                        <FeaturesPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/how-it-works"
-                    element={
-                      <MainLayout>
-                        <HowItWorksPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/report-issue"
-                    element={
-                      <MainLayout>
-                        <ReportIssuePage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/workspaces"
-                    element={
-                      <MainLayout>
-                        <CustomerWorkspacesPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/workspaces/:idOrSlug"
-                    element={
-                      <MainLayout>
-                        <CustomerWorkspaceProfilePage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/workspaces/:idOrSlug/specialist/:specialistId"
-                    element={
-                      <MainLayout>
-                        <CustomerSpecialistPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/workspaces/:idOrSlug/book"
-                    element={
-                      <MainLayout>
-                        <CustomerBookAppointmentPage />
-                      </MainLayout>
-                    }
-                  />
-
-                  {/* Customer Suite Routes */}
-                  <Route
-                    path="/customer/login"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <CustomerLoginPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/customer/register"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <CustomerRegisterPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/customer/forgot-password"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <CustomerForgotPasswordPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/customer/reset-password"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <CustomerForgotPasswordPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/customer/verify-account"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <CustomerVerifyAccountPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-
-                  <Route
-                    path="/customer"
-                    element={
-                      <MainLayout>
-                        <ProtectedRoute>
-                          <DashboardLayout />
-                        </ProtectedRoute>
-                      </MainLayout>
-                    }
-                  >
-                    <Route index element={<Navigate to="profile" replace />} />
-                    <Route path="profile" element={<CustomerProfilePage />} />
+                  <Routes>
+                    {/* Public pages — with Navbar/Footer */}
                     <Route
-                      path="security"
+                      path="/"
                       element={
-                        <Navigate to="/customer/profile?tab=security" replace />
+                        <MainLayout>
+                          <Home />
+                        </MainLayout>
                       }
                     />
                     <Route
-                      path="change-password"
+                      path="/about"
+                      element={<Navigate to="/#about" replace />}
+                    />
+                    <Route
+                      path="/blog"
                       element={
-                        <Navigate to="/customer/profile?tab=password" replace />
+                        <MainLayout>
+                          <Blog />
+                        </MainLayout>
                       }
                     />
                     <Route
-                      path="notifications"
+                      path="/blog/:slug"
+                      element={
+                        <MainLayout>
+                          <BlogPostDetailPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/privacy"
+                      element={
+                        <MainLayout>
+                          <PrivacyPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/terms"
+                      element={
+                        <MainLayout>
+                          <TermsPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/features"
+                      element={
+                        <MainLayout>
+                          <FeaturesPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/how-it-works"
+                      element={
+                        <MainLayout>
+                          <HowItWorksPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/report-issue"
+                      element={
+                        <MainLayout>
+                          <ReportIssuePage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/workspaces"
+                      element={
+                        <MainLayout>
+                          <CustomerWorkspacesPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/workspaces/:idOrSlug"
+                      element={
+                        <MainLayout>
+                          <CustomerWorkspaceProfilePage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/workspaces/:idOrSlug/specialist/:specialistId"
+                      element={
+                        <MainLayout>
+                          <CustomerSpecialistPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/workspaces/:idOrSlug/book"
+                      element={
+                        <MainLayout>
+                          <CustomerBookAppointmentPage />
+                        </MainLayout>
+                      }
+                    />
+
+                    {/* Customer Suite Routes */}
+                    <Route
+                      path="/customer/login"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <CustomerLoginPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/customer/register"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <CustomerRegisterPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/customer/forgot-password"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <CustomerForgotPasswordPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/customer/reset-password"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <CustomerForgotPasswordPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/customer/verify-account"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <CustomerVerifyAccountPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/customer"
+                      element={
+                        <MainLayout>
+                          <ProtectedRoute>
+                            <DashboardLayout />
+                          </ProtectedRoute>
+                        </MainLayout>
+                      }
+                    >
+                      <Route
+                        index
+                        element={<Navigate to="profile" replace />}
+                      />
+                      <Route path="profile" element={<CustomerProfilePage />} />
+                      <Route
+                        path="security"
+                        element={
+                          <Navigate
+                            to="/customer/profile?tab=security"
+                            replace
+                          />
+                        }
+                      />
+                      <Route
+                        path="change-password"
+                        element={
+                          <Navigate
+                            to="/customer/profile?tab=password"
+                            replace
+                          />
+                        }
+                      />
+                      <Route
+                        path="notifications"
+                        element={
+                          <Navigate
+                            to="/customer/profile?tab=notifications"
+                            replace
+                          />
+                        }
+                      />
+                      <Route
+                        path="chats"
+                        element={
+                          <Navigate to="/customer/profile?tab=chats" replace />
+                        }
+                      />
+                      <Route
+                        path="appointments"
+                        element={
+                          <Navigate
+                            to="/customer/profile?tab=appointments"
+                            replace
+                          />
+                        }
+                      />
+                    </Route>
+
+                    {/* Workspace Member Suite Routes */}
+                    <Route
+                      path="/member/login"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <MemberLoginPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/member/register"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <MemberRegisterPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/member/forgot-password"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <MemberForgotPasswordPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/member/reset-password"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <MemberForgotPasswordPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/member/verify-account"
+                      element={
+                        <GuestRoute>
+                          <AuthLayout>
+                            <MemberVerifyAccountPage />
+                          </AuthLayout>
+                        </GuestRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/member"
+                      element={
+                        <WorkspaceDashboardLayout>
+                          <ProtectedRoute>
+                            <DashboardLayout />
+                          </ProtectedRoute>
+                        </WorkspaceDashboardLayout>
+                      }
+                    >
+                      <Route
+                        index
+                        element={<Navigate to="/member/workspace" replace />}
+                      />
+                      <Route path="profile" element={<MemberProfilePage />} />
+                      <Route path="security" element={<MemberSecurityPage />} />
+                      <Route
+                        path="change-password"
+                        element={<MemberChangePasswordPage />}
+                      />
+                      <Route
+                        path="integrations"
+                        element={<IntegrationsSettingsPage />}
+                      />
+                      <Route
+                        path="api-integration"
+                        element={<WorkspaceApiIntegrationPage />}
+                      />
+                      <Route
+                        path="notifications"
+                        element={<NotificationsPage />}
+                      />
+                      <Route path="chats" element={<ChatsPage />} />
+                    </Route>
+
+                    {/* Workspace Suite Routes */}
+                    <Route
+                      path="/member/workspace"
+                      element={
+                        <WorkspaceDashboardLayout>
+                          <ProtectedRoute>
+                            <WorkspaceLayout />
+                          </ProtectedRoute>
+                        </WorkspaceDashboardLayout>
+                      }
+                    >
+                      <Route index element={<WorkspaceHomePage />} />
+                      <Route
+                        path="customers"
+                        element={<WorkspaceCustomersPage />}
+                      />
+                      <Route
+                        path="customers/:customerId"
+                        element={<WorkspaceCustomerProfilePage />}
+                      />
+                      <Route
+                        path="settings"
+                        element={<WorkspaceSettingsPage />}
+                      />
+                      <Route
+                        path="subscriptions"
+                        element={<WorkspaceSubscriptionsPage />}
+                      />
+                      <Route
+                        path="members"
+                        element={<WorkspaceMembersPage />}
+                      />
+                      <Route path="roles" element={<WorkspaceRolesPage />} />
+                      <Route
+                        path="services"
+                        element={<WorkspaceServicesPage />}
+                      />
+                      <Route
+                        path="bookings"
+                        element={<WorkspaceBookingsPage />}
+                      />
+                      <Route
+                        path="bookings/:bookingId"
+                        element={<WorkspaceBookingDetailPage />}
+                      />
+                      <Route
+                        path="schedules"
+                        element={<WorkspaceSchedulesPage />}
+                      />
+                      <Route
+                        path="payments"
+                        element={<WorkspacePaymentsPage />}
+                      />
+                      <Route
+                        path="resources"
+                        element={<WorkspaceResourcesPage />}
+                      />
+                      <Route
+                        path="rentals"
+                        element={<WorkspaceRentalsPage />}
+                      />
+                      <Route path="logs" element={<WorkspaceLogsPage />} />
+                      <Route path="reports" element={<WorkspaceLogsPage />} />
+                      <Route
+                        path="templates"
+                        element={
+                          <Navigate
+                            to="/member/workspace/settings?sub=templates"
+                            replace
+                          />
+                        }
+                      />
+                      <Route
+                        path="api-integration"
+                        element={<WorkspaceApiIntegrationPage />}
+                      />
+
+                      {/* Applications: Saabq-Chat */}
+                      <Route
+                        path="applications/saabq-chat"
+                        element={<SaabqChatAppLayout />}
+                      >
+                        <Route
+                          index
+                          element={<Navigate to="inbox" replace />}
+                        />
+                        <Route path="inbox" element={<SaabqChatInboxTab />} />
+                        <Route
+                          path="contacts"
+                          element={<SaabqChatContactsTab />}
+                        />
+                        <Route
+                          path="inboxes"
+                          element={<SaabqChatInboxesTab />}
+                        />
+                        <Route
+                          path="automations"
+                          element={<SaabqChatAutomationsTab />}
+                        />
+                        <Route path="sla" element={<SaabqChatSlaTab />} />
+                        <Route
+                          path="captain-ai"
+                          element={<SaabqChatCaptainAiTab />}
+                        />
+                        <Route
+                          path="reports"
+                          element={<SaabqChatReportsTab />}
+                        />
+                        <Route
+                          path="portals"
+                          element={<SaabqChatPortalsTab />}
+                        />
+                        <Route
+                          path="agents-teams"
+                          element={<SaabqChatAgentsTeamsTab />}
+                        />
+                        <Route
+                          path="settings"
+                          element={<SaabqChatSettingsTab />}
+                        />
+                      </Route>
+                    </Route>
+
+                    {/* Explicit Error Pages */}
+                    <Route
+                      path="/404"
+                      element={
+                        <MainLayout>
+                          <NotFoundPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/403"
+                      element={
+                        <MainLayout>
+                          <ForbiddenPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/500"
+                      element={
+                        <MainLayout>
+                          <ServerErrorPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/503"
+                      element={
+                        <MainLayout>
+                          <ServiceUnavailablePage />
+                        </MainLayout>
+                      }
+                    />
+
+                    {/* General Route Aliases */}
+                    <Route
+                      path="/login"
+                      element={
+                        <GuestRoute>
+                          <Navigate to="/customer/login" replace />
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/register"
+                      element={
+                        <GuestRoute>
+                          <Navigate to="/customer/register" replace />
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/forgot-password"
+                      element={
+                        <GuestRoute>
+                          <Navigate to="/customer/forgot-password" replace />
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/reset-password"
+                      element={
+                        <GuestRoute>
+                          <Navigate to="/customer/forgot-password" replace />
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/verify-account"
+                      element={
+                        <GuestRoute>
+                          <Navigate to="/customer/verify-account" replace />
+                        </GuestRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={<Navigate to="/customer/profile" replace />}
+                    />
+                    <Route
+                      path="/customer/appointments"
+                      element={
+                        <Navigate
+                          to="/customer/profile?tab=appointments"
+                          replace
+                        />
+                      }
+                    />
+                    <Route
+                      path="/my-appointments"
+                      element={
+                        <Navigate
+                          to="/customer/profile?tab=appointments"
+                          replace
+                        />
+                      }
+                    />
+                    <Route
+                      path="/customer/notifications"
                       element={
                         <Navigate
                           to="/customer/profile?tab=notifications"
@@ -459,459 +801,149 @@ export default function App() {
                       }
                     />
                     <Route
-                      path="chats"
+                      path="/customer/chats"
                       element={
                         <Navigate to="/customer/profile?tab=chats" replace />
                       }
                     />
                     <Route
-                      path="appointments"
+                      path="/notifications"
                       element={
                         <Navigate
-                          to="/customer/profile?tab=appointments"
-                          replace
-                        />
-                      }
-                    />
-                  </Route>
-
-                  {/* Workspace Member Suite Routes */}
-                  <Route
-                    path="/member/login"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <MemberLoginPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/member/register"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <MemberRegisterPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/member/forgot-password"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <MemberForgotPasswordPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/member/reset-password"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <MemberForgotPasswordPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/member/verify-account"
-                    element={
-                      <GuestRoute>
-                        <AuthLayout>
-                          <MemberVerifyAccountPage />
-                        </AuthLayout>
-                      </GuestRoute>
-                    }
-                  />
-
-                  <Route
-                    path="/member"
-                    element={
-                      <WorkspaceDashboardLayout>
-                        <ProtectedRoute>
-                          <DashboardLayout />
-                        </ProtectedRoute>
-                      </WorkspaceDashboardLayout>
-                    }
-                  >
-                    <Route
-                      index
-                      element={<Navigate to="/member/workspace" replace />}
-                    />
-                    <Route path="profile" element={<MemberProfilePage />} />
-                    <Route path="security" element={<MemberSecurityPage />} />
-                    <Route
-                      path="change-password"
-                      element={<MemberChangePasswordPage />}
-                    />
-                    <Route
-                      path="integrations"
-                      element={<IntegrationsSettingsPage />}
-                    />
-                    <Route
-                      path="api-integration"
-                      element={<WorkspaceApiIntegrationPage />}
-                    />
-                    <Route
-                      path="notifications"
-                      element={<NotificationsPage />}
-                    />
-                    <Route path="chats" element={<ChatsPage />} />
-                  </Route>
-
-                  {/* Workspace Suite Routes */}
-                  <Route
-                    path="/member/workspace"
-                    element={
-                      <WorkspaceDashboardLayout>
-                        <ProtectedRoute>
-                          <WorkspaceLayout />
-                        </ProtectedRoute>
-                      </WorkspaceDashboardLayout>
-                    }
-                  >
-                    <Route index element={<WorkspaceHomePage />} />
-                    <Route
-                      path="customers"
-                      element={<WorkspaceCustomersPage />}
-                    />
-                    <Route
-                      path="customers/:customerId"
-                      element={<WorkspaceCustomerProfilePage />}
-                    />
-                    <Route
-                      path="settings"
-                      element={<WorkspaceSettingsPage />}
-                    />
-                    <Route
-                      path="subscriptions"
-                      element={<WorkspaceSubscriptionsPage />}
-                    />
-                    <Route path="members" element={<WorkspaceMembersPage />} />
-                    <Route path="roles" element={<WorkspaceRolesPage />} />
-                    <Route
-                      path="services"
-                      element={<WorkspaceServicesPage />}
-                    />
-                    <Route
-                      path="bookings"
-                      element={<WorkspaceBookingsPage />}
-                    />
-                    <Route
-                      path="bookings/:bookingId"
-                      element={<WorkspaceBookingDetailPage />}
-                    />
-                    <Route
-                      path="schedules"
-                      element={<WorkspaceSchedulesPage />}
-                    />
-                    <Route
-                      path="payments"
-                      element={<WorkspacePaymentsPage />}
-                    />
-                    <Route
-                      path="resources"
-                      element={<WorkspaceResourcesPage />}
-                    />
-                    <Route path="rentals" element={<WorkspaceRentalsPage />} />
-                    <Route path="logs" element={<WorkspaceLogsPage />} />
-                    <Route path="reports" element={<WorkspaceLogsPage />} />
-                    <Route
-                      path="templates"
-                      element={
-                        <Navigate
-                          to="/member/workspace/settings?sub=templates"
+                          to="/customer/profile?tab=notifications"
                           replace
                         />
                       }
                     />
                     <Route
-                      path="api-integration"
-                      element={<WorkspaceApiIntegrationPage />}
+                      path="/chats"
+                      element={
+                        <Navigate to="/customer/profile?tab=chats" replace />
+                      }
+                    />
+                    <Route
+                      path="/security"
+                      element={
+                        <Navigate to="/customer/profile?tab=security" replace />
+                      }
+                    />
+                    <Route
+                      path="/change-password"
+                      element={
+                        <Navigate to="/customer/profile?tab=password" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/settings"
+                      element={
+                        <Navigate to="/member/workspace/settings" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/subscriptions"
+                      element={
+                        <Navigate
+                          to="/member/workspace/subscriptions"
+                          replace
+                        />
+                      }
+                    />
+                    <Route
+                      path="/workspace/members"
+                      element={
+                        <Navigate to="/member/workspace/members" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/roles"
+                      element={
+                        <Navigate to="/member/workspace/roles" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/services"
+                      element={
+                        <Navigate to="/member/workspace/services" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/bookings"
+                      element={
+                        <Navigate to="/member/workspace/bookings" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/schedules"
+                      element={
+                        <Navigate to="/member/workspace/schedules" replace />
+                      }
+                    />
+                    <Route
+                      path="/workspace/templates"
+                      element={
+                        <Navigate to="/member/workspace/templates" replace />
+                      }
                     />
 
-                    {/* Applications: Saabq-Chat */}
-                    <Route
-                      path="applications/saabq-chat"
-                      element={<SaabqChatAppLayout />}
-                    >
-                      <Route index element={<Navigate to="inbox" replace />} />
-                      <Route path="inbox" element={<SaabqChatInboxTab />} />
-                      <Route
-                        path="contacts"
-                        element={<SaabqChatContactsTab />}
-                      />
-                      <Route path="inboxes" element={<SaabqChatInboxesTab />} />
-                      <Route
-                        path="automations"
-                        element={<SaabqChatAutomationsTab />}
-                      />
-                      <Route path="sla" element={<SaabqChatSlaTab />} />
-                      <Route
-                        path="captain-ai"
-                        element={<SaabqChatCaptainAiTab />}
-                      />
-                      <Route path="reports" element={<SaabqChatReportsTab />} />
-                      <Route path="portals" element={<SaabqChatPortalsTab />} />
-                      <Route
-                        path="agents-teams"
-                        element={<SaabqChatAgentsTeamsTab />}
-                      />
-                      <Route
-                        path="settings"
-                        element={<SaabqChatSettingsTab />}
-                      />
-                    </Route>
-                  </Route>
-
-                  {/* Explicit Error Pages */}
-                  <Route
-                    path="/404"
-                    element={
-                      <MainLayout>
-                        <NotFoundPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/403"
-                    element={
-                      <MainLayout>
-                        <ForbiddenPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/500"
-                    element={
-                      <MainLayout>
-                        <ServerErrorPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/503"
-                    element={
-                      <MainLayout>
-                        <ServiceUnavailablePage />
-                      </MainLayout>
-                    }
-                  />
-
-                  {/* General Route Aliases */}
-                  <Route
-                    path="/login"
-                    element={
-                      <GuestRoute>
-                        <Navigate to="/customer/login" replace />
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/register"
-                    element={
-                      <GuestRoute>
-                        <Navigate to="/customer/register" replace />
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/forgot-password"
-                    element={
-                      <GuestRoute>
-                        <Navigate to="/customer/forgot-password" replace />
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/reset-password"
-                    element={
-                      <GuestRoute>
-                        <Navigate to="/customer/forgot-password" replace />
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/verify-account"
-                    element={
-                      <GuestRoute>
-                        <Navigate to="/customer/verify-account" replace />
-                      </GuestRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={<Navigate to="/customer/profile" replace />}
-                  />
-                  <Route
-                    path="/customer/appointments"
-                    element={
-                      <Navigate
-                        to="/customer/profile?tab=appointments"
-                        replace
-                      />
-                    }
-                  />
-                  <Route
-                    path="/my-appointments"
-                    element={
-                      <Navigate
-                        to="/customer/profile?tab=appointments"
-                        replace
-                      />
-                    }
-                  />
-                  <Route
-                    path="/customer/notifications"
-                    element={
-                      <Navigate
-                        to="/customer/profile?tab=notifications"
-                        replace
-                      />
-                    }
-                  />
-                  <Route
-                    path="/customer/chats"
-                    element={
-                      <Navigate to="/customer/profile?tab=chats" replace />
-                    }
-                  />
-                  <Route
-                    path="/notifications"
-                    element={
-                      <Navigate
-                        to="/customer/profile?tab=notifications"
-                        replace
-                      />
-                    }
-                  />
-                  <Route
-                    path="/chats"
-                    element={
-                      <Navigate to="/customer/profile?tab=chats" replace />
-                    }
-                  />
-                  <Route
-                    path="/security"
-                    element={
-                      <Navigate to="/customer/profile?tab=security" replace />
-                    }
-                  />
-                  <Route
-                    path="/change-password"
-                    element={
-                      <Navigate to="/customer/profile?tab=password" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/settings"
-                    element={
-                      <Navigate to="/member/workspace/settings" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/subscriptions"
-                    element={
-                      <Navigate to="/member/workspace/subscriptions" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/members"
-                    element={
-                      <Navigate to="/member/workspace/members" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/roles"
-                    element={<Navigate to="/member/workspace/roles" replace />}
-                  />
-                  <Route
-                    path="/workspace/services"
-                    element={
-                      <Navigate to="/member/workspace/services" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/bookings"
-                    element={
-                      <Navigate to="/member/workspace/bookings" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/schedules"
-                    element={
-                      <Navigate to="/member/workspace/schedules" replace />
-                    }
-                  />
-                  <Route
-                    path="/workspace/templates"
-                    element={
-                      <Navigate to="/member/workspace/templates" replace />
-                    }
-                  />
-
-                  {/* Clean Top-Level Workspace & Service URLs:
+                    {/* Clean Top-Level Workspace & Service URLs:
                       - baseurl/{workspace} -> Workspace Profile Page (supports ?book)
                       - baseurl/{workspace}/{service} -> Booking specific service
                       - baseurl/{workspace}/specialist/{specialistId} -> Specialist Page
                       - baseurl/{workspace}/book -> Service Selection / Booking
                   */}
-                  <Route
-                    path="/:idOrSlug/specialist/:specialistId"
-                    element={
-                      <MainLayout>
-                        <CustomerSpecialistPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/:idOrSlug/units/:unitId"
-                    element={
-                      <MainLayout>
-                        <CustomerRentalUnitPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/:idOrSlug/book"
-                    element={
-                      <MainLayout>
-                        <CustomerBookAppointmentPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/:idOrSlug/:serviceSlug"
-                    element={
-                      <MainLayout>
-                        <CustomerBookAppointmentPage />
-                      </MainLayout>
-                    }
-                  />
-                  <Route
-                    path="/:idOrSlug"
-                    element={
-                      <MainLayout>
-                        <CustomerWorkspaceProfilePage />
-                      </MainLayout>
-                    }
-                  />
+                    <Route
+                      path="/:idOrSlug/specialist/:specialistId"
+                      element={
+                        <MainLayout>
+                          <CustomerSpecialistPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/:idOrSlug/units/:unitId"
+                      element={
+                        <MainLayout>
+                          <CustomerRentalUnitPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/:idOrSlug/book"
+                      element={
+                        <MainLayout>
+                          <CustomerBookAppointmentPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/:idOrSlug/:serviceSlug"
+                      element={
+                        <MainLayout>
+                          <CustomerBookAppointmentPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/:idOrSlug"
+                      element={
+                        <MainLayout>
+                          <CustomerWorkspaceProfilePage />
+                        </MainLayout>
+                      }
+                    />
 
-                  {/* Catch-all Route for 404 Not Found */}
-                  <Route
-                    path="*"
-                    element={
-                      <MainLayout>
-                        <NotFoundPage />
-                      </MainLayout>
-                    }
-                  />
-                </Routes>
-              </Suspense>
-            </ErrorBoundary>
+                    {/* Catch-all Route for 404 Not Found */}
+                    <Route
+                      path="*"
+                      element={
+                        <MainLayout>
+                          <NotFoundPage />
+                        </MainLayout>
+                      }
+                    />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </SidebarProvider>
           </ToastProvider>
         </AuthProvider>

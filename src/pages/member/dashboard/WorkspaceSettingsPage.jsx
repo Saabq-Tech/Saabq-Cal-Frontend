@@ -29,7 +29,9 @@ const NotificationTemplatesTab = lazy(
   () => import("./workspace-settings/NotificationTemplatesTab"),
 );
 const WorkspaceTemplatesPage = lazy(() => import("./WorkspaceTemplatesPage"));
-const LandingPageTab = lazy(() => import("./workspace-settings/LandingPageTab"));
+const LandingPageTab = lazy(
+  () => import("./workspace-settings/LandingPageTab"),
+);
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 
 export default function WorkspaceSettingsPage() {
@@ -533,7 +535,8 @@ export default function WorkspaceSettingsPage() {
         };
       case "social":
         return {
-          title: t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والروابط",
+          title:
+            t("workspaceSocialLinks") || "وسائل التواصل الاجتماعي والروابط",
           subtitle:
             t("workspaceSocialLinksDesc") ||
             "روابط حسابات التواصل الاجتماعي والموقع الإلكتروني التي تظهر للعملاء في صفحة الحجز والإيميلات.",

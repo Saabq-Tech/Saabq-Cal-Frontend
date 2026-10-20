@@ -37,15 +37,18 @@ export default function WorkspaceSetupModal({
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-card animate-fade-in-up"
+        className="modal-card workspace-setup-modal animate-fade-in-up"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-setup-title"
         aria-describedby="modal-setup-desc"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <div>
+        <div className="workspace-setup-header">
+          <div className="workspace-setup-icon-badge" aria-hidden="true">
+            <Icon name="calendar" size={24} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h2 id="modal-setup-title" className="modal-title">
               {t("setupWorkspaceTitle", "إعداد مساحة العمل الخاصة بك")}
             </h2>
@@ -62,14 +65,15 @@ export default function WorkspaceSetupModal({
             onClick={onClose}
             aria-label={t("close") || "إغلاق"}
           >
-            <Icon name="x" size={16} />
+            <Icon name="x" size={18} />
           </button>
         </div>
 
         <form onSubmit={onSubmit} className="modal-body">
           <div className="form-group">
             <label htmlFor="ws-setup-name" className="form-label">
-              {t("workspaceName", "اسم مساحة العمل")} *
+              <span>{t("workspaceName", "اسم مساحة العمل")}</span>
+              <span className="badge-required">* {t("required", "مطلوب")}</span>
             </label>
             <input
               id="ws-setup-name"
@@ -85,11 +89,12 @@ export default function WorkspaceSetupModal({
                   ...workspaceData,
                   workspace_name: e.target.value,
                 });
-                if (setWorkspaceErrors)
+                if (setWorkspaceErrors) {
                   setWorkspaceErrors({
                     ...workspaceErrors,
                     workspace_name: null,
                   });
+                }
               }}
               required
               aria-required="true"
@@ -113,7 +118,10 @@ export default function WorkspaceSetupModal({
 
           <div className="form-group">
             <label htmlFor="ws-setup-slug" className="form-label">
-              {t("workspaceSlug", "رابط مساحة العمل (Slug)")}
+              <span>{t("workspaceSlug", "رابط مساحة العمل (Slug)")}</span>
+              <span className="badge-optional">
+                ({t("optional", "اختياري")})
+              </span>
             </label>
             <input
               id="ws-setup-slug"
@@ -126,11 +134,12 @@ export default function WorkspaceSetupModal({
                   ...workspaceData,
                   workspace_slug: e.target.value,
                 });
-                if (setWorkspaceErrors)
+                if (setWorkspaceErrors) {
                   setWorkspaceErrors({
                     ...workspaceErrors,
                     workspace_slug: null,
                   });
+                }
               }}
               aria-describedby={
                 getFieldError("workspace_slug")
@@ -138,6 +147,17 @@ export default function WorkspaceSetupModal({
                   : undefined
               }
             />
+            <div className="slug-preview-box">
+              <Icon name="link" size={14} />
+              <span>cal.saabq.com/</span>
+              <code>
+                {workspaceData.workspace_slug
+                  ? workspaceData.workspace_slug
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-_]/g, "")
+                  : "your-workspace"}
+              </code>
+            </div>
             {getFieldError("workspace_slug") && (
               <span
                 id="ws-setup-slug-error"
@@ -151,7 +171,8 @@ export default function WorkspaceSetupModal({
 
           <div className="form-group">
             <label htmlFor="ws-setup-type" className="form-label">
-              {t("workspaceType", "تصنيف مساحة العمل")} *
+              <span>{t("workspaceType", "تصنيف مساحة العمل")}</span>
+              <span className="badge-required">* {t("required", "مطلوب")}</span>
             </label>
             <select
               id="ws-setup-type"
@@ -162,11 +183,12 @@ export default function WorkspaceSetupModal({
                   ...workspaceData,
                   workspace_type_id: e.target.value,
                 });
-                if (setWorkspaceErrors)
+                if (setWorkspaceErrors) {
                   setWorkspaceErrors({
                     ...workspaceErrors,
                     workspace_type_id: null,
                   });
+                }
               }}
               required
               aria-required="true"
@@ -198,7 +220,10 @@ export default function WorkspaceSetupModal({
 
           <div className="form-group">
             <label htmlFor="ws-setup-phone" className="form-label">
-              {t("phoneNumber", "رقم التليفون")}
+              <span>{t("phoneNumber", "رقم التليفون")}</span>
+              <span className="badge-optional">
+                ({t("optional", "اختياري")})
+              </span>
             </label>
             <input
               id="ws-setup-phone"
@@ -208,8 +233,9 @@ export default function WorkspaceSetupModal({
               value={workspaceData.phone || ""}
               onChange={(e) => {
                 setWorkspaceData({ ...workspaceData, phone: e.target.value });
-                if (setWorkspaceErrors)
+                if (setWorkspaceErrors) {
                   setWorkspaceErrors({ ...workspaceErrors, phone: null });
+                }
               }}
               aria-describedby={
                 getFieldError("phone") ? "ws-setup-phone-error" : undefined
@@ -229,15 +255,17 @@ export default function WorkspaceSetupModal({
           <div className="modal-actions">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary"
               onClick={onClose}
+              disabled={loading}
             >
               {t("cancel", "إلغاء")}
             </button>
             <button
               type="submit"
-              className="btn btn-primary btn-sm"
+              className="btn btn-primary"
               disabled={loading}
+              style={{ minWidth: 160 }}
             >
               {loading ? (
                 <>
@@ -246,10 +274,15 @@ export default function WorkspaceSetupModal({
                     style={{ borderTopColor: "#fff" }}
                     aria-hidden="true"
                   />
-                  {t("saving", "جاري الحفظ...")}
+                  <span>{t("saving", "جاري الحفظ...")}</span>
                 </>
               ) : (
-                t("createWorkspaceAndContinue", "اعمل مساحة العمل وكمّل")
+                <span>
+                  {t(
+                    "createWorkspaceAndContinue",
+                    "إنشاء مساحة العمل والمتابعة",
+                  )}
+                </span>
               )}
             </button>
           </div>

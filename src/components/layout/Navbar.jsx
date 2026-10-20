@@ -38,7 +38,6 @@ export default function Navbar() {
       location.pathname,
     );
 
-
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -552,7 +551,6 @@ export default function Navbar() {
           )}
 
           <div className="navbar-actions">
-
             <button
               className="language-toggle-btn"
               onClick={toggleLanguage}
@@ -812,265 +810,259 @@ export default function Navbar() {
 
             {/* Drawer Navigation Links */}
             <div className="mobile-drawer-content">
-                <nav className="mobile-drawer-nav">
-                  <a
-                    href="/#home"
-                    className={`mobile-drawer-link${
-                      location.pathname === "/" &&
-                      (isAuthenticated ||
-                        !activeSection ||
-                        activeSection === "home")
-                        ? " active"
-                        : ""
-                    }`}
-                    onClick={(e) => handleSectionClick("home", e)}
-                  >
-                    <Icon name="custom-5992beed" />
-                    <span>{t("home")}</span>
-                  </a>
+              <nav className="mobile-drawer-nav">
+                <a
+                  href="/#home"
+                  className={`mobile-drawer-link${
+                    location.pathname === "/" &&
+                    (isAuthenticated ||
+                      !activeSection ||
+                      activeSection === "home")
+                      ? " active"
+                      : ""
+                  }`}
+                  onClick={(e) => handleSectionClick("home", e)}
+                >
+                  <Icon name="custom-5992beed" />
+                  <span>{t("home")}</span>
+                </a>
 
-                  <Link
-                    to="/blog"
-                    className={`mobile-drawer-link${location.pathname.startsWith("/blog") ? " active" : ""}`}
-                    onClick={closeMobileDrawer}
-                  >
-                    <Icon name="book-open" />
-                    <span>{t("navBlog")}</span>
-                  </Link>
+                <Link
+                  to="/blog"
+                  className={`mobile-drawer-link${location.pathname.startsWith("/blog") ? " active" : ""}`}
+                  onClick={closeMobileDrawer}
+                >
+                  <Icon name="book-open" />
+                  <span>{t("navBlog")}</span>
+                </Link>
 
-                  <Link
-                    to="/workspaces"
-                    className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
-                    onClick={closeMobileDrawer}
-                  >
-                    <Icon name="monitor" />
-                    <span>{t("workspaces", "مساحات العمل")}</span>
-                  </Link>
+                <Link
+                  to="/workspaces"
+                  className={`mobile-drawer-link${location.pathname === "/workspaces" ? " active" : ""}`}
+                  onClick={closeMobileDrawer}
+                >
+                  <Icon name="monitor" />
+                  <span>{t("workspaces", "مساحات العمل")}</span>
+                </Link>
 
-                  {!isAuthenticated && (
-                    <>
-                      <a
-                        href="/#sectors"
-                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
-                        onClick={(e) => handleSectionClick("sectors", e)}
-                      >
-                        <Icon name="briefcase" />
-                        <span>{t("navSectors")}</span>
-                      </a>
+                {!isAuthenticated && (
+                  <>
+                    <a
+                      href="/#sectors"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "sectors" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("sectors", e)}
+                    >
+                      <Icon name="briefcase" />
+                      <span>{t("navSectors")}</span>
+                    </a>
 
-                      <a
-                        href="/#about"
-                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "about" ? " active" : ""}`}
-                        onClick={(e) => handleSectionClick("about", e)}
-                      >
-                        <Icon name="custom-34f286e2" />
-                        <span>{t("about")}</span>
-                      </a>
+                    <a
+                      href="/#about"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "about" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("about", e)}
+                    >
+                      <Icon name="custom-34f286e2" />
+                      <span>{t("about")}</span>
+                    </a>
 
-                      <a
-                        href="/#features"
-                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "features" ? " active" : ""}`}
-                        onClick={(e) => handleSectionClick("features", e)}
-                      >
-                        <Icon name="custom-5768860f" />
-                        <span>{t("navFeatures")}</span>
-                      </a>
+                    <a
+                      href="/#features"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "features" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("features", e)}
+                    >
+                      <Icon name="custom-5768860f" />
+                      <span>{t("navFeatures")}</span>
+                    </a>
 
-                      <a
-                        href="/#how-it-works"
-                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "how-it-works" ? " active" : ""}`}
-                        onClick={(e) => handleSectionClick("how-it-works", e)}
-                      >
-                        <Icon name="custom-bd500d73" />
-                        <span>{t("navHowItWorks")}</span>
-                      </a>
+                    <a
+                      href="/#how-it-works"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "how-it-works" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("how-it-works", e)}
+                    >
+                      <Icon name="custom-bd500d73" />
+                      <span>{t("navHowItWorks")}</span>
+                    </a>
 
-                      <a
-                        href="/#pricing"
-                        className={`mobile-drawer-link${location.pathname === "/" && activeSection === "pricing" ? " active" : ""}`}
-                        onClick={(e) => handleSectionClick("pricing", e)}
-                      >
-                        <Icon name="credit-card" />
-                        <span>{t("navPricing")}</span>
-                      </a>
-                    </>
-                  )}
+                    <a
+                      href="/#pricing"
+                      className={`mobile-drawer-link${location.pathname === "/" && activeSection === "pricing" ? " active" : ""}`}
+                      onClick={(e) => handleSectionClick("pricing", e)}
+                    >
+                      <Icon name="credit-card" />
+                      <span>{t("navPricing")}</span>
+                    </a>
+                  </>
+                )}
 
-                  {isAuthenticated && (
-                    <>
-                      {/* حسابي — navigates to the profile and reveals its pages */}
-                      <button
-                        type="button"
-                        className={`mobile-drawer-link drawer-accordion-head${
-                          location.pathname.includes("/profile")
-                            ? " active"
-                            : ""
-                        }${drawerAccountOpen ? " open" : ""}`}
-                        aria-expanded={drawerAccountOpen}
-                        onClick={() => {
-                          if (!drawerAccountOpen)
-                            navigate(`${profilePrefix}/profile`);
-                          setDrawerAccountOpen((v) => !v);
-                        }}
-                      >
-                        <Icon name="user" />
-                        <span>{t("myAccount")}</span>
-                        <Icon
-                          name="chevron-down"
-                          size={16}
-                          className="drawer-accordion-chevron"
-                        />
-                      </button>
-                      {drawerAccountOpen && (
-                        <div className="drawer-subnav">
-                          {drawerAccountTabs.map((tab) => (
-                            <Link
-                              key={tab.id}
-                              to={tab.to}
-                              className="mobile-drawer-link drawer-sublink"
-                              onClick={closeMobileDrawer}
-                              title={tab.lockTooltip || undefined}
-                            >
-                              <Icon name={tab.icon} />
-                              <span style={{ flex: 1 }}>{tab.label}</span>
-                              {tab.locked && (
-                                <Icon
-                                  name="lock"
-                                  size={14}
-                                  style={{
-                                    color: "var(--muted)",
-                                    marginInlineStart: "auto",
-                                  }}
-                                />
-                              )}
-                              {tab.badge === "unread" &&
-                                unreadCount > 0 &&
-                                !tab.locked && (
-                                  <span className="drawer-badge">
-                                    {unreadCount > 99 ? "99+" : unreadCount}
-                                  </span>
-                                )}
-                              {tab.badge === "chat" &&
-                                unreadChatCount > 0 &&
-                                !tab.locked && (
-                                  <span className="drawer-badge primary">
-                                    {unreadChatCount > 99
-                                      ? "99+"
-                                      : unreadChatCount}
-                                  </span>
-                                )}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* مساحتي — navigates to the workspace and reveals its pages */}
-                      {userType === "member" && (
-                        <>
-                          <button
-                            type="button"
-                            className={`mobile-drawer-link drawer-accordion-head${
-                              location.pathname.startsWith("/member/workspace")
-                                ? " active"
-                                : ""
-                            }${drawerWorkspaceOpen ? " open" : ""}`}
-                            aria-expanded={drawerWorkspaceOpen}
-                            onClick={() => {
-                              if (!drawerWorkspaceOpen)
-                                navigate("/member/workspace");
-                              setDrawerWorkspaceOpen((v) => !v);
-                            }}
+                {isAuthenticated && (
+                  <>
+                    {/* حسابي — navigates to the profile and reveals its pages */}
+                    <button
+                      type="button"
+                      className={`mobile-drawer-link drawer-accordion-head${
+                        location.pathname.includes("/profile") ? " active" : ""
+                      }${drawerAccountOpen ? " open" : ""}`}
+                      aria-expanded={drawerAccountOpen}
+                      onClick={() => {
+                        if (!drawerAccountOpen)
+                          navigate(`${profilePrefix}/profile`);
+                        setDrawerAccountOpen((v) => !v);
+                      }}
+                    >
+                      <Icon name="user" />
+                      <span>{t("myAccount")}</span>
+                      <Icon
+                        name="chevron-down"
+                        size={16}
+                        className="drawer-accordion-chevron"
+                      />
+                    </button>
+                    {drawerAccountOpen && (
+                      <div className="drawer-subnav">
+                        {drawerAccountTabs.map((tab) => (
+                          <Link
+                            key={tab.id}
+                            to={tab.to}
+                            className="mobile-drawer-link drawer-sublink"
+                            onClick={closeMobileDrawer}
+                            title={tab.lockTooltip || undefined}
                           >
-                            <Icon name="briefcase" />
-                            <span>{t("myWorkspace")}</span>
-                            <Icon
-                              name="chevron-down"
-                              size={16}
-                              className="drawer-accordion-chevron"
-                            />
-                          </button>
-                          {drawerWorkspaceOpen && (
-                            <div className="drawer-subnav">
-                              {drawerWorkspaceTabs.map((tab) => {
-                                const enabled =
-                                  isWorkspaceActive &&
-                                  checkWorkspaceCapability(
-                                    user,
-                                    tab.capability,
-                                  );
-                                if (!enabled) {
-                                  return (
-                                    <span
-                                      key={tab.id}
-                                      className="mobile-drawer-link drawer-sublink drawer-sublink-disabled"
-                                      aria-disabled="true"
-                                    >
-                                      <Icon name={tab.icon} />
-                                      <span>{tab.label}</span>
-                                      <Icon name="lock" size={13} />
-                                    </span>
-                                  );
-                                }
+                            <Icon name={tab.icon} />
+                            <span style={{ flex: 1 }}>{tab.label}</span>
+                            {tab.locked && (
+                              <Icon
+                                name="lock"
+                                size={14}
+                                style={{
+                                  color: "var(--muted)",
+                                  marginInlineStart: "auto",
+                                }}
+                              />
+                            )}
+                            {tab.badge === "unread" &&
+                              unreadCount > 0 &&
+                              !tab.locked && (
+                                <span className="drawer-badge">
+                                  {unreadCount > 99 ? "99+" : unreadCount}
+                                </span>
+                              )}
+                            {tab.badge === "chat" &&
+                              unreadChatCount > 0 &&
+                              !tab.locked && (
+                                <span className="drawer-badge primary">
+                                  {unreadChatCount > 99
+                                    ? "99+"
+                                    : unreadChatCount}
+                                </span>
+                              )}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* مساحتي — navigates to the workspace and reveals its pages */}
+                    {userType === "member" && (
+                      <>
+                        <button
+                          type="button"
+                          className={`mobile-drawer-link drawer-accordion-head${
+                            location.pathname.startsWith("/member/workspace")
+                              ? " active"
+                              : ""
+                          }${drawerWorkspaceOpen ? " open" : ""}`}
+                          aria-expanded={drawerWorkspaceOpen}
+                          onClick={() => {
+                            if (!drawerWorkspaceOpen)
+                              navigate("/member/workspace");
+                            setDrawerWorkspaceOpen((v) => !v);
+                          }}
+                        >
+                          <Icon name="briefcase" />
+                          <span>{t("myWorkspace")}</span>
+                          <Icon
+                            name="chevron-down"
+                            size={16}
+                            className="drawer-accordion-chevron"
+                          />
+                        </button>
+                        {drawerWorkspaceOpen && (
+                          <div className="drawer-subnav">
+                            {drawerWorkspaceTabs.map((tab) => {
+                              const enabled =
+                                isWorkspaceActive &&
+                                checkWorkspaceCapability(user, tab.capability);
+                              if (!enabled) {
                                 return (
-                                  <NavLink
+                                  <span
                                     key={tab.id}
-                                    to={tab.path}
-                                    end={tab.end}
-                                    className={({ isActive }) =>
-                                      `mobile-drawer-link drawer-sublink${
-                                        isActive ? " active" : ""
-                                      }`
-                                    }
-                                    onClick={closeMobileDrawer}
+                                    className="mobile-drawer-link drawer-sublink drawer-sublink-disabled"
+                                    aria-disabled="true"
                                   >
                                     <Icon name={tab.icon} />
-                                    <span style={{ flex: 1 }}>{tab.label}</span>
-                                    {tab.isApplication && (
+                                    <span>{tab.label}</span>
+                                    <Icon name="lock" size={13} />
+                                  </span>
+                                );
+                              }
+                              return (
+                                <NavLink
+                                  key={tab.id}
+                                  to={tab.path}
+                                  end={tab.end}
+                                  className={({ isActive }) =>
+                                    `mobile-drawer-link drawer-sublink${
+                                      isActive ? " active" : ""
+                                    }`
+                                  }
+                                  onClick={closeMobileDrawer}
+                                >
+                                  <Icon name={tab.icon} />
+                                  <span style={{ flex: 1 }}>{tab.label}</span>
+                                  {tab.isApplication && (
+                                    <span
+                                      style={{
+                                        fontSize: "0.64rem",
+                                        fontWeight: 800,
+                                        padding: "2px 6px",
+                                        borderRadius: 4,
+                                        background: "rgba(59, 130, 246, 0.15)",
+                                        color: "#3b82f6",
+                                        border:
+                                          "1px solid rgba(59, 130, 246, 0.3)",
+                                        marginInlineStart: "auto",
+                                      }}
+                                    >
+                                      APP
+                                    </span>
+                                  )}
+                                  {tab.id === "bookings" &&
+                                    pendingBookingsCount > 0 && (
                                       <span
                                         style={{
-                                          fontSize: "0.64rem",
-                                          fontWeight: 800,
-                                          padding: "2px 6px",
-                                          borderRadius: 4,
-                                          background:
-                                            "rgba(59, 130, 246, 0.15)",
-                                          color: "#3b82f6",
-                                          border:
-                                            "1px solid rgba(59, 130, 246, 0.3)",
                                           marginInlineStart: "auto",
+                                          padding: "2px 7px",
+                                          borderRadius: 10,
+                                          fontSize: "0.72rem",
+                                          fontWeight: 800,
+                                          background: "#f59e0b",
+                                          color: "#ffffff",
+                                          lineHeight: 1,
                                         }}
                                       >
-                                        APP
+                                        {pendingBookingsCount}
                                       </span>
                                     )}
-                                    {tab.id === "bookings" &&
-                                      pendingBookingsCount > 0 && (
-                                        <span
-                                          style={{
-                                            marginInlineStart: "auto",
-                                            padding: "2px 7px",
-                                            borderRadius: 10,
-                                            fontSize: "0.72rem",
-                                            fontWeight: 800,
-                                            background: "#f59e0b",
-                                            color: "#ffffff",
-                                            lineHeight: 1,
-                                          }}
-                                        >
-                                          {pendingBookingsCount}
-                                        </span>
-                                      )}
-                                  </NavLink>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-                </nav>
-              </div>
+                                </NavLink>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
+              </nav>
+            </div>
 
             {/* Drawer Footer: Controls & Actions */}
             <div className="mobile-drawer-footer">

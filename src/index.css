@@ -2917,6 +2917,166 @@ html.dark .auth-panel-right {
   width: 100% !important;
 }
 
+/* ── Workspace Setup Modal (Google Auth Step 2) ── */
+.workspace-setup-modal {
+  max-width: min(520px, calc(100vw - 32px)) !important;
+  padding: 28px 24px !important;
+  border-radius: var(--radius-xl, 20px) !important;
+  overflow-y: auto !important;
+  overflow-x: visible !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+}
+
+.workspace-setup-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.workspace-setup-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(33, 134, 141, 0.12);
+  color: var(--primary, #21868d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(33, 134, 141, 0.08);
+}
+
+.workspace-setup-modal .modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--heading, #0f172a);
+  margin-bottom: 4px;
+}
+
+.workspace-setup-modal .modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.5;
+}
+
+.workspace-setup-modal .modal-body {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  gap: 18px !important;
+  padding: 4px 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.workspace-setup-modal .form-group {
+  margin-bottom: 0;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+.workspace-setup-modal .form-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+  padding: 0 2px;
+  color: var(--heading, #1e293b);
+}
+
+.workspace-setup-modal .badge-required {
+  color: var(--primary, #21868d);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.workspace-setup-modal .badge-optional {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.workspace-setup-modal .form-input,
+.workspace-setup-modal .form-select {
+  width: calc(100% - 8px) !important;
+  margin: 3px 4px !important;
+  min-height: 48px !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--border, #e2e8f0);
+  background-color: var(--surface, #ffffff);
+  box-sizing: border-box !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block !important;
+}
+
+.workspace-setup-modal .form-input:hover:not(:disabled),
+.workspace-setup-modal .form-select:hover:not(:disabled) {
+  border-color: var(--primary-hover, #28767c) !important;
+}
+
+.workspace-setup-modal .form-input:focus,
+.workspace-setup-modal .form-select:focus {
+  border-color: var(--primary, #21868d) !important;
+  box-shadow:
+    0 0 0 4px rgba(33, 134, 141, 0.18),
+    0 2px 6px rgba(15, 23, 42, 0.06) !important;
+  outline: none !important;
+  transform: translateY(-1px);
+}
+
+.workspace-setup-modal .form-input.is-invalid,
+.workspace-setup-modal .form-select.is-invalid {
+  border-color: var(--danger, #ef4444) !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+}
+
+.workspace-setup-modal .slug-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 4px 0 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-alt, #f8fafc);
+  border: 1px dashed var(--border, #e2e8f0);
+  font-size: 0.8rem;
+  color: var(--text-secondary, #64748b);
+  direction: ltr;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-setup-modal .slug-preview-box code {
+  color: var(--primary, #21868d);
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.workspace-setup-modal .form-error {
+  margin: 4px 4px 0 4px !important;
+  font-size: 0.8rem !important;
+}
+
+.workspace-setup-modal .modal-actions {
+  margin-top: 14px !important;
+  padding-top: 18px !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  gap: 12px !important;
+}
+
+.workspace-setup-modal .modal-actions .btn {
+  min-height: 44px;
+  padding: 10px 20px;
+  font-weight: 700;
+}
+
 /* ── Mobile-First Responsive Overrides (< 768px) ── */
 @media (max-width: 768px) {
   /* Ban horizontal scrollbars across all containers on mobile without nesting scroll contexts */

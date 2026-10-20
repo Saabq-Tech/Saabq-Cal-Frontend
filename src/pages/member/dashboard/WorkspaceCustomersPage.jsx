@@ -1973,7 +1973,10 @@ export default function WorkspaceCustomersPage() {
                         className={`form-input ${getFieldError("customer_reference") ? "is-invalid" : ""}`}
                         value={customerForm.customer_reference}
                         onChange={(e) =>
-                          handleFieldChange("customer_reference", e.target.value)
+                          handleFieldChange(
+                            "customer_reference",
+                            e.target.value,
+                          )
                         }
                         placeholder={
                           lang === "ar"

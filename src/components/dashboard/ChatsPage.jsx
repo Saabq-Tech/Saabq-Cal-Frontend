@@ -484,11 +484,12 @@ export default function ChatsPage() {
           return prev;
         }
 
-        const senderRole = rtMsg.sender_type?.includes("Admin")
-          ? "admin"
-          : rtMsg.sender_type?.includes("Customer")
-            ? "customer"
-            : "member";
+        const senderRole =
+          rtMsg.sender_type?.includes("Admin") || rtMsg.sender_role === "admin"
+            ? "admin"
+            : rtMsg.sender_type?.includes("Customer")
+              ? "customer"
+              : "member";
 
         const newMsg = {
           id: rtMsg.id || Date.now(),
@@ -496,12 +497,12 @@ export default function ChatsPage() {
           sender: {
             id: rtMsg.sender_id,
             name:
-              rtMsg.sender_name ||
-              (senderRole === "admin"
-                ? t("technicalSupport")
-                : t("supportAgent")),
+              senderRole === "admin"
+                ? t("technicalSupport") || "الدعم الفني"
+                : rtMsg.sender_name || t("supportAgent"),
             type: rtMsg.sender_type,
             role: senderRole,
+            is_support: senderRole === "admin",
           },
           parent_id: rtMsg.parent_id || null,
           parent: rtMsg.parent || null,
@@ -716,25 +717,14 @@ export default function ChatsPage() {
     sendMessage();
   };
 
-  // Filter conversations
-  const filteredConversations = conversations.filter((c) => {
-    if (!searchQuery.trim()) return true;
-    const name =
-      c.participants?.map((p) => p.participant?.name).join(" ") || "";
-    const lastMsg = c.last_message?.body || "";
-    return (
-      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lastMsg.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
-
   // Get recipient display name & role label for conversation header
   const getRecipientInfo = (conv) => {
     if (!conv)
       return {
-        name: t("technicalSupport"),
+        name: t("technicalSupport") || "الدعم الفني",
         role: "admin",
         roleLabel: t("technicalSupport") || "الدعم الفني",
+        isAdmin: true,
       };
 
     const otherPart = conv.participants?.find((p) => {
@@ -770,22 +760,49 @@ export default function ChatsPage() {
           ? "member"
           : "admin");
 
+    const isAdmin =
+      pRole === "admin" ||
+      otherPart?.participant_type?.includes("Admin") ||
+      otherModel?.is_support === true ||
+      conv.participants?.some(
+        (p) =>
+          p.participant_type?.includes("Admin") &&
+          String(p.participant_id || p.participant?.id) !== String(user?.id),
+      );
+
     let roleLabel = t("technicalSupport") || "الدعم الفني";
-    if (pRole === "customer") {
+    if (isAdmin) {
+      roleLabel = t("technicalSupport") || "الدعم الفني";
+    } else if (pRole === "customer") {
       roleLabel = t("customer") || "عميل";
     } else if (pRole === "member") {
       roleLabel = t("workspaceMember") || "عضو مساحة عمل";
-    } else if (pRole === "admin") {
-      roleLabel = t("technicalSupport") || "الدعم الفني";
     }
 
+    const displayName = isAdmin
+      ? t("technicalSupport") || "الدعم الفني"
+      : otherModel?.name || t("technicalSupport") || "الدعم الفني";
+
     return {
-      name: otherModel?.name || t("technicalSupport"),
-      avatarUrl: otherModel?.avatar_url,
-      role: pRole,
+      name: displayName,
+      avatarUrl: isAdmin ? null : otherModel?.avatar_url,
+      role: isAdmin ? "admin" : pRole,
       roleLabel,
+      isAdmin,
     };
   };
+
+  // Filter conversations
+  const filteredConversations = conversations.filter((c) => {
+    if (!searchQuery.trim()) return true;
+    const info = getRecipientInfo(c);
+    const name = info.name || "";
+    const lastMsg = c.last_message?.body || "";
+    return (
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lastMsg.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
   const recipient = getRecipientInfo(activeConversation);
 
@@ -1094,7 +1111,8 @@ export default function ChatsPage() {
                       const isAdminMessage =
                         msg.sender?.role === "admin" ||
                         msg.sender?.type?.includes("Admin") ||
-                        msg.sender_type?.includes("Admin");
+                        msg.sender_type?.includes("Admin") ||
+                        msg.sender?.is_support === true;
                       const msgSenderType =
                         msg.sender_type || msg.sender?.type || "";
                       let isMe = false;
@@ -1126,8 +1144,14 @@ export default function ChatsPage() {
                             {msg.parent && (
                               <div className="chat-reply-quote">
                                 <span className="quote-author">
-                                  {msg.parent.sender?.name ||
-                                    t("technicalSupport")}
+                                  {msg.parent.sender?.role === "admin" ||
+                                  msg.parent.sender?.type?.includes("Admin") ||
+                                  msg.parent.sender_type?.includes("Admin") ||
+                                  msg.parent.sender?.is_support
+                                    ? t("technicalSupport") || "الدعم الفني"
+                                    : msg.parent.sender?.name ||
+                                      t("technicalSupport") ||
+                                      "الدعم الفني"}
                                 </span>
                                 <span className="quote-body">
                                   {msg.parent.type === "image"
@@ -1245,7 +1269,14 @@ export default function ChatsPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <span className="reply-title">
                       {t("replyingTo")}{" "}
-                      {replyingTo.sender?.name || t("technicalSupport")}
+                      {replyingTo.sender?.role === "admin" ||
+                      replyingTo.sender?.type?.includes("Admin") ||
+                      replyingTo.sender_type?.includes("Admin") ||
+                      replyingTo.sender?.is_support
+                        ? t("technicalSupport") || "الدعم الفني"
+                        : replyingTo.sender?.name ||
+                          t("technicalSupport") ||
+                          "الدعم الفني"}
                     </span>
                     <span className="reply-snippet">
                       {replyingTo.type === "image"
