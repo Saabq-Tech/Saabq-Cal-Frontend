@@ -9,6 +9,7 @@
  */
 
 import { workspaceTypeCode } from "../landing-pages/catalog";
+import { getRecordTitle } from "../pages/member/dashboard/components/recordTypes";
 import {
   isApiIntegrationEnabled,
   checkWorkspaceCapability,
@@ -106,6 +107,27 @@ export function getSaabqChatSubTabs(t) {
   ];
 }
 
+/**
+ * Sidebar sections between the pinned block (home, bookings, customers) and
+ * the footer (settings, subscriptions). Each tab names its section by `group`.
+ */
+export function getWorkspaceNavSections(t) {
+  return [
+    {
+      id: "operations",
+      label: t("navSectionOperations") || "التشغيل",
+      icon: "briefcase",
+    },
+    {
+      id: "finance",
+      label: t("navSectionFinance") || "المالية",
+      icon: "credit-card",
+    },
+    { id: "team", label: t("navSectionTeam") || "الفريق", icon: "users" },
+    { id: "apps", label: t("navApplications") || "التطبيقات", icon: "grid" },
+  ];
+}
+
 /** All workspace management tabs (before permission/capability gating). */
 export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
   const getCustomerLabel = () => {
@@ -133,6 +155,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
   return [
     {
       id: "home",
+      group: "pinned",
       path: "/member/workspace",
       end: true,
       label: t("home") || "الرئيسية",
@@ -143,6 +166,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "bookings",
+      group: "pinned",
       path: "/member/workspace/bookings",
       label: t("navBookings") || "الحجوزات",
       icon: "calendar",
@@ -157,6 +181,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "schedules",
+      group: "operations",
       path: "/member/workspace/schedules",
       label: t("navSchedules") || "الجداول",
       icon: "clock",
@@ -171,6 +196,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "customers",
+      group: "pinned",
       path: "/member/workspace/customers",
       label: getCustomerLabel(),
       icon: customerIcon,
@@ -184,7 +210,17 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
       capability: "CUSTOMERS",
     },
     {
+      id: "records",
+      group: "pinned",
+      path: "/member/workspace/records",
+      label: getRecordTitle(workspace, lang),
+      icon: "file",
+      permissions: ["customer_read", "customer_update", "customer_write"],
+      capability: "CUSTOMERS",
+    },
+    {
       id: "services",
+      group: "operations",
       path: "/member/workspace/services",
       label: t("navServices") || "الخدمات",
       icon: "briefcase",
@@ -199,6 +235,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "members",
+      group: "team",
       path: "/member/workspace/members",
       label: t("navMembers") || "الفريق",
       icon: "users",
@@ -214,6 +251,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "logs",
+      group: "finance",
       path: "/member/workspace/logs",
       label: t("reports") || "التقارير",
       icon: "bar-chart",
@@ -231,6 +269,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "settings",
+      group: "footer",
       path: "/member/workspace/settings",
       label: t("workspaceSettings") || "الإعدادات",
       icon: "settings",
@@ -240,6 +279,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "roles",
+      group: "team",
       path: "/member/workspace/roles",
       label: t("workspaceRoles") || "الأدوار والصلاحيات",
       icon: "shield",
@@ -254,6 +294,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "subscriptions",
+      group: "footer",
       path: "/member/workspace/subscriptions",
       label: t("navSubscriptions") || "الباقات والاشتراكات",
       icon: "credit-card",
@@ -268,6 +309,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "resources",
+      group: "operations",
       path: "/member/workspace/resources",
       label: t("workspaceResources") || "الموارد والمخزون",
       icon: "briefcase",
@@ -282,6 +324,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "payments",
+      group: "finance",
       path: "/member/workspace/payments",
       label: t("paymentsAndFinance") || "المدفوعات والمالية",
       icon: "credit-card",
@@ -303,6 +346,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
       ? [
           {
             id: "rentals",
+            group: "operations",
             path: "/member/workspace/rentals",
             label: t("navRentals"),
             icon: "home",
@@ -320,6 +364,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
       : []),
     {
       id: "api_integration",
+      group: "apps",
       path: "/member/workspace/api-integration",
       label: t("apiIntegrationTitle") || "الربط البرمجي (API)",
       icon: "code",
@@ -337,6 +382,7 @@ export function getWorkspaceTabs(t, workspace = null, lang = "ar") {
     },
     {
       id: "saabq_chat",
+      group: "apps",
       path: "/member/workspace/applications/saabq-chat",
       label: t("saabqChatAppTitle") || "سابق شات",
       icon: "message-circle",

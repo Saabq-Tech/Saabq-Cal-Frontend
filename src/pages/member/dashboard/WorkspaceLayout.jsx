@@ -14,6 +14,7 @@ import {
   canViewWorkspaceTab,
   getWorkspaceSettingsSubTabs,
   getSaabqChatSubTabs,
+  getWorkspaceNavSections,
 } from "../../../config/dashboardNav";
 import { getWorkspaceVibe } from "../../../utils/workspaceVibe";
 import WorkspaceTabsBar from "./components/WorkspaceTabsBar";
@@ -99,8 +100,168 @@ export default function WorkspaceLayout() {
   );
   const activeSaabqChatTab = saabqChatMatch?.[1] || "inbox";
 
-  const regularTabs = availableTabs.filter((tab) => !tab.isApplication);
-  const applicationTabs = availableTabs.filter((tab) => tab.isApplication);
+  const pinnedTabs = availableTabs.filter((tab) => tab.group === "pinned");
+  const footerTabs = availableTabs.filter((tab) => tab.group === "footer");
+  const sections = getWorkspaceNavSections(t)
+    .map((section) => ({
+      ...section,
+      tabs: availableTabs.filter((tab) => tab.group === section.id),
+    }))
+    .filter((section) => section.tabs.length > 0);
+  const settingsTab = footerTabs.find((tab) => tab.subTabs);
+
+  const isTabActive = (tab) =>
+    tab.end
+      ? location.pathname === tab.path
+      : location.pathname === tab.path ||
+        location.pathname.startsWith(`${tab.path}/`);
+
+  // Sections are an accordion: opening one closes the rest, and a closed one
+  // still shows its active item. The open one is remembered in this browser.
+  const [openSections, setOpenSections] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("ws-sidebar-open-sections")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const toggleSection = (id) => {
+    setOpenSections((prev) => {
+      const next = prev.includes(id) ? [] : [id];
+      try {
+        localStorage.setItem("ws-sidebar-open-sections", JSON.stringify(next));
+      } catch {
+        // Private mode: the open sections just reset next visit.
+      }
+      return next;
+    });
+  };
+
+  // Settings' screens open in their own panel that replaces the nav, so the
+  // main menu stays short. It opens by itself while on the settings page.
+  const [settingsPanelOpen, setSettingsPanelOpen] = useState(isSettingsOpen);
+  useEffect(() => {
+    setSettingsPanelOpen(isSettingsOpen);
+  }, [isSettingsOpen]);
+  const isSettingsPanelOpen = settingsPanelOpen && isWorkspaceActive;
+
+  // The yellow "complete setup" shortcut stays at the top until the owner
+  // dismisses it; the flag is kept per workspace in this browser.
+  const setupKey = `ws-setup-dismissed-${user?.workspace?.id}`;
+  const [setupDismissed, setSetupDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(setupKey) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const showSetupButton = isOwner && isWorkspaceActive && !setupDismissed;
+  const dismissSetup = () => {
+    setSetupDismissed(true);
+    try {
+      localStorage.setItem(setupKey, "1");
+    } catch {
+      // Private mode: the button just comes back next visit.
+    }
+  };
+  const openSettingsPanel = () => setSettingsPanelOpen(true);
+
+  const renderTab = (wsTab) => {
+    if (!isWorkspaceActive) {
+      return (
+        <div
+          key={wsTab.path}
+          className="profile-sidebar-link"
+          style={{ opacity: 0.5, cursor: "not-allowed" }}
+          title={
+            t("workspacePendingApprovalTitle") ||
+            t("workspaceInactiveTitle") ||
+            "مساحة العمل بانتظار موافقة الإدارة"
+          }
+        >
+          <span className="profile-sidebar-icon">
+            <Icon name={wsTab.icon} />
+          </span>
+          <span style={{ flex: 1 }}>{wsTab.label}</span>
+          <Icon name="lock" size={14} style={{ color: "#ef4444" }} />
+        </div>
+      );
+    }
+
+    if (wsTab.subTabs && !wsTab.isApplication) {
+      return (
+        <button
+          key={wsTab.path}
+          type="button"
+          className={`profile-sidebar-link${isSettingsOpen ? " active" : ""}`}
+          onClick={openSettingsPanel}
+        >
+          <span className="profile-sidebar-icon">
+            <Icon name={wsTab.icon} />
+          </span>
+          <span style={{ flex: 1 }}>{wsTab.label}</span>
+          <Icon name="chevron-left" size={14} className="ws-sidebar-chevron" />
+        </button>
+      );
+    }
+
+    const isCapAllowed = wsTab.isApplication
+      ? true
+      : checkWorkspaceCapability(user, wsTab.capability);
+
+    return (
+      <Fragment key={wsTab.path}>
+        <NavLink
+          to={wsTab.path}
+          end={wsTab.end}
+          title={wsTab.label}
+          className={({ isActive }) =>
+            `profile-sidebar-link${
+              isActive || (wsTab.isApplication && isSaabqChatOpen)
+                ? " active"
+                : ""
+            }`
+          }
+          style={{ opacity: isCapAllowed ? 1 : 0.7 }}
+        >
+          <span className="profile-sidebar-icon">
+            <Icon name={wsTab.icon} />
+          </span>
+          <span style={{ flex: 1 }}>{wsTab.label}</span>
+          {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
+            <span className="ws-sidebar-badge">{pendingBookingsCount}</span>
+          )}
+          {wsTab.isApplication && <span className="ws-sidebar-app-tag">APP</span>}
+          {!isCapAllowed && (
+            <Icon
+              name="lock"
+              size={14}
+              style={{ color: "var(--muted)", marginInlineStart: 6 }}
+            />
+          )}
+        </NavLink>
+
+        {/* Saabq-Chat nested sub-items in sidebar */}
+        {wsTab.isApplication && wsTab.subTabs && isSaabqChatOpen && (
+          <div className="workspace-subnav">
+            {wsTab.subTabs.map((sub) => (
+              <Link
+                key={sub.id}
+                to={`${wsTab.path}/${sub.id}`}
+                className={`workspace-subnav-item${
+                  activeSaabqChatTab === sub.id ? " active" : ""
+                }`}
+                style={{ display: "flex", alignItems: "center", gap: 8 }}
+              >
+                <Icon name={sub.icon} size={13} />
+                <span>{sub.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </Fragment>
+    );
+  };
 
   if (availableTabs.length === 0) {
     return (
@@ -173,185 +334,120 @@ export default function WorkspaceLayout() {
             isSidebarCollapsed ? " collapsed" : ""
           }`}
         >
-          <nav aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}>
-            {/* 1. Main Workspace Management Tabs */}
-            {regularTabs.map((wsTab) => {
-              const isCapAllowed =
-                isWorkspaceActive &&
-                checkWorkspaceCapability(user, wsTab.capability);
-
-              if (!isWorkspaceActive) {
-                return (
-                  <div
-                    key={wsTab.path}
-                    className="profile-sidebar-link"
-                    style={{
-                      opacity: 0.5,
-                      cursor: "not-allowed",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: "10px 14px",
-                    }}
-                    title={
-                      t("workspacePendingApprovalTitle") ||
-                      t("workspaceInactiveTitle") ||
-                      "مساحة العمل بانتظار موافقة الإدارة"
-                    }
+          {isSettingsPanelOpen && settingsTab ? (
+            <div className="ws-settings-panel">
+              <button
+                type="button"
+                className="ws-settings-panel-back"
+                onClick={() => setSettingsPanelOpen(false)}
+              >
+                <Icon name="arrow-right" size={16} />
+                <span>{settingsTab.label}</span>
+              </button>
+              <nav aria-label={settingsTab.label}>
+                {settingsTab.subTabs.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    to={`${settingsTab.path}?sub=${sub.id}`}
+                    className={`workspace-subnav-item${
+                      isSettingsOpen && activeSettingsTab === sub.id
+                        ? " active"
+                        : ""
+                    }`}
                   >
-                    <span className="profile-sidebar-icon">
-                      <Icon name={wsTab.icon} />
-                    </span>
-                    <span style={{ flex: 1 }}>{wsTab.label}</span>
-                    <Icon name="lock" size={14} style={{ color: "#ef4444" }} />
-                  </div>
-                );
-              }
-
-              return (
-                <Fragment key={wsTab.path}>
-                  <NavLink
-                    to={wsTab.path}
-                    end={wsTab.end}
-                    title={wsTab.label}
-                    className={({ isActive }) =>
-                      `profile-sidebar-link${isActive ? " active" : ""}`
-                    }
-                    style={{ opacity: isCapAllowed ? 1 : 0.7 }}
+                    {sub.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          ) : (
+            <>
+              {showSetupButton && settingsTab && (
+                <div className="ws-setup-card">
+                  <button
+                    type="button"
+                    className="ws-setup-btn"
+                    onClick={openSettingsPanel}
                   >
-                    <span className="profile-sidebar-icon">
-                      <Icon name={wsTab.icon} />
-                    </span>
-                    <span style={{ flex: 1 }}>{wsTab.label}</span>
-                    {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
-                      <span
-                        style={{
-                          marginInlineStart: "auto",
-                          padding: "2px 8px",
-                          borderRadius: 10,
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                          background: "#f59e0b",
-                          color: "#ffffff",
-                          boxShadow: "0 2px 6px rgba(245, 158, 11, 0.3)",
-                        }}
-                      >
-                        {pendingBookingsCount}
-                      </span>
-                    )}
-                    {!isCapAllowed && (
-                      <Icon
-                        name="lock"
-                        size={14}
-                        style={{
-                          color: "var(--muted)",
-                          marginInlineStart: 6,
-                        }}
-                      />
-                    )}
-                  </NavLink>
-
-                  {/* Settings' screens */}
-                  {wsTab.subTabs && isSettingsOpen && (
-                    <div className="workspace-subnav">
-                      {wsTab.subTabs.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to={`${wsTab.path}?sub=${sub.id}`}
-                          className={`workspace-subnav-item${
-                            activeSettingsTab === sub.id ? " active" : ""
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </Fragment>
-              );
-            })}
-
-            {/* 2. Applications Section (Saabq-Chat, etc.) */}
-            {applicationTabs.length > 0 && (
-              <>
-                <div
-                  className="workspace-sidebar-section-header"
-                  style={{
-                    padding: "16px 14px 8px",
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    color: "var(--muted)",
-                    borderTop:
-                      "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
-                    marginTop: 12,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                >
-                  <Icon name="grid" size={13} />
-                  <span>{t("navApplications") || "التطبيقات"}</span>
+                    <Icon name="settings" size={16} />
+                    <span>{t("completeWorkspaceSetup") || "أكمل إعداد المساحة"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="ws-setup-dismiss"
+                    onClick={dismissSetup}
+                    aria-label={t("close") || "إغلاق"}
+                  >
+                    <Icon name="x" size={14} />
+                  </button>
                 </div>
+              )}
 
-                {applicationTabs.map((appTab) => (
-                  <Fragment key={appTab.path}>
-                    <NavLink
-                      to={appTab.path}
-                      title={appTab.label}
-                      className={({ isActive }) =>
-                        `profile-sidebar-link${
-                          isActive || isSaabqChatOpen ? " active" : ""
-                        }`
-                      }
+              <nav
+                className="ws-sidebar-pinned"
+                aria-label={t("workspaceDetails") || "إدارة مساحة العمل"}
+              >
+                {pinnedTabs.map(renderTab)}
+              </nav>
+
+              <div className="ws-sidebar-sections">
+                {sections.map((section) => {
+                  const isOpen = openSections.includes(section.id);
+                  const activeTab = section.tabs.find(isTabActive);
+                  const hasVisibleTabs = isOpen || Boolean(activeTab);
+                  return (
+                    <div
+                      key={section.id}
+                      className={`ws-sidebar-section${isOpen ? " open" : ""}`}
                     >
-                      <span className="profile-sidebar-icon">
-                        <Icon name={appTab.icon} />
-                      </span>
-                      <span style={{ flex: 1 }}>{appTab.label}</span>
-                      <span
-                        style={{
-                          fontSize: "0.68rem",
-                          fontWeight: 800,
-                          padding: "2px 6px",
-                          borderRadius: 6,
-                          background: "rgba(59, 130, 246, 0.15)",
-                          color: "#3b82f6",
-                          border: "1px solid rgba(59, 130, 246, 0.3)",
-                        }}
+                      <button
+                        type="button"
+                        className={`ws-sidebar-section-toggle${
+                          activeTab ? " has-active" : ""
+                        }`}
+                        onClick={() => toggleSection(section.id)}
+                        aria-expanded={isOpen}
                       >
-                        APP
-                      </span>
-                    </NavLink>
-
-                    {/* Saabq-Chat nested sub-items in sidebar */}
-                    {appTab.subTabs && isSaabqChatOpen && (
-                      <div className="workspace-subnav">
-                        {appTab.subTabs.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={`${appTab.path}/${sub.id}`}
-                            className={`workspace-subnav-item${
-                              activeSaabqChatTab === sub.id ? " active" : ""
+                        <span className="profile-sidebar-icon">
+                          <Icon name={section.icon} />
+                        </span>
+                        <span style={{ flex: 1 }}>{section.label}</span>
+                        <Icon
+                          name="chevron-down"
+                          size={14}
+                          className="ws-sidebar-section-chevron"
+                        />
+                      </button>
+                      {/* Every tab stays rendered so the mobile strip shows
+                          them all; collapsed ones are hidden by CSS. */}
+                      <div
+                        className={`ws-sidebar-section-items${
+                          hasVisibleTabs ? "" : " empty"
+                        }`}
+                      >
+                        {section.tabs.map((tab) => (
+                          <div
+                            key={tab.path}
+                            className={`ws-sidebar-section-item${
+                              isOpen || tab === activeTab ? "" : " collapsed"
                             }`}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                            }}
                           >
-                            <Icon name={sub.icon} size={13} />
-                            <span>{sub.label}</span>
-                          </Link>
+                            {renderTab(tab)}
+                          </div>
                         ))}
                       </div>
-                    )}
-                  </Fragment>
-                ))}
-              </>
-            )}
-          </nav>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {footerTabs.length > 0 && (
+                <div className="ws-sidebar-footer">
+                  {footerTabs.map(renderTab)}
+                </div>
+              )}
+            </>
+          )}
         </aside>
 
         <div className="workspace-dashboard-content">
