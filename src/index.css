@@ -9982,15 +9982,34 @@ html.dark .flagship-card {
 }
 
 /* ── Pricing Grid ── */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 16px;
+#pricing .container,
+.pricing-container {
+  max-width: 1400px;
 }
 
-@media (max-width: 900px) {
-  .pricing-grid {
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 28px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.pricing-grid.plans-count-2,
+.pricing-grid:has(> article:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pricing-grid.plans-count-1,
+.pricing-grid:has(> article:only-child) {
+  grid-template-columns: minmax(0, 540px);
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .pricing-grid,
+  .pricing-grid.plans-count-2,
+  .pricing-grid:has(> article:nth-child(2):last-child) {
     grid-template-columns: 1fr;
   }
 }
@@ -10000,11 +10019,13 @@ html.dark .flagship-card {
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px 24px;
+  padding: 36px 30px;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
   transition: all var(--duration-normal) var(--ease-spring);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pricing-card:hover {
@@ -10031,13 +10052,13 @@ html.dark .flagship-card {
 }
 
 .pricing-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   margin-bottom: 6px;
 }
 
 .pricing-card .plan-desc {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   margin-bottom: 20px;
   min-height: 40px;
@@ -10075,9 +10096,18 @@ html.dark .flagship-card {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 28px;
   flex: 1;
+}
+
+.plan-features li {
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .about-content {
@@ -15582,10 +15612,8 @@ html.dark .hero-lp-actions .btn-outline:hover:not(:disabled) {
 /* ── Pricing + why-choose panel ── */
 .pricing-layout {
   display: grid;
-  /* minmax(0, ...) or the plan cards' intrinsic width wins over the fractions
-     and the panel ends up wider than the plans it sits beside. */
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr);
-  gap: 28px;
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  gap: 32px;
   align-items: start;
 }
 

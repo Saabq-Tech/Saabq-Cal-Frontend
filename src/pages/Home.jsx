@@ -667,7 +667,7 @@ export default function Home() {
 
       {/* Pricing Section */}
       <section id="pricing" className="section-sm">
-        <div className="container">
+        <div className="container pricing-container">
           <div className="section-header">
             <h2>{t("pricingTitleNew")}</h2>
             <p>{t("pricingSubtitleNew")}</p>
@@ -692,7 +692,11 @@ export default function Home() {
                 </ul>
               </div>
             </aside>
-            <div className="pricing-grid">
+            <div
+              className={`pricing-grid ${
+                plans.length > 0 ? `plans-count-${plans.length}` : ""
+              }`}
+            >
               {loading ? (
                 [1, 2, 3].map((i) => (
                   <div
