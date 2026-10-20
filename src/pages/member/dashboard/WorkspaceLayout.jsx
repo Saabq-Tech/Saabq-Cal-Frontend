@@ -231,7 +231,9 @@ export default function WorkspaceLayout() {
           {wsTab.id === "bookings" && pendingBookingsCount > 0 && (
             <span className="ws-sidebar-badge">{pendingBookingsCount}</span>
           )}
-          {wsTab.isApplication && <span className="ws-sidebar-app-tag">APP</span>}
+          {wsTab.isApplication && (
+            <span className="ws-sidebar-app-tag">APP</span>
+          )}
           {!isCapAllowed && (
             <Icon
               name="lock"
@@ -370,7 +372,9 @@ export default function WorkspaceLayout() {
                     onClick={openSettingsPanel}
                   >
                     <Icon name="settings" size={16} />
-                    <span>{t("completeWorkspaceSetup") || "أكمل إعداد المساحة"}</span>
+                    <span>
+                      {t("completeWorkspaceSetup") || "أكمل إعداد المساحة"}
+                    </span>
                   </button>
                   <button
                     type="button"

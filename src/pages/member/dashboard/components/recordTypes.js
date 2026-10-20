@@ -30,9 +30,21 @@ const PRESETS = {
       color: "#026982",
       label: { ar: "كشف", en: "Visit" },
       fields: [
-        { key: "complaint", type: "textarea", label: { ar: "الشكوى", en: "Complaint" } },
-        { key: "examination", type: "textarea", label: { ar: "الفحص", en: "Examination" } },
-        { key: "vitals", type: "text", label: { ar: "العلامات الحيوية", en: "Vitals" } },
+        {
+          key: "complaint",
+          type: "textarea",
+          label: { ar: "الشكوى", en: "Complaint" },
+        },
+        {
+          key: "examination",
+          type: "textarea",
+          label: { ar: "الفحص", en: "Examination" },
+        },
+        {
+          key: "vitals",
+          type: "text",
+          label: { ar: "العلامات الحيوية", en: "Vitals" },
+        },
       ],
     },
     {
@@ -41,7 +53,11 @@ const PRESETS = {
       color: "#7c3aed",
       label: { ar: "تشخيص", en: "Diagnosis" },
       fields: [
-        { key: "diagnosis", type: "textarea", label: { ar: "التشخيص", en: "Diagnosis" } },
+        {
+          key: "diagnosis",
+          type: "textarea",
+          label: { ar: "التشخيص", en: "Diagnosis" },
+        },
       ],
     },
     {
@@ -49,7 +65,13 @@ const PRESETS = {
       icon: "plus-square",
       color: "#16a34a",
       label: { ar: "روشتة", en: "Prescription" },
-      fields: [{ key: "medications", type: "meds", label: { ar: "الأدوية", en: "Medications" } }],
+      fields: [
+        {
+          key: "medications",
+          type: "meds",
+          label: { ar: "الأدوية", en: "Medications" },
+        },
+      ],
     },
     {
       id: "procedure",
@@ -57,8 +79,17 @@ const PRESETS = {
       color: "#ea580c",
       label: { ar: "إجراء / جلسة", en: "Procedure" },
       fields: [
-        { key: "procedure", type: "text", label: { ar: "الإجراء", en: "Procedure" } },
-        { key: "teeth", type: "text", label: { ar: "الأسنان / المنطقة", en: "Teeth / area" }, dentalOnly: true },
+        {
+          key: "procedure",
+          type: "text",
+          label: { ar: "الإجراء", en: "Procedure" },
+        },
+        {
+          key: "teeth",
+          type: "text",
+          label: { ar: "الأسنان / المنطقة", en: "Teeth / area" },
+          dentalOnly: true,
+        },
       ],
     },
     {
@@ -68,7 +99,11 @@ const PRESETS = {
       label: { ar: "تحاليل / أشعة", en: "Labs / imaging" },
       fields: [
         { key: "test", type: "text", label: { ar: "الفحص", en: "Test" } },
-        { key: "result", type: "textarea", label: { ar: "النتيجة", en: "Result" } },
+        {
+          key: "result",
+          type: "textarea",
+          label: { ar: "النتيجة", en: "Result" },
+        },
       ],
     },
     {
@@ -77,7 +112,11 @@ const PRESETS = {
       color: "#dc2626",
       label: { ar: "أمراض مزمنة / حساسية", en: "Chronic / allergies" },
       fields: [
-        { key: "condition", type: "text", label: { ar: "الحالة", en: "Condition" } },
+        {
+          key: "condition",
+          type: "text",
+          label: { ar: "الحالة", en: "Condition" },
+        },
       ],
     },
     note,
@@ -90,7 +129,11 @@ const PRESETS = {
       color: "#026982",
       label: { ar: "تقييم / اختبار", en: "Assessment" },
       fields: [
-        { key: "subject", type: "text", label: { ar: "المادة", en: "Subject" } },
+        {
+          key: "subject",
+          type: "text",
+          label: { ar: "المادة", en: "Subject" },
+        },
         { key: "score", type: "number", label: { ar: "الدرجة", en: "Score" } },
         { key: "max_score", type: "number", label: { ar: "من", en: "Out of" } },
       ],
@@ -100,7 +143,9 @@ const PRESETS = {
       icon: "book-open",
       color: "#7c3aed",
       label: { ar: "واجب", en: "Homework" },
-      fields: [{ key: "due", type: "text", label: { ar: "موعد التسليم", en: "Due" } }],
+      fields: [
+        { key: "due", type: "text", label: { ar: "موعد التسليم", en: "Due" } },
+      ],
     },
     {
       id: "progress",
@@ -118,7 +163,13 @@ const PRESETS = {
       icon: "message-square",
       color: "#026982",
       label: { ar: "جلسة", en: "Session" },
-      fields: [{ key: "topics", type: "textarea", label: { ar: "المحاور", en: "Topics" } }],
+      fields: [
+        {
+          key: "topics",
+          type: "textarea",
+          label: { ar: "المحاور", en: "Topics" },
+        },
+      ],
     },
     {
       id: "recommendation",

@@ -72,7 +72,11 @@ export default function WorkspaceRecordsPage() {
           {records.map((record) => {
             const ty = typeById[record.type] || typeById.note;
             return (
-              <li key={record.id} className="cr-entry" style={{ "--cr-color": ty?.color }}>
+              <li
+                key={record.id}
+                className="cr-entry"
+                style={{ "--cr-color": ty?.color }}
+              >
                 <span className="cr-entry-dot">
                   <Icon name={ty?.icon || "file-text"} size={14} />
                 </span>
@@ -82,16 +86,23 @@ export default function WorkspaceRecordsPage() {
                   style={{ textDecoration: "none" }}
                 >
                   <div className="cr-entry-head">
-                    <strong style={{ color: "var(--heading)" }}>{record.customer?.name}</strong>
-                    <span className="cr-entry-type">{label(ty?.label) || record.type}</span>
+                    <strong style={{ color: "var(--heading)" }}>
+                      {record.customer?.name}
+                    </strong>
+                    <span className="cr-entry-type">
+                      {label(ty?.label) || record.type}
+                    </span>
                     {record.title && <span>{record.title}</span>}
                     <span className="cr-entry-meta">
                       {record.record_date}
                       {record.author && ` · ${record.author.name}`}
-                      {record.attachments?.length > 0 && ` · 📎 ${record.attachments.length}`}
+                      {record.attachments?.length > 0 &&
+                        ` · 📎 ${record.attachments.length}`}
                     </span>
                   </div>
-                  {record.body && <p className="cr-entry-body">{record.body}</p>}
+                  {record.body && (
+                    <p className="cr-entry-body">{record.body}</p>
+                  )}
                 </Link>
               </li>
             );

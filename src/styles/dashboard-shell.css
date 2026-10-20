@@ -613,7 +613,10 @@ html .workspace-dashboard-sidebar .ws-sidebar-section-chevron {
 html[dir="rtl"] .workspace-dashboard-sidebar .ws-sidebar-section-chevron {
   transform: rotate(90deg);
 }
-html .workspace-dashboard-sidebar .ws-sidebar-section.open .ws-sidebar-section-chevron {
+html
+  .workspace-dashboard-sidebar
+  .ws-sidebar-section.open
+  .ws-sidebar-section-chevron {
   transform: none;
 }
 html .workspace-dashboard-sidebar .ws-sidebar-section-items {
@@ -630,7 +633,10 @@ html .workspace-dashboard-sidebar .ws-sidebar-section-items.empty {
 html .workspace-dashboard-sidebar .ws-sidebar-section-item.collapsed {
   display: none;
 }
-html .workspace-dashboard-sidebar .ws-sidebar-section-items .profile-sidebar-link {
+html
+  .workspace-dashboard-sidebar
+  .ws-sidebar-section-items
+  .profile-sidebar-link {
   padding-block: 7px;
   font-size: 0.85rem;
 }

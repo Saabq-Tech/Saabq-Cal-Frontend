@@ -103,16 +103,23 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
       setEditingId(null);
       load();
     } catch (err) {
-      toast.error(err.response?.data?.message || t("recordSaveFailed") || "تعذر حفظ الإدخال");
+      toast.error(
+        err.response?.data?.message ||
+          t("recordSaveFailed") ||
+          "تعذر حفظ الإدخال",
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (record) => {
-    if (!window.confirm(t("recordDeleteConfirm") || "حذف هذا الإدخال وملفاته؟")) return;
+    if (!window.confirm(t("recordDeleteConfirm") || "حذف هذا الإدخال وملفاته؟"))
+      return;
     try {
-      await client.delete(endpoints.workspaceCustomerRecordItem(customerId, record.id));
+      await client.delete(
+        endpoints.workspaceCustomerRecordItem(customerId, record.id),
+      );
       setRecords((rs) => rs.filter((r) => r.id !== record.id));
     } catch {
       toast.error(t("recordDeleteFailed") || "تعذر حذف الإدخال");
@@ -122,7 +129,11 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
   const download = async (record, attachment) => {
     try {
       const res = await client.get(
-        endpoints.workspaceCustomerRecordAttachment(customerId, record.id, attachment.id),
+        endpoints.workspaceCustomerRecordAttachment(
+          customerId,
+          record.id,
+          attachment.id,
+        ),
         { responseType: "blob" },
       );
       const url = URL.createObjectURL(res.data);
@@ -136,7 +147,8 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
     }
   };
 
-  const visible = filter === "all" ? records : records.filter((r) => r.type === filter);
+  const visible =
+    filter === "all" ? records : records.filter((r) => r.type === filter);
   const formType = form ? typeById[form.type] : null;
 
   return (
@@ -166,7 +178,8 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
           <div className="cr-form-head">
             <Icon name={formType.icon} size={18} />
             <strong>
-              {editingId ? t("edit") || "تعديل" : t("add") || "إضافة"}: {label(formType.label)}
+              {editingId ? t("edit") || "تعديل" : t("add") || "إضافة"}:{" "}
+              {label(formType.label)}
             </strong>
           </div>
 
@@ -185,7 +198,9 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                 type="date"
                 className="form-input"
                 value={form.record_date}
-                onChange={(e) => setForm({ ...form, record_date: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, record_date: e.target.value })
+                }
               />
             </label>
           </div>
@@ -220,7 +235,9 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                   {a.name}
                   <button
                     type="button"
-                    onClick={() => setForm({ ...form, remove: [...form.remove, a.id] })}
+                    onClick={() =>
+                      setForm({ ...form, remove: [...form.remove, a.id] })
+                    }
                     aria-label={t("delete") || "حذف"}
                   >
                     <Icon name="x" size={12} />
@@ -234,7 +251,10 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                 <button
                   type="button"
                   onClick={() =>
-                    setForm({ ...form, files: form.files.filter((_, j) => j !== i) })
+                    setForm({
+                      ...form,
+                      files: form.files.filter((_, j) => j !== i),
+                    })
                   }
                   aria-label={t("delete") || "حذف"}
                 >
@@ -250,7 +270,10 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                 multiple
                 hidden
                 onChange={(e) => {
-                  setForm({ ...form, files: [...form.files, ...e.target.files] });
+                  setForm({
+                    ...form,
+                    files: [...form.files, ...e.target.files],
+                  });
                   e.target.value = "";
                 }}
               />
@@ -258,10 +281,19 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
           </div>
 
           <div className="cr-form-actions">
-            <button type="button" className="btn btn-primary" disabled={saving} onClick={save}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={saving}
+              onClick={save}
+            >
               {saving ? t("saving") || "جاري الحفظ..." : t("save") || "حفظ"}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => setForm(null)}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setForm(null)}
+            >
               {t("cancel") || "إلغاء"}
             </button>
           </div>
@@ -295,19 +327,27 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
       {loading ? (
         <p className="cr-empty">{t("loading") || "جاري التحميل..."}</p>
       ) : visible.length === 0 ? (
-        <p className="cr-empty">{t("recordEmpty") || "لا توجد إدخالات في السجل بعد"}</p>
+        <p className="cr-empty">
+          {t("recordEmpty") || "لا توجد إدخالات في السجل بعد"}
+        </p>
       ) : (
         <ol className="cr-timeline">
           {visible.map((record) => {
             const ty = typeById[record.type] || typeById.note;
             return (
-              <li key={record.id} className="cr-entry" style={{ "--cr-color": ty?.color }}>
+              <li
+                key={record.id}
+                className="cr-entry"
+                style={{ "--cr-color": ty?.color }}
+              >
                 <span className="cr-entry-dot">
                   <Icon name={ty?.icon || "file-text"} size={14} />
                 </span>
                 <div className="cr-entry-card">
                   <div className="cr-entry-head">
-                    <span className="cr-entry-type">{label(ty?.label) || record.type}</span>
+                    <span className="cr-entry-type">
+                      {label(ty?.label) || record.type}
+                    </span>
                     {record.title && <strong>{record.title}</strong>}
                     <span className="cr-entry-meta">
                       {record.record_date}
@@ -315,10 +355,18 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                     </span>
                     {canWrite && (
                       <span className="cr-entry-actions">
-                        <button type="button" onClick={() => openEdit(record)} aria-label={t("edit") || "تعديل"}>
+                        <button
+                          type="button"
+                          onClick={() => openEdit(record)}
+                          aria-label={t("edit") || "تعديل"}
+                        >
                           <Icon name="edit" size={14} />
                         </button>
-                        <button type="button" onClick={() => remove(record)} aria-label={t("delete") || "حذف"}>
+                        <button
+                          type="button"
+                          onClick={() => remove(record)}
+                          aria-label={t("delete") || "حذف"}
+                        >
                           <Icon name="trash-2" size={14} />
                         </button>
                       </span>
@@ -327,7 +375,8 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
 
                   {ty?.fields.map((field) => {
                     const value = record.data?.[field.key];
-                    if (!value || (Array.isArray(value) && !value.length)) return null;
+                    if (!value || (Array.isArray(value) && !value.length))
+                      return null;
                     return field.type === "meds" ? (
                       <table key={field.key} className="cr-meds">
                         <thead>
@@ -356,7 +405,9 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
                     );
                   })}
 
-                  {record.body && <p className="cr-entry-body">{record.body}</p>}
+                  {record.body && (
+                    <p className="cr-entry-body">{record.body}</p>
+                  )}
 
                   {record.attachments?.length > 0 && (
                     <div className="cr-files">
@@ -385,7 +436,8 @@ export default function CustomerRecordTab({ customerId, workspace, canWrite }) {
 
 function RecordField({ field, label, value, onChange, t }) {
   if (field.type === "meds") {
-    const meds = Array.isArray(value) && value.length ? value : [{ ...emptyMed }];
+    const meds =
+      Array.isArray(value) && value.length ? value : [{ ...emptyMed }];
     const update = (i, key, v) =>
       onChange(meds.map((m, j) => (j === i ? { ...m, [key]: v } : m)));
     return (
@@ -393,16 +445,44 @@ function RecordField({ field, label, value, onChange, t }) {
         <span>{label}</span>
         {meds.map((m, i) => (
           <div key={i} className="cr-med-row">
-            <input className="form-input" placeholder={t("medicationName") || "اسم الدواء"} value={m.name} onChange={(e) => update(i, "name", e.target.value)} />
-            <input className="form-input" placeholder={t("medicationDose") || "الجرعة"} value={m.dose} onChange={(e) => update(i, "dose", e.target.value)} />
-            <input className="form-input" placeholder={t("medicationFrequency") || "التكرار"} value={m.frequency} onChange={(e) => update(i, "frequency", e.target.value)} />
-            <input className="form-input" placeholder={t("medicationDuration") || "المدة"} value={m.duration} onChange={(e) => update(i, "duration", e.target.value)} />
-            <button type="button" onClick={() => onChange(meds.filter((_, j) => j !== i))} aria-label={t("delete") || "حذف"}>
+            <input
+              className="form-input"
+              placeholder={t("medicationName") || "اسم الدواء"}
+              value={m.name}
+              onChange={(e) => update(i, "name", e.target.value)}
+            />
+            <input
+              className="form-input"
+              placeholder={t("medicationDose") || "الجرعة"}
+              value={m.dose}
+              onChange={(e) => update(i, "dose", e.target.value)}
+            />
+            <input
+              className="form-input"
+              placeholder={t("medicationFrequency") || "التكرار"}
+              value={m.frequency}
+              onChange={(e) => update(i, "frequency", e.target.value)}
+            />
+            <input
+              className="form-input"
+              placeholder={t("medicationDuration") || "المدة"}
+              value={m.duration}
+              onChange={(e) => update(i, "duration", e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => onChange(meds.filter((_, j) => j !== i))}
+              aria-label={t("delete") || "حذف"}
+            >
               <Icon name="x" size={14} />
             </button>
           </div>
         ))}
-        <button type="button" className="cr-add-med" onClick={() => onChange([...meds, { ...emptyMed }])}>
+        <button
+          type="button"
+          className="cr-add-med"
+          onClick={() => onChange([...meds, { ...emptyMed }])}
+        >
           <Icon name="plus" size={14} />
           {t("addMedication") || "إضافة دواء"}
         </button>
@@ -414,7 +494,12 @@ function RecordField({ field, label, value, onChange, t }) {
     <label>
       <span>{label}</span>
       {field.type === "textarea" ? (
-        <textarea className="form-input" rows={2} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+          className="form-input"
+          rows={2}
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
       ) : (
         <input
           className="form-input"
@@ -432,7 +517,9 @@ function appendData(formData, prefix, value) {
   if (Array.isArray(value)) {
     value.forEach((v, i) => appendData(formData, `${prefix}[${i}]`, v));
   } else if (value && typeof value === "object") {
-    Object.entries(value).forEach(([k, v]) => appendData(formData, `${prefix}[${k}]`, v));
+    Object.entries(value).forEach(([k, v]) =>
+      appendData(formData, `${prefix}[${k}]`, v),
+    );
   } else if (value !== undefined && value !== null && value !== "") {
     formData.append(prefix, value);
   }
