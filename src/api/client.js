@@ -180,6 +180,13 @@ export const endpoints = {
   workspaceLogs: "/workspace-members/workspace/logs",
   workspaceCustomers: "/workspace-members/workspace/customers",
   workspaceCustomerItem: (id) => `/workspace-members/workspace/customers/${id}`,
+  workspaceRecentRecords: "/workspace-members/workspace/customer-records",
+  workspaceCustomerRecords: (customerId) =>
+    `/workspace-members/workspace/customers/${customerId}/records`,
+  workspaceCustomerRecordItem: (customerId, recordId) =>
+    `/workspace-members/workspace/customers/${customerId}/records/${recordId}`,
+  workspaceCustomerRecordAttachment: (customerId, recordId, attachmentId) =>
+    `/workspace-members/workspace/customers/${customerId}/records/${recordId}/attachments/${attachmentId}`,
   workspaceBookings: "/workspace-members/workspace/bookings",
   workspaceBookingSeries: "/workspace-members/workspace/booking-series",
   // Rentals (units, departures, reservations, finance)
