@@ -228,6 +228,27 @@ export default function ChatsPage() {
   const [imagePreview, setImagePreview] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [mobileShowChat, setMobileShowChat] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+  // Mobile popstate / back button handler: allows mobile hardware/gesture back to return to chat list
+  useEffect(() => {
+    const handlePopState = () => {
+      if (mobileShowChat) {
+        setMobileShowChat(false);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [mobileShowChat]);
+
+  const handleMobileBack = () => {
+    if (window.history.state?.chatOpen) {
+      window.history.back();
+    } else {
+      setMobileShowChat(false);
+    }
+  };
 
   // Voice Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -356,6 +377,9 @@ export default function ChatsPage() {
       if (toSelect) {
         setActiveConversation(toSelect);
         setMobileShowChat(true);
+        if (window.innerWidth <= 768) {
+          window.history.pushState({ chatOpen: true }, "");
+        }
         fetchConversationDetails(toSelect.id);
 
         // Clear history state so refreshing the page doesn't auto-select it again
@@ -375,11 +399,17 @@ export default function ChatsPage() {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Handle scroll-up to trigger loading older messages
+  // Handle scroll-up to trigger loading older messages + scroll-to-bottom toggle
   const handleFeedScroll = () => {
-    if (!chatFeedRef.current || loadingMoreMessages || !messagesMeta.has_more)
-      return;
-    if (chatFeedRef.current.scrollTop === 0 && activeConversation?.id) {
+    if (!chatFeedRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatFeedRef.current;
+
+    // Toggle scroll to bottom button
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    setShowScrollBottom(distanceFromBottom > 140);
+
+    if (loadingMoreMessages || !messagesMeta.has_more) return;
+    if (scrollTop === 0 && activeConversation?.id) {
       fetchConversationDetails(
         activeConversation.id,
         messagesMeta.current_page + 1,
@@ -392,6 +422,9 @@ export default function ChatsPage() {
   const handleSelectConversation = (conv) => {
     setActiveConversation(conv);
     setMobileShowChat(true);
+    if (window.innerWidth <= 768) {
+      window.history.pushState({ chatOpen: true }, "");
+    }
     setReplyingTo(null);
     setImageFile(null);
     setImagePreview(null);
@@ -416,6 +449,9 @@ export default function ChatsPage() {
         setActiveConversation(conv);
         setMessages(conv.messages || []);
         setMobileShowChat(true);
+        if (window.innerWidth <= 768) {
+          window.history.pushState({ chatOpen: true }, "");
+        }
         toast.success(t("technicalSupport"));
       }
     } catch (err) {
@@ -692,6 +728,9 @@ export default function ChatsPage() {
 
       // Reset form states
       setTextInput("");
+      if (textInputRef.current) {
+        textInputRef.current.style.height = "auto";
+      }
       setReplyingTo(null);
       cancelImage();
       setTimeout(() => scrollToBottom(true), 100);
@@ -700,6 +739,14 @@ export default function ChatsPage() {
     } finally {
       setSending(false);
       setTimeout(() => textInputRef.current?.focus(), 50);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setTextInput(e.target.value);
+    if (textInputRef.current) {
+      textInputRef.current.style.height = "auto";
+      textInputRef.current.style.height = `${Math.min(textInputRef.current.scrollHeight, 120)}px`;
     }
   };
 
@@ -805,6 +852,92 @@ export default function ChatsPage() {
   });
 
   const recipient = getRecipientInfo(activeConversation);
+
+  const renderRecordingBar = () => (
+    <div className="chat-recording-bar">
+      <div className="rec-pulse-dot" />
+      <span className="rec-text">{t("recordingVoice")}</span>
+      <span className="rec-time">{formatDuration(recordingTime)}</span>
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm rec-cancel"
+        onClick={cancelRecording}
+      >
+        {t("cancel")}
+      </button>
+      <button
+        type="button"
+        className="btn btn-primary btn-sm rec-send"
+        onClick={stopRecordingAndSend}
+      >
+        <Icon name="send" size={14} />
+        <span className="rec-send-label">{t("sendMessage")}</span>
+      </button>
+    </div>
+  );
+
+  const renderInputForm = () => (
+    <form className="chat-input-form" onSubmit={handleSubmit}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileSelect}
+        style={{ display: "none" }}
+      />
+
+      {/* Image upload button */}
+      <button
+        type="button"
+        className="chat-action-icon"
+        onClick={() => fileInputRef.current?.click()}
+        title={t("imageAttachment")}
+        aria-label={t("imageAttachment")}
+      >
+        <Icon name="image" size={18} />
+      </button>
+
+      {/* Mic button */}
+      <button
+        type="button"
+        className="chat-action-icon"
+        onClick={startRecording}
+        title={t("recordVoice")}
+        aria-label={t("recordVoice")}
+      >
+        <Icon name="custom-26929a1c" size={18} />
+      </button>
+
+      {/* Text Input */}
+      <textarea
+        ref={textInputRef}
+        className="chat-input"
+        placeholder={t("typeMessagePlaceholder")}
+        value={textInput}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        disabled={sending}
+        rows="1"
+      />
+
+      {/* Send Button */}
+      <button
+        type="submit"
+        className="btn btn-primary chat-send-btn"
+        disabled={sending || (!textInput.trim() && !imageFile)}
+        title={t("sendMessage")}
+        aria-label={t("sendMessage")}
+      >
+        {sending ? (
+          <span
+            className="spinner spinner-sm"
+            style={{ borderTopColor: "#fff" }}
+          />
+        ) : (
+          <Icon name="send" size={16} />
+        )}
+      </button>
+    </form>
+  );
 
   return (
     <div className="card chat-container animate-fade-in-up">
@@ -1009,7 +1142,9 @@ export default function ChatsPage() {
                 <button
                   type="button"
                   className="chat-mobile-back"
-                  onClick={() => setMobileShowChat(false)}
+                  onClick={handleMobileBack}
+                  aria-label={t("goBack") || "رجوع"}
+                  title={t("goBack") || "رجوع"}
                 >
                   <Icon name="arrow-left" size={18} />
                 </button>
@@ -1018,40 +1153,14 @@ export default function ChatsPage() {
                   avatarUrl={recipient.avatarUrl}
                   size={40}
                 />
-                <div
-                  style={{
-                    marginInlineStart: 10,
-                    marginInlineEnd: 10,
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        fontSize: "0.92rem",
-                        fontWeight: 700,
-                        margin: 0,
-                        color: "var(--heading)",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {recipient.name}
-                    </h3>
-                    <span className="chat-status-badge">
-                      <span className="chat-status-dot" />
-                      {recipient.roleLabel}
-                    </span>
-                  </div>
+                <div className="chat-header-user-info">
+                  <h3 className="chat-header-name">
+                    {recipient.name}
+                  </h3>
+                  <span className="chat-status-badge">
+                    <span className="chat-status-dot" />
+                    <span>{recipient.roleLabel}</span>
+                  </span>
                 </div>
               </div>
 
@@ -1263,6 +1372,19 @@ export default function ChatsPage() {
                 )}
               </div>
 
+              {/* Floating Scroll To Bottom Button */}
+              {showScrollBottom && (
+                <button
+                  type="button"
+                  className="chat-scroll-bottom-btn"
+                  onClick={() => scrollToBottom(true)}
+                  title={t("scrollToBottom") || "الانتقال لآخر الرسائل"}
+                  aria-label="Scroll to bottom"
+                >
+                  <Icon name="chevron-down" size={18} />
+                </button>
+              )}
+
               {/* Reply Preview Bar */}
               {replyingTo && (
                 <div className="chat-reply-preview">
@@ -1322,203 +1444,33 @@ export default function ChatsPage() {
 
               {isRecording ? (
                 userType === "customer" ? (
-                  <div className="chat-recording-bar">
-                    <div className="rec-pulse-dot" />
-                    <span className="rec-text">{t("recordingVoice")}</span>
-                    <span className="rec-time">
-                      {formatDuration(recordingTime)}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm rec-cancel"
-                      onClick={cancelRecording}
-                    >
-                      {t("cancel")}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm rec-send"
-                      onClick={stopRecordingAndSend}
-                    >
-                      <Icon name="send" size={14} />
-                      {t("sendMessage")}
-                    </button>
-                  </div>
+                  renderRecordingBar()
                 ) : (
                   <PermissionCheck
                     anyOf={["chat_create", "chat_update", "chat_write"]}
                     fallback={
-                      <div
-                        style={{
-                          padding: 20,
-                          textAlign: "center",
-                          color: "var(--muted)",
-                          background: "var(--surface-alt)",
-                          borderTop: "1px solid var(--border-light)",
-                        }}
-                      >
+                      <div className="chat-readonly-banner">
                         {t("readOnlyChat") ||
                           "ليس لديك صلاحية للرد على المحادثات."}
                       </div>
                     }
                   >
-                    <div className="chat-recording-bar">
-                      <div className="rec-pulse-dot" />
-                      <span className="rec-text">{t("recordingVoice")}</span>
-                      <span className="rec-time">
-                        {formatDuration(recordingTime)}
-                      </span>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm rec-cancel"
-                        onClick={cancelRecording}
-                      >
-                        {t("cancel")}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm rec-send"
-                        onClick={stopRecordingAndSend}
-                      >
-                        <Icon name="send" size={14} />
-                        {t("sendMessage")}
-                      </button>
-                    </div>
+                    {renderRecordingBar()}
                   </PermissionCheck>
                 )
-              ) : /* Standard Message Input Form */
-              userType === "customer" ? (
-                <form className="chat-input-form" onSubmit={handleSubmit}>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    onChange={handleFileSelect}
-                    style={{ display: "none" }}
-                  />
-
-                  {/* Image upload button */}
-                  <button
-                    type="button"
-                    className="chat-action-icon"
-                    onClick={() => fileInputRef.current?.click()}
-                    title={t("imageAttachment")}
-                  >
-                    <Icon name="image" size={18} />
-                  </button>
-
-                  {/* Mic button */}
-                  <button
-                    type="button"
-                    className="chat-action-icon"
-                    onClick={startRecording}
-                    title={t("recordVoice")}
-                  >
-                    <Icon name="custom-26929a1c" size={18} />
-                  </button>
-
-                  {/* Text Input */}
-                  <textarea
-                    ref={textInputRef}
-                    className="chat-input"
-                    placeholder={t("typeMessagePlaceholder")}
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={sending}
-                    rows="1"
-                  />
-
-                  {/* Send Button */}
-                  <button
-                    type="submit"
-                    className="btn btn-primary chat-send-btn"
-                    disabled={sending || (!textInput.trim() && !imageFile)}
-                  >
-                    {sending ? (
-                      <span
-                        className="spinner spinner-sm"
-                        style={{ borderTopColor: "#fff" }}
-                      />
-                    ) : (
-                      <Icon name="send" size={16} />
-                    )}
-                  </button>
-                </form>
+              ) : userType === "customer" ? (
+                renderInputForm()
               ) : (
                 <PermissionCheck
                   anyOf={["chat_create", "chat_update", "chat_write"]}
                   fallback={
-                    <div
-                      style={{
-                        padding: 20,
-                        textAlign: "center",
-                        color: "var(--muted)",
-                        background: "var(--surface-alt)",
-                        borderTop: "1px solid var(--border-light)",
-                      }}
-                    >
+                    <div className="chat-readonly-banner">
                       {t("readOnlyChat") ||
                         "ليس لديك صلاحية للرد على المحادثات."}
                     </div>
                   }
                 >
-                  <form className="chat-input-form" onSubmit={handleSubmit}>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      onChange={handleFileSelect}
-                      style={{ display: "none" }}
-                    />
-
-                    {/* Image upload button */}
-                    <button
-                      type="button"
-                      className="chat-action-icon"
-                      onClick={() => fileInputRef.current?.click()}
-                      title={t("imageAttachment")}
-                    >
-                      <Icon name="image" size={18} />
-                    </button>
-
-                    {/* Mic button */}
-                    <button
-                      type="button"
-                      className="chat-action-icon"
-                      onClick={startRecording}
-                      title={t("recordVoice")}
-                    >
-                      <Icon name="custom-26929a1c" size={18} />
-                    </button>
-
-                    {/* Text Input */}
-                    <textarea
-                      ref={textInputRef}
-                      className="chat-input"
-                      placeholder={t("typeMessagePlaceholder")}
-                      value={textInput}
-                      onChange={(e) => setTextInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      disabled={sending}
-                      rows="1"
-                    />
-
-                    {/* Send button */}
-                    <button
-                      type="submit"
-                      className="chat-action-icon send-btn"
-                      disabled={(!textInput.trim() && !imageFile) || sending}
-                      title={t("sendMessage")}
-                    >
-                      {sending ? (
-                        <div
-                          className="spinner"
-                          style={{ width: 16, height: 16, borderWidth: 2 }}
-                        />
-                      ) : (
-                        <Icon name="send" size={18} />
-                      )}
-                    </button>
-                  </form>
+                  {renderInputForm()}
                 </PermissionCheck>
               )}
             </>
