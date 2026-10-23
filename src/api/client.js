@@ -108,6 +108,8 @@ export const endpoints = {
     `${getAuthPrefix(type)}/integrations/google/sheets/test`,
   googleSheetsCreate: (type) =>
     `${getAuthPrefix(type)}/integrations/google/sheets/create`,
+  googlePickerToken: (type) =>
+    `${getAuthPrefix(type)}/integrations/google/picker-token`,
   webhookIntegration: (type) => `${getAuthPrefix(type)}/integrations/webhook`,
   telegramIntegration: (type) => `${getAuthPrefix(type)}/integrations/telegram`,
   telegramActivateWebhook: (type) =>

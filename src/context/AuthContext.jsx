@@ -739,6 +739,24 @@ export function AuthProvider({ children }) {
     }
   }, [userType]);
 
+  const getGooglePickerToken = useCallback(async () => {
+    if (!userType) return;
+    try {
+      const response = await client.get(endpoints.googlePickerToken(userType));
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || "Failed to open Google Picker",
+      };
+    }
+  }, [userType]);
+
   // --- Webhook Integration Methods (Workspace Members) ---
   const fetchWebhookIntegration = useCallback(async () => {
     if (userType !== "member") return;
@@ -1010,6 +1028,7 @@ export function AuthProvider({ children }) {
     disconnectGoogleIntegration,
     testGoogleSheets,
     createGoogleSheet,
+    getGooglePickerToken,
     fetchWebhookIntegration,
     saveWebhookIntegration,
     deleteWebhookIntegration,

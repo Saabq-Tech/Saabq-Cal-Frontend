@@ -17,6 +17,7 @@ import {
 import { useCustomerLabel } from "../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../components/dashboard/WorkspacePageHeader";
 import CapabilityGate from "../../../components/common/CapabilityGate";
+import { pickSpreadsheet } from "../../../utils/googlePicker";
 
 // Helper function to safely render strings or localized objects
 function _getTranslatableText(textObj, currentLang = "ar") {
@@ -89,6 +90,10 @@ function ToggleSwitch({ checked, onChange, disabled = false }) {
   );
 }
 
+const GOOGLE_CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  "333771442482-0ip5t2oeentnfm6rjac75fj40891iuam.apps.googleusercontent.com";
+
 export default function IntegrationsSettingsPage() {
   const {
     user,
@@ -98,6 +103,7 @@ export default function IntegrationsSettingsPage() {
     disconnectGoogleIntegration,
     testGoogleSheets,
     createGoogleSheet,
+    getGooglePickerToken,
     fetchWebhookIntegration,
     saveWebhookIntegration,
     deleteWebhookIntegration,
@@ -171,7 +177,8 @@ export default function IntegrationsSettingsPage() {
   const [sheetsSync, setSheetsSync] = useState(true);
   const [sheetLanguage, setSheetLanguage] = useState("ar");
   const [spreadsheetId, setSpreadsheetId] = useState("");
-  const [showSheetId, setShowSheetId] = useState(false);
+  const [pickedSheetName, setPickedSheetName] = useState("");
+  const [isPickingSheet, setIsPickingSheet] = useState(false);
   const [isTestingSheet, setIsTestingSheet] = useState(false);
   const [isCreatingSheet, setIsCreatingSheet] = useState(false);
   const [sheetTestSuccess, setSheetTestSuccess] = useState(false);
@@ -353,9 +360,7 @@ export default function IntegrationsSettingsPage() {
 
   // --- Google Integration Handlers ---
   const handleStartGoogleOAuth = () => {
-    const clientId =
-      import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-      "333771442482-0ip5t2oeentnfm6rjac75fj40891iuam.apps.googleusercontent.com";
+    const clientId = GOOGLE_CLIENT_ID;
 
     const handleConnectResponse = async (payload) => {
       const res = await connectGoogleIntegration(payload);
@@ -409,7 +414,7 @@ export default function IntegrationsSettingsPage() {
       const codeClient = window.google.accounts.oauth2.initCodeClient({
         client_id: clientId,
         scope:
-          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
         ux_mode: "popup",
         callback: async (response) => {
           if (response.error && response.error !== "popup_closed") {
@@ -433,7 +438,7 @@ export default function IntegrationsSettingsPage() {
       const tokenClient = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope:
-          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
         callback: async (response) => {
           if (response.error && response.error !== "popup_closed") {
             toast.error(t("googleAuthFailed"));
@@ -569,6 +574,36 @@ export default function IntegrationsSettingsPage() {
       toast.error("Failed to test Google Sheets");
     } finally {
       setIsTestingSheet(false);
+    }
+  };
+
+  const handlePickGoogleSheet = async () => {
+    if (!googleIntegration) {
+      toast.error(
+        t("connectGoogleFirst") || "من فضلك اربط حساب Google Workspace الأول",
+      );
+      return;
+    }
+    setIsPickingSheet(true);
+    try {
+      const res = await getGooglePickerToken();
+      if (!res?.success || !res.data?.access_token) {
+        toast.error(res?.message || "Failed to open Google Picker");
+        return;
+      }
+      const picked = await pickSpreadsheet({
+        accessToken: res.data.access_token,
+        clientId: GOOGLE_CLIENT_ID,
+        locale: isRTL ? "ar" : "en",
+      });
+      if (picked?.id) {
+        setSpreadsheetId(picked.id);
+        setPickedSheetName(picked.name || "");
+      }
+    } catch {
+      toast.error("Failed to open Google Picker");
+    } finally {
+      setIsPickingSheet(false);
     }
   };
 
@@ -1907,62 +1942,75 @@ export default function IntegrationsSettingsPage() {
 
               <div className="form-group" style={{ marginBottom: 20 }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
-                  {t("spreadsheetIdLabel") ||
-                    "معرّف ملف Google Sheets الخاص بك (مستند مخصص)"}
+                  {t("spreadsheetPickerLabel") || "ملف Google Sheets المرتبط"}
                 </label>
-                <input
-                  type={showSheetId ? "text" : "password"}
-                  className="form-input"
-                  placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-                  value={spreadsheetId}
-                  onChange={(e) => setSpreadsheetId(e.target.value)}
-                  disabled={!canEditIntegrations}
-                />
                 <div
+                  className="form-input"
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    gap: 8,
+                    color: spreadsheetId ? "inherit" : "var(--muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Icon name="file-text" size={16} />
+                  <span
+                    style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                  >
+                    {spreadsheetId
+                      ? pickedSheetName ||
+                        t("spreadsheetLinked") ||
+                        "تم ربط ملف Google Sheets"
+                      : t("noSpreadsheetSelected") || "لم يتم اختيار ملف بعد"}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: "0.78rem",
+                    color: "var(--muted)",
+                    lineHeight: 1.4,
                     marginTop: 6,
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: "0.78rem",
-                      color: "var(--muted)",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {t("spreadsheetIdHelpText")}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowSheetId(!showSheetId)}
-                    style={{
-                      border: 0,
-                      background: "transparent",
-                      color: "var(--primary)",
-                      fontSize: "0.78rem",
-                      cursor: "pointer",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {showSheetId
-                      ? t("hide") || "إخفاء"
-                      : t("showId") || "إظهر المعرف"}
-                  </button>
-                </div>
+                  {t("spreadsheetPickerHelpText") ||
+                    "أنشئ ملفاً تلقائياً أو اختر ملفاً موجوداً من Google Drive. سيصل التطبيق إلى هذا الملف فقط."}
+                </span>
 
-                {spreadsheetId?.trim() && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      marginTop: 12,
-                      flexWrap: "wrap",
-                    }}
-                  >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginTop: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handlePickGoogleSheet}
+                      disabled={!googleIntegration || isPickingSheet}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontSize: "0.82rem",
+                        padding: "6px 12px",
+                      }}
+                    >
+                      <Icon name="google-sheets" size={14} />
+                      {isPickingSheet
+                        ? t("openingGoogleDrive") || "جاري فتح Google Drive..."
+                        : t("chooseFromGoogleDrive") ||
+                          "اختيار ملف من Google Drive"}
+                    </button>
+                  )}
+                  {spreadsheetId?.trim() && (
                     <a
                       href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
                       target="_blank"
@@ -1980,8 +2028,8 @@ export default function IntegrationsSettingsPage() {
                       <Icon name="external-link" size={14} />
                       {t("openSheetInDrive") || "فتح المستند في Google Drive"}
                     </a>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div className="modal-actions">
