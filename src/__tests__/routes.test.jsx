@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { LanguageProvider } from "../context/LanguageContext";
 
@@ -99,107 +99,117 @@ vi.mock("../api/client", () => ({
     type === "member" ? "/workspace-members" : "/customers",
 }));
 
-function renderWithProviders(ui) {
-  return render(
-    <MemoryRouter>
-      <LanguageProvider>{ui}</LanguageProvider>
-    </MemoryRouter>,
-  );
+async function renderWithProviders(ui) {
+  let result;
+  await act(async () => {
+    result = render(
+      <MemoryRouter>
+        <LanguageProvider>{ui}</LanguageProvider>
+      </MemoryRouter>,
+    );
+  });
+  return result;
 }
 
 describe("All Primary Application Routes Visual & Render Integrity", () => {
-  it("renders Home page without crash", () => {
-    const { container } = renderWithProviders(<Home />);
+  it("renders Home page without crash", async () => {
+    const { container } = await renderWithProviders(<Home />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Blog page without crash", () => {
-    const { container } = renderWithProviders(<Blog />);
+  it("renders Blog page without crash", async () => {
+    const { container } = await renderWithProviders(<Blog />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Blog Post Detail page without crash", () => {
-    const { container } = renderWithProviders(<BlogPostDetailPage />);
+  it("renders Blog Post Detail page without crash", async () => {
+    const { container } = await renderWithProviders(<BlogPostDetailPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspaces Explorer page without crash", () => {
-    const { container } = renderWithProviders(<CustomerWorkspacesPage />);
+  it("renders Workspaces Explorer page without crash", async () => {
+    const { container } = await renderWithProviders(<CustomerWorkspacesPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Member Login page without crash", () => {
-    const { container } = renderWithProviders(<MemberLoginPage />);
+  it("renders Member Login page without crash", async () => {
+    const { container } = await renderWithProviders(<MemberLoginPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Customer Login page without crash", () => {
-    const { container } = renderWithProviders(<CustomerLoginPage />);
+  it("renders Customer Login page without crash", async () => {
+    const { container } = await renderWithProviders(<CustomerLoginPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Member Dashboard Overview tab without crash", () => {
-    const { container } = renderWithProviders(<MemberOverviewTab />);
+  it("renders Member Dashboard Overview tab without crash", async () => {
+    const { container } = await renderWithProviders(<MemberOverviewTab />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Customers page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceCustomersPage />);
+  it("renders Workspace Customers page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceCustomersPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Customer Profile page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceCustomerProfilePage />);
+  it("renders Workspace Customer Profile page without crash", async () => {
+    const { container } = await renderWithProviders(
+      <WorkspaceCustomerProfilePage />,
+    );
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Bookings page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceBookingsPage />);
+  it("renders Workspace Bookings page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceBookingsPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Services page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceServicesPage />);
+  it("renders Workspace Services page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceServicesPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Schedules page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceSchedulesPage />);
+  it("renders Workspace Schedules page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceSchedulesPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Settings page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceSettingsPage />);
+  it("renders Workspace Settings page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceSettingsPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Members page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceMembersPage />);
+  it("renders Workspace Members page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceMembersPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Roles page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceRolesPage />);
+  it("renders Workspace Roles page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceRolesPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Payments page without crash", () => {
-    const { container } = renderWithProviders(<WorkspacePaymentsPage />);
+  it("renders Workspace Payments page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspacePaymentsPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Subscriptions page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceSubscriptionsPage />);
+  it("renders Workspace Subscriptions page without crash", async () => {
+    const { container } = await renderWithProviders(
+      <WorkspaceSubscriptionsPage />,
+    );
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Logs/Reports page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceLogsPage />);
+  it("renders Workspace Logs/Reports page without crash", async () => {
+    const { container } = await renderWithProviders(<WorkspaceLogsPage />);
     expect(container).toBeTruthy();
   });
 
-  it("renders Workspace Booking Detail page without crash", () => {
-    const { container } = renderWithProviders(<WorkspaceBookingDetailPage />);
+  it("renders Workspace Booking Detail page without crash", async () => {
+    const { container } = await renderWithProviders(
+      <WorkspaceBookingDetailPage />,
+    );
     expect(container).toBeTruthy();
   });
 });
