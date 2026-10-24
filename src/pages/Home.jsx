@@ -13,6 +13,14 @@ import {
 import Icon from "../components/common/Icon";
 import HeroDashboardMockup from "../components/marketing/HeroDashboardMockup";
 import AboutIllustration from "../components/marketing/AboutIllustration";
+import {
+  sortPlansByPrice,
+  getPopularPlanId,
+  isStartingFromPlan,
+  formatPlanPrice,
+  planCurrencyLabel,
+  planPrice,
+} from "../utils/plans";
 
 // The eight sectors shown in the trust strip and the "built for any activity"
 // grid. There is no /sectors endpoint, so this list lives here and is
@@ -166,6 +174,9 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(timer);
   }, [banners.length]);
+
+  const sortedPlans = useMemo(() => sortPlansByPrice(plans), [plans]);
+  const popularPlanId = getPopularPlanId(sortedPlans);
 
   // Build FAQ JSON-LD structured data
   const faqJsonLd = useMemo(() => {
@@ -724,14 +735,14 @@ export default function Home() {
                     </div>
                   </div>
                 ))
-              ) : plans.length > 0 ? (
-                plans.map((plan, index) => {
-                  const planNameStr = formatTranslatable(plan.name);
-                  const isPopular =
-                    index === 1 ||
-                    planNameStr.toLowerCase().includes("pro") ||
-                    (plan.type?.value || plan.type) === "FLAT";
-                  const planDesc = formatTranslatable(plan.description);
+              ) : sortedPlans.length > 0 ? (
+                sortedPlans.map((plan) => {
+                  const isPopular = plan.id === popularPlanId;
+                  const startingFrom = isStartingFromPlan(plan, sortedPlans);
+                  const limitLine = (value, label, unlimitedLabel) =>
+                    value
+                      ? `${label}: ${Number(value).toLocaleString("en-US")}`
+                      : unlimitedLabel;
 
                   return (
                     <article
@@ -739,61 +750,58 @@ export default function Home() {
                       className={`pricing-card ${isPopular ? "popular" : ""}`}
                     >
                       {isPopular && (
-                        <span className="popular-badge">
-                          {t("popularTag") || "الأكثر طلباً"}
-                        </span>
+                        <span className="popular-badge">{t("popularTag")}</span>
                       )}
-                      <h3>{planNameStr}</h3>
-                      {planDesc && <p className="plan-desc">{planDesc}</p>}
+                      <h3>{formatTranslatable(plan.name)}</h3>
+                      <div className="plan-price">
+                        {startingFrom && (
+                          <span className="period">{t("planStartingFrom")}</span>
+                        )}
+                        <span className="amount">{formatPlanPrice(plan)}</span>
+                        <span className="currency">
+                          {planCurrencyLabel(plan, lang)}
+                        </span>
+                        {planPrice(plan) > 0 && (
+                          <span className="period">{t("planPerMonth")}</span>
+                        )}
+                      </div>
                       <ul className="plan-features">
                         <li>
-                          ✓{" "}
-                          {plan.max_members
-                            ? `${t("members") || (lang === "ar" ? "أعضاء الفريق" : "Workspace Members")}: ${plan.max_members}`
-                            : t("unlimitedTeamMembers") ||
-                              (lang === "ar"
-                                ? "أعضاء فريق غير محدودين"
-                                : "Unlimited Team Members")}
+                          {limitLine(
+                            plan.max_members,
+                            t("planAccountsLabel"),
+                            t("planUnlimitedAccounts"),
+                          )}
                         </li>
                         <li>
-                          ✓{" "}
-                          {plan.max_services
-                            ? `${t("services") || (lang === "ar" ? "الخدمات" : "Offered Services")}: ${plan.max_services}`
-                            : t("unlimitedServices") ||
-                              (lang === "ar"
-                                ? "خدمات وجداول غير محدودة"
-                                : "Unlimited Services & Schedules")}
+                          {limitLine(
+                            plan.max_services,
+                            t("planServicesLabel"),
+                            t("unlimitedServices"),
+                          )}
                         </li>
                         <li>
-                          ✓{" "}
-                          {plan.max_appointments
-                            ? `${t("appointments") || (lang === "ar" ? "الحجوزات" : "Bookings")}: ${plan.max_appointments}`
-                            : t("unlimitedAppointments") ||
-                              (lang === "ar"
-                                ? "حجوزات عملاء غير محدودة"
-                                : "Unlimited Bookings")}
+                          {limitLine(
+                            plan.max_appointments,
+                            t("planBookingsLabel"),
+                            t("unlimitedAppointments"),
+                          )}
                         </li>
-                        {plan.max_customers && (
-                          <li>
-                            ✓{" "}
-                            {t("customers") ||
-                              (lang === "ar" ? "العملاء" : "Customers")}
-                            : {plan.max_customers}
-                          </li>
-                        )}
-                        {plan.capabilities &&
-                          plan.capabilities.map((cap) => (
-                            <li key={cap.id || cap.code}>
-                              ✓ {formatTranslatable(cap.name) || cap.code}
-                            </li>
-                          ))}
+                        <li>
+                          {limitLine(
+                            plan.max_customers,
+                            t("customers"),
+                            t("planUnlimitedCustomers"),
+                          )}
+                        </li>
                       </ul>
                       <Link
                         to="/register"
                         className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-block`}
                       >
-                        {t("getStarted") ||
-                          (lang === "ar" ? "ابدأ الآن" : "Get Started")}
+                        {planPrice(plan) > 0
+                          ? t("getStarted")
+                          : t("planStartFree")}
                       </Link>
                     </article>
                   );
@@ -812,6 +820,11 @@ export default function Home() {
               )}
             </div>
           </div>
+          {sortedPlans.length > 0 && (
+            <div className="pricing-compare-link">
+              <Link to="/pricing">{t("planCompareAll")}</Link>
+            </div>
+          )}
         </div>
       </section>
 
