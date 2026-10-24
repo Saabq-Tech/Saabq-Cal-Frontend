@@ -245,6 +245,7 @@ export default function WorkspacesPage() {
   // Debounced search
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const debounceTimerRef = useRef(null);
+  const isFiltering = selectedType !== "all" || debouncedSearch !== "";
 
   const handleSearchChange = useCallback((value) => {
     setSearchQuery(value);
@@ -341,105 +342,20 @@ export default function WorkspacesPage() {
       {/* Flagship Aurora Hero Header */}
       <section className="explore-hero">
         <div className="container">
-          <div className="explore-hero-inner">
-            {/* Glowing Hero Badge */}
-            <div className="explore-badge">
-              <span className="explore-badge-icon">
-                <Icon name="sparkles" size={15} />
-              </span>
-              <span>{t("exploreWorkspaces")}</span>
-            </div>
-
-            {/* Hero Main Heading with Brand Gradient */}
-            <h1 className="explore-title">
-              {isRTL ? "استكشاف " : "Explore "}
-              <span className="explore-title-gradient">
-                {isRTL ? "مساحات العمل" : "Workspaces"}
-              </span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="explore-subtitle">{t("exploreWorkspacesSubtitle")}</p>
-
-            {/* Trust & Feature Pillars Strip */}
-            <div className="explore-trust-strip">
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
-                    <path d="M9 22v-4h6v4" />
-                    <path d="M8 6h.01" />
-                    <path d="M16 6h.01" />
-                    <path d="M12 6h.01" />
-                    <path d="M12 10h.01" />
-                    <path d="M12 14h.01" />
-                    <path d="M16 10h.01" />
-                    <path d="M16 14h.01" />
-                    <path d="M8 10h.01" />
-                    <path d="M8 14h.01" />
-                  </svg>
-                </span>
-                <span>
-                  {isRTL
-                    ? "مساحات عمل معتمدة وموثوقة"
-                    : "Verified & Trusted Workspaces"}
-                </span>
+          <div className="explore-hero-inner is-compact">
+            <div className="explore-hero-row">
+              <div className="explore-hero-head">
+                <h1 className="explore-title">
+                  {isRTL ? "استكشاف " : "Explore "}
+                  <span className="explore-title-gradient">
+                    {isRTL ? "مساحات العمل" : "Workspaces"}
+                  </span>
+                </h1>
+                <p className="explore-subtitle">
+                  {t("exploreWorkspacesSubtitle")}
+                </p>
               </div>
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                  </svg>
-                </span>
-                <span>
-                  {isRTL
-                    ? "حجز فوري ومؤكد 100%"
-                    : "100% Instant Guaranteed Booking"}
-                </span>
-              </div>
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <polyline points="9 12 11 14 15 10" />
-                  </svg>
-                </span>
-                <span>
-                  {isRTL
-                    ? "خدمات متخصصة ومواعيد دقيقة"
-                    : "Specialized Services & Punctual Slots"}
-                </span>
-              </div>
-            </div>
 
-            {/* Flagship Floating Search Box */}
             <div className="explore-search-container">
               <div className="explore-search-wrapper">
                 <div className="explore-search-icon-badge" aria-hidden="true">
@@ -491,6 +407,7 @@ export default function WorkspacesPage() {
                   <span>{isRTL ? "بحث" : "Search"}</span>
                 </button>
               </div>
+            </div>
             </div>
 
             {/* Category Filter Pills & Mobile Select */}
@@ -701,7 +618,9 @@ export default function WorkspacesPage() {
                   color: "var(--heading)",
                 }}
               >
-                {t("noWorkspacesFound")}
+                {isFiltering
+                  ? t("noWorkspacesFound")
+                  : t("exploreNoWorkspacesYet")}
               </h3>
               <p
                 style={{
@@ -711,29 +630,37 @@ export default function WorkspacesPage() {
                   marginBottom: 24,
                 }}
               >
-                {isRTL
-                  ? "لم نتمكن من العثور على أي مساحة تطابق معايير بحثك. جرّب كلمات أخرى أو قم بإلغاء تصنيف الفلترة."
-                  : "We couldn't find any workspace matching your criteria. Try different search terms or reset the filters."}
+                {isFiltering
+                  ? isRTL
+                    ? "لم نتمكن من العثور على أي مساحة تطابق معايير بحثك. جرّب كلمات أخرى أو قم بإلغاء تصنيف الفلترة."
+                    : "We couldn't find any workspace matching your criteria. Try different search terms or reset the filters."
+                  : t("exploreNoWorkspacesYetDesc")}
               </p>
-              <button
-                type="button"
-                className="btn btn-primary btn-md"
-                style={{
-                  borderRadius: "var(--radius-full)",
-                  padding: "10px 26px",
-                  fontWeight: 700,
-                }}
-                onClick={() => {
-                  setSelectedType("all");
-                  setSearchQuery("");
-                  setDebouncedSearch("");
-                  setPage(1);
-                }}
-              >
-                <span>
-                  {isRTL ? "عرض جميع مساحات العمل" : "Show All Workspaces"}
-                </span>
-              </button>
+              {isFiltering ? (
+                <button
+                  type="button"
+                  className="btn btn-primary btn-md"
+                  style={{
+                    borderRadius: "var(--radius-full)",
+                    padding: "10px 26px",
+                    fontWeight: 700,
+                  }}
+                  onClick={() => {
+                    setSelectedType("all");
+                    setSearchQuery("");
+                    setDebouncedSearch("");
+                    setPage(1);
+                  }}
+                >
+                  <span>
+                    {isRTL ? "عرض جميع مساحات العمل" : "Show All Workspaces"}
+                  </span>
+                </button>
+              ) : (
+                <Link to="/register" className="btn btn-primary btn-md">
+                  {t("exploreListYourBusiness")}
+                </Link>
+              )}
             </div>
           ) : (
             <>
@@ -742,8 +669,8 @@ export default function WorkspacesPage() {
                 style={{
                   display: "grid",
                   gridTemplateColumns:
-                    "repeat(auto-fill, minmax(min(100%, 320px), 1fr))",
-                  gap: 28,
+                    "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+                  gap: 20,
                 }}
               >
                 {workspaces.map((ws) => {
@@ -851,19 +778,6 @@ export default function WorkspacesPage() {
                       <div className="workspace-card-body">
                         <h3 className="workspace-card-title">
                           <span>{ws.name}</span>
-                          <span
-                            className="workspace-verified-icon"
-                            title={isRTL ? "مساحة موثقة" : "Verified"}
-                          >
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                            >
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                            </svg>
-                          </span>
                         </h3>
 
                         {ws.slug && (

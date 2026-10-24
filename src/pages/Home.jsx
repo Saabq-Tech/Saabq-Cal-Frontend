@@ -22,8 +22,7 @@ import {
   planPrice,
 } from "../utils/plans";
 
-// The eight sectors shown in the trust strip and the "built for any activity"
-// grid. There is no /sectors endpoint, so this list lives here and is
+// The eight sectors shown in the "built for any activity" grid. There is no /sectors endpoint, so this list lives here and is
 // translated through translations.js; the shape mirrors what an API resource
 // would return so swapping the source later stays a local change.
 const ABOUT_POINTS = [
@@ -93,16 +92,24 @@ const CHANNELS = [
   { icon: "facebook", labelKey: "channelMessenger", tone: "messenger" },
   { icon: "instagram", labelKey: "channelInstagram", tone: "instagram" },
   { icon: "message-square", labelKey: "channelSms", tone: "sms" },
-  { icon: "plus", labelKey: "channelOthers", tone: "more" },
+  { icon: "telegram", labelKey: "channelTelegram", tone: "more" },
+  { icon: "message-circle", labelKey: "channelWebChat", tone: "more" },
+];
+
+const HOW_IT_WORKS_STEPS = [
+  { icon: "user-plus", titleKey: "step1Title", descKey: "step1Desc" },
+  { icon: "settings", titleKey: "step2Title", descKey: "step2Desc" },
+  { icon: "share-2", titleKey: "step3Title", descKey: "step3Desc" },
+  { icon: "bar-chart", titleKey: "step4Title", descKey: "step4Desc" },
 ];
 
 const HERO_TRUST = ["heroTrustSetup", "heroTrustDevices", "heroTrustNoCard"];
 
 const WHY_CHOOSE = [
-  "whyChoosePoint1",
-  "whyChoosePoint2",
-  "whyChoosePoint3",
-  "whyChoosePoint4",
+  { key: "whyChoosePoint1", icon: "globe" },
+  { key: "whyChoosePoint2", icon: "layers" },
+  { key: "whyChoosePoint3", icon: "award" },
+  { key: "whyChoosePoint4", icon: "clock" },
 ];
 
 const FEATURE_ICONS = [
@@ -123,6 +130,7 @@ export default function Home() {
   const [faqs, setFaqs] = useState([]);
   const [about, setAbout] = useState(null);
   const [plans, setPlans] = useState([]);
+  const [supportEmail, setSupportEmail] = useState("");
   const [activeBanner, setActiveBanner] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -156,12 +164,14 @@ export default function Home() {
       client.get(endpoints.faqs).catch(() => ({ data: { data: [] } })),
       client.get(endpoints.about).catch(() => ({ data: { data: null } })),
       client.get(endpoints.plans).catch(() => ({ data: { data: [] } })),
-    ]).then(([bannersRes, featuresRes, faqsRes, aboutRes, plansRes]) => {
+      client.get(endpoints.settings).catch(() => ({ data: { data: null } })),
+    ]).then(([bannersRes, featuresRes, faqsRes, aboutRes, plansRes, settingsRes]) => {
       setBanners(bannersRes.data.data || []);
       setFeatures(featuresRes.data.data || []);
       setFaqs(faqsRes.data.data || []);
       setAbout(aboutRes.data.data || null);
       setPlans(plansRes.data.data || []);
+      setSupportEmail(settingsRes.data.data?.site_email || "");
       setLoading(false);
     });
   }, [lang]);
@@ -365,29 +375,12 @@ export default function Home() {
         )
       )}
 
-      {/* Sector Trust Strip */}
-      <section className="trust-strip" aria-label={t("trustStripTitle")}>
-        <div className="container">
-          <div className="trust-strip-card">
-            <p className="trust-strip-title">{t("trustStripTitle")}</p>
-            <ul className="trust-strip-list">
-              {SECTORS.map((sector) => (
-                <li key={sector.titleKey}>
-                  <Icon name={sector.icon} size={22} />
-                  <span>{t(sector.titleKey)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
       {/* Sectors */}
       <section id="sectors" className="section-sm">
         <div className="container">
           <div className="section-header">
             <h2>{t("sectorsTitle")}</h2>
-            <p>{t("sectorsSubtitle")}</p>
+            <p>{t("trustStripTitle")}</p>
           </div>
           <div className="sectors-grid">
             {SECTORS.map((sector) => (
@@ -403,6 +396,71 @@ export default function Home() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section
+        id="features"
+        className="section-sm"
+        style={{ background: "var(--surface)" }}
+      >
+        <div className="container">
+          <div className="section-header">
+            <h2>{t("featuresTitleNew")}</h2>
+          </div>
+          {loading ? (
+            <div className="features-grid">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="card feature-card"
+                  style={{ padding: 24 }}
+                >
+                  <SkeletonCircle size={40} />
+                  <SkeletonLine
+                    width="50%"
+                    height={18}
+                    style={{ marginTop: 16 }}
+                  />
+                  <SkeletonLine
+                    width="80%"
+                    height={12}
+                    style={{ marginTop: 8 }}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="features-grid">
+              {features.map((feature, i) => {
+                return (
+                  <article
+                    key={feature.id || i}
+                    className="card card-hover feature-card"
+                  >
+                    <div className="card-icon">
+                      {feature.image || feature.icon_url ? (
+                        <img
+                          src={feature.image || feature.icon_url}
+                          alt=""
+                          width={28}
+                          height={28}
+                          loading="lazy"
+                        />
+                      ) : feature.icon ? (
+                        <Icon name={feature.icon} size={28} />
+                      ) : (
+                        FEATURE_ICONS[i % FEATURE_ICONS.length]
+                      )}
+                    </div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.description}</p>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -456,203 +514,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Decorative Section Separator */}
-      <div className="container">
-        <div className="section-separator" />
-      </div>
-
-      {/* Features Section */}
-      <section
-        id="features"
-        className="section-sm"
-        style={{ background: "var(--surface)" }}
-      >
-        <div className="container">
-          <div className="section-header">
-            <h2>{t("featuresTitleNew")}</h2>
-          </div>
-          {loading ? (
-            <div className="features-grid">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="card feature-card"
-                  style={{ padding: 24 }}
-                >
-                  <SkeletonCircle size={40} />
-                  <SkeletonLine
-                    width="50%"
-                    height={18}
-                    style={{ marginTop: 16 }}
-                  />
-                  <SkeletonLine
-                    width="80%"
-                    height={12}
-                    style={{ marginTop: 8 }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="features-grid">
-              {features.map((feature, i) => {
-                const isFlagship = i === 1;
-                return (
-                  <article
-                    key={feature.id || i}
-                    className={`card card-hover feature-card ${isFlagship ? "flagship-card" : ""}`}
-                  >
-                    <div className="card-icon">
-                      {feature.image || feature.icon_url ? (
-                        <img
-                          src={feature.image || feature.icon_url}
-                          alt=""
-                          width={28}
-                          height={28}
-                          loading="lazy"
-                        />
-                      ) : feature.icon ? (
-                        <Icon name={feature.icon} size={28} />
-                      ) : (
-                        FEATURE_ICONS[i % FEATURE_ICONS.length]
-                      )}
-                    </div>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* How It Works Section */}
       <section id="how-it-works" className="section-sm">
         <div className="container">
           <div className="section-header">
             <h2>{t("howItWorksTitle")}</h2>
-            <div
-              style={{
-                width: 44,
-                height: 4,
-                background: "var(--primary)",
-                margin: "12px auto 0",
-                borderRadius: "var(--radius-full)",
-              }}
-            />
           </div>
 
           <div className="how-it-works-grid">
-            <div className="step-card">
-              <span className="step-number">1</span>
-              <div className="step-icon">
-                <Icon name="calendar" size={24} />
+            {HOW_IT_WORKS_STEPS.map((step) => (
+              <div key={step.titleKey} className="step-card">
+                <div className="step-icon">
+                  <Icon name={step.icon} size={24} />
+                </div>
+                <h3>{t(step.titleKey)}</h3>
+                <p>{t(step.descKey)}</p>
               </div>
-              <h3>{t("step1Title")}</h3>
-              <p>{t("step1Desc")}</p>
-            </div>
-
-            <div className="step-card">
-              <span className="step-number">2</span>
-              <div className="step-icon">
-                <Icon name="credit-card" size={24} />
-              </div>
-              <h3>{t("step2Title")}</h3>
-              <p>{t("step2Desc")}</p>
-            </div>
-
-            <div className="step-card">
-              <span className="step-number">3</span>
-              <div className="step-icon">
-                <Icon name="video" size={24} />
-              </div>
-              <h3>{t("step3Title")}</h3>
-              <p>{t("step3Desc")}</p>
-            </div>
-
-            <div className="step-card">
-              <span className="step-number">4</span>
-              <div className="step-icon">
-                <Icon name="bell" size={24} />
-              </div>
-              <h3>{t("step4Title")}</h3>
-              <p>{t("step4Desc")}</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* What's Included Section */}
-      <section className="section-sm" style={{ background: "var(--surface)" }}>
-        <div className="container">
-          <div className="why-choose-layout">
-            <div className="why-choose-grid">
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="video" size={24} />
-                </div>
-                <h4>{t("whyBadge1")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="shield" size={24} />
-                </div>
-                <h4>{t("whyBadge2")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="bell" size={24} />
-                </div>
-                <h4>{t("whyBadge3")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="monitor" size={24} />
-                </div>
-                <h4>{t("whyBadge4")}</h4>
-              </div>
-            </div>
-
-            <div className="why-choose-content">
-              <h2>{t("whatsIncludedTitle")}</h2>
-              <p className="subtitle">{t("whatsIncludedSubtitle")}</p>
-
-              <div className="why-choose-checklist">
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck1")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck2")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck3")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck4")}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Omni-channel messaging (announced, not yet released) */}
+      {/* Saabq Chat: one inbox for every messaging channel */}
       <section className="section-sm">
         <div className="container">
           <div className="channels-panel">
@@ -661,6 +544,15 @@ export default function Home() {
               <h2>{t("channelsTitle")}</h2>
               <p>{t("channelsDesc")}</p>
               <p className="channels-footer">{t("channelsFooter")}</p>
+              <a
+                href="https://saabqchat.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline channels-cta"
+              >
+                {t("channelsCta")}
+                <Icon name="external-link" size={15} />
+              </a>
             </div>
             <ul className="channels-list">
               {CHANNELS.map((channel) => (
@@ -676,6 +568,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Why choose us */}
+      <section className="section-sm">
+        <div className="container">
+          <div className="section-header">
+            <h2>{t("whyChooseTitle")}</h2>
+          </div>
+          <div className="why-strip-grid">
+            {WHY_CHOOSE.map((point) => (
+              <div key={point.key} className="why-strip-card">
+                <span className="why-strip-icon">
+                  <Icon name={point.icon} size={22} />
+                </span>
+                <p>{t(point.key)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section id="pricing" className="section-sm">
         <div className="container pricing-container">
@@ -683,26 +594,7 @@ export default function Home() {
             <h2>{t("pricingTitleNew")}</h2>
             <p>{t("pricingSubtitleNew")}</p>
           </div>
-          <div className="pricing-layout">
-            <aside className="why-panel">
-              <div className="why-panel-art" aria-hidden="true">
-                <Icon name="calendar" size={64} />
-                <span className="why-panel-clock">
-                  <Icon name="clock" size={26} />
-                </span>
-              </div>
-              <div>
-                <h2>{t("whyChooseTitle")}</h2>
-                <ul className="why-panel-list">
-                  {WHY_CHOOSE.map((key) => (
-                    <li key={key}>
-                      <Icon name="check-circle" size={18} />
-                      <span>{t(key)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
+          <div className="pricing-layout is-full">
             <div
               className={`pricing-grid ${
                 plans.length > 0 ? `plans-count-${plans.length}` : ""
@@ -830,21 +722,19 @@ export default function Home() {
 
       {/* FAQs Section */}
       <section className="section-sm" style={{ background: "var(--surface)" }}>
-        <div className="container">
-          <div className="section-header">
+        <div className="container faq-layout">
+          <div className="faq-intro">
             <h2>{t("faqsTitle")}</h2>
             <p>{t("faqsDesc")}</p>
+            {supportEmail && (
+              <a href={`mailto:${supportEmail}`} className="btn btn-outline">
+                <Icon name="mail" size={16} />
+                {t("faqContactUs")}
+              </a>
+            )}
           </div>
           {loading ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                maxWidth: 800,
-                margin: "0 auto",
-              }}
-            >
+            <div className="faq-list">
               {[1, 2, 3].map((i) => (
                 <SkeletonRect key={i} height={52} />
               ))}
@@ -862,8 +752,8 @@ export default function Home() {
                     aria-expanded={openFaq === i}
                     aria-controls={`faq-answer-${i}`}
                   >
-                    {faq.question}
-                    <Icon name="chevron-down" />
+                    <span>{faq.question}</span>
+                    <Icon name={openFaq === i ? "x" : "plus"} size={16} />
                   </button>
                   {openFaq === i && (
                     <div
