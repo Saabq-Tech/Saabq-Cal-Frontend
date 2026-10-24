@@ -76,7 +76,7 @@ export default function HeroDashboardMockup() {
 
   const hours = ["09:00", "10:00", "11:00", "12:00", "01:00", "02:00"];
 
-  const locale = lang === "ar" ? "ar-EG" : "en-GB";
+  const locale = lang === "ar" ? "ar-EG-u-nu-latn" : "en-GB";
 
   const { monthLabel, todayLabel, weekdays, cells } = useMemo(() => {
     const today = new Date();

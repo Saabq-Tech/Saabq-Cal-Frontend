@@ -131,81 +131,41 @@ export default function Blog() {
       {/* Flagship Aurora Hero Header */}
       <section className="explore-hero blog-hero-aurora">
         <div className="container">
-          <div className="explore-hero-inner">
-            {/* Glowing Hero Badge */}
-            <div className="explore-badge">
-              <span className="explore-badge-icon">
-                <Icon name="sparkles" size={15} />
-              </span>
-              <span>{t("blogTitle")}</span>
-            </div>
-
-            {/* Hero Main Heading with Brand Gradient */}
-            <h1 className="explore-title">
-              {isRTL ? "مدونة " : "Saabq "}
-              <span className="explore-title-gradient">
-                {isRTL ? "تقويم سابق" : "Blog"}
-              </span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="explore-subtitle">{t("blogSubtitle")}</p>
-
-            {/* Knowledge & Value Pillars Strip */}
-            <div className="explore-trust-strip">
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <Icon name="book-open" size={15} />
-                </span>
-                <span>
-                  {isRTL ? "أدلة ونصائح عملية" : "Practical Guides & Tips"}
-                </span>
+          <div className="explore-hero-inner is-compact">
+            <div className="explore-hero-row">
+              <div className="explore-hero-head">
+                <h1 className="explore-title">
+                  {isRTL ? "مدونة " : "Saabq "}
+                  <span className="explore-title-gradient">
+                    {isRTL ? "تقويم سابق" : "Blog"}
+                  </span>
+                </h1>
+                <p className="explore-subtitle">{t("blogSubtitle")}</p>
               </div>
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <Icon name="calendar" size={15} />
-                </span>
-                <span>
-                  {isRTL
-                    ? "أسرار تنظيم الوقت والجدولة"
-                    : "Time & Schedule Secrets"}
-                </span>
-              </div>
-              <div className="explore-trust-item">
-                <span className="explore-trust-icon" aria-hidden="true">
-                  <Icon name="sparkles" size={15} />
-                </span>
-                <span>
-                  {isRTL
-                    ? "تحديثات وميزات مستمرة"
-                    : "Continuous Updates & Releases"}
-                </span>
-              </div>
-            </div>
 
-            {/* Flagship Floating Search Bar */}
-            <div className="explore-search-container">
-              <div className="explore-search-wrapper">
-                <span className="explore-search-icon-badge">
-                  <Icon name="search" size={20} />
-                </span>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder={t("searchArticlesPlaceholder")}
-                  className="explore-search-input"
-                />
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchTerm("")}
-                    className="explore-search-clear"
-                    aria-label="Clear search"
-                  >
-                    <Icon name="x-mark" size={14} />
-                  </button>
-                )}
+              <div className="explore-search-container">
+                <div className="explore-search-wrapper">
+                  <span className="explore-search-icon-badge">
+                    <Icon name="search" size={20} />
+                  </span>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder={t("searchArticlesPlaceholder")}
+                    className="explore-search-input"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="explore-search-clear"
+                      aria-label="Clear search"
+                    >
+                      <Icon name="x-mark" size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
