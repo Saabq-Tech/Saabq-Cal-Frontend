@@ -6,6 +6,7 @@ import SEO from "../../components/ui/SEO";
 import LazyImage from "../../components/ui/LazyImage";
 import { WorkspaceCardSkeleton } from "../../components/ui/Skeleton";
 import Icon from "../../components/common/Icon";
+import ChipScroller from "../../components/common/ChipScroller";
 
 function getCategoryIcon(typeName, isAll = false, size = 16) {
   if (isAll) {
@@ -462,7 +463,7 @@ export default function WorkspacesPage() {
                 </div>
 
                 {/* Desktop Category Filter Pills */}
-                <div
+                <ChipScroller
                   className="explore-categories-wrap desktop-category-pills"
                   role="tablist"
                   aria-label={
@@ -515,7 +516,7 @@ export default function WorkspacesPage() {
                       </button>
                     );
                   })}
-                </div>
+                </ChipScroller>
               </div>
             )}
           </div>

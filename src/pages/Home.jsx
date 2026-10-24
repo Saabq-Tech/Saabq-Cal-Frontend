@@ -25,29 +25,6 @@ import {
 // The eight sectors shown in the "built for any activity" grid. There is no /sectors endpoint, so this list lives here and is
 // translated through translations.js; the shape mirrors what an API resource
 // would return so swapping the source later stays a local change.
-const ABOUT_POINTS = [
-  {
-    icon: "shield",
-    titleKey: "aboutPointSecurityTitle",
-    descKey: "aboutPointSecurityDesc",
-  },
-  {
-    icon: "clock",
-    titleKey: "aboutPointTimeTitle",
-    descKey: "aboutPointTimeDesc",
-  },
-  {
-    icon: "users",
-    titleKey: "aboutPointSectorsTitle",
-    descKey: "aboutPointSectorsDesc",
-  },
-  {
-    icon: "bar-chart",
-    titleKey: "aboutPointGrowthTitle",
-    descKey: "aboutPointGrowthDesc",
-  },
-];
-
 const SECTORS = [
   {
     icon: "activity",
@@ -376,7 +353,7 @@ export default function Home() {
       )}
 
       {/* Sectors */}
-      <section id="sectors" className="section-sm">
+      <section id="sectors" className="section-sm is-compact">
         <div className="container">
           <div className="section-header">
             <h2>{t("sectorsTitle")}</h2>
@@ -402,7 +379,7 @@ export default function Home() {
       {/* Features Section */}
       <section
         id="features"
-        className="section-sm"
+        className="section-sm is-compact"
         style={{ background: "var(--surface)" }}
       >
         <div className="container">
@@ -461,17 +438,32 @@ export default function Home() {
               })}
             </div>
           )}
+          <div id="how-it-works" className="steps-strip">
+            <h3 className="steps-strip-title">{t("howItWorksTitle")}</h3>
+            <ol className="steps-strip-list">
+              {HOW_IT_WORKS_STEPS.map((step) => (
+                <li key={step.titleKey}>
+                  <span className="steps-strip-icon">
+                    <Icon name={step.icon} size={18} />
+                  </span>
+                  <span>
+                    <strong>{t(step.titleKey)}</strong>
+                    <small>{t(step.descKey)}</small>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
       {/* About */}
       <section id="about" className="section-sm">
         <div className="container">
-          <div className="about-panel">
+          <div className="about-panel is-compact">
             <div className="about-copy">
               <span className="about-eyebrow">{t("aboutEyebrow")}</span>
               <h2>{about?.title || t("aboutTitle")}</h2>
-              <p className="about-subtitle">{t("aboutSubtitle")}</p>
 
               {loading ? (
                 <div className="about-skeleton">
@@ -494,43 +486,11 @@ export default function Home() {
                 </div>
               )}
 
-              <ul className="about-points">
-                {ABOUT_POINTS.map((point) => (
-                  <li key={point.titleKey}>
-                    <span className="about-point-icon">
-                      <Icon name={point.icon} size={18} />
-                    </span>
-                    <strong>{t(point.titleKey)}</strong>
-                    <span>{t(point.descKey)}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
 
             <div className="about-art-wrap">
               <AboutIllustration />
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="section-sm">
-        <div className="container">
-          <div className="section-header">
-            <h2>{t("howItWorksTitle")}</h2>
-          </div>
-
-          <div className="how-it-works-grid">
-            {HOW_IT_WORKS_STEPS.map((step) => (
-              <div key={step.titleKey} className="step-card">
-                <div className="step-icon">
-                  <Icon name={step.icon} size={24} />
-                </div>
-                <h3>{t(step.titleKey)}</h3>
-                <p>{t(step.descKey)}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -568,31 +528,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why choose us */}
-      <section className="section-sm">
-        <div className="container">
-          <div className="section-header">
-            <h2>{t("whyChooseTitle")}</h2>
-          </div>
-          <div className="why-strip-grid">
-            {WHY_CHOOSE.map((point) => (
-              <div key={point.key} className="why-strip-card">
-                <span className="why-strip-icon">
-                  <Icon name={point.icon} size={22} />
-                </span>
-                <p>{t(point.key)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="pricing" className="section-sm">
         <div className="container pricing-container">
           <div className="section-header">
             <h2>{t("pricingTitleNew")}</h2>
             <p>{t("pricingSubtitleNew")}</p>
+            <ul className="why-chips" aria-label={t("whyChooseTitle")}>
+              {WHY_CHOOSE.map((point) => (
+                <li key={point.key}>
+                  <Icon name={point.icon} size={15} />
+                  {t(point.key)}
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="pricing-layout is-full">
             <div
