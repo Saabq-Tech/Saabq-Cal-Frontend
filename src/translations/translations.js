@@ -761,6 +761,8 @@ export const translations = {
     automationCategory: "الأتمتة",
     notificationsCategory: "الإشعارات",
     sheetsTestSuccess: "تم اختبار الاتصال بـ Google Sheets بنجاح!",
+    spreadsheetUrlOrIdPlaceholder:
+      "الصق رابط الشيت أو معرف الجدول (Spreadsheet ID)",
     noSheetIdProvided: "سيتم إنشاء جدول بيانات تلقائياً عند أول حجز مؤكد.",
     enterWebhookUrl: "يرجى إدخال رابط Webhook أولاً للاختبار.",
     webhookTestSuccess: "تم إرسال حدث اختباري بنجاح إلى رابط Webhook!",
@@ -3655,6 +3657,7 @@ export const translations = {
     automationCategory: "Automation",
     notificationsCategory: "Notifications",
     sheetsTestSuccess: "Google Sheets connection tested successfully!",
+    spreadsheetUrlOrIdPlaceholder: "Paste spreadsheet URL or ID",
     noSheetIdProvided:
       "A blank sheet will be automatically created upon the first confirmed booking.",
     enterWebhookUrl: "Please enter a Webhook URL first to test.",

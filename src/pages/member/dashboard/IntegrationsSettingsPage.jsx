@@ -2203,32 +2203,44 @@ export default function IntegrationsSettingsPage() {
                         "ملف Google Sheets المرتبط"}
                     </label>
                     <div
-                      className="form-input"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        color: spreadsheetId ? "inherit" : "var(--muted)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
+                      style={{ display: "flex", gap: 8, alignItems: "center" }}
                     >
-                      <Icon name="file-text" size={16} />
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder={
+                          t("spreadsheetUrlOrIdPlaceholder") ||
+                          "الصق رابط الشيت أو معرف الجدول (Spreadsheet ID)"
+                        }
+                        value={spreadsheetId}
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
+                          const match = val.match(
+                            /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/,
+                          );
+                          if (match && match[1]) {
+                            setSpreadsheetId(match[1]);
+                          } else {
+                            setSpreadsheetId(val);
+                          }
+                        }}
+                        disabled={!canEditIntegrations}
+                        style={{ flex: 1, fontSize: "0.88rem" }}
+                      />
+                    </div>
+                    {pickedSheetName && (
                       <span
                         style={{
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          fontSize: "0.78rem",
+                          color: "var(--primary)",
+                          marginTop: 4,
+                          display: "block",
+                          fontWeight: 600,
                         }}
                       >
-                        {spreadsheetId
-                          ? pickedSheetName ||
-                            t("spreadsheetLinked") ||
-                            "تم ربط ملف Google Sheets"
-                          : t("noSpreadsheetSelected") ||
-                            "لم يتم اختيار ملف بعد"}
+                        {pickedSheetName}
                       </span>
-                    </div>
+                    )}
                     <span
                       style={{
                         display: "block",
