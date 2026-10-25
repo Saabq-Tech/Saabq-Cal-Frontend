@@ -1154,9 +1154,7 @@ export default function ChatsPage() {
                   size={40}
                 />
                 <div className="chat-header-user-info">
-                  <h3 className="chat-header-name">
-                    {recipient.name}
-                  </h3>
+                  <h3 className="chat-header-name">{recipient.name}</h3>
                   <span className="chat-status-badge">
                     <span className="chat-status-dot" />
                     <span>{recipient.roleLabel}</span>

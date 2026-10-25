@@ -357,58 +357,58 @@ export default function WorkspacesPage() {
                 </p>
               </div>
 
-            <div className="explore-search-container">
-              <div className="explore-search-wrapper">
-                <div className="explore-search-icon-badge" aria-hidden="true">
-                  <Icon name="search" size={20} />
-                </div>
+              <div className="explore-search-container">
+                <div className="explore-search-wrapper">
+                  <div className="explore-search-icon-badge" aria-hidden="true">
+                    <Icon name="search" size={20} />
+                  </div>
 
-                <input
-                  type="search"
-                  className="explore-search-input"
-                  placeholder={t("searchWorkspacesPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setDebouncedSearch(searchQuery.trim());
-                      setPage(1);
+                  <input
+                    type="search"
+                    className="explore-search-input"
+                    placeholder={t("searchWorkspacesPlaceholder")}
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setDebouncedSearch(searchQuery.trim());
+                        setPage(1);
+                      }
+                    }}
+                    aria-label={
+                      isRTL ? "البحث في مساحات العمل" : "Search workspaces"
                     }
-                  }}
-                  aria-label={
-                    isRTL ? "البحث في مساحات العمل" : "Search workspaces"
-                  }
-                />
+                  />
 
-                {searchQuery && (
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="explore-search-clear"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setDebouncedSearch("");
+                        setPage(1);
+                      }}
+                      aria-label={isRTL ? "مسح البحث" : "Clear search"}
+                    >
+                      ✕
+                    </button>
+                  )}
+
                   <button
                     type="button"
-                    className="explore-search-clear"
+                    className="explore-search-btn"
                     onClick={() => {
-                      setSearchQuery("");
-                      setDebouncedSearch("");
+                      setDebouncedSearch(searchQuery.trim());
                       setPage(1);
                     }}
-                    aria-label={isRTL ? "مسح البحث" : "Clear search"}
+                    aria-label={isRTL ? "بحث" : "Search"}
                   >
-                    ✕
+                    <Icon name="search" size={16} />
+                    <span>{isRTL ? "بحث" : "Search"}</span>
                   </button>
-                )}
-
-                <button
-                  type="button"
-                  className="explore-search-btn"
-                  onClick={() => {
-                    setDebouncedSearch(searchQuery.trim());
-                    setPage(1);
-                  }}
-                  aria-label={isRTL ? "بحث" : "Search"}
-                >
-                  <Icon name="search" size={16} />
-                  <span>{isRTL ? "بحث" : "Search"}</span>
-                </button>
+                </div>
               </div>
-            </div>
             </div>
 
             {/* Category Filter Pills & Mobile Select */}

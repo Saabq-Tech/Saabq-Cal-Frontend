@@ -142,15 +142,17 @@ export default function Home() {
       client.get(endpoints.about).catch(() => ({ data: { data: null } })),
       client.get(endpoints.plans).catch(() => ({ data: { data: [] } })),
       client.get(endpoints.settings).catch(() => ({ data: { data: null } })),
-    ]).then(([bannersRes, featuresRes, faqsRes, aboutRes, plansRes, settingsRes]) => {
-      setBanners(bannersRes.data.data || []);
-      setFeatures(featuresRes.data.data || []);
-      setFaqs(faqsRes.data.data || []);
-      setAbout(aboutRes.data.data || null);
-      setPlans(plansRes.data.data || []);
-      setSupportEmail(settingsRes.data.data?.site_email || "");
-      setLoading(false);
-    });
+    ]).then(
+      ([bannersRes, featuresRes, faqsRes, aboutRes, plansRes, settingsRes]) => {
+        setBanners(bannersRes.data.data || []);
+        setFeatures(featuresRes.data.data || []);
+        setFaqs(faqsRes.data.data || []);
+        setAbout(aboutRes.data.data || null);
+        setPlans(plansRes.data.data || []);
+        setSupportEmail(settingsRes.data.data?.site_email || "");
+        setLoading(false);
+      },
+    );
   }, [lang]);
 
   // Auto-rotate banners
@@ -485,7 +487,6 @@ export default function Home() {
                   <p>{t("aboutParagraph2")}</p>
                 </div>
               )}
-
             </div>
 
             <div className="about-art-wrap">
@@ -596,7 +597,9 @@ export default function Home() {
                       <h3>{formatTranslatable(plan.name)}</h3>
                       <div className="plan-price">
                         {startingFrom && (
-                          <span className="period">{t("planStartingFrom")}</span>
+                          <span className="period">
+                            {t("planStartingFrom")}
+                          </span>
                         )}
                         <span className="amount">{formatPlanPrice(plan)}</span>
                         <span className="currency">

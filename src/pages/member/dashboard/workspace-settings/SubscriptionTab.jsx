@@ -11,33 +11,60 @@ import { sortPlansByPrice } from "../../../../utils/plans";
 const FEATURE_TRANSLATIONS = {
   custom_branding: { ar: "الهوية البصرية والبراندينج", en: "Custom Branding" },
   api_access: { ar: "واجهة برمجة التطبيقات (API Access)", en: "API Access" },
-  rest_api: { ar: "واجهة برمجة التطبيقات (REST API)", en: "Developer REST API" },
-  sms_notifications: { ar: "إشعارات الرسائل النصية (SMS)", en: "SMS Notifications" },
+  rest_api: {
+    ar: "واجهة برمجة التطبيقات (REST API)",
+    en: "Developer REST API",
+  },
+  sms_notifications: {
+    ar: "إشعارات الرسائل النصية (SMS)",
+    en: "SMS Notifications",
+  },
   priority_support: { ar: "دعم فني ذو أولوية", en: "Priority Support" },
   custom_domain: { ar: "نطاق مخصص (Custom Domain)", en: "Custom Domain" },
   white_label: { ar: "علامة تجارية بيضاء (White Label)", en: "White Label" },
   webhooks: { ar: "الويب هوكس (Webhooks)", en: "Webhooks" },
   webhook: { ar: "الويب هوكس (Webhooks)", en: "Webhooks" },
   custom_templates: { ar: "قوالب مخصصة", en: "Custom Templates" },
-  booking_form_config: { ar: "تهيئة نموذج الحجز", en: "Booking Form Configuration" },
+  booking_form_config: {
+    ar: "تهيئة نموذج الحجز",
+    en: "Booking Form Configuration",
+  },
   per_member_calendar: { ar: "تقويم لكل عضو", en: "Calendar for Each Member" },
-  roles_permissions: { ar: "الأدوار والصلاحيات المخصصة", en: "Roles & Permissions" },
-  integrations: { ar: "التطبيقات والتكاملات الخارجية", en: "Integrations & Connected Apps" },
-  payments: { ar: "المدفوعات والمحفظة المالية", en: "Payments & Financial Wallet" },
+  roles_permissions: {
+    ar: "الأدوار والصلاحيات المخصصة",
+    en: "Roles & Permissions",
+  },
+  integrations: {
+    ar: "التطبيقات والتكاملات الخارجية",
+    en: "Integrations & Connected Apps",
+  },
+  payments: {
+    ar: "المدفوعات والمحفظة المالية",
+    en: "Payments & Financial Wallet",
+  },
   reports: { ar: "التقارير والإحصائيات", en: "Reports & Analytics" },
   logs: { ar: "سجل العمليات والأمان", en: "Audit & Activity Logs" },
   resources: { ar: "الوحدات والمخزون", en: "Resources & Inventory" },
   landing_page: { ar: "الصفحة التعريفية", en: "Landing Page" },
   rentals: { ar: "الوحدات والإيجارات", en: "Units & Rentals" },
-  team_members: { ar: "أعضاء الفريق ومقدمو الخدمات", en: "Team Members & Staff" },
+  team_members: {
+    ar: "أعضاء الفريق ومقدمو الخدمات",
+    en: "Team Members & Staff",
+  },
   booking: { ar: "الحجوزات والمواعيد", en: "Bookings & Appointments" },
   bookings: { ar: "الحجوزات والمواعيد", en: "Bookings & Appointments" },
   services: { ar: "إدارة الخدمات", en: "Services Management" },
   schedules: { ar: "مواعيد العمل والجداول", en: "Schedules & Availability" },
   customers: { ar: "سجل وإدارة العملاء", en: "Customer Management" },
   dedicated_manager: { ar: "مدير حساب مخصص", en: "Dedicated Account Manager" },
-  dedicated_account_manager: { ar: "مدير حساب مخصص", en: "Dedicated Account Manager" },
-  sla: { ar: "اتفاقية مستوى الخدمة (SLA)", en: "Service Level Agreement (SLA)" },
+  dedicated_account_manager: {
+    ar: "مدير حساب مخصص",
+    en: "Dedicated Account Manager",
+  },
+  sla: {
+    ar: "اتفاقية مستوى الخدمة (SLA)",
+    en: "Service Level Agreement (SLA)",
+  },
 };
 
 const normalizeFeatureKey = (key) => {

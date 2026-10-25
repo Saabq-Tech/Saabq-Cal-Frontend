@@ -235,7 +235,8 @@ export const translations = {
     heroTitleLine1: "تقويم",
     heroTitleHighlight: "سابق",
     heroTitleLine2: "— مواعيدك وحجوزاتك في مكان واحد",
-    heroDescriptionNew: "استقبل الحجوزات عبر الإنترنت، واعرض نشاطك على موقع خاص بك، وتابع عملاءك وفريقك، وأدِر جميع رسائل عملائك من مكان واحد.",
+    heroDescriptionNew:
+      "استقبل الحجوزات عبر الإنترنت، واعرض نشاطك على موقع خاص بك، وتابع عملاءك وفريقك، وأدِر جميع رسائل عملائك من مكان واحد.",
     heroCtaSecondary: "اكتشف كيف يعمل",
     heroTrustSetup: "إعداد سريع وبسيط",
     heroTrustDevices: "ملائم لكل الأجهزة",
@@ -263,15 +264,18 @@ export const translations = {
     featuresTitleNew: "كل ما تحتاجه في مكان واحد",
     channelsBadge: "متاح الآن",
     channelsTitle: "جميع رسائل عملائك في مكان واحد مع Saabq Chat",
-    channelsDesc: "تواصل مع عملائك من صندوق وارد واحد بدلاً من التنقل بين التطبيقات، مع وكيل ذكاء اصطناعي يرد بالعربية والإنجليزية على مدار الساعة.",
-    channelsFooter: "يرتبط بحسابك في تقويم سابق، ويحصل مشتركو الباقات المدفوعة على خصم على باقاته.",
+    channelsDesc:
+      "تواصل مع عملائك من صندوق وارد واحد بدلاً من التنقل بين التطبيقات، مع وكيل ذكاء اصطناعي يرد بالعربية والإنجليزية على مدار الساعة.",
+    channelsFooter:
+      "يرتبط بحسابك في تقويم سابق، ويحصل مشتركو الباقات المدفوعة على خصم على باقاته.",
     channelMessenger: "ماسنجر",
     channelInstagram: "إنستغرام",
     channelSms: "رسائل SMS",
     channelWebChat: "محادثة الموقع",
     channelsCta: "اعرف المزيد عن Saabq Chat",
     exploreNoWorkspacesYet: "لا توجد مساحات عمل منشورة بعد",
-    exploreNoWorkspacesYetDesc: "كن أول نشاط يظهر هنا ويستقبل حجوزات عملائه عبر الإنترنت.",
+    exploreNoWorkspacesYetDesc:
+      "كن أول نشاط يظهر هنا ويستقبل حجوزات عملائه عبر الإنترنت.",
     exploreListYourBusiness: "سجّل نشاطك ليظهر هنا",
     faqContactUs: "تواصل معنا",
     channelOthers: "وغيرها",
@@ -695,7 +699,8 @@ export const translations = {
       "اربط حساب Google الخاص بك لتصدير ومزامنة كافة الحجوزات تلقائياً في جدول بيانات منظم.",
     googleSheetsConnectedAccount: "حساب Google المرتبط",
     chooseExistingSheet: "اختيار جدول موجود",
-    sheetAutoCreatedNote: "تم تجهيز وإنشاء الجدول بنجاح وتنسيق كافة الأعمدة الـ 26 تلقائياً.",
+    sheetAutoCreatedNote:
+      "تم تجهيز وإنشاء الجدول بنجاح وتنسيق كافة الأعمدة الـ 26 تلقائياً.",
     twoFactorTitle: "التحقق بخطوتين (2FA)",
     twoFactorDesc:
       "حماية حسابك باستخدام تطبيقات التحقق مثل Google Authenticator",
@@ -1609,8 +1614,10 @@ export const translations = {
     planStartFree: "ابدأ مجاناً",
     planCompareAll: "قارن كل المزايا ←",
     planCompareTitle: "قارن بين الباقات",
-    planCompareSubtitle: "جميع المزايا والحدود في كل باقة، لتختار ما يناسب نشاطك.",
-    planCompareNote: "بدون رسوم تأسيس · جرّب الباقات المدفوعة مجاناً لفترة تجريبية",
+    planCompareSubtitle:
+      "جميع المزايا والحدود في كل باقة، لتختار ما يناسب نشاطك.",
+    planCompareNote:
+      "بدون رسوم تأسيس · جرّب الباقات المدفوعة مجاناً لفترة تجريبية",
     planFeature: "الميزة",
     planGroupLimits: "الحدود",
     planGroupEssentials: "الأساسيات",
@@ -3133,7 +3140,8 @@ export const translations = {
     heroTitleLine1: "Saabq",
     heroTitleHighlight: "Cal",
     heroTitleLine2: "— your appointments and bookings in one place",
-    heroDescriptionNew: "Take bookings online, show off your business on its own website, keep track of your customers and team, and handle every customer message in one place.",
+    heroDescriptionNew:
+      "Take bookings online, show off your business on its own website, keep track of your customers and team, and handle every customer message in one place.",
     heroCtaSecondary: "See how it works",
     heroTrustSetup: "Quick, simple setup",
     heroTrustDevices: "Works on every device",
@@ -3161,15 +3169,18 @@ export const translations = {
     featuresTitleNew: "Everything you need in one place",
     channelsBadge: "Available now",
     channelsTitle: "Every customer message in one place with Saabq Chat",
-    channelsDesc: "Reply to customers from one shared inbox instead of jumping between apps, with an AI agent that answers in Arabic and English around the clock.",
-    channelsFooter: "It connects to your Saabq Cal account, and paid plans get a discount on Saabq Chat.",
+    channelsDesc:
+      "Reply to customers from one shared inbox instead of jumping between apps, with an AI agent that answers in Arabic and English around the clock.",
+    channelsFooter:
+      "It connects to your Saabq Cal account, and paid plans get a discount on Saabq Chat.",
     channelMessenger: "Messenger",
     channelInstagram: "Instagram",
     channelSms: "SMS",
     channelWebChat: "Website chat",
     channelsCta: "Learn more about Saabq Chat",
     exploreNoWorkspacesYet: "No workspaces published yet",
-    exploreNoWorkspacesYetDesc: "Be the first business listed here and take bookings online.",
+    exploreNoWorkspacesYetDesc:
+      "Be the first business listed here and take bookings online.",
     exploreListYourBusiness: "List your business here",
     faqContactUs: "Contact us",
     channelOthers: "And more",
@@ -3579,7 +3590,8 @@ export const translations = {
       "Connect your Google account to automatically export and sync all bookings into a dedicated Google spreadsheet.",
     googleSheetsConnectedAccount: "Connected Google Account",
     chooseExistingSheet: "Select Existing Sheet",
-    sheetAutoCreatedNote: "Spreadsheet was auto-created and formatted with all 26 booking columns successfully.",
+    sheetAutoCreatedNote:
+      "Spreadsheet was auto-created and formatted with all 26 booking columns successfully.",
     twoFactorTitle: "Two-Factor Authentication (2FA)",
     twoFactorDesc:
       "Add an extra layer of security using Google Authenticator or Authy",
@@ -4511,8 +4523,10 @@ export const translations = {
     planStartFree: "Start free",
     planCompareAll: "Compare all features →",
     planCompareTitle: "Compare plans",
-    planCompareSubtitle: "Every feature and limit in each plan, so you can pick the right fit for your business.",
-    planCompareNote: "No setup fees · Try paid plans free during the trial period",
+    planCompareSubtitle:
+      "Every feature and limit in each plan, so you can pick the right fit for your business.",
+    planCompareNote:
+      "No setup fees · Try paid plans free during the trial period",
     planFeature: "Feature",
     planGroupLimits: "Limits",
     planGroupEssentials: "Essentials",

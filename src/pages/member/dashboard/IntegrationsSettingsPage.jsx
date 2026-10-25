@@ -253,7 +253,9 @@ export default function IntegrationsSettingsPage() {
     const gRes = await fetchGoogleIntegration();
     if (gRes?.success && gRes.data) {
       setGoogleIntegration(gRes.data);
-      const isCalMeet = !!(gRes.data.calendar_sync_enabled || gRes.data.auto_create_meet_links);
+      const isCalMeet = !!(
+        gRes.data.calendar_sync_enabled || gRes.data.auto_create_meet_links
+      );
       setCalendarSync(isCalMeet);
       setAutoMeet(isCalMeet);
       setSheetsSync(!!gRes.data.sheets_sync_enabled);
@@ -368,30 +370,33 @@ export default function IntegrationsSettingsPage() {
   // --- Google Integration Feature State Helpers ---
   const isCalendarConnected = Boolean(
     googleIntegration &&
-      calendarSync &&
-      (googleIntegration.is_calendar_connected !== undefined
-        ? googleIntegration.is_calendar_connected
-        : true),
+    calendarSync &&
+    (googleIntegration.is_calendar_connected !== undefined
+      ? googleIntegration.is_calendar_connected
+      : true),
   );
 
   const isMeetConnected = Boolean(
     googleIntegration &&
-      autoMeet &&
-      (googleIntegration.is_meet_connected !== undefined
-        ? googleIntegration.is_meet_connected
-        : true),
+    autoMeet &&
+    (googleIntegration.is_meet_connected !== undefined
+      ? googleIntegration.is_meet_connected
+      : true),
   );
 
   const isSheetsConnected = Boolean(
     googleIntegration &&
-      sheetsSync &&
-      (googleIntegration.is_sheets_connected !== undefined
-        ? googleIntegration.is_sheets_connected
-        : true),
+    sheetsSync &&
+    (googleIntegration.is_sheets_connected !== undefined
+      ? googleIntegration.is_sheets_connected
+      : true),
   );
 
   // --- Google Feature-Specific OAuth Connector ---
-  const handleStartGoogleOAuthForFeature = (feature = "sheets", extraParams = {}) => {
+  const handleStartGoogleOAuthForFeature = (
+    feature = "sheets",
+    extraParams = {},
+  ) => {
     const clientId = GOOGLE_CLIENT_ID;
     const requestedScope = GOOGLE_SCOPES[feature] || GOOGLE_SCOPES.calendar;
 
@@ -420,7 +425,11 @@ export default function IntegrationsSettingsPage() {
 
               const retryRes = await connectGoogleIntegration(retryPayload);
               if (retryRes.success) {
-                toast.success(retryRes.message || t("googleConnectedSuccess") || "تم الربط بنجاح");
+                toast.success(
+                  retryRes.message ||
+                    t("googleConnectedSuccess") ||
+                    "تم الربط بنجاح",
+                );
                 await loadSecurityData();
               } else {
                 toast.error(
@@ -430,7 +439,9 @@ export default function IntegrationsSettingsPage() {
             },
           );
         } else {
-          toast.success(res.message || t("googleConnectedSuccess") || "تم الربط بنجاح");
+          toast.success(
+            res.message || t("googleConnectedSuccess") || "تم الربط بنجاح",
+          );
           await loadSecurityData();
         }
       } else {
@@ -491,7 +502,10 @@ export default function IntegrationsSettingsPage() {
       });
       tokenClient.requestAccessToken();
     } else {
-      toast.error(t("googleSdkLoading") || "جاري تحميل خدمات Google، يرجى المحاولة بعد قليل...");
+      toast.error(
+        t("googleSdkLoading") ||
+          "جاري تحميل خدمات Google، يرجى المحاولة بعد قليل...",
+      );
     }
   };
 
@@ -520,7 +534,11 @@ export default function IntegrationsSettingsPage() {
       async () => {
         const res = await disconnectGoogleIntegration(feature);
         if (res.success) {
-          toast.success(res.message || t("googleDisconnectedSuccess") || "تم إلغاء الربط بنجاح");
+          toast.success(
+            res.message ||
+              t("googleDisconnectedSuccess") ||
+              "تم إلغاء الربط بنجاح",
+          );
           if (feature === "sheets") {
             setSheetsSync(false);
             setSpreadsheetId("");
@@ -1515,31 +1533,29 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {isCalendarConnected ? (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={handleSaveCalendarSettings}
-                      disabled={loading}
-                    >
-                      {t("saveSettings")}
-                    </button>
-                  )
-                ) : (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        handleStartGoogleOAuthForFeature("calendar")
-                      }
-                      disabled={loading}
-                    >
-                      {t("connectGoogleCalendar")}
-                    </button>
-                  )
-                )}
+                {isCalendarConnected
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveCalendarSettings}
+                        disabled={loading}
+                      >
+                        {t("saveSettings")}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() =>
+                          handleStartGoogleOAuthForFeature("calendar")
+                        }
+                        disabled={loading}
+                      >
+                        {t("connectGoogleCalendar")}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,
@@ -1747,29 +1763,27 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {isMeetConnected ? (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={handleSaveMeetSettings}
-                      disabled={loading}
-                    >
-                      {t("saveChanges") || "حفظ التغييرات"}
-                    </button>
-                  )
-                ) : (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() => handleStartGoogleOAuthForFeature("meet")}
-                      disabled={loading}
-                    >
-                      {t("connectGoogleMeet")}
-                    </button>
-                  )
-                )}
+                {isMeetConnected
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveMeetSettings}
+                        disabled={loading}
+                      >
+                        {t("saveChanges") || "حفظ التغييرات"}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleStartGoogleOAuthForFeature("meet")}
+                        disabled={loading}
+                      >
+                        {t("connectGoogleMeet")}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,
@@ -1832,9 +1846,7 @@ export default function IntegrationsSettingsPage() {
                     <button
                       type="button"
                       className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        handleStartGoogleOAuthForFeature("sheets")
-                      }
+                      onClick={() => handleStartGoogleOAuthForFeature("sheets")}
                       disabled={loading}
                       style={{
                         gap: 8,
@@ -1884,9 +1896,7 @@ export default function IntegrationsSettingsPage() {
                       <button
                         type="button"
                         className="btn btn-ghost btn-sm"
-                        onClick={() =>
-                          handleDisconnectGoogleFeature("sheets")
-                        }
+                        onClick={() => handleDisconnectGoogleFeature("sheets")}
                         disabled={loading}
                         style={{
                           color: "var(--error, #ef4444)",
@@ -1991,8 +2001,7 @@ export default function IntegrationsSettingsPage() {
                                   style={{ width: 14, height: 14 }}
                                 />
                                 <span>
-                                  {t("creatingSheet") ||
-                                    "جاري إنشاء الشيت..."}
+                                  {t("creatingSheet") || "جاري إنشاء الشيت..."}
                                 </span>
                               </>
                             ) : (
@@ -2297,31 +2306,29 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {isSheetsConnected ? (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={handleSaveSheetsSettings}
-                      disabled={loading}
-                    >
-                      {t("saveSettings") || "حفظ الضبط"}
-                    </button>
-                  )
-                ) : (
-                  canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        handleStartGoogleOAuthForFeature("sheets")
-                      }
-                      disabled={loading}
-                    >
-                      {t("connectGoogleSheets")}
-                    </button>
-                  )
-                )}
+                {isSheetsConnected
+                  ? canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={handleSaveSheetsSettings}
+                        disabled={loading}
+                      >
+                        {t("saveSettings") || "حفظ الضبط"}
+                      </button>
+                    )
+                  : canEditIntegrations && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() =>
+                          handleStartGoogleOAuthForFeature("sheets")
+                        }
+                        disabled={loading}
+                      >
+                        {t("connectGoogleSheets")}
+                      </button>
+                    )}
               </div>
             </div>
           </div>,

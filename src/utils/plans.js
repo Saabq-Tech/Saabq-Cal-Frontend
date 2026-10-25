@@ -34,7 +34,8 @@ export const visibleCapabilities = (plan) =>
     (cap) => !HIDDEN_CAPABILITIES.includes(cap.code),
   );
 
-export const formatPlanPrice = (plan) => planPrice(plan).toLocaleString("en-US");
+export const formatPlanPrice = (plan) =>
+  planPrice(plan).toLocaleString("en-US");
 
 export const planCurrencyLabel = (plan, lang) => {
   const detail = plan?.currency_detail;

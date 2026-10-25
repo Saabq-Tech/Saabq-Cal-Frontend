@@ -89,7 +89,10 @@ export default function PricingPage() {
 
   return (
     <div className="main-content">
-      <SEO title={t("planCompareTitle")} description={t("planCompareSubtitle")} />
+      <SEO
+        title={t("planCompareTitle")}
+        description={t("planCompareSubtitle")}
+      />
       <section className="section-sm">
         <div className="container pricing-container">
           <div className="section-header">
@@ -114,13 +117,16 @@ export default function PricingPage() {
                     {sortedPlans.map((plan) => (
                       <th key={plan.id} className={cellClass(plan)}>
                         {plan.id === popularPlanId && (
-                          <span className="compare-popular">{t("popularTag")}</span>
+                          <span className="compare-popular">
+                            {t("popularTag")}
+                          </span>
                         )}
                         <span className="compare-plan-name">{plan.name}</span>
                         <span className="compare-plan-price">
                           {isStartingFromPlan(plan, sortedPlans) &&
                             `${t("planStartingFrom")} `}
-                          {formatPlanPrice(plan)} {planCurrencyLabel(plan, lang)}
+                          {formatPlanPrice(plan)}{" "}
+                          {planCurrencyLabel(plan, lang)}
                           {planPrice(plan) > 0 && ` ${t("planPerMonth")}`}
                         </span>
                       </th>
@@ -129,7 +135,9 @@ export default function PricingPage() {
                 </thead>
                 <tbody>
                   <tr className="compare-group-row">
-                    <td colSpan={sortedPlans.length + 1}>{t("planGroupLimits")}</td>
+                    <td colSpan={sortedPlans.length + 1}>
+                      {t("planGroupLimits")}
+                    </td>
                   </tr>
                   {LIMIT_ROWS.map((row) => (
                     <tr key={row.key}>
@@ -145,23 +153,35 @@ export default function PricingPage() {
                   ))}
 
                   {CAPABILITY_GROUPS.map((group) => {
-                    const codes = group.codes.filter((code) => capabilityNames[code]);
+                    const codes = group.codes.filter(
+                      (code) => capabilityNames[code],
+                    );
                     if (codes.length === 0) return null;
                     return [
                       <tr key={group.titleKey} className="compare-group-row">
-                        <td colSpan={sortedPlans.length + 1}>{t(group.titleKey)}</td>
+                        <td colSpan={sortedPlans.length + 1}>
+                          {t(group.titleKey)}
+                        </td>
                       </tr>,
                       ...codes.map((code) => (
                         <tr key={code}>
-                          <td className="compare-feature-col">{capabilityNames[code]}</td>
+                          <td className="compare-feature-col">
+                            {capabilityNames[code]}
+                          </td>
                           {sortedPlans.map((plan) => (
                             <td key={plan.id} className={cellClass(plan)}>
                               {hasCapability(plan, code) ? (
-                                <span className="compare-yes" aria-label={t("planIncluded")}>
+                                <span
+                                  className="compare-yes"
+                                  aria-label={t("planIncluded")}
+                                >
                                   <Icon name="check" size={16} />
                                 </span>
                               ) : (
-                                <span className="compare-no" aria-label={t("planNotIncluded")}>
+                                <span
+                                  className="compare-no"
+                                  aria-label={t("planNotIncluded")}
+                                >
                                   —
                                 </span>
                               )}
@@ -179,10 +199,14 @@ export default function PricingPage() {
                         <Link
                           to="/register"
                           className={`btn btn-sm ${
-                            plan.id === popularPlanId ? "btn-primary" : "btn-secondary"
+                            plan.id === popularPlanId
+                              ? "btn-primary"
+                              : "btn-secondary"
                           }`}
                         >
-                          {planPrice(plan) > 0 ? t("getStarted") : t("planStartFree")}
+                          {planPrice(plan) > 0
+                            ? t("getStarted")
+                            : t("planStartFree")}
                         </Link>
                       </td>
                     ))}
