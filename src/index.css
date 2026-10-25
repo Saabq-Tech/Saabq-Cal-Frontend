@@ -2765,6 +2765,13 @@ html.dark .auth-panel-right {
   box-sizing: border-box !important;
 }
 
+/* Google Drive Picker Dialog - must always appear above all modal backdrops */
+.picker-dialog,
+.picker-dialog-bg,
+.picker-dialog-content {
+  z-index: 2147483647 !important;
+}
+
 /* Custom Modern Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

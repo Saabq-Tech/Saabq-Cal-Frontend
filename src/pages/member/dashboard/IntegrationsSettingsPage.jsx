@@ -94,6 +94,12 @@ const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   "333771442482-0ip5t2oeentnfm6rjac75fj40891iuam.apps.googleusercontent.com";
 
+const GOOGLE_SCOPES = {
+  sheets: "https://www.googleapis.com/auth/drive.file",
+  calendar: "https://www.googleapis.com/auth/calendar.events",
+  meet: "https://www.googleapis.com/auth/calendar.events",
+};
+
 export default function IntegrationsSettingsPage() {
   const {
     user,
@@ -247,8 +253,9 @@ export default function IntegrationsSettingsPage() {
     const gRes = await fetchGoogleIntegration();
     if (gRes?.success && gRes.data) {
       setGoogleIntegration(gRes.data);
-      setCalendarSync(!!gRes.data.calendar_sync_enabled);
-      setAutoMeet(!!gRes.data.auto_create_meet_links);
+      const isCalMeet = !!(gRes.data.calendar_sync_enabled || gRes.data.auto_create_meet_links);
+      setCalendarSync(isCalMeet);
+      setAutoMeet(isCalMeet);
       setSheetsSync(!!gRes.data.sheets_sync_enabled);
       if (gRes.data.spreadsheet_id) setSpreadsheetId(gRes.data.spreadsheet_id);
       if (gRes.data.calendar_id) setCalendarId(gRes.data.calendar_id);
@@ -358,9 +365,35 @@ export default function IntegrationsSettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // --- Google Integration Handlers ---
-  const handleStartGoogleOAuth = () => {
+  // --- Google Integration Feature State Helpers ---
+  const isCalendarConnected = Boolean(
+    googleIntegration &&
+      calendarSync &&
+      (googleIntegration.is_calendar_connected !== undefined
+        ? googleIntegration.is_calendar_connected
+        : true),
+  );
+
+  const isMeetConnected = Boolean(
+    googleIntegration &&
+      autoMeet &&
+      (googleIntegration.is_meet_connected !== undefined
+        ? googleIntegration.is_meet_connected
+        : true),
+  );
+
+  const isSheetsConnected = Boolean(
+    googleIntegration &&
+      sheetsSync &&
+      (googleIntegration.is_sheets_connected !== undefined
+        ? googleIntegration.is_sheets_connected
+        : true),
+  );
+
+  // --- Google Feature-Specific OAuth Connector ---
+  const handleStartGoogleOAuthForFeature = (feature = "sheets", extraParams = {}) => {
     const clientId = GOOGLE_CLIENT_ID;
+    const requestedScope = GOOGLE_SCOPES[feature] || GOOGLE_SCOPES.calendar;
 
     const handleConnectResponse = async (payload) => {
       const res = await connectGoogleIntegration(payload);
@@ -387,8 +420,8 @@ export default function IntegrationsSettingsPage() {
 
               const retryRes = await connectGoogleIntegration(retryPayload);
               if (retryRes.success) {
-                toast.success(retryRes.message || t("googleConnectedSuccess"));
-                loadSecurityData();
+                toast.success(retryRes.message || t("googleConnectedSuccess") || "تم الربط بنجاح");
+                await loadSecurityData();
               } else {
                 toast.error(
                   retryRes.message || "Failed to connect Google account.",
@@ -397,39 +430,44 @@ export default function IntegrationsSettingsPage() {
             },
           );
         } else {
-          toast.success(res.message || t("googleConnectedSuccess"));
-          loadSecurityData();
+          toast.success(res.message || t("googleConnectedSuccess") || "تم الربط بنجاح");
+          await loadSecurityData();
         }
       } else {
         const confirmMsg = res.errors?.confirm_replace?.[0] || res.message;
-        if (confirmMsg) {
-          toast.error(confirmMsg);
-        } else {
-          toast.error(res.message || "Failed to connect Google account.");
-        }
+        toast.error(confirmMsg || "Failed to connect Google account.");
       }
+    };
+
+    const buildFeaturePayload = (authData) => {
+      const base = { ...authData, ...extraParams, feature };
+      if (feature === "sheets") {
+        base.sheets_sync_enabled = true;
+        if (spreadsheetId) base.spreadsheet_id = spreadsheetId;
+        if (sheetLanguage) base.sheet_language = sheetLanguage;
+      } else if (feature === "calendar" || feature === "meet") {
+        base.calendar_sync_enabled = true;
+        base.auto_create_meet_links = true;
+        base.calendar_id = calendarId || "primary";
+      }
+      return base;
     };
 
     if (window.google?.accounts?.oauth2?.initCodeClient) {
       const codeClient = window.google.accounts.oauth2.initCodeClient({
         client_id: clientId,
-        scope:
-          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+        scope: requestedScope,
+        include_granted_scopes: false,
         ux_mode: "popup",
         callback: async (response) => {
           if (response.error && response.error !== "popup_closed") {
-            toast.error(t("googleAuthFailed"));
+            toast.error(t("googleAuthFailed") || "فشلت المصادقة مع Google");
             return;
           }
           if (response.code) {
-            await handleConnectResponse({
-              code: response.code,
-              calendar_sync_enabled: true,
-              auto_create_meet_links: true,
-              sheets_sync_enabled: true,
-              spreadsheet_id: spreadsheetId || undefined,
-              calendar_id: calendarId || undefined,
-            });
+            await handleConnectResponse(
+              buildFeaturePayload({ code: response.code }),
+            );
           }
         },
       });
@@ -437,47 +475,62 @@ export default function IntegrationsSettingsPage() {
     } else if (window.google?.accounts?.oauth2?.initTokenClient) {
       const tokenClient = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope:
-          "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+        scope: requestedScope,
+        include_granted_scopes: false,
         callback: async (response) => {
           if (response.error && response.error !== "popup_closed") {
-            toast.error(t("googleAuthFailed"));
+            toast.error(t("googleAuthFailed") || "فشلت المصادقة مع Google");
             return;
           }
           if (response.access_token) {
-            await handleConnectResponse({
-              token: response.access_token,
-              calendar_sync_enabled: true,
-              auto_create_meet_links: true,
-              sheets_sync_enabled: true,
-              spreadsheet_id: spreadsheetId || undefined,
-              calendar_id: calendarId || undefined,
-            });
+            await handleConnectResponse(
+              buildFeaturePayload({ token: response.access_token }),
+            );
           }
         },
       });
       tokenClient.requestAccessToken();
     } else {
-      toast.error(t("googleSdkLoading"));
+      toast.error(t("googleSdkLoading") || "جاري تحميل خدمات Google، يرجى المحاولة بعد قليل...");
     }
   };
 
-  const handleDisconnectGoogle = () => {
+  const handleDisconnectGoogleFeature = (feature) => {
+    const titles = {
+      sheets: t("disconnectGoogleSheets") || "إلغاء ربط Google Sheets",
+      calendar: t("disconnectGoogleCalendar") || "إلغاء ربط تقويم Google",
+      meet: t("disconnectGoogleMeet") || "إلغاء ربط Google Meet",
+    };
+    const confirmTexts = {
+      sheets: isRTL
+        ? "هل أنت متأكد من رغبتك في إلغاء ربط Google Sheets؟ لن يتم تصدير الحجوزات لجدول البيانات."
+        : "Are you sure you want to disconnect Google Sheets? Bookings will no longer sync to your spreadsheet.",
+      calendar: isRTL
+        ? "هل أنت متأكد من رغبتك في إلغاء ربط تقويم Google؟ لن تتم مزامنة المواعيد مع التقويم."
+        : "Are you sure you want to disconnect Google Calendar? Appointments will no longer sync to your calendar.",
+      meet: isRTL
+        ? "هل أنت متأكد من رغبتك في إلغاء ربط Google Meet؟ لن يتم إنشاء روابط اجتماعات تلقائياً."
+        : "Are you sure you want to disconnect Google Meet? Video meeting links will no longer be generated automatically.",
+    };
+
     openConfirm(
-      t("googleIntegrationTitle") || "حساب جوجل المترابط",
-      t("googleDisconnectConfirm") ||
-        "هل أنت متأكد من رغبتك في إلغاء ربط حساب Google؟",
+      titles[feature] || t("disconnectGoogle") || "إلغاء الربط",
+      confirmTexts[feature] || "هل أنت متأكد من رغبتك في إلغاء الربط؟",
       t("disconnect") || "إلغاء الربط",
       async () => {
-        const res = await disconnectGoogleIntegration();
+        const res = await disconnectGoogleIntegration(feature);
         if (res.success) {
-          toast.success(res.message || t("googleDisconnectedSuccess"));
-          setGoogleIntegration(null);
-          setCalendarSync(false);
-          setAutoMeet(false);
-          setSheetsSync(false);
+          toast.success(res.message || t("googleDisconnectedSuccess") || "تم إلغاء الربط بنجاح");
+          if (feature === "sheets") {
+            setSheetsSync(false);
+            setSpreadsheetId("");
+          } else if (feature === "calendar" || feature === "meet") {
+            setCalendarSync(false);
+            setAutoMeet(false);
+          }
+          await loadSecurityData();
         } else {
-          toast.error(res.message || "Failed to disconnect Google account.");
+          toast.error(res.message || "Failed to disconnect.");
         }
       },
     );
@@ -492,6 +545,7 @@ export default function IntegrationsSettingsPage() {
     }
     const res = await connectGoogleIntegration({
       calendar_sync_enabled: calendarSync,
+      auto_create_meet_links: calendarSync,
       calendar_id: calendarId || "primary",
     });
     if (res.success) {
@@ -514,6 +568,7 @@ export default function IntegrationsSettingsPage() {
     }
     const res = await connectGoogleIntegration({
       auto_create_meet_links: autoMeet,
+      calendar_sync_enabled: autoMeet,
     });
     if (res.success) {
       toast.success(t("updatedSuccess") || "اتحدث بنجاح");
@@ -853,16 +908,16 @@ export default function IntegrationsSettingsPage() {
 
   const integrationsList = [
     {
-      id: "google_workspace",
-      title: "Google Workspace",
+      id: "google_sheets",
+      title: "Google Sheets",
       category: "google",
-      icon: <Icon name="google" size={28} />,
+      icon: <Icon name="google-sheets" size={28} />,
       description:
-        t("googleWorkspaceDesc") ||
-        "ربط حساب جوجل الرئيسي لمزامنة التقويم وإنشاء روابط اجتماعات Google Meet تلقائياً.",
-      isConnected: !!googleIntegration,
-      subtitle: googleIntegration
-        ? `${t("connectedAs") || "مرتبط كـ:"} ${googleIntegration.google_email}`
+        t("googleSheetsDesc") ||
+        "تصدير وتحديث بيانات المواعيد الجديدة فوراً في جدول بيانات Google Sheets خاص بك.",
+      isConnected: isSheetsConnected,
+      subtitle: isSheetsConnected
+        ? `${t("connectedAs") || "مرتبط كـ:"} ${googleIntegration?.google_email || ""}`
         : t("statusNotConnected") || "غير مرتبط",
     },
     {
@@ -873,10 +928,10 @@ export default function IntegrationsSettingsPage() {
       description:
         t("googleCalendarDesc") ||
         "مزامنة كافة الحجوزات والمواعيد المستلمة تلقائياً مع تقويم جوجل المفضل لديك.",
-      isConnected: !!googleIntegration && calendarSync,
-      subtitle: calendarSync
-        ? t("syncEnabled") || "المزامنة مفعّلة"
-        : t("statusDisabled") || "معطّلة",
+      isConnected: isCalendarConnected,
+      subtitle: isCalendarConnected
+        ? `${t("connectedAs") || "مرتبط كـ:"} ${googleIntegration?.google_email || ""}`
+        : t("statusNotConnected") || "غير مرتبط",
     },
     {
       id: "google_meet",
@@ -889,23 +944,10 @@ export default function IntegrationsSettingsPage() {
           : `Generate instant meeting links for every confirmed appointment with ${customerPlural.toLowerCase()}.`
         : t("googleMeetDesc") ||
           "توليد روابط اجتماعات افتراضية فورية لكل موعد يتم تأكيده مع العملاء.",
-      isConnected: !!googleIntegration && autoMeet,
-      subtitle: autoMeet
-        ? t("autoCreateEnabled") || "الإنشاء التلقائي مفعّل"
-        : t("statusDisabled") || "معطّل",
-    },
-    {
-      id: "google_sheets",
-      title: "Google Sheets",
-      category: "google",
-      icon: <Icon name="google-sheets" size={28} />,
-      description:
-        t("googleSheetsDesc") ||
-        "تصدير وتحديث بيانات المواعيد الجديدة فوراً في جدول بيانات Google Sheets.",
-      isConnected: !!googleIntegration && sheetsSync,
-      subtitle: sheetsSync
-        ? t("syncEnabled") || "المزامنة التلقائية مفعّلة"
-        : t("statusDisabled") || "معطّلة",
+      isConnected: isMeetConnected,
+      subtitle: isMeetConnected
+        ? `${t("connectedAs") || "مرتبط كـ:"} ${googleIntegration?.google_email || ""}`
+        : t("statusNotConnected") || "غير مرتبط",
     },
     {
       id: "telegram",
@@ -1255,156 +1297,14 @@ export default function IntegrationsSettingsPage() {
         ))}
       </div>
 
-      {/* --- MODAL 1: Google Workspace Main Connection --- */}
-      {activeModalId === "google_workspace" &&
-        createPortal(
-          <div className="modal-backdrop">
-            <div className="modal-card animate-scale-up">
-              <div className="modal-header">
-                <h3 className="modal-title">
-                  {t("googleIntegrationTitle") ||
-                    "Google Workspace Integration"}
-                </h3>
-                <button
-                  type="button"
-                  className="modal-close-btn"
-                  onClick={() => setActiveModalId(null)}
-                >
-                  <Icon name="x" size={16} />
-                </button>
-              </div>
-
-              <p
-                style={{
-                  fontSize: "0.88rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.6,
-                  marginBottom: 16,
-                }}
-              >
-                {t("googleWorkspaceDesc")}
-              </p>
-
-              {googleIntegration ? (
-                <div
-                  style={{
-                    background: "var(--surface-alt)",
-                    padding: 16,
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: 20,
-                    border: "1px solid var(--border-light)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--muted)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {t("connectedAccountLabel") || "الحساب المرتبط حالياً"}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "1.05rem",
-                      fontWeight: 700,
-                      color: "var(--primary)",
-                      marginTop: 4,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Icon name="mail" size={16} />
-                    {googleIntegration.google_email}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "var(--text-secondary)",
-                      marginTop: 4,
-                    }}
-                  >
-                    {t("connectionDate") || "تاريخ الربط:"}{" "}
-                    {new Date(
-                      googleIntegration.created_at || Date.now(),
-                    ).toLocaleDateString(
-                      t("lang") === "ar" ? "ar-SA" : "en-US",
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    background: "rgba(234, 179, 8, 0.1)",
-                    padding: 14,
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: 20,
-                    border: "1px solid rgba(234, 179, 8, 0.3)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.86rem",
-                      color: "#b45309",
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Icon name="alert-triangle" size={16} />
-                    {t("noGoogleConnectedNotice") ||
-                      "لم يتم ربط أي حساب Google حتى الآن. انقر على الزر أدناه للربط بأمان."}
-                  </span>
-                </div>
-              )}
-
-              <div className="modal-actions">
-                {googleIntegration
-                  ? canDelete && (
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm"
-                        onClick={handleDisconnectGoogle}
-                        disabled={loading}
-                      >
-                        {t("disconnectGoogleBtn") || "إلغاء ربط حساب Google"}
-                      </button>
-                    )
-                  : canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={handleStartGoogleOAuth}
-                        disabled={loading}
-                        style={{ gap: 6 }}
-                      >
-                        <Icon name="globe" size={14} />
-                        {t("connectGoogleNow") || "ربط حساب Google الآن"}
-                      </button>
-                    )}
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => setActiveModalId(null)}
-                >
-                  {t("cancel")}
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
-
-      {/* --- MODAL 2: Google Calendar Settings --- */}
+      {/* --- MODAL 1: Google Calendar Settings --- */}
       {activeModalId === "google_calendar" &&
         createPortal(
           <div className="modal-backdrop">
             <div className="modal-card animate-scale-up">
               <div className="modal-header">
                 <h3 className="modal-title">
-                  {t("googleCalendarSettingsTitle")}
+                  {t("googleCalendarSettingsTitle") || "إعدادات تقويم Google"}
                 </h3>
                 <button
                   type="button"
@@ -1415,79 +1315,197 @@ export default function IntegrationsSettingsPage() {
                 </button>
               </div>
 
-              {!googleIntegration && (
-                <div
-                  style={{
-                    background: "rgba(239, 68, 68, 0.08)",
-                    padding: 14,
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: 16,
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.86rem",
-                      color: "var(--error, #ef4444)",
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Icon name="alert-triangle" size={16} />
-                    {t("connectGoogleFirst")}
-                  </span>
-                </div>
-              )}
-
+              {/* Under-Review Notice Banner */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 0",
-                  borderBottom: "1px solid var(--border-light)",
+                  background: "rgba(245, 158, 11, 0.08)",
+                  border: "1px solid rgba(245, 158, 11, 0.25)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "12px 14px",
+                  marginBottom: 16,
                 }}
               >
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
-                    {t("enableCalendarSync")}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
-                    {t("calendarSyncDescSub")}
-                  </div>
-                </div>
-                <ToggleSwitch
-                  checked={calendarSync}
-                  onChange={(e) => setCalendarSync(e.target.checked)}
-                  disabled={!canEditIntegrations}
-                />
-              </div>
-
-              <div style={{ marginTop: 16, marginBottom: 20 }}>
-                <label className="form-label" style={{ fontWeight: 700 }}>
-                  {t("calendarIdLabel")}
-                </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={calendarId}
-                  onChange={(e) => setCalendarId(e.target.value)}
-                  disabled={!canEditIntegrations}
-                  placeholder="primary or your-email@gmail.com"
-                />
-                <span
+                <div
                   style={{
-                    fontSize: "0.78rem",
-                    color: "var(--muted)",
-                    marginTop: 4,
-                    display: "block",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "#d97706",
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    marginBottom: 4,
                   }}
                 >
-                  {t("calendarIdHelpText")}
-                </span>
+                  <Icon name="alert-triangle" size={16} />
+                  {t("googleCalendarUnderReviewTitle")}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "var(--text-secondary)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {t("googleCalendarUnderReviewDesc")}
+                </div>
               </div>
+
+              {!isCalendarConnected ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "24px 16px",
+                    background: "var(--surface-alt)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px dashed var(--border)",
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <Icon name="google-calendar" size={44} />
+                  </div>
+                  <h4
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "0.96rem",
+                      marginBottom: 6,
+                    }}
+                  >
+                    {t("connectGoogleCalendar")}
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "0.82rem",
+                      color: "var(--muted)",
+                      maxWidth: 380,
+                      margin: "0 auto 16px",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {t("googleCalendarDesc")}
+                  </p>
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() =>
+                        handleStartGoogleOAuthForFeature("calendar")
+                      }
+                      disabled={loading}
+                      style={{
+                        gap: 6,
+                        margin: "0 auto",
+                        padding: "8px 20px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      <Icon name="globe" size={14} />
+                      {t("connectGoogleCalendar")}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      background: "var(--surface-alt)",
+                      padding: "10px 14px",
+                      borderRadius: "var(--radius-md)",
+                      marginBottom: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      border: "1px solid var(--border-light)",
+                    }}
+                  >
+                    <div>
+                      <span
+                        style={{ fontSize: "0.78rem", color: "var(--muted)" }}
+                      >
+                        {t("googleSheetsConnectedAccount") || "الحساب المرتبط"}:
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.88rem",
+                          fontWeight: 700,
+                          marginLeft: 6,
+                          marginRight: 6,
+                          color: "var(--primary)",
+                        }}
+                      >
+                        {googleIntegration?.google_email}
+                      </span>
+                    </div>
+                    {canDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() =>
+                          handleDisconnectGoogleFeature("calendar")
+                        }
+                        disabled={loading}
+                        style={{
+                          color: "var(--error, #ef4444)",
+                          fontSize: "0.78rem",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {t("disconnectGoogleCalendar")}
+                      </button>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "12px 0",
+                      borderBottom: "1px solid var(--border-light)",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
+                        {t("enableCalendarSync")}
+                      </div>
+                      <div
+                        style={{ fontSize: "0.8rem", color: "var(--muted)" }}
+                      >
+                        {t("calendarSyncDescSub")}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={calendarSync}
+                      onChange={(e) => setCalendarSync(e.target.checked)}
+                      disabled={!canEditIntegrations}
+                    />
+                  </div>
+
+                  <div style={{ marginTop: 16, marginBottom: 20 }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("calendarIdLabel")}
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={calendarId}
+                      onChange={(e) => setCalendarId(e.target.value)}
+                      disabled={!canEditIntegrations}
+                      placeholder="primary or your-email@gmail.com"
+                    />
+                    <span
+                      style={{
+                        fontSize: "0.78rem",
+                        color: "var(--muted)",
+                        marginTop: 4,
+                        display: "block",
+                      }}
+                    >
+                      {t("calendarIdHelpText")}
+                    </span>
+                  </div>
+                </>
+              )}
 
               <div className="modal-actions">
                 <button
@@ -1497,36 +1515,38 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration
-                  ? canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={handleSaveCalendarSettings}
-                        disabled={loading}
-                      >
-                        {t("saveSettings")}
-                      </button>
-                    )
-                  : canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => {
-                          setActiveModalId(null);
-                          handleStartGoogleOAuth();
-                        }}
-                      >
-                        {t("connectGoogle")}
-                      </button>
-                    )}
+                {isCalendarConnected ? (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleSaveCalendarSettings}
+                      disabled={loading}
+                    >
+                      {t("saveSettings")}
+                    </button>
+                  )
+                ) : (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() =>
+                        handleStartGoogleOAuthForFeature("calendar")
+                      }
+                      disabled={loading}
+                    >
+                      {t("connectGoogleCalendar")}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>,
           document.body,
         )}
 
-      {/* --- MODAL 3: Google Meet Settings --- */}
+      {/* --- MODAL 2: Google Meet Settings --- */}
       {activeModalId === "google_meet" &&
         createPortal(
           <div className="modal-backdrop">
@@ -1542,67 +1562,182 @@ export default function IntegrationsSettingsPage() {
                 </button>
               </div>
 
-              {!googleIntegration && (
-                <div
-                  style={{
-                    background: "rgba(239, 68, 68, 0.08)",
-                    padding: 14,
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: 16,
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.86rem",
-                      color: "var(--error, #ef4444)",
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Icon name="alert-triangle" size={16} />
-                    {t("connectGoogleFirst") ||
-                      "من فضلك اربط حساب Google Workspace الأول"}
-                  </span>
-                </div>
-              )}
-
+              {/* Under-Review Notice Banner */}
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "14px 0",
+                  background: "rgba(245, 158, 11, 0.08)",
+                  border: "1px solid rgba(245, 158, 11, 0.25)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "12px 14px",
+                  marginBottom: 16,
                 }}
               >
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
-                    {t("autoCreateMeetLinksLabel") ||
-                      "إنشاء رابط اجتماع Google Meet تلقائياً"}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "#d97706",
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Icon name="alert-triangle" size={16} />
+                  {t("googleMeetUnderReviewTitle")}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    color: "var(--text-secondary)",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {t("googleMeetUnderReviewDesc")}
+                </div>
+              </div>
+
+              {!isMeetConnected ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "24px 16px",
+                    background: "var(--surface-alt)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px dashed var(--border)",
+                    marginBottom: 16,
+                  }}
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <Icon name="google-meet" size={44} />
                   </div>
-                  <div
+                  <h4
                     style={{
-                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      fontSize: "0.96rem",
+                      marginBottom: 6,
+                    }}
+                  >
+                    {t("connectGoogleMeet")}
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "0.82rem",
                       color: "var(--muted)",
-                      marginTop: 2,
+                      maxWidth: 380,
+                      margin: "0 auto 16px",
+                      lineHeight: 1.5,
                     }}
                   >
                     {isCustom
                       ? isRTL
-                        ? `سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية لـ ${customerSingular}.`
-                        : `A direct link will be generated and attached to confirmation messages for the ${customerSingular.toLowerCase()}.`
-                      : t("autoCreateMeetLinksSub") ||
-                        "سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية للعميل."}
-                  </div>
+                        ? `توليد روابط اجتماعات افتراضية فورية لكل موعد يتم تأكيده مع ${customerPlural}.`
+                        : `Generate instant meeting links for every confirmed appointment with ${customerPlural.toLowerCase()}.`
+                      : t("googleMeetDesc")}
+                  </p>
+                  {canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleStartGoogleOAuthForFeature("meet")}
+                      disabled={loading}
+                      style={{
+                        gap: 6,
+                        margin: "0 auto",
+                        padding: "8px 20px",
+                        fontWeight: 700,
+                      }}
+                    >
+                      <Icon name="globe" size={14} />
+                      {t("connectGoogleMeet")}
+                    </button>
+                  )}
                 </div>
-                <ToggleSwitch
-                  checked={autoMeet}
-                  onChange={(e) => setAutoMeet(e.target.checked)}
-                  disabled={!canEditIntegrations}
-                />
-              </div>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      background: "var(--surface-alt)",
+                      padding: "10px 14px",
+                      borderRadius: "var(--radius-md)",
+                      marginBottom: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      border: "1px solid var(--border-light)",
+                    }}
+                  >
+                    <div>
+                      <span
+                        style={{ fontSize: "0.78rem", color: "var(--muted)" }}
+                      >
+                        {t("googleSheetsConnectedAccount") || "الحساب المرتبط"}:
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.88rem",
+                          fontWeight: 700,
+                          marginLeft: 6,
+                          marginRight: 6,
+                          color: "var(--primary)",
+                        }}
+                      >
+                        {googleIntegration?.google_email}
+                      </span>
+                    </div>
+                    {canDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => handleDisconnectGoogleFeature("meet")}
+                        disabled={loading}
+                        style={{
+                          color: "var(--error, #ef4444)",
+                          fontSize: "0.78rem",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {t("disconnectGoogleMeet")}
+                      </button>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "14px 0",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
+                        {t("autoCreateMeetLinksLabel") ||
+                          "إنشاء رابط اجتماع Google Meet تلقائياً"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "var(--muted)",
+                          marginTop: 2,
+                        }}
+                      >
+                        {isCustom
+                          ? isRTL
+                            ? `سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية لـ ${customerSingular}.`
+                            : `A direct link will be generated and attached to confirmation messages for the ${customerSingular.toLowerCase()}.`
+                          : t("autoCreateMeetLinksSub") ||
+                            "سيتم توليد رابط مباشر وإرفاقه بالرسائل التأكيدية للعميل."}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={autoMeet}
+                      onChange={(e) => setAutoMeet(e.target.checked)}
+                      disabled={!canEditIntegrations}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="modal-actions">
                 <button
@@ -1612,43 +1747,43 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration
-                  ? canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={handleSaveMeetSettings}
-                        disabled={loading}
-                      >
-                        {t("saveChanges") || "حفظ التغييرات"}
-                      </button>
-                    )
-                  : canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => {
-                          setActiveModalId(null);
-                          handleStartGoogleOAuth();
-                        }}
-                      >
-                        {t("connectGoogle") || "ربط حساب جوجل"}
-                      </button>
-                    )}
+                {isMeetConnected ? (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleSaveMeetSettings}
+                      disabled={loading}
+                    >
+                      {t("saveChanges") || "حفظ التغييرات"}
+                    </button>
+                  )
+                ) : (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handleStartGoogleOAuthForFeature("meet")}
+                      disabled={loading}
+                    >
+                      {t("connectGoogleMeet")}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>,
           document.body,
         )}
 
-      {/* --- MODAL 4: Google Sheets Integration Settings --- */}
+      {/* --- MODAL 3: Google Sheets Integration Settings --- */}
       {activeModalId === "google_sheets" &&
         createPortal(
           <div className="modal-backdrop">
             <div className="modal-card animate-scale-up">
               <div className="modal-header">
                 <h3 className="modal-title">
-                  {t("googleSheetsSettingsTitle")}
+                  {t("googleSheetsSettingsTitle") || "إعدادات Google Sheets"}
                 </h3>
                 <button
                   type="button"
@@ -1659,378 +1794,500 @@ export default function IntegrationsSettingsPage() {
                 </button>
               </div>
 
-              {!googleIntegration && (
+              {!isSheetsConnected ? (
                 <div
                   style={{
-                    background: "rgba(239, 68, 68, 0.08)",
-                    padding: 14,
-                    borderRadius: "var(--radius-md)",
-                    marginBottom: 16,
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.86rem",
-                      color: "var(--error, #ef4444)",
-                      fontWeight: 600,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Icon name="alert-triangle" size={16} />
-                    {t("connectGoogleFirst") ||
-                      "من فضلك اربط حساب Google Workspace الأول"}
-                  </span>
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 0",
-                  borderBottom: "1px solid var(--border-light)",
-                  marginBottom: 16,
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
-                    {t("sheetsExportSyncLabel") ||
-                      "تفعيل التصدير والمزامنة التلقائية"}
-                  </div>
-                  <div style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
-                    {t("sheetsExportSyncSub") ||
-                      "إضافة كل حجز جديد كصف بالجدول"}
-                  </div>
-                </div>
-                <ToggleSwitch
-                  checked={sheetsSync}
-                  onChange={(e) => setSheetsSync(e.target.checked)}
-                  disabled={!canEditIntegrations}
-                />
-              </div>
-
-              {!spreadsheetId?.trim() ? (
-                <div
-                  style={{
-                    background: "rgba(32, 123, 89, 0.05)",
-                    border: "1px dashed var(--primary)",
-                    borderRadius: "var(--radius-md)",
-                    padding: 16,
-                    marginBottom: 18,
                     textAlign: "center",
+                    padding: "26px 18px",
+                    background: "var(--surface-alt)",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px dashed var(--border)",
+                    marginBottom: 16,
                   }}
                 >
-                  <div
+                  <div style={{ marginBottom: 12 }}>
+                    <Icon name="google-sheets" size={46} />
+                  </div>
+                  <h4
                     style={{
                       fontWeight: 700,
-                      fontSize: "0.94rem",
-                      color: "var(--heading)",
-                      marginBottom: 4,
+                      fontSize: "1rem",
+                      marginBottom: 6,
                     }}
                   >
-                    {t("createSheetAuto") ||
-                      "إنشاء جدول Google Sheets تلقائياً"}
-                  </div>
+                    {t("connectGoogleSheets")}
+                  </h4>
                   <p
                     style={{
-                      fontSize: "0.82rem",
+                      fontSize: "0.84rem",
                       color: "var(--muted)",
-                      margin: "0 auto 12px",
-                      maxWidth: 420,
+                      maxWidth: 400,
+                      margin: "0 auto 18px",
                       lineHeight: 1.5,
                     }}
                   >
-                    {t("createSheetAutoDesc") ||
-                      "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة."}
+                    {t("googleSheetsConnectIntro")}
                   </p>
                   {canEditIntegrations && (
                     <button
                       type="button"
                       className="btn btn-primary btn-sm"
-                      onClick={handleCreateGoogleSheet}
-                      disabled={isCreatingSheet || !googleIntegration}
+                      onClick={() =>
+                        handleStartGoogleOAuthForFeature("sheets")
+                      }
+                      disabled={loading}
                       style={{
-                        display: "inline-flex",
-                        alignItems: "center",
                         gap: 8,
-                        padding: "8px 18px",
+                        margin: "0 auto",
+                        padding: "8px 22px",
                         fontWeight: 700,
                       }}
                     >
-                      {isCreatingSheet ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm"
-                            style={{ width: 14, height: 14 }}
-                          />
-                          <span>
-                            {t("creatingSheet") || "جاري إنشاء الشيت..."}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="plus" size={15} />
-                          <span>
-                            {t("createSheetAuto") || "إنشاء جدول جديد تلقائياً"}
-                          </span>
-                        </>
-                      )}
+                      <Icon name="globe" size={14} />
+                      {t("connectGoogleSheets")}
                     </button>
                   )}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: 12,
-                    background: "var(--surface-alt)",
-                    border: "1px solid var(--border-light)",
-                    borderRadius: "var(--radius-md)",
-                    padding: "12px 16px",
-                    marginBottom: 18,
-                  }}
-                >
+                <>
                   <div
                     style={{
+                      background: "var(--surface-alt)",
+                      padding: "10px 14px",
+                      borderRadius: "var(--radius-md)",
+                      marginBottom: 16,
                       display: "flex",
                       alignItems: "center",
-                      gap: 14,
-                      flexWrap: "wrap",
+                      justifyContent: "space-between",
+                      border: "1px solid var(--border-light)",
                     }}
                   >
-                    {canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-outline btn-sm"
-                        onClick={handleTestGoogleSheets}
-                        disabled={isTestingSheet || !googleIntegration}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          fontWeight: 700,
-                          fontSize: "0.85rem",
-                          padding: "7px 16px",
-                          borderRadius: 8,
-                          background: "var(--bg-card)",
-                          color: "var(--heading)",
-                          borderColor: "var(--border)",
-                        }}
+                    <div>
+                      <span
+                        style={{ fontSize: "0.78rem", color: "var(--muted)" }}
                       >
-                        {isTestingSheet ? (
-                          <>
-                            <span
-                              className="spinner-border spinner-border-sm"
-                              style={{ width: 14, height: 14 }}
-                            />
-                            <span>
-                              {t("testingSheet") || "جاري الاختبار..."}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Icon name="activity" size={14} />
-                            <span>
-                              {t("testGoogleSheetsBtn") ||
-                                "اختبار مزامنة الشيت"}
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    )}
-
-                    <a
-                      href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-ghost btn-sm"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        textDecoration: "none",
-                        fontSize: "0.85rem",
-                        color: "var(--primary)",
-                        fontWeight: 600,
-                      }}
-                    >
-                      <Icon name="external-link" size={15} />
-                      <span>{t("openSheet") || "فتح الشيت"}</span>
-                    </a>
-
-                    {sheetTestSuccess && (
+                        {t("googleSheetsConnectedAccount") || "الحساب المرتبط"}:
+                      </span>
                       <span
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 6,
-                          fontSize: "0.86rem",
-                          color: "var(--primary, #207b59)",
+                          fontSize: "0.88rem",
                           fontWeight: 700,
+                          marginLeft: 6,
+                          marginRight: 6,
+                          color: "var(--primary)",
                         }}
                       >
-                        <span>✓</span>
-                        <span>
-                          {t("testRowAddedSuccess") ||
-                            "تم! أضيف صف تجريبي في الشيت."}
-                        </span>
+                        {googleIntegration?.google_email}
                       </span>
+                    </div>
+                    {canDelete && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() =>
+                          handleDisconnectGoogleFeature("sheets")
+                        }
+                        disabled={loading}
+                        style={{
+                          color: "var(--error, #ef4444)",
+                          fontSize: "0.78rem",
+                          padding: "4px 8px",
+                        }}
+                      >
+                        {t("disconnectGoogleSheets")}
+                      </button>
                     )}
                   </div>
 
-                  {canEditIntegrations && (
-                    <button
-                      type="button"
-                      onClick={handleCreateGoogleSheet}
-                      disabled={isCreatingSheet}
-                      style={{
-                        border: 0,
-                        background: "transparent",
-                        color: "var(--muted)",
-                        fontSize: "0.78rem",
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                      }}
-                      title={
-                        t("recreateSheetAuto") ||
-                        "إعادة إنشاء جدول جديد بتنسيق النظام"
-                      }
-                    >
-                      {isCreatingSheet
-                        ? t("creatingSheet") || "جاري الإنشاء..."
-                        : t("recreateSheetAuto") || "إعادة إنشاء جدول جديد"}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label className="form-label" style={{ fontWeight: 700 }}>
-                  {t("sheetHeaderLangLabel") || "لغة العناوين بالجدول"}
-                </label>
-                <select
-                  className="form-select"
-                  value={sheetLanguage}
-                  onChange={(e) => setSheetLanguage(e.target.value)}
-                  disabled={!canEditIntegrations}
-                >
-                  <option value="ar">
-                    {isCustom
-                      ? isRTL
-                        ? `العربية (اسم ${customerSingular}، الموعد، الخدمة)`
-                        : `Arabic (${customerSingular} Name, Date, Service)`
-                      : t("sheetLangArOption") ||
-                        (isRTL
-                          ? "العربية (اسم العميل، الموعد، الخدمة)"
-                          : "Arabic (Customer Name, Date, Service)")}
-                  </option>
-                  <option value="en">
-                    {isCustom
-                      ? `English (${customerSingular} Name, Date, Service)`
-                      : t("sheetLangEnOption") ||
-                        "English (Customer Name, Date, Service)"}
-                  </option>
-                </select>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 20 }}>
-                <label className="form-label" style={{ fontWeight: 700 }}>
-                  {t("spreadsheetPickerLabel") || "ملف Google Sheets المرتبط"}
-                </label>
-                <div
-                  className="form-input"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    color: spreadsheetId ? "inherit" : "var(--muted)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <Icon name="file-text" size={16} />
-                  <span
-                    style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "12px 0",
+                      borderBottom: "1px solid var(--border-light)",
+                      marginBottom: 16,
+                    }}
                   >
-                    {spreadsheetId
-                      ? pickedSheetName ||
-                        t("spreadsheetLinked") ||
-                        "تم ربط ملف Google Sheets"
-                      : t("noSpreadsheetSelected") || "لم يتم اختيار ملف بعد"}
-                  </span>
-                </div>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "0.78rem",
-                    color: "var(--muted)",
-                    lineHeight: 1.4,
-                    marginTop: 6,
-                  }}
-                >
-                  {t("spreadsheetPickerHelpText") ||
-                    "أنشئ ملفاً تلقائياً أو اختر ملفاً موجوداً من Google Drive. سيصل التطبيق إلى هذا الملف فقط."}
-                </span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "0.92rem" }}>
+                        {t("sheetsExportSyncLabel") ||
+                          "تفعيل التصدير والمزامنة التلقائية"}
+                      </div>
+                      <div
+                        style={{ fontSize: "0.8rem", color: "var(--muted)" }}
+                      >
+                        {t("sheetsExportSyncSub") ||
+                          "إضافة كل حجز جديد كصف بالجدول"}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={sheetsSync}
+                      onChange={(e) => setSheetsSync(e.target.checked)}
+                      disabled={!canEditIntegrations}
+                    />
+                  </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginTop: 12,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  {canEditIntegrations && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={handlePickGoogleSheet}
-                      disabled={!googleIntegration || isPickingSheet}
+                  {!spreadsheetId?.trim() ? (
+                    <div
                       style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: "0.82rem",
-                        padding: "6px 12px",
+                        background: "rgba(32, 123, 89, 0.05)",
+                        border: "1px dashed var(--primary)",
+                        borderRadius: "var(--radius-md)",
+                        padding: 18,
+                        marginBottom: 18,
+                        textAlign: "center",
                       }}
                     >
-                      <Icon name="google-sheets" size={14} />
-                      {isPickingSheet
-                        ? t("openingGoogleDrive") || "جاري فتح Google Drive..."
-                        : t("chooseFromGoogleDrive") ||
-                          "اختيار ملف من Google Drive"}
-                    </button>
-                  )}
-                  {spreadsheetId?.trim() && (
-                    <a
-                      href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-secondary btn-sm"
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "0.94rem",
+                          color: "var(--heading)",
+                          marginBottom: 4,
+                        }}
+                      >
+                        {t("createSheetAuto") ||
+                          "إنشاء جدول Google Sheets تلقائياً"}
+                      </div>
+                      <p
+                        style={{
+                          fontSize: "0.82rem",
+                          color: "var(--muted)",
+                          margin: "0 auto 14px",
+                          maxWidth: 420,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {t("createSheetAutoDesc") ||
+                          "لا يوجد جدول مرتبط حالياً. أنشئ جدولاً جديداً مجهزاً بكافة الحقول الـ 26 والتنسيق المعتمد بنقرة واحدة."}
+                      </p>
+                      {canEditIntegrations && (
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: 10,
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={handleCreateGoogleSheet}
+                            disabled={isCreatingSheet}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "8px 18px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {isCreatingSheet ? (
+                              <>
+                                <span
+                                  className="spinner-border spinner-border-sm"
+                                  style={{ width: 14, height: 14 }}
+                                />
+                                <span>
+                                  {t("creatingSheet") ||
+                                    "جاري إنشاء الشيت..."}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <Icon name="plus" size={15} />
+                                <span>
+                                  {t("createSheetAuto") ||
+                                    "إنشاء جدول جديد تلقائياً"}
+                                </span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={handlePickGoogleSheet}
+                            disabled={isPickingSheet}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              padding: "8px 14px",
+                            }}
+                          >
+                            <Icon name="google-sheets" size={14} />
+                            <span>
+                              {isPickingSheet
+                                ? t("openingGoogleDrive") ||
+                                  "جاري فتح Google Drive..."
+                                : t("chooseExistingSheet") ||
+                                  "اختيار جدول موجود"}
+                            </span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
                       style={{
-                        display: "inline-flex",
+                        display: "flex",
                         alignItems: "center",
-                        gap: 6,
-                        textDecoration: "none",
-                        fontSize: "0.82rem",
-                        padding: "6px 12px",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: 12,
+                        background: "var(--surface-alt)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "var(--radius-md)",
+                        padding: "12px 16px",
+                        marginBottom: 18,
                       }}
                     >
-                      <Icon name="external-link" size={14} />
-                      {t("openSheetInDrive") || "فتح المستند في Google Drive"}
-                    </a>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {canEditIntegrations && (
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            onClick={handleTestGoogleSheets}
+                            disabled={isTestingSheet}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              fontWeight: 700,
+                              fontSize: "0.85rem",
+                              padding: "7px 16px",
+                              borderRadius: 8,
+                              background: "var(--bg-card)",
+                              color: "var(--heading)",
+                              borderColor: "var(--border)",
+                            }}
+                          >
+                            {isTestingSheet ? (
+                              <>
+                                <span
+                                  className="spinner-border spinner-border-sm"
+                                  style={{ width: 14, height: 14 }}
+                                />
+                                <span>
+                                  {t("testingSheet") || "جاري الاختبار..."}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <Icon name="activity" size={14} />
+                                <span>
+                                  {t("testGoogleSheetsBtn") ||
+                                    "اختبار مزامنة الشيت"}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )}
+
+                        <a
+                          href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-ghost btn-sm"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            textDecoration: "none",
+                            fontSize: "0.85rem",
+                            color: "var(--primary)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <Icon name="external-link" size={15} />
+                          <span>{t("openSheet") || "فتح الشيت"}</span>
+                        </a>
+
+                        {sheetTestSuccess && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              fontSize: "0.86rem",
+                              color: "var(--primary, #207b59)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            <span>✓</span>
+                            <span>
+                              {t("testRowAddedSuccess") ||
+                                "تم! أضيف صف تجريبي في الشيت."}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+
+                      {canEditIntegrations && (
+                        <button
+                          type="button"
+                          onClick={handleCreateGoogleSheet}
+                          disabled={isCreatingSheet}
+                          style={{
+                            border: 0,
+                            background: "transparent",
+                            color: "var(--muted)",
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                          title={
+                            t("recreateSheetAuto") ||
+                            "إعادة إنشاء جدول جديد بتنسيق النظام"
+                          }
+                        >
+                          {isCreatingSheet
+                            ? t("creatingSheet") || "جاري الإنشاء..."
+                            : t("recreateSheetAuto") || "إعادة إنشاء جدول جديد"}
+                        </button>
+                      )}
+                    </div>
                   )}
-                </div>
-              </div>
+
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("sheetHeaderLangLabel") || "لغة العناوين بالجدول"}
+                    </label>
+                    <select
+                      className="form-select"
+                      value={sheetLanguage}
+                      onChange={(e) => setSheetLanguage(e.target.value)}
+                      disabled={!canEditIntegrations}
+                    >
+                      <option value="ar">
+                        {isCustom
+                          ? isRTL
+                            ? `العربية (اسم ${customerSingular}، الموعد، الخدمة)`
+                            : `Arabic (${customerSingular} Name, Date, Service)`
+                          : t("sheetLangArOption") ||
+                            (isRTL
+                              ? "العربية (اسم العميل، الموعد، الخدمة)"
+                              : "Arabic (Customer Name, Date, Service)")}
+                      </option>
+                      <option value="en">
+                        {isCustom
+                          ? `English (${customerSingular} Name, Date, Service)`
+                          : t("sheetLangEnOption") ||
+                            "English (Customer Name, Date, Service)"}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 20 }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>
+                      {t("spreadsheetPickerLabel") ||
+                        "ملف Google Sheets المرتبط"}
+                    </label>
+                    <div
+                      className="form-input"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        color: spreadsheetId ? "inherit" : "var(--muted)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <Icon name="file-text" size={16} />
+                      <span
+                        style={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {spreadsheetId
+                          ? pickedSheetName ||
+                            t("spreadsheetLinked") ||
+                            "تم ربط ملف Google Sheets"
+                          : t("noSpreadsheetSelected") ||
+                            "لم يتم اختيار ملف بعد"}
+                      </span>
+                    </div>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "0.78rem",
+                        color: "var(--muted)",
+                        lineHeight: 1.4,
+                        marginTop: 6,
+                      }}
+                    >
+                      {t("spreadsheetPickerHelpText") ||
+                        "أنشئ ملفاً تلقائياً أو اختر ملفاً موجوداً من Google Drive. سيصل التطبيق إلى هذا الملف فقط."}
+                    </span>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        marginTop: 12,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {canEditIntegrations && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={handlePickGoogleSheet}
+                          disabled={isPickingSheet}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            fontSize: "0.82rem",
+                            padding: "6px 12px",
+                          }}
+                        >
+                          <Icon name="google-sheets" size={14} />
+                          {isPickingSheet
+                            ? t("openingGoogleDrive") ||
+                              "جاري فتح Google Drive..."
+                            : t("chooseFromGoogleDrive") ||
+                              "اختيار ملف من Google Drive"}
+                        </button>
+                      )}
+                      {spreadsheetId?.trim() && (
+                        <a
+                          href={`https://docs.google.com/spreadsheets/d/${spreadsheetId.trim()}/edit`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-secondary btn-sm"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            textDecoration: "none",
+                            fontSize: "0.82rem",
+                            padding: "6px 12px",
+                          }}
+                        >
+                          <Icon name="external-link" size={14} />
+                          {t("openSheetInDrive") ||
+                            "فتح المستند في Google Drive"}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="modal-actions">
                 <button
@@ -2040,29 +2297,31 @@ export default function IntegrationsSettingsPage() {
                 >
                   {t("cancel")}
                 </button>
-                {googleIntegration
-                  ? canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={handleSaveSheetsSettings}
-                        disabled={loading}
-                      >
-                        {t("saveSettings") || "حفظ الضبط"}
-                      </button>
-                    )
-                  : canEditIntegrations && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => {
-                          setActiveModalId(null);
-                          handleStartGoogleOAuth();
-                        }}
-                      >
-                        {t("connectGoogle") || "ربط حساب جوجل"}
-                      </button>
-                    )}
+                {isSheetsConnected ? (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={handleSaveSheetsSettings}
+                      disabled={loading}
+                    >
+                      {t("saveSettings") || "حفظ الضبط"}
+                    </button>
+                  )
+                ) : (
+                  canEditIntegrations && (
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() =>
+                        handleStartGoogleOAuthForFeature("sheets")
+                      }
+                      disabled={loading}
+                    >
+                      {t("connectGoogleSheets")}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>,

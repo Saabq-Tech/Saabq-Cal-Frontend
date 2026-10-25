@@ -6,6 +6,47 @@ import Icon from "../../../../components/common/Icon";
 import client, { endpoints } from "../../../../api/client";
 import { useCustomerLabel } from "../../../../hooks/useCustomerLabel";
 import WorkspacePageHeader from "../../../../components/dashboard/WorkspacePageHeader";
+import { sortPlansByPrice } from "../../../../utils/plans";
+
+const FEATURE_TRANSLATIONS = {
+  custom_branding: { ar: "الهوية البصرية والبراندينج", en: "Custom Branding" },
+  api_access: { ar: "واجهة برمجة التطبيقات (API Access)", en: "API Access" },
+  rest_api: { ar: "واجهة برمجة التطبيقات (REST API)", en: "Developer REST API" },
+  sms_notifications: { ar: "إشعارات الرسائل النصية (SMS)", en: "SMS Notifications" },
+  priority_support: { ar: "دعم فني ذو أولوية", en: "Priority Support" },
+  custom_domain: { ar: "نطاق مخصص (Custom Domain)", en: "Custom Domain" },
+  white_label: { ar: "علامة تجارية بيضاء (White Label)", en: "White Label" },
+  webhooks: { ar: "الويب هوكس (Webhooks)", en: "Webhooks" },
+  webhook: { ar: "الويب هوكس (Webhooks)", en: "Webhooks" },
+  custom_templates: { ar: "قوالب مخصصة", en: "Custom Templates" },
+  booking_form_config: { ar: "تهيئة نموذج الحجز", en: "Booking Form Configuration" },
+  per_member_calendar: { ar: "تقويم لكل عضو", en: "Calendar for Each Member" },
+  roles_permissions: { ar: "الأدوار والصلاحيات المخصصة", en: "Roles & Permissions" },
+  integrations: { ar: "التطبيقات والتكاملات الخارجية", en: "Integrations & Connected Apps" },
+  payments: { ar: "المدفوعات والمحفظة المالية", en: "Payments & Financial Wallet" },
+  reports: { ar: "التقارير والإحصائيات", en: "Reports & Analytics" },
+  logs: { ar: "سجل العمليات والأمان", en: "Audit & Activity Logs" },
+  resources: { ar: "الوحدات والمخزون", en: "Resources & Inventory" },
+  landing_page: { ar: "الصفحة التعريفية", en: "Landing Page" },
+  rentals: { ar: "الوحدات والإيجارات", en: "Units & Rentals" },
+  team_members: { ar: "أعضاء الفريق ومقدمو الخدمات", en: "Team Members & Staff" },
+  booking: { ar: "الحجوزات والمواعيد", en: "Bookings & Appointments" },
+  bookings: { ar: "الحجوزات والمواعيد", en: "Bookings & Appointments" },
+  services: { ar: "إدارة الخدمات", en: "Services Management" },
+  schedules: { ar: "مواعيد العمل والجداول", en: "Schedules & Availability" },
+  customers: { ar: "سجل وإدارة العملاء", en: "Customer Management" },
+  dedicated_manager: { ar: "مدير حساب مخصص", en: "Dedicated Account Manager" },
+  dedicated_account_manager: { ar: "مدير حساب مخصص", en: "Dedicated Account Manager" },
+  sla: { ar: "اتفاقية مستوى الخدمة (SLA)", en: "Service Level Agreement (SLA)" },
+};
+
+const normalizeFeatureKey = (key) => {
+  if (!key) return "";
+  return String(key)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_]+/g, "_");
+};
 
 export default function SubscriptionTab({
   subscriptionInfo,
@@ -165,6 +206,95 @@ export default function SubscriptionTab({
     const str = String(d);
     if (str.includes("T")) return str.split("T")[0];
     return str.substring(0, 10);
+  };
+
+  const formatTranslatable = (val) => {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number") {
+      const str = String(val).trim();
+      const lower = str.toLowerCase();
+      if (lower === "free") return isRTL ? "مجاني" : "Free";
+      if (lower === "pro") return isRTL ? "احترافي" : "Pro";
+      if (lower === "enterprise") return isRTL ? "مؤسسات" : "Enterprise";
+      return str;
+    }
+    if (typeof val === "object") {
+      const res = isRTL
+        ? val.ar || val.en || val.name || val.title
+        : val.en || val.ar || val.name || val.title;
+      return typeof res === "string" || typeof res === "number"
+        ? String(res)
+        : "";
+    }
+    return String(val);
+  };
+
+  const formatCapStr = (cap) => {
+    if (!cap) return "";
+
+    // If object with localized name, title or code
+    if (typeof cap === "object") {
+      const codeKey = normalizeFeatureKey(cap.code || cap.key);
+      if (codeKey && FEATURE_TRANSLATIONS[codeKey]) {
+        return isRTL
+          ? FEATURE_TRANSLATIONS[codeKey].ar
+          : FEATURE_TRANSLATIONS[codeKey].en;
+      }
+
+      if (cap.name) {
+        if (typeof cap.name === "object") {
+          return isRTL
+            ? cap.name.ar || cap.name.en || ""
+            : cap.name.en || cap.name.ar || "";
+        }
+        const normName = normalizeFeatureKey(cap.name);
+        if (FEATURE_TRANSLATIONS[normName]) {
+          return isRTL
+            ? FEATURE_TRANSLATIONS[normName].ar
+            : FEATURE_TRANSLATIONS[normName].en;
+        }
+        const fromT = t(`feature_${normName}`);
+        if (fromT && fromT !== `feature_${normName}`) return fromT;
+        return String(cap.name);
+      }
+
+      if (cap.title) {
+        if (typeof cap.title === "object") {
+          return isRTL
+            ? cap.title.ar || cap.title.en || ""
+            : cap.title.en || cap.title.ar || "";
+        }
+        const normTitle = normalizeFeatureKey(cap.title);
+        if (FEATURE_TRANSLATIONS[normTitle]) {
+          return isRTL
+            ? FEATURE_TRANSLATIONS[normTitle].ar
+            : FEATURE_TRANSLATIONS[normTitle].en;
+        }
+        const fromT = t(`feature_${normTitle}`);
+        if (fromT && fromT !== `feature_${normTitle}`) return fromT;
+        return String(cap.title);
+      }
+
+      if (codeKey) {
+        const fromT = t(`feature_${codeKey}`);
+        if (fromT && fromT !== `feature_${codeKey}`) return fromT;
+        return cap.code || cap.key || "";
+      }
+    }
+
+    // If string or number
+    const str = String(cap).trim();
+    const normalized = normalizeFeatureKey(str);
+    if (FEATURE_TRANSLATIONS[normalized]) {
+      return isRTL
+        ? FEATURE_TRANSLATIONS[normalized].ar
+        : FEATURE_TRANSLATIONS[normalized].en;
+    }
+
+    const fromT = t(`feature_${normalized}`);
+    if (fromT && fromT !== `feature_${normalized}`) return fromT;
+
+    return str;
   };
 
   const renderStatusBadge = (status) => {
@@ -553,7 +683,9 @@ export default function SubscriptionTab({
                   margin: "2px 0 0",
                 }}
               >
-                {planName || t("basicPlan") || "الباقة الأساسية"}
+                {formatTranslatable(planName) ||
+                  t("basicPlan") ||
+                  (isRTL ? "الباقة الأساسية" : "Basic Plan")}
               </h3>
             </div>
             {renderStatusBadge(statusStr)}
@@ -653,25 +785,8 @@ export default function SubscriptionTab({
                 </div>
               ) : (
                 <div className="plan-cards-grid">
-                  {plans.map((p) => {
+                  {sortPlansByPrice(plans).map((p) => {
                     const selected = selectedUpgradePlanId === p.id;
-
-                    const formatCapStr = (cap) => {
-                      if (!cap) return "";
-                      if (typeof cap === "string") return cap;
-                      if (typeof cap === "object") {
-                        if (cap.name)
-                          return typeof cap.name === "object"
-                            ? cap.name.ar || cap.name.en || ""
-                            : cap.name;
-                        if (cap.title)
-                          return typeof cap.title === "object"
-                            ? cap.title.ar || cap.title.en || ""
-                            : cap.title;
-                        return cap.code || cap.key || "";
-                      }
-                      return String(cap);
-                    };
 
                     return (
                       <div
@@ -681,13 +796,13 @@ export default function SubscriptionTab({
                       >
                         {selected && (
                           <div className="plan-card-selected-badge">
-                            {t("selected") || "محدد"}
+                            {t("selected") || (isRTL ? "محدد" : "Selected")}
                           </div>
                         )}
 
                         <div className="plan-card-header">
                           <span className="plan-card-title">
-                            {p.name || p.title}
+                            {formatTranslatable(p.name || p.title)}
                           </span>
                           <input
                             type="radio"
@@ -699,14 +814,16 @@ export default function SubscriptionTab({
 
                         {p.description && (
                           <p className="plan-card-desc">
-                            {formatCapStr(p.description)}
+                            {formatTranslatable(p.description)}
                           </p>
                         )}
 
                         <div className="plan-card-features-wrapper">
                           <div className="plan-card-features-title">
                             {t("planCapabilitiesLabel") ||
-                              "المميزات والإمكانيات:"}
+                              (isRTL
+                                ? "الإمكانيات والمميزات المتاحة:"
+                                : "Available Capabilities & Features:")}
                           </div>
                           <ul className="plan-card-features-list">
                             {(() => {
@@ -716,7 +833,7 @@ export default function SubscriptionTab({
                               // 1. Core limits
                               if (p.max_members || p.max_team_members) {
                                 items.push(
-                                  `${t("members") || "أعضاء الفريق"}: ${p.max_members || p.max_team_members}`,
+                                  `${t("members") || (isRTL ? "أعضاء مساحة العمل" : "Workspace Members")}: ${p.max_members || p.max_team_members}`,
                                 );
                                 seen.add("members");
                                 seen.add("team_members");
@@ -726,7 +843,9 @@ export default function SubscriptionTab({
                               ) {
                                 items.push(
                                   t("unlimitedTeamMembers") ||
-                                    "أعضاء فريق غير محدودين",
+                                    (isRTL
+                                      ? "أعضاء فريق غير محدودين"
+                                      : "Unlimited Team Members"),
                                 );
                                 seen.add("members");
                                 seen.add("team_members");
@@ -734,7 +853,7 @@ export default function SubscriptionTab({
 
                               if (p.max_services || p.max_schedules) {
                                 items.push(
-                                  `${t("services") || "الخدمات"}: ${p.max_services || p.max_schedules}`,
+                                  `${t("services") || (isRTL ? "الخدمات المقدمة" : "Offered Services")}: ${p.max_services || p.max_schedules}`,
                                 );
                                 seen.add("services");
                               } else if (
@@ -742,14 +861,17 @@ export default function SubscriptionTab({
                                 p.price > 0
                               ) {
                                 items.push(
-                                  t("unlimitedServices") || "خدمات غير محدودة",
+                                  t("unlimitedServices") ||
+                                    (isRTL
+                                      ? "خدمات وجداول غير محدودة"
+                                      : "Unlimited Services & Schedules"),
                                 );
                                 seen.add("services");
                               }
 
                               if (p.max_appointments || p.max_bookings) {
                                 items.push(
-                                  `${t("appointments") || "الحجوزات"}: ${p.max_appointments || p.max_bookings}`,
+                                  `${t("appointments") || (isRTL ? "الحجوزات" : "Bookings")}: ${p.max_appointments || p.max_bookings}`,
                                 );
                                 seen.add("appointments");
                                 seen.add("bookings");
@@ -759,7 +881,9 @@ export default function SubscriptionTab({
                               ) {
                                 items.push(
                                   t("unlimitedAppointments") ||
-                                    "حجوزات غير محدودة",
+                                    (isRTL
+                                      ? "حجوزات عملاء غير محدودة"
+                                      : "Unlimited Bookings"),
                                 );
                                 seen.add("appointments");
                                 seen.add("bookings");
@@ -767,7 +891,7 @@ export default function SubscriptionTab({
 
                               if (p.max_customers) {
                                 items.push(
-                                  `${isCustom ? customerPlural : t("customers") || "العملاء"}: ${p.max_customers}`,
+                                  `${isCustom ? customerPlural : t("customers") || (isRTL ? "العملاء" : "Customers")}: ${p.max_customers}`,
                                 );
                                 seen.add("customers");
                               } else if (
@@ -780,7 +904,9 @@ export default function SubscriptionTab({
                                       ? `${customerPlural} غير محدودين`
                                       : `Unlimited ${customerPlural}`
                                     : t("unlimitedCustomers") ||
-                                        "عملاء غير محدودين",
+                                        (isRTL
+                                          ? "عملاء غير محدودين"
+                                          : "Unlimited Customers"),
                                 );
                                 seen.add("customers");
                               }
@@ -828,8 +954,7 @@ export default function SubscriptionTab({
                               ) {
                                 Object.entries(p.features).forEach(([k, v]) => {
                                   if (v === true) {
-                                    const label =
-                                      t(`feature_${k}`) || k.replace(/_/g, " ");
+                                    const label = formatCapStr(k);
                                     if (!seen.has(label.toLowerCase())) {
                                       seen.add(label.toLowerCase());
                                       items.push(label);

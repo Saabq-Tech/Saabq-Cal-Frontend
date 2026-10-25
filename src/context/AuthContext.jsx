@@ -654,6 +654,17 @@ export function AuthProvider({ children }) {
           endpoints.googleIntegration(userType),
           payload,
         );
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                is_google_connected: true,
+                workspace: prev.workspace
+                  ? { ...prev.workspace, is_google_connected: true }
+                  : prev.workspace,
+              }
+            : prev,
+        );
         await fetchProfile();
         return {
           success: true,
@@ -674,26 +685,34 @@ export function AuthProvider({ children }) {
     [userType, fetchProfile],
   );
 
-  const disconnectGoogleIntegration = useCallback(async () => {
-    if (!userType) return;
-    setLoading(true);
-    try {
-      const response = await client.delete(
-        endpoints.googleIntegration(userType),
-      );
-      await fetchProfile();
-      return { success: true, message: response.data.message };
-    } catch (error) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message ||
-          "Failed to disconnect Google account",
-      };
-    } finally {
-      setLoading(false);
-    }
-  }, [userType, fetchProfile]);
+  const disconnectGoogleIntegration = useCallback(
+    async (feature = null) => {
+      if (!userType) return;
+      setLoading(true);
+      try {
+        const response = await client.delete(
+          endpoints.googleIntegration(userType),
+          feature ? { params: { feature } } : undefined,
+        );
+        await fetchProfile();
+        return {
+          success: true,
+          message: response.data.message,
+          data: response.data.data,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            "Failed to disconnect Google account",
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userType, fetchProfile],
+  );
 
   const testGoogleSheets = useCallback(async () => {
     if (!userType) return;

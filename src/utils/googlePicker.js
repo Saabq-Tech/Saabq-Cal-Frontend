@@ -40,6 +40,19 @@ const getAppId = (clientId) => clientId?.split("-")[0];
 export const pickSpreadsheet = async ({ accessToken, clientId, locale }) => {
   await loadPickerApi();
 
+  if (!document.getElementById("google-picker-z-index-override")) {
+    const style = document.createElement("style");
+    style.id = "google-picker-z-index-override";
+    style.textContent = `
+      .picker-dialog,
+      .picker-dialog-bg,
+      .picker-dialog-content {
+        z-index: 2147483647 !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   const { picker } = window.google;
 
   return new Promise((resolve) => {
