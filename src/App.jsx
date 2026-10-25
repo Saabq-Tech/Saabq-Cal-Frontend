@@ -26,6 +26,7 @@ const BlogPostDetailPage = lazy(() => import("./pages/BlogPostDetailPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const FeaturesPage = lazy(() => import("./pages/FeaturesPage"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
 const HowItWorksPage = lazy(() => import("./pages/HowItWorksPage"));
 const ReportIssuePage = lazy(() => import("./pages/ReportIssuePage"));
 
@@ -316,6 +317,14 @@ export default function App() {
                       element={
                         <MainLayout>
                           <TermsPage />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/pricing"
+                      element={
+                        <MainLayout>
+                          <PricingPage />
                         </MainLayout>
                       }
                     />

@@ -13,34 +13,18 @@ import {
 import Icon from "../components/common/Icon";
 import HeroDashboardMockup from "../components/marketing/HeroDashboardMockup";
 import AboutIllustration from "../components/marketing/AboutIllustration";
+import {
+  sortPlansByPrice,
+  getPopularPlanId,
+  isStartingFromPlan,
+  formatPlanPrice,
+  planCurrencyLabel,
+  planPrice,
+} from "../utils/plans";
 
-// The eight sectors shown in the trust strip and the "built for any activity"
-// grid. There is no /sectors endpoint, so this list lives here and is
+// The eight sectors shown in the "built for any activity" grid. There is no /sectors endpoint, so this list lives here and is
 // translated through translations.js; the shape mirrors what an API resource
 // would return so swapping the source later stays a local change.
-const ABOUT_POINTS = [
-  {
-    icon: "shield",
-    titleKey: "aboutPointSecurityTitle",
-    descKey: "aboutPointSecurityDesc",
-  },
-  {
-    icon: "clock",
-    titleKey: "aboutPointTimeTitle",
-    descKey: "aboutPointTimeDesc",
-  },
-  {
-    icon: "users",
-    titleKey: "aboutPointSectorsTitle",
-    descKey: "aboutPointSectorsDesc",
-  },
-  {
-    icon: "bar-chart",
-    titleKey: "aboutPointGrowthTitle",
-    descKey: "aboutPointGrowthDesc",
-  },
-];
-
 const SECTORS = [
   {
     icon: "activity",
@@ -85,16 +69,24 @@ const CHANNELS = [
   { icon: "facebook", labelKey: "channelMessenger", tone: "messenger" },
   { icon: "instagram", labelKey: "channelInstagram", tone: "instagram" },
   { icon: "message-square", labelKey: "channelSms", tone: "sms" },
-  { icon: "plus", labelKey: "channelOthers", tone: "more" },
+  { icon: "telegram", labelKey: "channelTelegram", tone: "more" },
+  { icon: "message-circle", labelKey: "channelWebChat", tone: "more" },
+];
+
+const HOW_IT_WORKS_STEPS = [
+  { icon: "user-plus", titleKey: "step1Title", descKey: "step1Desc" },
+  { icon: "settings", titleKey: "step2Title", descKey: "step2Desc" },
+  { icon: "share-2", titleKey: "step3Title", descKey: "step3Desc" },
+  { icon: "bar-chart", titleKey: "step4Title", descKey: "step4Desc" },
 ];
 
 const HERO_TRUST = ["heroTrustSetup", "heroTrustDevices", "heroTrustNoCard"];
 
 const WHY_CHOOSE = [
-  "whyChoosePoint1",
-  "whyChoosePoint2",
-  "whyChoosePoint3",
-  "whyChoosePoint4",
+  { key: "whyChoosePoint1", icon: "globe" },
+  { key: "whyChoosePoint2", icon: "layers" },
+  { key: "whyChoosePoint3", icon: "award" },
+  { key: "whyChoosePoint4", icon: "clock" },
 ];
 
 const FEATURE_ICONS = [
@@ -115,6 +107,7 @@ export default function Home() {
   const [faqs, setFaqs] = useState([]);
   const [about, setAbout] = useState(null);
   const [plans, setPlans] = useState([]);
+  const [supportEmail, setSupportEmail] = useState("");
   const [activeBanner, setActiveBanner] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -148,12 +141,14 @@ export default function Home() {
       client.get(endpoints.faqs).catch(() => ({ data: { data: [] } })),
       client.get(endpoints.about).catch(() => ({ data: { data: null } })),
       client.get(endpoints.plans).catch(() => ({ data: { data: [] } })),
-    ]).then(([bannersRes, featuresRes, faqsRes, aboutRes, plansRes]) => {
+      client.get(endpoints.settings).catch(() => ({ data: { data: null } })),
+    ]).then(([bannersRes, featuresRes, faqsRes, aboutRes, plansRes, settingsRes]) => {
       setBanners(bannersRes.data.data || []);
       setFeatures(featuresRes.data.data || []);
       setFaqs(faqsRes.data.data || []);
       setAbout(aboutRes.data.data || null);
       setPlans(plansRes.data.data || []);
+      setSupportEmail(settingsRes.data.data?.site_email || "");
       setLoading(false);
     });
   }, [lang]);
@@ -166,6 +161,9 @@ export default function Home() {
     }, 5000);
     return () => clearInterval(timer);
   }, [banners.length]);
+
+  const sortedPlans = useMemo(() => sortPlansByPrice(plans), [plans]);
+  const popularPlanId = getPopularPlanId(sortedPlans);
 
   // Build FAQ JSON-LD structured data
   const faqJsonLd = useMemo(() => {
@@ -354,29 +352,12 @@ export default function Home() {
         )
       )}
 
-      {/* Sector Trust Strip */}
-      <section className="trust-strip" aria-label={t("trustStripTitle")}>
-        <div className="container">
-          <div className="trust-strip-card">
-            <p className="trust-strip-title">{t("trustStripTitle")}</p>
-            <ul className="trust-strip-list">
-              {SECTORS.map((sector) => (
-                <li key={sector.titleKey}>
-                  <Icon name={sector.icon} size={22} />
-                  <span>{t(sector.titleKey)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
       {/* Sectors */}
-      <section id="sectors" className="section-sm">
+      <section id="sectors" className="section-sm is-compact">
         <div className="container">
           <div className="section-header">
             <h2>{t("sectorsTitle")}</h2>
-            <p>{t("sectorsSubtitle")}</p>
+            <p>{t("trustStripTitle")}</p>
           </div>
           <div className="sectors-grid">
             {SECTORS.map((sector) => (
@@ -395,65 +376,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="section-sm">
-        <div className="container">
-          <div className="about-panel">
-            <div className="about-copy">
-              <span className="about-eyebrow">{t("aboutEyebrow")}</span>
-              <h2>{about?.title || t("aboutTitle")}</h2>
-              <p className="about-subtitle">{t("aboutSubtitle")}</p>
-
-              {loading ? (
-                <div className="about-skeleton">
-                  <SkeletonLine width="95%" height={14} />
-                  <SkeletonLine width="88%" height={14} />
-                  <SkeletonLine width="70%" height={14} />
-                </div>
-              ) : aboutBody ? (
-                /* The editorial copy is admin-managed; the surrounding
-                   layout is not. Falls back to the shipped text when the
-                   endpoint has nothing yet. */
-                <div
-                  className="about-body"
-                  dangerouslySetInnerHTML={{ __html: aboutBody }}
-                />
-              ) : (
-                <div className="about-body">
-                  <p>{t("aboutParagraph1")}</p>
-                  <p>{t("aboutParagraph2")}</p>
-                </div>
-              )}
-
-              <ul className="about-points">
-                {ABOUT_POINTS.map((point) => (
-                  <li key={point.titleKey}>
-                    <span className="about-point-icon">
-                      <Icon name={point.icon} size={18} />
-                    </span>
-                    <strong>{t(point.titleKey)}</strong>
-                    <span>{t(point.descKey)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="about-art-wrap">
-              <AboutIllustration />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Decorative Section Separator */}
-      <div className="container">
-        <div className="section-separator" />
-      </div>
-
       {/* Features Section */}
       <section
         id="features"
-        className="section-sm"
+        className="section-sm is-compact"
         style={{ background: "var(--surface)" }}
       >
         <div className="container">
@@ -485,11 +411,10 @@ export default function Home() {
           ) : (
             <div className="features-grid">
               {features.map((feature, i) => {
-                const isFlagship = i === 1;
                 return (
                   <article
                     key={feature.id || i}
-                    className={`card card-hover feature-card ${isFlagship ? "flagship-card" : ""}`}
+                    className="card card-hover feature-card"
                   >
                     <div className="card-icon">
                       {feature.image || feature.icon_url ? (
@@ -513,135 +438,64 @@ export default function Home() {
               })}
             </div>
           )}
+          <div id="how-it-works" className="steps-strip">
+            <h3 className="steps-strip-title">{t("howItWorksTitle")}</h3>
+            <ol className="steps-strip-list">
+              {HOW_IT_WORKS_STEPS.map((step) => (
+                <li key={step.titleKey}>
+                  <span className="steps-strip-icon">
+                    <Icon name={step.icon} size={18} />
+                  </span>
+                  <span>
+                    <strong>{t(step.titleKey)}</strong>
+                    <small>{t(step.descKey)}</small>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="section-sm">
+      {/* About */}
+      <section id="about" className="section-sm">
         <div className="container">
-          <div className="section-header">
-            <h2>{t("howItWorksTitle")}</h2>
-            <div
-              style={{
-                width: 44,
-                height: 4,
-                background: "var(--primary)",
-                margin: "12px auto 0",
-                borderRadius: "var(--radius-full)",
-              }}
-            />
-          </div>
+          <div className="about-panel is-compact">
+            <div className="about-copy">
+              <span className="about-eyebrow">{t("aboutEyebrow")}</span>
+              <h2>{about?.title || t("aboutTitle")}</h2>
 
-          <div className="how-it-works-grid">
-            <div className="step-card">
-              <span className="step-number">1</span>
-              <div className="step-icon">
-                <Icon name="calendar" size={24} />
-              </div>
-              <h3>{t("step1Title")}</h3>
-              <p>{t("step1Desc")}</p>
+              {loading ? (
+                <div className="about-skeleton">
+                  <SkeletonLine width="95%" height={14} />
+                  <SkeletonLine width="88%" height={14} />
+                  <SkeletonLine width="70%" height={14} />
+                </div>
+              ) : aboutBody ? (
+                /* The editorial copy is admin-managed; the surrounding
+                   layout is not. Falls back to the shipped text when the
+                   endpoint has nothing yet. */
+                <div
+                  className="about-body"
+                  dangerouslySetInnerHTML={{ __html: aboutBody }}
+                />
+              ) : (
+                <div className="about-body">
+                  <p>{t("aboutParagraph1")}</p>
+                  <p>{t("aboutParagraph2")}</p>
+                </div>
+              )}
+
             </div>
 
-            <div className="step-card">
-              <span className="step-number">2</span>
-              <div className="step-icon">
-                <Icon name="credit-card" size={24} />
-              </div>
-              <h3>{t("step2Title")}</h3>
-              <p>{t("step2Desc")}</p>
-            </div>
-
-            <div className="step-card">
-              <span className="step-number">3</span>
-              <div className="step-icon">
-                <Icon name="video" size={24} />
-              </div>
-              <h3>{t("step3Title")}</h3>
-              <p>{t("step3Desc")}</p>
-            </div>
-
-            <div className="step-card">
-              <span className="step-number">4</span>
-              <div className="step-icon">
-                <Icon name="bell" size={24} />
-              </div>
-              <h3>{t("step4Title")}</h3>
-              <p>{t("step4Desc")}</p>
+            <div className="about-art-wrap">
+              <AboutIllustration />
             </div>
           </div>
         </div>
       </section>
 
-      {/* What's Included Section */}
-      <section className="section-sm" style={{ background: "var(--surface)" }}>
-        <div className="container">
-          <div className="why-choose-layout">
-            <div className="why-choose-grid">
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="video" size={24} />
-                </div>
-                <h4>{t("whyBadge1")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="shield" size={24} />
-                </div>
-                <h4>{t("whyBadge2")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="bell" size={24} />
-                </div>
-                <h4>{t("whyBadge3")}</h4>
-              </div>
-
-              <div className="why-badge-card">
-                <div className="why-badge-icon">
-                  <Icon name="monitor" size={24} />
-                </div>
-                <h4>{t("whyBadge4")}</h4>
-              </div>
-            </div>
-
-            <div className="why-choose-content">
-              <h2>{t("whatsIncludedTitle")}</h2>
-              <p className="subtitle">{t("whatsIncludedSubtitle")}</p>
-
-              <div className="why-choose-checklist">
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck1")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck2")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck3")}</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="checklist-icon">
-                    <Icon name="check" size={12} />
-                  </span>
-                  <span>{t("whyCheck4")}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Omni-channel messaging (announced, not yet released) */}
+      {/* Saabq Chat: one inbox for every messaging channel */}
       <section className="section-sm">
         <div className="container">
           <div className="channels-panel">
@@ -650,6 +504,15 @@ export default function Home() {
               <h2>{t("channelsTitle")}</h2>
               <p>{t("channelsDesc")}</p>
               <p className="channels-footer">{t("channelsFooter")}</p>
+              <a
+                href="https://saabqchat.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline channels-cta"
+              >
+                {t("channelsCta")}
+                <Icon name="external-link" size={15} />
+              </a>
             </div>
             <ul className="channels-list">
               {CHANNELS.map((channel) => (
@@ -671,27 +534,16 @@ export default function Home() {
           <div className="section-header">
             <h2>{t("pricingTitleNew")}</h2>
             <p>{t("pricingSubtitleNew")}</p>
+            <ul className="why-chips" aria-label={t("whyChooseTitle")}>
+              {WHY_CHOOSE.map((point) => (
+                <li key={point.key}>
+                  <Icon name={point.icon} size={15} />
+                  {t(point.key)}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="pricing-layout">
-            <aside className="why-panel">
-              <div className="why-panel-art" aria-hidden="true">
-                <Icon name="calendar" size={64} />
-                <span className="why-panel-clock">
-                  <Icon name="clock" size={26} />
-                </span>
-              </div>
-              <div>
-                <h2>{t("whyChooseTitle")}</h2>
-                <ul className="why-panel-list">
-                  {WHY_CHOOSE.map((key) => (
-                    <li key={key}>
-                      <Icon name="check-circle" size={18} />
-                      <span>{t(key)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
+          <div className="pricing-layout is-full">
             <div
               className={`pricing-grid ${
                 plans.length > 0 ? `plans-count-${plans.length}` : ""
@@ -724,14 +576,14 @@ export default function Home() {
                     </div>
                   </div>
                 ))
-              ) : plans.length > 0 ? (
-                plans.map((plan, index) => {
-                  const planNameStr = formatTranslatable(plan.name);
-                  const isPopular =
-                    index === 1 ||
-                    planNameStr.toLowerCase().includes("pro") ||
-                    (plan.type?.value || plan.type) === "FLAT";
-                  const planDesc = formatTranslatable(plan.description);
+              ) : sortedPlans.length > 0 ? (
+                sortedPlans.map((plan) => {
+                  const isPopular = plan.id === popularPlanId;
+                  const startingFrom = isStartingFromPlan(plan, sortedPlans);
+                  const limitLine = (value, label, unlimitedLabel) =>
+                    value
+                      ? `${label}: ${Number(value).toLocaleString("en-US")}`
+                      : unlimitedLabel;
 
                   return (
                     <article
@@ -739,61 +591,58 @@ export default function Home() {
                       className={`pricing-card ${isPopular ? "popular" : ""}`}
                     >
                       {isPopular && (
-                        <span className="popular-badge">
-                          {t("popularTag") || "الأكثر طلباً"}
-                        </span>
+                        <span className="popular-badge">{t("popularTag")}</span>
                       )}
-                      <h3>{planNameStr}</h3>
-                      {planDesc && <p className="plan-desc">{planDesc}</p>}
+                      <h3>{formatTranslatable(plan.name)}</h3>
+                      <div className="plan-price">
+                        {startingFrom && (
+                          <span className="period">{t("planStartingFrom")}</span>
+                        )}
+                        <span className="amount">{formatPlanPrice(plan)}</span>
+                        <span className="currency">
+                          {planCurrencyLabel(plan, lang)}
+                        </span>
+                        {planPrice(plan) > 0 && (
+                          <span className="period">{t("planPerMonth")}</span>
+                        )}
+                      </div>
                       <ul className="plan-features">
                         <li>
-                          ✓{" "}
-                          {plan.max_members
-                            ? `${t("members") || (lang === "ar" ? "أعضاء الفريق" : "Workspace Members")}: ${plan.max_members}`
-                            : t("unlimitedTeamMembers") ||
-                              (lang === "ar"
-                                ? "أعضاء فريق غير محدودين"
-                                : "Unlimited Team Members")}
+                          {limitLine(
+                            plan.max_members,
+                            t("planAccountsLabel"),
+                            t("planUnlimitedAccounts"),
+                          )}
                         </li>
                         <li>
-                          ✓{" "}
-                          {plan.max_services
-                            ? `${t("services") || (lang === "ar" ? "الخدمات" : "Offered Services")}: ${plan.max_services}`
-                            : t("unlimitedServices") ||
-                              (lang === "ar"
-                                ? "خدمات وجداول غير محدودة"
-                                : "Unlimited Services & Schedules")}
+                          {limitLine(
+                            plan.max_services,
+                            t("planServicesLabel"),
+                            t("unlimitedServices"),
+                          )}
                         </li>
                         <li>
-                          ✓{" "}
-                          {plan.max_appointments
-                            ? `${t("appointments") || (lang === "ar" ? "الحجوزات" : "Bookings")}: ${plan.max_appointments}`
-                            : t("unlimitedAppointments") ||
-                              (lang === "ar"
-                                ? "حجوزات عملاء غير محدودة"
-                                : "Unlimited Bookings")}
+                          {limitLine(
+                            plan.max_appointments,
+                            t("planBookingsLabel"),
+                            t("unlimitedAppointments"),
+                          )}
                         </li>
-                        {plan.max_customers && (
-                          <li>
-                            ✓{" "}
-                            {t("customers") ||
-                              (lang === "ar" ? "العملاء" : "Customers")}
-                            : {plan.max_customers}
-                          </li>
-                        )}
-                        {plan.capabilities &&
-                          plan.capabilities.map((cap) => (
-                            <li key={cap.id || cap.code}>
-                              ✓ {formatTranslatable(cap.name) || cap.code}
-                            </li>
-                          ))}
+                        <li>
+                          {limitLine(
+                            plan.max_customers,
+                            t("customers"),
+                            t("planUnlimitedCustomers"),
+                          )}
+                        </li>
                       </ul>
                       <Link
                         to="/register"
                         className={`btn ${isPopular ? "btn-primary" : "btn-secondary"} btn-block`}
                       >
-                        {t("getStarted") ||
-                          (lang === "ar" ? "ابدأ الآن" : "Get Started")}
+                        {planPrice(plan) > 0
+                          ? t("getStarted")
+                          : t("planStartFree")}
                       </Link>
                     </article>
                   );
@@ -812,26 +661,29 @@ export default function Home() {
               )}
             </div>
           </div>
+          {sortedPlans.length > 0 && (
+            <div className="pricing-compare-link">
+              <Link to="/pricing">{t("planCompareAll")}</Link>
+            </div>
+          )}
         </div>
       </section>
 
       {/* FAQs Section */}
       <section className="section-sm" style={{ background: "var(--surface)" }}>
-        <div className="container">
-          <div className="section-header">
+        <div className="container faq-layout">
+          <div className="faq-intro">
             <h2>{t("faqsTitle")}</h2>
             <p>{t("faqsDesc")}</p>
+            {supportEmail && (
+              <a href={`mailto:${supportEmail}`} className="btn btn-outline">
+                <Icon name="mail" size={16} />
+                {t("faqContactUs")}
+              </a>
+            )}
           </div>
           {loading ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-                maxWidth: 800,
-                margin: "0 auto",
-              }}
-            >
+            <div className="faq-list">
               {[1, 2, 3].map((i) => (
                 <SkeletonRect key={i} height={52} />
               ))}
@@ -849,8 +701,8 @@ export default function Home() {
                     aria-expanded={openFaq === i}
                     aria-controls={`faq-answer-${i}`}
                   >
-                    {faq.question}
-                    <Icon name="chevron-down" />
+                    <span>{faq.question}</span>
+                    <Icon name={openFaq === i ? "x" : "plus"} size={16} />
                   </button>
                   {openFaq === i && (
                     <div

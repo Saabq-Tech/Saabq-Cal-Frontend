@@ -1,5 +1,6 @@
 import { useLanguage } from "../../context/LanguageContext";
 import Icon from "../common/Icon";
+import ChipScroller from "../common/ChipScroller";
 
 export default function BlogCategoryFilter({
   categories = [],
@@ -9,7 +10,7 @@ export default function BlogCategoryFilter({
   const { t } = useLanguage();
 
   return (
-    <div className="explore-categories-wrap" role="tablist">
+    <ChipScroller className="explore-categories-wrap" role="tablist">
       <button
         type="button"
         role="tab"
@@ -44,6 +45,6 @@ export default function BlogCategoryFilter({
           </button>
         );
       })}
-    </div>
+    </ChipScroller>
   );
 }
