@@ -6,6 +6,7 @@ import { useToast } from "../context/ToastContext";
 import { submitIssueReport } from "../api/client";
 import SEO from "../components/ui/SEO";
 import Icon from "../components/common/Icon";
+import ModalPortal from "../components/common/ModalPortal";
 
 const CATEGORIES = [
   { id: "bug", icon: "alert-circle", labelKey: "reportCategoryBug" },
@@ -1104,102 +1105,105 @@ export default function ReportIssuePage() {
 
       {/* Image Preview Lightbox */}
       {previewImage && (
-        <div
-          onClick={() => setPreviewImage(null)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setPreviewImage(null);
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label={previewImage.name}
-          tabIndex={-1}
-          ref={(el) => el?.focus()}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0, 0, 0, 0.85)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-            animation: "fadeIn 0.2s ease",
-            cursor: "zoom-out",
-          }}
-        >
-          {/* Close button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setPreviewImage(null);
+        <ModalPortal>
+          <div
+            className="modal-backdrop"
+            onClick={() => setPreviewImage(null)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setPreviewImage(null);
             }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={previewImage.name}
+            tabIndex={-1}
+            ref={(el) => el?.focus()}
             style={{
-              position: "absolute",
-              top: 20,
-              [isRTL ? "left" : "right"]: 20,
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              color: "#fff",
-              cursor: "pointer",
+              position: "fixed",
+              inset: 0,
+              zIndex: 99999999,
+              background: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(8px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "background 0.2s",
-              zIndex: 10,
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.3)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-            }
-            aria-label="Close preview"
-          >
-            <Icon name="x" size={20} />
-          </button>
-
-          {/* Preview image */}
-          <img
-            src={previewImage.url}
-            alt={previewImage.name}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "90vw",
-              maxHeight: "85vh",
-              borderRadius: "12px",
-              objectFit: "contain",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-              cursor: "default",
-            }}
-          />
-
-          {/* Filename label */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: 20,
-              left: "50%",
-              transform: "translateX(-50%)",
-              background: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(4px)",
-              padding: "8px 20px",
-              borderRadius: "20px",
-              color: "rgba(255,255,255,0.85)",
-              fontSize: "0.85rem",
-              maxWidth: "80vw",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              padding: 24,
+              animation: "fadeIn 0.2s ease",
+              cursor: "zoom-out",
             }}
           >
-            {previewImage.name}
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewImage(null);
+              }}
+              style={{
+                position: "absolute",
+                top: 20,
+                [isRTL ? "left" : "right"]: 20,
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                color: "#fff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.2s",
+                zIndex: 10,
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.3)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+              }
+              aria-label="Close preview"
+            >
+              <Icon name="x" size={20} />
+            </button>
+
+            {/* Preview image */}
+            <img
+              src={previewImage.url}
+              alt={previewImage.name}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: "90vw",
+                maxHeight: "85vh",
+                borderRadius: "12px",
+                objectFit: "contain",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                cursor: "default",
+              }}
+            />
+
+            {/* Filename label */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 20,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(0,0,0,0.6)",
+                backdropFilter: "blur(4px)",
+                padding: "8px 20px",
+                borderRadius: "20px",
+                color: "rgba(255,255,255,0.85)",
+                fontSize: "0.85rem",
+                maxWidth: "80vw",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {previewImage.name}
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

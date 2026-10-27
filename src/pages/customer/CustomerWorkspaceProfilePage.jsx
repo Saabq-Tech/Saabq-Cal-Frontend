@@ -21,6 +21,7 @@ import { buildLandingSite } from "../../landing-pages/adapter";
 import LandingPageRenderer from "../../landing-pages/LandingPageRenderer";
 import { useHideLayoutChrome } from "../../context/LayoutChromeContext";
 import { useCustomerLabel } from "../../hooks/useCustomerLabel";
+import ModalPortal from "../../components/common/ModalPortal";
 export default function WorkspaceProfilePage() {
   const { idOrSlug } = useParams();
   const [searchParams] = useSearchParams();
@@ -2255,20 +2256,21 @@ export default function WorkspaceProfilePage() {
 
       {/* Portfolio Lightbox Overlay */}
       {lightboxIndex !== null && galleryItems[lightboxIndex] && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setLightboxIndex(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(10, 10, 15, 0.9)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 24,
-          }}
-        >
+        <ModalPortal>
+          <div
+            className="modal-backdrop"
+            onClick={() => setLightboxIndex(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(10, 10, 15, 0.9)",
+              zIndex: 99999999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 24,
+            }}
+          >
           <button
             type="button"
             onClick={() => setLightboxIndex(null)}
@@ -2390,6 +2392,7 @@ export default function WorkspaceProfilePage() {
             </button>
           )}
         </div>
+      </ModalPortal>
       )}
     </div>
   );

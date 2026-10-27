@@ -2232,6 +2232,14 @@ export const translations = {
     apiPendingReview: "طلبك قيد المراجعة والاعتماد من قبل إدارة سابق",
     apiPendingReviewDesc:
       "تم استلام طلب الوصول للـ API بنجاح. سيقوم المسؤول بتفعيل المفتاح وتحديد الصلاحيات المسموحة على طول.",
+    secretRevealedSuccess: "تم إظهار المفتاح السري بنجاح",
+    apiSuspendedTitle: "تم تعليق مفاتيح الربط البرمجي مؤقتاً",
+    apiSuspendedDesc:
+      "تم إيقاف صلاحيات الوصول للـ API لمساحة العمل هذه من قبل الإدارة. يرجى التواصل مع الدعم الفني للاستفسار.",
+    apiRevokedTitle: "تم إلغاء مفاتيح الربط البرمجي",
+    apiRevokedDesc:
+      "تم رفض أو إبطال مفاتيح الـ API السابقة. يمكنك تقديم طلب جديد إذا كنت بحاجة للربط مجدداً.",
+    requestNewKeys: "طلب مفاتيح جديدة",
     activeCredentialsTitle: "بيانات الاعتماد النشطة (Active Credentials)",
     apiKeyLabel: "مفتاح API العام (X-Api-Key)",
     secretKeyLabel: "المفتاح السري (X-Api-Secret)",
@@ -5163,6 +5171,14 @@ export const translations = {
     apiPendingReview: "Your request is under review by Saabq administration",
     apiPendingReviewDesc:
       "Your API access request has been received. The administrator will activate your key and configure allowed scopes shortly.",
+    secretRevealedSuccess: "API Secret revealed successfully",
+    apiSuspendedTitle: "API Keys Temporarily Suspended",
+    apiSuspendedDesc:
+      "API access for this workspace has been temporarily suspended by administration. Please contact support for inquiries.",
+    apiRevokedTitle: "API Keys Revoked",
+    apiRevokedDesc:
+      "Previous API keys were revoked or rejected. You can submit a new access request if needed.",
+    requestNewKeys: "Request New Keys",
     activeCredentialsTitle: "Active API Credentials",
     apiKeyLabel: "Public API Key (X-Api-Key)",
     secretKeyLabel: "Secret Key (X-Api-Secret)",

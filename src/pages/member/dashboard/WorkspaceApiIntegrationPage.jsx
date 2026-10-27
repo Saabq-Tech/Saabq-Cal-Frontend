@@ -6,6 +6,7 @@ import { useToast } from "../../../context/ToastContext";
 import { useLanguage } from "../../../context/LanguageContext";
 import SEO from "../../../components/ui/SEO";
 import Icon from "../../../components/common/Icon";
+import ModalPortal from "../../../components/common/ModalPortal";
 import PageLoader from "../../../components/ui/PageLoader";
 import client, { endpoints } from "../../../api/client";
 import { isApiIntegrationEnabled } from "../../../utils/capabilities";
@@ -78,7 +79,7 @@ export default function WorkspaceApiIntegrationPage() {
     setLoading(true);
     try {
       const res = await client.get(endpoints.apiIntegration("member"));
-      if (res.data?.success) {
+      if (res.data?.status || res.data?.success || res.data?.data) {
         setApiData(res.data.data);
       }
     } catch (err) {
@@ -92,17 +93,16 @@ export default function WorkspaceApiIntegrationPage() {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
-    toast?.show?.(t("copiedToClipboard") || "اتنسخ بنجاح!", "success");
+    toast?.success?.(t("copiedToClipboard") || "اتنسخ بنجاح!");
     setTimeout(() => setCopiedField(null), 2500);
   };
 
   const handleRequestAccess = async (e) => {
     e.preventDefault();
     if (!requestNotes.trim() || requestNotes.trim().length < 10) {
-      toast?.show?.(
+      toast?.error?.(
         t("requestNotesRequired") ||
           "من فضلك اكتب سبب الاستخدام وموقع الويب (10 حروف على الأقل)",
-        "error",
       );
       return;
     }
@@ -114,19 +114,29 @@ export default function WorkspaceApiIntegrationPage() {
         request_notes: requestNotes,
       });
 
-      if (res.data?.success) {
-        toast?.show?.(
-          res.data.message || t("apiRequestedSuccess") || "الطلب اتبعت بنجاح",
-          "success",
+      if (
+        res.data?.status ||
+        res.data?.success ||
+        res.status === 200 ||
+        res.status === 201
+      ) {
+        toast?.success?.(
+          res.data?.message || t("apiRequestedSuccess") || "الطلب اتبعت بنجاح",
         );
         setShowRequestModal(false);
         loadApiIntegration();
+      } else {
+        toast?.error?.(res.data?.message || t("errorOccurred") || "حدث خطأ");
       }
     } catch (err) {
-      toast?.show?.(
-        err.response?.data?.message || t("errorOccurred") || "حدث خطأ",
-        "error",
-      );
+      const errMsg =
+        err.response?.data?.message ||
+        (err.response?.data?.errors
+          ? Object.values(err.response.data.errors).flat().join(" - ")
+          : null) ||
+        t("errorOccurred") ||
+        "حدث خطأ";
+      toast?.error?.(errMsg);
     } finally {
       setIsSubmittingRequest(false);
     }
@@ -142,16 +152,29 @@ export default function WorkspaceApiIntegrationPage() {
         password: revealPassword,
       });
 
-      if (res.data?.success && res.data.data?.api_secret) {
+      if (
+        (res.data?.status || res.data?.success) &&
+        res.data.data?.api_secret
+      ) {
         setRevealedSecret(res.data.data.api_secret);
         setRevealPassword("");
+        toast?.success?.(
+          res.data?.message ||
+            t("secretRevealedSuccess") ||
+            "تم إظهار المفتاح السري بنجاح",
+        );
+      } else {
+        toast?.error?.(
+          res.data?.message ||
+            t("incorrectPassword") ||
+            "كلمة المرور غير صحيحة",
+        );
       }
     } catch (err) {
-      toast?.show?.(
+      toast?.error?.(
         err.response?.data?.message ||
           t("incorrectPassword") ||
           "كلمة المرور غير صحيحة",
-        "error",
       );
     } finally {
       setIsRevealingSecret(false);
@@ -164,12 +187,16 @@ export default function WorkspaceApiIntegrationPage() {
       const res = await client.post(
         endpoints.apiIntegrationRegenerate("member"),
       );
-      if (res.data?.success) {
-        toast?.show?.(
-          res.data.message ||
+      if (
+        res.data?.status ||
+        res.data?.success ||
+        res.status === 200 ||
+        res.status === 201
+      ) {
+        toast?.success?.(
+          res.data?.message ||
             t("secretRegeneratedSuccess") ||
             "المفتاح السري اتغيّر بنجاح",
-          "success",
         );
         setShowRegenerateModal(false);
         if (res.data.data?.api_secret) {
@@ -177,11 +204,12 @@ export default function WorkspaceApiIntegrationPage() {
           setShowRevealModal(true);
         }
         loadApiIntegration();
+      } else {
+        toast?.error?.(res.data?.message || t("errorOccurred") || "حدث خطأ");
       }
     } catch (err) {
-      toast?.show?.(
+      toast?.error?.(
         err.response?.data?.message || t("errorOccurred") || "حدث خطأ",
-        "error",
       );
     } finally {
       setIsRegenerating(false);
@@ -195,15 +223,18 @@ export default function WorkspaceApiIntegrationPage() {
     try {
       const res = await client.post(endpoints.apiIntegrationVerify("member"));
       const duration = Date.now() - startTime;
-      if (res.data?.success) {
+      if (res.data?.status || res.data?.success) {
         setPingResult({
           success: true,
           latency: duration,
           data: res.data.data,
         });
-        toast?.show?.(
+        toast?.success?.(
           `${t("connectionActive") || "الاتصال نشط"} (${duration}ms)`,
-          "success",
+        );
+      } else {
+        toast?.error?.(
+          res.data?.message || t("connectionFailed") || "الاتصال بالسيرفر منجحش",
         );
       }
     } catch (err) {
@@ -213,7 +244,7 @@ export default function WorkspaceApiIntegrationPage() {
         latency: duration,
         error: err.response?.data?.message || "Failed to connect",
       });
-      toast?.show?.(t("connectionFailed") || "الاتصال بالسيرفر منجحش", "error");
+      toast?.error?.(t("connectionFailed") || "الاتصال بالسيرفر منجحش");
     } finally {
       setIsPinging(false);
     }
@@ -373,8 +404,15 @@ export default function WorkspaceApiIntegrationPage() {
 
   const isPending = apiData?.status === "pending_approval";
   const isActive = apiData?.status === "active";
+  const isSuspended = apiData?.status === "suspended";
+  const isRevoked = apiData?.status === "revoked";
+  const hasExistingKey = Boolean(
+    apiData?.has_key || apiData?.api_key || apiData?.id,
+  );
   const isNotRequested =
-    !apiData || apiData.status === "not_requested" || !apiData.has_key;
+    !apiData ||
+    apiData.status === "not_requested" ||
+    (!isActive && !isPending && !isSuspended && !isRevoked && !hasExistingKey);
 
   if (!isApiIntegrationEnabled(user)) {
     return (
@@ -793,6 +831,129 @@ export default function WorkspaceApiIntegrationPage() {
                       "طلب الوصول للـ API وصل بنجاح. المسؤول هيفعل المفتاح ويحدد الصلاحيات المتاحة على طول."}
                   </p>
                 </div>
+              </div>
+            )}
+
+            {isSuspended && (
+              <div
+                style={{
+                  padding: 24,
+                  backgroundColor: "rgba(245, 158, 11, 0.08)",
+                  borderRadius: 16,
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    backgroundColor: "rgba(245, 158, 11, 0.15)",
+                    color: "#d97706",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon name="alert-triangle" size={24} />
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      color: "#b45309",
+                      margin: "0 0 4px",
+                    }}
+                  >
+                    {t("apiSuspendedTitle") ||
+                      "تم تعليق مفاتيح الربط البرمجي مؤقتاً"}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "0.85rem",
+                      color: "var(--text-muted)",
+                      margin: 0,
+                    }}
+                  >
+                    {t("apiSuspendedDesc") ||
+                      "تم إيقاف صلاحيات الوصول للـ API لمساحة العمل هذه من قبل الإدارة. يرجى التواصل مع الدعم الفني للاستفسار."}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {isRevoked && (
+              <div
+                style={{
+                  padding: 24,
+                  backgroundColor: "rgba(239, 68, 68, 0.08)",
+                  borderRadius: 16,
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 16,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(239, 68, 68, 0.15)",
+                      color: "#dc2626",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon name="x-circle" size={24} />
+                  </div>
+                  <div>
+                    <h3
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: 800,
+                        color: "#b91c1c",
+                        margin: "0 0 4px",
+                      }}
+                    >
+                      {t("apiRevokedTitle") || "تم إلغاء مفاتيح الربط البرمجي"}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-muted)",
+                        margin: 0,
+                      }}
+                    >
+                      {t("apiRevokedDesc") ||
+                        "تم رفض أو إبطال مفاتيح الـ API السابقة. يمكنك تقديم طلب جديد إذا كنت بحاجة للربط مجدداً."}
+                    </p>
+                  </div>
+                </div>
+                {(isOwner ||
+                  canCreateIntegrations ||
+                  canUpdateIntegrations) && (
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => setShowRequestModal(true)}
+                  >
+                    <Icon name="refresh-cw" size={14} />
+                    <span>
+                      {t("requestNewKeys") || "طلب مفاتيح جديدة"}
+                    </span>
+                  </button>
+                )}
               </div>
             )}
 
@@ -2040,312 +2201,300 @@ res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", head
 
       {/* REQUEST ACCESS MODAL */}
       {showRequestModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 20,
-          }}
-        >
+        <ModalPortal>
           <div
-            style={{
-              backgroundColor: "var(--surface)",
-              borderRadius: 16,
-              padding: 28,
-              width: "100%",
-              maxWidth: 480,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-            }}
+            className="modal-backdrop"
+            onClick={() => setShowRequestModal(false)}
           >
-            <h3
-              style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
-            >
-              {t("requestApiModalTitle") ||
-                "طلب تفعيل مفتاح الربط البرمجي (API)"}
-            </h3>
-            <p
+            <div
+              className="modal-card modal-md animate-fade-in-up"
+              onClick={(e) => e.stopPropagation()}
               style={{
-                fontSize: "0.82rem",
-                color: "var(--text-muted)",
-                margin: "0 0 20px",
+                backgroundColor: "var(--surface)",
+                borderRadius: 16,
+                padding: 28,
+                width: "100%",
+                maxWidth: 480,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
               }}
             >
-              {t("requestApiModalDesc") ||
-                "سيتم إرسال طلبك لمسؤول النظام للمراجعة وتحديد الصلاحيات المسموحة لمساحة عملك."}
-            </p>
-
-            <form
-              onSubmit={handleRequestAccess}
-              style={{ display: "flex", flexDirection: "column", gap: 16 }}
-            >
-              <div>
-                <label
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  {t("appNameLabel") || "اسم التطبيق أو الموقع"}
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={requestAppName}
-                  onChange={(e) => setRequestAppName(e.target.value)}
-                  placeholder={t("appNamePlaceholder") || "e.g. My Website"}
-                  style={{ fontSize: "0.85rem" }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  {t("useCaseNotes") || "طبيعة الاستخدام ورابط موقعك"}
-                </label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={requestNotes}
-                  onChange={(e) => setRequestNotes(e.target.value)}
-                  placeholder={
-                    t("useCaseNotesPlaceholder") ||
-                    "e.g. Integrate bookings with our store..."
-                  }
-                  style={{ fontSize: "0.85rem" }}
-                  required
-                />
-              </div>
-
-              <div
+              <h3
+                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+              >
+                {t("requestApiModalTitle") ||
+                  "طلب تفعيل مفتاح الربط البرمجي (API)"}
+              </h3>
+              <p
                 style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 10,
-                  marginTop: 8,
+                  fontSize: "0.82rem",
+                  color: "var(--text-muted)",
+                  margin: "0 0 20px",
                 }}
               >
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowRequestModal(false)}
-                  style={{ fontSize: "0.85rem" }}
+                {t("requestApiModalDesc") ||
+                  "سيتم إرسال طلبك لمسؤول النظام للمراجعة وتحديد الصلاحيات المسموحة لمساحة عملك."}
+              </p>
+
+              <form
+                onSubmit={handleRequestAccess}
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
+                <div>
+                  <label
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      display: "block",
+                      marginBottom: 6,
+                    }}
+                  >
+                    {t("appNameLabel") || "اسم التطبيق أو الموقع"}
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={requestAppName}
+                    onChange={(e) => setRequestAppName(e.target.value)}
+                    placeholder={t("appNamePlaceholder") || "e.g. My Website"}
+                    style={{ fontSize: "0.85rem" }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      display: "block",
+                      marginBottom: 6,
+                    }}
+                  >
+                    {t("useCaseNotes") || "طبيعة الاستخدام ورابط موقعك"}
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    value={requestNotes}
+                    onChange={(e) => setRequestNotes(e.target.value)}
+                    placeholder={
+                      t("useCaseNotesPlaceholder") ||
+                      "e.g. Integrate bookings with our store..."
+                    }
+                    style={{ fontSize: "0.85rem" }}
+                    required
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                    marginTop: 8,
+                  }}
                 >
-                  {t("cancel") || "إلغاء"}
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isSubmittingRequest}
-                  style={{ fontSize: "0.85rem", fontWeight: 700 }}
-                >
-                  {isSubmittingRequest
-                    ? t("submitting") || "جارِ الإرسال..."
-                    : t("submitRequest") || "إرسال الطلب"}
-                </button>
-              </div>
-            </form>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowRequestModal(false)}
+                    style={{ fontSize: "0.85rem" }}
+                  >
+                    {t("cancel") || "إلغاء"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isSubmittingRequest}
+                    style={{ fontSize: "0.85rem", fontWeight: 700 }}
+                  >
+                    {isSubmittingRequest
+                      ? t("submitting") || "جارِ الإرسال..."
+                      : t("submitRequest") || "إرسال الطلب"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* REVEAL SECRET MODAL */}
       {showRevealModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 20,
-          }}
-        >
+        <ModalPortal>
           <div
-            style={{
-              backgroundColor: "var(--surface)",
-              borderRadius: 16,
-              padding: 28,
-              width: "100%",
-              maxWidth: 440,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            className="modal-backdrop"
+            onClick={() => {
+              setShowRevealModal(false);
+              setRevealPassword("");
             }}
           >
-            <h3
-              style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
-            >
-              {t("confirmPasswordTitle") ||
-                "تأكيد كلمة المرور لعرض المفتاح السري"}
-            </h3>
-            <p
+            <div
+              className="modal-card modal-sm animate-fade-in-up"
+              onClick={(e) => e.stopPropagation()}
               style={{
-                fontSize: "0.82rem",
-                color: "var(--text-muted)",
-                margin: "0 0 20px",
+                backgroundColor: "var(--surface)",
+                borderRadius: 16,
+                padding: 28,
+                width: "100%",
+                maxWidth: 440,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
               }}
             >
-              {t("confirmPasswordDesc") ||
-                "لأسباب أمنية، يرجى كتابة كلمة مرور حسابك لإظهار المفتاح السري."}
-            </p>
+              <h3
+                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+              >
+                {t("confirmPasswordTitle") ||
+                  "تأكيد كلمة المرور لعرض المفتاح السري"}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.82rem",
+                  color: "var(--text-muted)",
+                  margin: "0 0 20px",
+                }}
+              >
+                {t("confirmPasswordDesc") ||
+                  "لأسباب أمنية، يرجى كتابة كلمة مرور حسابك لإظهار المفتاح السري."}
+              </p>
 
-            <form
-              onSubmit={handleRevealSecret}
-              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              <form
+                onSubmit={handleRevealSecret}
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
+                <div>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={revealPassword}
+                    onChange={(e) => setRevealPassword(e.target.value)}
+                    placeholder={t("passwordPlaceholder") || "••••••••"}
+                    style={{ fontSize: "0.9rem" }}
+                    autoFocus
+                    required
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                    marginTop: 8,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setShowRevealModal(false);
+                      setRevealPassword("");
+                    }}
+                    style={{ fontSize: "0.85rem" }}
+                  >
+                    {t("cancel") || "إلغاء"}
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isRevealingSecret}
+                    style={{ fontSize: "0.85rem", fontWeight: 700 }}
+                  >
+                    {isRevealingSecret
+                      ? t("verifying") || "جارِ التحقق..."
+                      : t("confirmAndReveal") || "تأكيد وإظهار"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </ModalPortal>
+      )}
+
+      {/* REGENERATE CONFIRMATION MODAL */}
+      {showRegenerateModal && (
+        <ModalPortal>
+          <div
+            className="modal-backdrop"
+            onClick={() => setShowRegenerateModal(false)}
+          >
+            <div
+              className="modal-card modal-sm animate-fade-in-up"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: "var(--surface)",
+                borderRadius: 16,
+                padding: 28,
+                width: "100%",
+                maxWidth: 440,
+                boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+              }}
             >
-              <div>
-                <input
-                  type="password"
-                  className="form-control"
-                  value={revealPassword}
-                  onChange={(e) => setRevealPassword(e.target.value)}
-                  placeholder={t("passwordPlaceholder") || "••••••••"}
-                  style={{ fontSize: "0.9rem" }}
-                  autoFocus
-                  required
-                />
-              </div>
-
               <div
                 style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(245, 158, 11, 0.15)",
+                  color: "#d97706",
                   display: "flex",
-                  justifyContent: "flex-end",
-                  gap: 10,
-                  marginTop: 8,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
                 }}
+              >
+                <Icon name="alert-triangle" size={24} />
+              </div>
+
+              <h3
+                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+              >
+                {t("confirmRegenerateTitle") ||
+                  "هل أنت متأكد من رغبتك في تدوير المفتاح السري؟"}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.82rem",
+                  color: "var(--text-muted)",
+                  margin: "0 0 20px",
+                  lineHeight: 1.6,
+                }}
+              >
+                {t("confirmRegenerateDesc") ||
+                  "سيتوقف المفتاح السري الحالي عن العمل فوراً، وسيتعين عليك تحديثه في متغيرات بيئة موقعك الخارجي (.env)."}
+              </p>
+
+              <div
+                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
               >
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => {
-                    setShowRevealModal(false);
-                    setRevealPassword("");
-                  }}
+                  onClick={() => setShowRegenerateModal(false)}
                   style={{ fontSize: "0.85rem" }}
                 >
                   {t("cancel") || "إلغاء"}
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   className="btn btn-primary"
-                  disabled={isRevealingSecret}
-                  style={{ fontSize: "0.85rem", fontWeight: 700 }}
+                  onClick={handleRegenerateSecret}
+                  disabled={isRegenerating}
+                  style={{
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    backgroundColor: "#d97706",
+                    borderColor: "#d97706",
+                  }}
                 >
-                  {isRevealingSecret
-                    ? t("verifying") || "جارِ التحقق..."
-                    : t("confirmAndReveal") || "تأكيد وإظهار"}
+                  {isRegenerating
+                    ? t("rotating") || "جارِ التدوير..."
+                    : t("confirmRegenerate") || "نعم، قم بالتدوير الآن"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* REGENERATE CONFIRMATION MODAL */}
-      {showRegenerateModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            padding: 20,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "var(--surface)",
-              borderRadius: 16,
-              padding: 28,
-              width: "100%",
-              maxWidth: 440,
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-            }}
-          >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                backgroundColor: "rgba(245, 158, 11, 0.15)",
-                color: "#d97706",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 16,
-              }}
-            >
-              <Icon name="alert-triangle" size={24} />
-            </div>
-
-            <h3
-              style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
-            >
-              {t("confirmRegenerateTitle") ||
-                "هل أنت متأكد من رغبتك في تدوير المفتاح السري؟"}
-            </h3>
-            <p
-              style={{
-                fontSize: "0.82rem",
-                color: "var(--text-muted)",
-                margin: "0 0 20px",
-                lineHeight: 1.6,
-              }}
-            >
-              {t("confirmRegenerateDesc") ||
-                "سيتوقف المفتاح السري الحالي عن العمل فوراً، وسيتعين عليك تحديثه في متغيرات بيئة موقعك الخارجي (.env)."}
-            </p>
-
-            <div
-              style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
-            >
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowRegenerateModal(false)}
-                style={{ fontSize: "0.85rem" }}
-              >
-                {t("cancel") || "إلغاء"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleRegenerateSecret}
-                disabled={isRegenerating}
-                style={{
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                  backgroundColor: "#d97706",
-                  borderColor: "#d97706",
-                }}
-              >
-                {isRegenerating
-                  ? t("rotating") || "جارِ التدوير..."
-                  : t("confirmRegenerate") || "نعم، قم بالتدوير الآن"}
-              </button>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );
