@@ -158,6 +158,7 @@ export default function WorkspaceApiIntegrationPage() {
       ) {
         setRevealedSecret(res.data.data.api_secret);
         setRevealPassword("");
+        setShowRevealModal(false);
         toast?.success?.(
           res.data?.message ||
             t("secretRevealedSuccess") ||
@@ -171,11 +172,16 @@ export default function WorkspaceApiIntegrationPage() {
         );
       }
     } catch (err) {
-      toast?.error?.(
-        err.response?.data?.message ||
-          t("incorrectPassword") ||
-          "كلمة المرور غير صحيحة",
-      );
+      const serverMsg = err.response?.data?.message;
+      const passErr = err.response?.data?.errors?.password?.[0];
+      const fallback = t("incorrectPassword") || "كلمة المرور غير صحيحة";
+      const displayMsg =
+        serverMsg && serverMsg !== "validation.current_password"
+          ? serverMsg
+          : passErr && passErr !== "validation.current_password"
+            ? passErr
+            : fallback;
+      toast?.error?.(displayMsg);
     } finally {
       setIsRevealingSecret(false);
     }
@@ -201,7 +207,6 @@ export default function WorkspaceApiIntegrationPage() {
         setShowRegenerateModal(false);
         if (res.data.data?.api_secret) {
           setRevealedSecret(res.data.data.api_secret);
-          setShowRevealModal(true);
         }
         loadApiIntegration();
       } else {
