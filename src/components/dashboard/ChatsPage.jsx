@@ -204,7 +204,7 @@ function VoicePlayer({ src }) {
 --------------------------------------------------------------- */
 export default function ChatsPage() {
   const { t } = useLanguage();
-  const { user, userType, refreshUnreadCounts } = useAuth();
+  const { user, userType, unreadChatCount, refreshUnreadCounts } = useAuth();
   const toast = useToast();
 
   const [conversations, setConversations] = useState([]);
@@ -272,14 +272,38 @@ export default function ChatsPage() {
   }, []);
 
   // Auto scroll messages container only
-  const scrollToBottom = (smooth = true) => {
-    if (chatFeedRef.current) {
-      chatFeedRef.current.scrollTo({
-        top: chatFeedRef.current.scrollHeight,
+  const scrollToBottom = useCallback((smooth = true) => {
+    const run = () => {
+      const el = chatFeedRef.current;
+      if (!el) return;
+      el.scrollTo({
+        top: el.scrollHeight,
         behavior: smooth ? "smooth" : "auto",
       });
+      if (!smooth) {
+        el.scrollTop = el.scrollHeight;
+      }
+    };
+    run();
+    requestAnimationFrame(() => {
+      run();
+      setTimeout(run, 60);
+    });
+  }, []);
+
+  const lastMessageId = messages.length > 0 ? messages[messages.length - 1]?.id : null;
+  const prevLastMessageIdRef = useRef(null);
+  useEffect(() => {
+    if (!lastMessageId) {
+      prevLastMessageIdRef.current = null;
+      return;
     }
-  };
+    if (prevLastMessageIdRef.current !== lastMessageId) {
+      const isInitialForChat = prevLastMessageIdRef.current === null;
+      prevLastMessageIdRef.current = lastMessageId;
+      scrollToBottom(!isInitialForChat);
+    }
+  }, [lastMessageId, scrollToBottom]);
 
   const location = useLocation();
   const targetConvId = location.state?.conversationId;
@@ -338,7 +362,19 @@ export default function ChatsPage() {
           } else {
             setMessages(fetchedMsgs);
             setActiveConversation(details);
+            if (details.last_message) {
+              setConversations((prev) =>
+                prev.map((c) =>
+                  String(c.id) === String(details.id)
+                    ? { ...c, last_message: details.last_message }
+                    : c,
+                ),
+              );
+            }
             setTimeout(() => scrollToBottom(false), 80);
+            if (typeof refreshUnreadCounts === "function") {
+              refreshUnreadCounts(true);
+            }
           }
         }
       } catch {
@@ -349,8 +385,89 @@ export default function ChatsPage() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [toast, t],
+    [toast, t, refreshUnreadCounts],
   );
+
+  // Silent background sync for conversation list & active conversation messages
+  const isSyncingRef = useRef(false);
+  const syncConversationsAndActiveChat = useCallback(async () => {
+    if (isSyncingRef.current) return;
+    isSyncingRef.current = true;
+
+    try {
+      const listRes = await client.get(endpoints.chats);
+      const latestList = listRes.data?.data;
+      if (Array.isArray(latestList)) {
+        setConversations(latestList);
+      }
+
+      const currentActive = activeConversationRef.current;
+      if (currentActive?.id) {
+        const detailRes = await client.get(
+          endpoints.chatDetails(currentActive.id),
+          {
+            params: { per_page: 15, page: 1 },
+          },
+        );
+        const details = detailRes.data?.data;
+        if (
+          details &&
+          String(activeConversationRef.current?.id) === String(currentActive.id)
+        ) {
+          const incomingMsgs = details.messages || [];
+          let appendedNew = false;
+
+          setMessages((prev) => {
+            if (prev.length === 0) {
+              if (incomingMsgs.length > 0) appendedNew = true;
+              return incomingMsgs;
+            }
+
+            const incomingMap = new Map(
+              incomingMsgs.map((m) => [String(m.id), m]),
+            );
+            let changed = false;
+
+            const updatedPrev = prev.map((existing) => {
+              const fresh = incomingMap.get(String(existing.id));
+              if (fresh && fresh.read_status !== existing.read_status) {
+                changed = true;
+                return { ...existing, read_status: fresh.read_status };
+              }
+              return existing;
+            });
+
+            const existingIds = new Set(prev.map((m) => String(m.id)));
+            const brandNew = incomingMsgs.filter(
+              (m) => !existingIds.has(String(m.id)),
+            );
+
+            if (brandNew.length > 0) {
+              appendedNew = true;
+              return [...updatedPrev, ...brandNew];
+            }
+
+            return changed ? updatedPrev : prev;
+          });
+
+          if (appendedNew) {
+            setTimeout(() => scrollToBottom(true), 60);
+          }
+
+          if (
+            (appendedNew || unreadChatCount > 0) &&
+            typeof refreshUnreadCounts === "function"
+          ) {
+            refreshUnreadCounts(true);
+          }
+        }
+      }
+    } catch {
+      // ignore silent sync errors
+    } finally {
+      isSyncingRef.current = false;
+    }
+  }, [unreadChatCount, refreshUnreadCounts]);
 
   // Fetch Conversations List
   const fetchConversations = useCallback(async () => {
@@ -373,12 +490,22 @@ export default function ChatsPage() {
 
       setConversations(list);
 
-      const toSelect = targetConv || null;
+      const toSelect =
+        targetConv ||
+        (!activeConversationRef.current &&
+        list.length > 0 &&
+        window.innerWidth > 768
+          ? list[0]
+          : null);
+
       if (toSelect) {
+        activeConversationRef.current = toSelect;
         setActiveConversation(toSelect);
-        setMobileShowChat(true);
-        if (window.innerWidth <= 768) {
-          window.history.pushState({ chatOpen: true }, "");
+        if (targetConv) {
+          setMobileShowChat(true);
+          if (window.innerWidth <= 768) {
+            window.history.pushState({ chatOpen: true }, "");
+          }
         }
         fetchConversationDetails(toSelect.id);
 
@@ -398,6 +525,37 @@ export default function ChatsPage() {
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
+
+  // Sync messages immediately when unreadChatCount alerts > 0 while on ChatsPage
+  useEffect(() => {
+    if (unreadChatCount > 0 && !loadingConversations) {
+      syncConversationsAndActiveChat();
+    }
+  }, [unreadChatCount, loadingConversations, syncConversationsAndActiveChat]);
+
+  // Periodic background sync + window focus / visibility sync
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        syncConversationsAndActiveChat();
+      }
+    }, 5000);
+
+    const handleVisibilityOrFocus = () => {
+      if (!document.hidden) {
+        syncConversationsAndActiveChat();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+    };
+  }, [syncConversationsAndActiveChat]);
 
   // Handle scroll-up to trigger loading older messages + scroll-to-bottom toggle
   const handleFeedScroll = () => {
@@ -420,6 +578,7 @@ export default function ChatsPage() {
 
   // Load details on conversation select
   const handleSelectConversation = (conv) => {
+    activeConversationRef.current = conv;
     setActiveConversation(conv);
     setMobileShowChat(true);
     if (window.innerWidth <= 768) {
@@ -429,9 +588,6 @@ export default function ChatsPage() {
     setImageFile(null);
     setImagePreview(null);
     fetchConversationDetails(conv.id);
-    if (typeof refreshUnreadCounts === "function") {
-      setTimeout(refreshUnreadCounts, 1000);
-    }
   };
 
   // Start New Chat (with Technical Support Admin)
@@ -446,11 +602,15 @@ export default function ChatsPage() {
           conv,
           ...prev.filter((c) => c.id !== conv.id),
         ]);
+        activeConversationRef.current = conv;
         setActiveConversation(conv);
         setMessages(conv.messages || []);
         setMobileShowChat(true);
         if (window.innerWidth <= 768) {
           window.history.pushState({ chatOpen: true }, "");
+        }
+        if (typeof refreshUnreadCounts === "function") {
+          refreshUnreadCounts(true);
         }
         toast.success(t("technicalSupport"));
       }
@@ -553,6 +713,18 @@ export default function ChatsPage() {
       });
 
       setTimeout(() => scrollToBottom(true), 50);
+
+      // Mark conversation as read on backend when viewing active chat in real-time
+      client
+        .get(endpoints.chatDetails(currentActive.id), {
+          params: { per_page: 1, page: 1 },
+        })
+        .then(() => {
+          if (typeof refreshUnreadCounts === "function") {
+            refreshUnreadCounts(true);
+          }
+        })
+        .catch(() => {});
     });
 
     return () => unsubscribe();
@@ -734,6 +906,9 @@ export default function ChatsPage() {
       setReplyingTo(null);
       cancelImage();
       setTimeout(() => scrollToBottom(true), 100);
+      if (typeof refreshUnreadCounts === "function") {
+        refreshUnreadCounts(true);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || t("failedToSendMessage"));
     } finally {

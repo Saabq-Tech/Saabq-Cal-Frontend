@@ -589,7 +589,7 @@ export default function IntegrationsSettingsPage() {
       calendar_sync_enabled: autoMeet,
     });
     if (res.success) {
-      toast.success(t("updatedSuccess") || "اتحدث بنجاح");
+      toast.success(t("updatedSuccess") || "تم التحديث بنجاح");
       await loadSecurityData();
       setActiveModalId(null);
     } else {

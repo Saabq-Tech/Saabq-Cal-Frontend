@@ -459,14 +459,14 @@ export default function WorkspaceSettingsPage() {
       toast.success(
         res.data?.message ||
           t("settingsUpdatedSuccess") ||
-          "اتحفظت الإعدادات بنجاح",
+          "تم حفظ الإعدادات بنجاح",
       );
       if (fetchProfile) {
         await fetchProfile();
       }
       applyWorkspaceBranding(data);
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الإعدادات");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حفظ الإعدادات");
     } finally {
       setSaving(false);
     }
@@ -476,7 +476,7 @@ export default function WorkspaceSettingsPage() {
     if (!canEdit || settings?.allow_template_editing === false) {
       toast.error(
         t("templateEditingDisabledNotice") ||
-          "تعديل قوالب الإشعارات موقوف لمساحة العمل دي من الأدمن",
+          "تعديل قوالب الإشعارات غير متاح لمساحة العمل هذه من قبل الإدارة",
       );
       return;
     }
@@ -495,11 +495,11 @@ export default function WorkspaceSettingsPage() {
       toast.success(
         res.data?.message ||
           t("settingsUpdatedSuccess") ||
-          "اتحدث قالب الإشعار بنجاح",
+          "تم تحديث قالب الإشعار بنجاح",
       );
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "حصل خطأ في تحديث قالب الإشعار",
+        err.response?.data?.message || "حدث خطأ أثناء تحديث قالب الإشعار",
       );
     } finally {
       setSaving(false);

@@ -50,8 +50,9 @@ export default function SaabqChatInboxTab() {
         params: { status: filter },
       })
       .then((res) => {
-        if (res.data?.data?.meta) {
-          setMetaCounts(res.data.data.meta);
+        const meta = res.data?.data?.meta || res.data?.data;
+        if (meta && typeof meta === "object") {
+          setMetaCounts(meta);
         }
       })
       .catch(() => {});
@@ -69,7 +70,11 @@ export default function SaabqChatInboxTab() {
         },
       })
       .then((res) => {
-        const payload = res.data?.data?.payload || res.data?.data || [];
+        const payload =
+          res.data?.data?.data?.payload ||
+          res.data?.data?.payload ||
+          res.data?.data ||
+          [];
         const list = Array.isArray(payload) ? payload : [];
         setConversations(list);
         if (list.length > 0) {
@@ -288,7 +293,11 @@ export default function SaabqChatInboxTab() {
         client.get(endpoints.workspaceSaabqChatInboxes),
         client.get(endpoints.workspaceSaabqChatContacts),
       ]);
-      const ibs = inboxesRes.data?.data?.payload || inboxesRes.data?.data || [];
+      const ibs =
+        inboxesRes.data?.data?.inboxes ||
+        inboxesRes.data?.data?.payload ||
+        inboxesRes.data?.data ||
+        [];
       const cts =
         contactsRes.data?.data?.payload || contactsRes.data?.data || [];
       setInboxes(Array.isArray(ibs) ? ibs : []);

@@ -95,6 +95,48 @@ html .workspace-dashboard-content {
   background: var(--background);
 }
 
+html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+  padding: 36px 48px 64px !important;
+}
+
+html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
+html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+  padding: 28px 32px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: var(--radius-lg, 16px) !important;
+  box-shadow: var(--shadow-xs, 0 1px 3px rgba(0, 0, 0, 0.04)) !important;
+}
+
+@media (max-width: 1100px) {
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+    padding: 28px 28px 56px !important;
+  }
+
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+    padding: 22px 24px !important;
+  }
+}
+
+html .workspace-dashboard-content:has(.chat-container) {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  min-height: calc(100dvh - var(--navbar-height, 72px)) !important;
+  height: calc(100dvh - var(--navbar-height, 72px)) !important;
+  max-height: calc(100dvh - var(--navbar-height, 72px)) !important;
+  overflow: hidden !important;
+}
+
+html .workspace-dashboard-content:has(.chat-container) .chat-container,
+html .workspace-dashboard-content:has(.chat-container) .chat-layout {
+  flex: 1 1 auto !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
 /* Dark mode keeps the same structure with the dark tokens. */
 html.dark .workspace-dashboard-sidebar {
   background: var(--surface);
@@ -347,6 +389,22 @@ html
     padding: 16px 14px 80px !important;
     box-sizing: border-box !important;
     overflow-x: clip !important;
+  }
+
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+    padding: 20px 18px 88px !important;
+  }
+
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
+  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+    padding: 18px 16px !important;
+  }
+
+  html .workspace-dashboard-content:has(.chat-container) {
+    padding: 0 0 64px 0 !important;
+    min-height: calc(100dvh - var(--navbar-height, 64px) - 54px) !important;
+    height: calc(100dvh - var(--navbar-height, 64px) - 54px) !important;
+    max-height: calc(100dvh - var(--navbar-height, 64px) - 54px) !important;
   }
 }
 

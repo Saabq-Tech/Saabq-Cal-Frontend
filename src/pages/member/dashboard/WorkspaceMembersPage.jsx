@@ -71,14 +71,14 @@ export default function WorkspaceMembersPage() {
       const memberId = formData.id || formData.editing_id;
       if (memberId) {
         await client.put(endpoints.workspaceMemberItem(memberId), formData);
-        toast.success(t("memberUpdatedSuccess") || "اتحدثت بيانات العضو بنجاح");
+        toast.success(t("memberUpdatedSuccess") || "تم تحديث بيانات العضو بنجاح");
       } else {
         await client.post(endpoints.workspaceMembers, formData);
-        toast.success(t("inviteSentSuccess") || "اتبعتت الدعوة للعضو بنجاح");
+        toast.success(t("inviteSentSuccess") || "تم إرسال الدعوة للعضو بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في العملية");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء العملية");
     }
   };
 
@@ -88,7 +88,7 @@ export default function WorkspaceMembersPage() {
       toast.success(t("memberDeletedSuccess") || "تم حذف العضو من مساحة العمل");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حذف العضو");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف العضو");
     }
   };
 

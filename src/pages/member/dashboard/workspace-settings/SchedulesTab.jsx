@@ -518,7 +518,7 @@ export default function SchedulesTab({
       toast.error(
         err.response?.data?.message ||
           t("saveScheduleFailed") ||
-          "حفظ الجدول منجحش",
+          "تعذر حفظ الجدول",
       );
     } finally {
       setSavingModal(false);
@@ -547,7 +547,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to delete schedule:", err);
-      toast.error(err.response?.data?.message || "حذف الجدول منجحش");
+      toast.error(err.response?.data?.message || "تعذر حذف الجدول");
     }
   };
 
@@ -669,7 +669,7 @@ export default function SchedulesTab({
     } catch (err) {
       console.error("Failed to save weekly rules:", err);
       toast.error(
-        err.response?.data?.message || "حفظ ساعات العمل الأسبوعية منجحش",
+        err.response?.data?.message || "تعذر حفظ ساعات العمل الأسبوعية",
       );
     } finally {
       setSavingWeeklyRules(false);
@@ -692,7 +692,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to save schedule validity:", err);
-      toast.error(err.response?.data?.message || "حفظ فترة الصلاحية منجحش");
+      toast.error(err.response?.data?.message || "تعذر حفظ فترة الصلاحية");
     } finally {
       setSavingValidity(false);
     }
@@ -703,7 +703,7 @@ export default function SchedulesTab({
     e.preventDefault();
     if (!activeSchedule) return;
     if (!exceptionForm.date) {
-      toast.error(t("selectDateError") || "من فضلك اختار التاريخ الأول");
+      toast.error(t("selectDateError") || "يرجى اختيار التاريخ أولاً");
       return;
     }
 
@@ -751,7 +751,7 @@ export default function SchedulesTab({
       }
     } catch (err) {
       console.error("Failed to delete exception:", err);
-      toast.error(err.response?.data?.message || "حذف الاستثناء منجحش");
+      toast.error(err.response?.data?.message || "تعذر حذف الاستثناء");
     }
   };
 

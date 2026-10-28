@@ -86,7 +86,7 @@ export default function CustomerAppointmentsTab() {
       } catch (err) {
         toast.error(
           err.response?.data?.message ||
-            (isRTL ? "تحميل المواعيد منجحش" : "Failed to load appointments"),
+            (isRTL ? "تعذر تحميل المواعيد" : "Failed to load appointments"),
         );
       } finally {
         setLoading(false);
@@ -567,7 +567,7 @@ export default function CustomerAppointmentsTab() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "بدء المحادثة منجحش" : "Failed to start chat"),
+          (isRTL ? "تعذر بدء المحادثة" : "Failed to start chat"),
       );
     } finally {
       setStartingChatId(null);
@@ -609,7 +609,7 @@ export default function CustomerAppointmentsTab() {
     if (!rescheduleModalAppt || !rescheduleDate || !rescheduleTime) {
       toast.error(
         isRTL
-          ? "من فضلك اختار التاريخ والوقت الجديد"
+          ? "يرجى اختيار التاريخ والوقت الجديد"
           : "Please select a new date and time",
       );
       return;
@@ -693,7 +693,7 @@ export default function CustomerAppointmentsTab() {
       } else {
         toast.error(
           isRTL
-            ? "من فضلك اختار صورة إيصال السداد"
+            ? "يرجى اختيار صورة إيصال السداد"
             : "Please select a receipt proof file",
         );
         setUploadingProof(false);

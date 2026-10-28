@@ -72,33 +72,44 @@ export default function SaabqChatAppLayout() {
       setSsoUrl("");
       return;
     }
+    const fallbackUrl = settings?.account_id
+      ? `${(settings?.chat_base_url || "https://app.saabqchat.com").replace(/\/$/, "")}/app/accounts/${settings.account_id}/dashboard`
+      : "";
     client
       .get(endpoints.workspaceSaabqChatSsoUrl || endpoints.chatSsoUrl)
       .then((res) => {
-        const url = res.data?.data?.url || res.data?.data?.sso_url;
+        const url =
+          res.data?.data?.url || res.data?.data?.sso_url || fallbackUrl;
         if (url) setSsoUrl(url);
       })
       .catch(() => {
-        setSsoUrl("");
+        setSsoUrl(fallbackUrl);
       });
-  }, [isIntegrated]);
+  }, [isIntegrated, settings?.account_id, settings?.chat_base_url]);
 
   const handleLaunchSso = async () => {
     if (ssoUrl) {
       window.open(ssoUrl, "_blank", "noopener,noreferrer");
       return;
     }
+    const fallbackUrl = settings?.account_id
+      ? `${(settings?.chat_base_url || "https://app.saabqchat.com").replace(/\/$/, "")}/app/accounts/${settings.account_id}/dashboard`
+      : "";
     setSsoLoading(true);
     try {
       const res = await client.get(
         endpoints.workspaceSaabqChatSsoUrl || endpoints.chatSsoUrl,
       );
-      const url = res.data?.data?.url || res.data?.data?.sso_url;
+      const url = res.data?.data?.url || res.data?.data?.sso_url || fallbackUrl;
       if (url) {
         setSsoUrl(url);
         window.open(url, "_blank", "noopener,noreferrer");
       }
     } catch (err) {
+      if (fallbackUrl) {
+        window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
       const msg =
         err.response?.data?.message ||
         t("chat_sso_failed") ||

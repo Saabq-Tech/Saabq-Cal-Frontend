@@ -73,14 +73,14 @@ export default function WorkspaceResourcesPage() {
           endpoints.workspaceResourceItem(resourceId),
           resourceForm,
         );
-        toast.success(t("resourceUpdatedSuccess") || "اتحدث المورد بنجاح");
+        toast.success(t("resourceUpdatedSuccess") || "تم تحديث المورد بنجاح");
       } else {
         await client.post(endpoints.workspaceResources, resourceForm);
-        toast.success(t("resourceAddedSuccess") || "اتضاف المورد بنجاح");
+        toast.success(t("resourceAddedSuccess") || "تمت إضافة المورد بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حفظ المورد");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حفظ المورد");
     }
   };
 
@@ -90,7 +90,7 @@ export default function WorkspaceResourcesPage() {
       toast.success(t("resourceDeletedSuccess") || "تم حذف المورد بنجاح");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حذف المورد");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف المورد");
     }
   };
 

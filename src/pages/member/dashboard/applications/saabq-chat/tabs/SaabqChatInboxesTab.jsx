@@ -37,7 +37,11 @@ export default function SaabqChatInboxesTab() {
     client
       .get(endpoints.workspaceSaabqChatInboxes)
       .then((res) => {
-        const list = res.data?.data?.payload || res.data?.data || [];
+        const list =
+          res.data?.data?.inboxes ||
+          res.data?.data?.payload ||
+          res.data?.data ||
+          [];
         setInboxes(Array.isArray(list) ? list : []);
       })
       .catch(() => {

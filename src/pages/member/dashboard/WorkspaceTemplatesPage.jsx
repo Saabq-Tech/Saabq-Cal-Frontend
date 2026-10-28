@@ -67,7 +67,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     } catch (err) {
       if (err?.response?.status !== 403) {
         toast.error(
-          isRTL ? "فشل تحميل قوالب الشغل" : "Failed to load templates",
+          isRTL ? "تعذر تحميل قوالب العمل" : "Failed to load templates",
         );
       }
     } finally {
@@ -129,7 +129,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
           payload,
         );
         toast.success(
-          isRTL ? "اتحدث القالب بنجاح" : "Template updated successfully",
+          isRTL ? "تم تحديث القالب بنجاح" : "Template updated successfully",
         );
       } else {
         await client.post(endpoints.workspaceTemplates, payload);
@@ -143,7 +143,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "حصلت مشكلة في حفظ القالب" : "Failed to save template"),
+          (isRTL ? "حدث خطأ أثناء حفظ القالب" : "Failed to save template"),
       );
     } finally {
       setSaving(false);
@@ -163,7 +163,7 @@ export default function WorkspaceTemplatesPage({ embedded = false }) {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "حصلت مشكلة في حذف القالب" : "Failed to delete template"),
+          (isRTL ? "حدث خطأ أثناء حذف القالب" : "Failed to delete template"),
       );
     } finally {
       setDeleting(false);

@@ -22,8 +22,14 @@ export default function SaabqChatReportsTab() {
         .get(endpoints.workspaceSaabqChatReportsCsatResponses)
         .catch(() => ({ data: { data: [] } })),
     ]).then(([summaryRes, csatMetRes, csatRespRes]) => {
-      const sum = summaryRes.data?.data || [];
-      setSummaryData(Array.isArray(sum) ? sum : []);
+      const sum = summaryRes.data?.data;
+      if (Array.isArray(sum)) {
+        setSummaryData(sum);
+      } else if (sum && typeof sum === "object") {
+        setSummaryData([{ value: sum[selectedMetric] ?? 0, ...sum }]);
+      } else {
+        setSummaryData([]);
+      }
       setCsatMetrics(csatMetRes.data?.data || null);
       const cr =
         csatRespRes.data?.data?.payload || csatRespRes.data?.data || [];

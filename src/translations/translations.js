@@ -1117,7 +1117,7 @@ export const translations = {
     defaultScheduleTag: "افتراضي",
     unauthorizedSettingsEdit: "ليس لديك صلاحية لتعديل إعدادات مساحة العمل",
     calendarSettingsSaved: "تم حفظ إعدادات التقويم بنجاح",
-    updatedSuccess: "اتحدث بنجاح",
+    updatedSuccess: "تم التحديث بنجاح",
     sheetsSettingsSaved: "تم حفظ إعدادات Google Sheets",
     webhookSettingsSaved: "تم حفظ رابط الـ Webhook والأحداث بنجاح",
     notificationSettingsSaved: "تم حفظ خيارات التنبيهات بنجاح",

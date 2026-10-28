@@ -5770,6 +5770,17 @@ html.dark .tabs-bar-fav-btn.has-favorites {
     max-height: none !important;
     overflow-y: visible !important;
   }
+
+  .workspace-dashboard-content:has(.chat-container) {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100dvh - var(--navbar-height, 72px)) !important;
+    min-height: calc(100dvh - var(--navbar-height, 72px)) !important;
+    max-height: calc(100dvh - var(--navbar-height, 72px)) !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
 }
 
 /* =========================================================
@@ -12058,11 +12069,17 @@ html.dark .notif-action-btn.delete-action {
 =============================================================== */
 .chat-container {
   padding: 0 !important;
+  margin: 0 !important;
   overflow: hidden;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow-lg);
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
 }
 
 .chat-card-top-header {
@@ -12077,14 +12094,18 @@ html.dark .notif-action-btn.delete-action {
 
 .chat-layout {
   display: flex;
-  height: 620px;
-  max-height: 75vh;
+  flex: 1 1 auto;
+  height: calc(100dvh - var(--navbar-height, 72px));
+  min-height: 0;
+  max-height: none;
   position: relative;
 }
 
 /* Sidebar List */
 .chat-sidebar {
   width: 320px;
+  height: 100%;
+  min-height: 0;
   border-inline-end: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
@@ -12271,6 +12292,8 @@ html.dark .chat-item.active .chat-item-time {
 /* Chat Main Feed Area */
 .chat-main {
   flex: 1;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -14873,12 +14896,54 @@ html.dark .error-details-disclosure {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 14px);
 }
 
 .payments-desktop-table {
   width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
   border-collapse: collapse;
+  text-align: start;
+  font-size: 0.88rem;
+}
+
+.table thead tr {
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  padding: 14px 18px;
+  text-align: start;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.table td {
+  padding: 16px 18px;
+  vertical-align: middle;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-light);
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover td {
+  background: var(--surface-alt);
 }
 
 .payments-mobile-cards {

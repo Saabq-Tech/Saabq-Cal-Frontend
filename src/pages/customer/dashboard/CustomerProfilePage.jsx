@@ -408,7 +408,7 @@ function InfoRow({ label, value }) {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "10px 0",
+        padding: "13px 4px",
         borderBottom: "1px solid var(--border-light)",
       }}
     >

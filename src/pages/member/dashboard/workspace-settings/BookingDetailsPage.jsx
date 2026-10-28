@@ -375,7 +375,7 @@ export default function BookingDetailsPage({
     if (!rescheduleDate || !rescheduleTime) {
       toast.error(
         isRTL
-          ? "من فضلك اختار التاريخ والوقت الجديد"
+          ? "يرجى اختيار التاريخ والوقت الجديد"
           : "Please select a new date and time",
       );
       return;
@@ -422,7 +422,7 @@ export default function BookingDetailsPage({
     if (!followUpDate || !followUpTime) {
       toast.error(
         isRTL
-          ? "من فضلك اختار التاريخ والوقت"
+          ? "يرجى اختيار التاريخ والوقت"
           : "Please select a date and time",
       );
       return;
@@ -505,7 +505,7 @@ export default function BookingDetailsPage({
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "حفظ التقرير منجحش" : "Failed to save report"),
+          (isRTL ? "تعذر حفظ التقرير" : "Failed to save report"),
       );
     } finally {
       setSavingSummary(false);
@@ -533,7 +533,7 @@ export default function BookingDetailsPage({
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          (isRTL ? "حذف التقرير منجحش" : "Failed to delete report"),
+          (isRTL ? "تعذر حذف التقرير" : "Failed to delete report"),
       );
     } finally {
       setSavingSummary(false);

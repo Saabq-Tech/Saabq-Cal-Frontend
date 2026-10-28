@@ -126,6 +126,10 @@ export const endpoints = {
     `${getAuthPrefix(type)}/integrations/api/regenerate`,
   apiIntegrationVerify: (type) =>
     `${getAuthPrefix(type)}/integrations/api/verify`,
+  apiIntegrationScopes: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/scopes`,
+  apiIntegrationCollection: (type) =>
+    `${getAuthPrefix(type)}/integrations/api/collection`,
 
   // 2FA
   twoFactorEnable: (type) => `${getAuthPrefix(type)}/2fa/enable`,

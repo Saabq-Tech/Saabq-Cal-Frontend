@@ -251,6 +251,33 @@ export default function WorkspacePaymentsPage() {
     });
   };
 
+  const formatPaymentMethod = (method) => {
+    const val = (method || "bank_transfer").toLowerCase();
+    const map = {
+      bank_transfer: isRTL ? "تحويل بنكي" : "Bank Transfer",
+      online: isRTL ? "دفع إلكتروني" : "Online Payment",
+      cash: isRTL ? "نقدي" : "Cash",
+      instapay: isRTL ? "إنستا باي" : "InstaPay",
+      vodafone_cash: isRTL ? "فودافون كاش" : "Vodafone Cash",
+      wallet: isRTL ? "محفظة إلكترونية" : "E-Wallet",
+      card: isRTL ? "بطاقة بنكية" : "Card",
+    };
+    return map[val] || method;
+  };
+
+  const formatPaymentProvider = (provider) => {
+    const val = (provider || "manual").toLowerCase();
+    const map = {
+      manual: isRTL ? "يدوي" : "Manual",
+      free: isRTL ? "مجاني" : "Free",
+      paymob: "Paymob",
+      stripe: "Stripe",
+      tap: "Tap Payments",
+      myfatoorah: "MyFatoorah",
+    };
+    return map[val] || provider;
+  };
+
   return (
     <CapabilityGate capabilityCode="PAYMENTS">
       {!isOwner && !canReadPayments ? (
@@ -551,37 +578,87 @@ export default function WorkspacePaymentsPage() {
                         (!p.type && !isSub && p.status !== "refunded");
                       return (
                         <tr key={p.id}>
-                          <td style={{ fontWeight: 700 }}>#{p.id}</td>
                           <td>
                             <span
                               style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "4px 9px",
+                                borderRadius: 8,
+                                background: "var(--surface-alt)",
+                                border: "1px solid var(--border-light)",
                                 fontWeight: 700,
-                                color: "var(--heading)",
-                                display: "block",
-                              }}
-                            >
-                              {isSub
-                                ? isRTL
-                                  ? "اشتراك مساحة العمل"
-                                  : "Workspace Subscription"
-                                : isRTL
-                                  ? "حجز موعد"
-                                  : "Appointment Booking"}
-                            </span>
-                            <span
-                              style={{
                                 fontSize: "0.78rem",
                                 color: "var(--text-secondary)",
+                                fontFamily: "var(--font-mono, monospace)",
                               }}
                             >
-                              ID: {p.payable_id}
+                              #{p.id}
                             </span>
+                          </td>
+                          <td>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: 10,
+                                  background: isSub
+                                    ? "rgba(10, 144, 153, 0.1)"
+                                    : "rgba(59, 130, 246, 0.1)",
+                                  color: isSub ? "var(--primary)" : "#3b82f6",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <Icon
+                                  name={isSub ? "credit-card" : "calendar"}
+                                  size={16}
+                                />
+                              </div>
+                              <div>
+                                <span
+                                  style={{
+                                    fontWeight: 700,
+                                    color: "var(--heading)",
+                                    display: "block",
+                                    lineHeight: 1.35,
+                                  }}
+                                >
+                                  {isSub
+                                    ? isRTL
+                                      ? "اشتراك مساحة العمل"
+                                      : "Workspace Subscription"
+                                    : isRTL
+                                      ? "حجز موعد"
+                                      : "Appointment Booking"}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "var(--text-secondary)",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  ID: #{p.payable_id}
+                                </span>
+                              </div>
+                            </div>
                           </td>
                           <td>
                             <span
                               style={{
-                                padding: "4px 10px",
-                                borderRadius: 14,
+                                padding: "5px 12px",
+                                borderRadius: 999,
                                 fontSize: "0.75rem",
                                 fontWeight: 800,
                                 color: isCredit
@@ -595,7 +672,10 @@ export default function WorkspacePaymentsPage() {
                                     ? "var(--badge-success-border)"
                                     : "var(--badge-danger-border)"
                                 }`,
-                                display: "inline-block",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {isCredit ? t("creditBadge") : t("debitBadge")}
@@ -604,44 +684,68 @@ export default function WorkspacePaymentsPage() {
                           <td
                             style={{
                               fontWeight: 800,
+                              fontSize: "0.92rem",
+                              whiteSpace: "nowrap",
                               color: isCredit
                                 ? "var(--badge-success-color)"
                                 : "var(--badge-danger-color)",
                             }}
                           >
-                            {isCredit ? "+" : "-"}
-                            {(parseFloat(p.amount) || 0).toLocaleString()}{" "}
+                            <span dir="ltr" style={{ display: "inline-block" }}>
+                              {isCredit ? "+" : "-"}
+                              {(parseFloat(p.amount) || 0).toLocaleString()}
+                            </span>{" "}
                             {getCurrencySymbol(
                               p.currency_detail || p.currency || wsCurrency,
                               isRTL,
                             )}
                           </td>
                           <td>
-                            <span style={{ fontWeight: 600, display: "block" }}>
-                              {p.method || "bank_transfer"}
+                            <span
+                              style={{
+                                fontWeight: 700,
+                                color: "var(--heading)",
+                                display: "block",
+                                lineHeight: 1.35,
+                              }}
+                            >
+                              {formatPaymentMethod(p.method)}
                             </span>
                             <span
                               style={{
-                                fontSize: "0.76rem",
-                                color: "var(--muted)",
+                                fontSize: "0.75rem",
+                                color: "var(--text-secondary)",
+                                fontWeight: 500,
                               }}
                             >
-                              {p.provider || "manual"}
+                              {formatPaymentProvider(p.provider)}
                             </span>
                           </td>
                           <td>
                             <span
                               style={{
-                                padding: "4px 12px",
-                                borderRadius: 20,
-                                fontSize: "0.78rem",
+                                padding: "5px 12px",
+                                borderRadius: 999,
+                                fontSize: "0.76rem",
                                 fontWeight: 700,
                                 color: badge.color,
                                 background: badge.bg,
                                 border: `1px solid ${badge.border}`,
-                                display: "inline-block",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                whiteSpace: "nowrap",
                               }}
                             >
+                              <span
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  backgroundColor: badge.color,
+                                  flexShrink: 0,
+                                }}
+                              />
                               {badge.label}
                             </span>
                           </td>
@@ -649,6 +753,8 @@ export default function WorkspacePaymentsPage() {
                             style={{
                               fontSize: "0.82rem",
                               color: "var(--text-secondary)",
+                              whiteSpace: "nowrap",
+                              fontWeight: 500,
                             }}
                           >
                             {formatDate(p.created_at)}
@@ -657,7 +763,14 @@ export default function WorkspacePaymentsPage() {
                             <button
                               className="btn btn-secondary btn-sm"
                               onClick={() => setSelectedPayment(p)}
-                              style={{ gap: 6, fontSize: "0.8rem" }}
+                              style={{
+                                gap: 6,
+                                fontSize: "0.8rem",
+                                padding: "7px 14px",
+                                borderRadius: 10,
+                                fontWeight: 600,
+                                whiteSpace: "nowrap",
+                              }}
                             >
                               <Icon name="eye" size={14} />
                               {isRTL ? "التفاصيل / الإيصال" : "View / Verify"}
@@ -800,7 +913,7 @@ export default function WorkspacePaymentsPage() {
                               color: "var(--heading)",
                             }}
                           >
-                            {p.method || "bank_transfer"}
+                            {formatPaymentMethod(p.method)}
                           </span>
                         </div>
                         <div style={{ gridColumn: "span 2" }}>

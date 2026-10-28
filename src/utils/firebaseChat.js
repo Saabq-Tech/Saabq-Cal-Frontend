@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getDatabase, ref, onChildAdded, off } from "firebase/database";
+import { getDatabase, ref, onChildAdded, onValue, off } from "firebase/database";
 
 const DB_URL =
   import.meta.env.VITE_FIREBASE_DATABASE_URL ||
@@ -24,7 +24,7 @@ try {
 
 /**
  * Subscribe to real-time chat messages for a specific conversation.
- * @param {number|string} conversationId
+ * @param {number|string|object} conversation
  * @param {function} onNewMessage Callback receiving real-time message object
  * @returns {function} Unsubscribe function
  */
@@ -39,7 +39,7 @@ export function subscribeToChatMessages(conversation, onNewMessage) {
   if (!identifier) return () => {};
 
   const path = `chats/conversation_${identifier}`;
-  const subscriptionTime = Date.now() - 5000;
+  const subscriptionTime = Date.now() - 60000;
 
   const isHistorical = (data) => {
     if (!data) return true;
@@ -56,13 +56,31 @@ export function subscribeToChatMessages(conversation, onNewMessage) {
   if (dbInstance) {
     try {
       const chatRef = ref(dbInstance, path);
+      let initialSnapshotLoaded = false;
 
-      const unsubscribe = onChildAdded(chatRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data && !isHistorical(data)) {
-          onNewMessage(data);
-        }
-      });
+      onValue(
+        chatRef,
+        () => {
+          initialSnapshotLoaded = true;
+        },
+        () => {
+          initialSnapshotLoaded = true;
+        },
+        { onlyOnce: true },
+      );
+
+      const unsubscribe = onChildAdded(
+        chatRef,
+        (snapshot) => {
+          const data = snapshot.val();
+          if (data && (initialSnapshotLoaded || !isHistorical(data))) {
+            onNewMessage(data);
+          }
+        },
+        (err) => {
+          console.warn("Firebase RTDB child_added error:", err);
+        },
+      );
 
       return () => {
         try {

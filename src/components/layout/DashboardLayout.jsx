@@ -23,7 +23,10 @@ export default function DashboardLayout() {
       >
         <DashboardSidebar variant="dashboard" />
 
-        <div key={location.pathname} className="workspace-dashboard-content">
+        <div
+          key={location.pathname}
+          className="workspace-dashboard-content profile-dashboard-content"
+        >
           <GoogleNotConnectedBanner />
           <Outlet />
         </div>

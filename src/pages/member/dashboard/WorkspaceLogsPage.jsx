@@ -697,7 +697,7 @@ export default function WorkspaceLogsPage() {
                 </div>
                 <div className="insight-body">
                   <div className="insight-label">
-                    {lang === "ar" ? "أكتر وقت عليه طلب" : "Peak Booking Hour"}
+                    {lang === "ar" ? "أكثر الأوقات طلباً" : "Peak Booking Hour"}
                   </div>
                   <div className="insight-value">
                     {peakHoursData.find((p) => p.isPeak)?.label || "—"}
@@ -838,7 +838,7 @@ export default function WorkspaceLogsPage() {
                     <Icon name="clock" size={14} color="var(--primary)" />
                     <span>
                       {lang === "ar"
-                        ? "توزيع المواعيد على ساعات الشغل"
+                        ? "توزيع المواعيد خلال ساعات العمل"
                         : "Hourly Appointments Density"}
                     </span>
                   </div>
@@ -907,7 +907,7 @@ export default function WorkspaceLogsPage() {
                       className={`chart-toggle-btn ${trendPeriod === "30d" ? "active" : ""}`}
                       onClick={() => setTrendPeriod("30d")}
                     >
-                      {lang === "ar" ? "الشهر ده" : "This Month"}
+                      {lang === "ar" ? "هذا الشهر" : "This Month"}
                     </button>
                   </div>
                 </div>
@@ -1230,7 +1230,7 @@ export default function WorkspaceLogsPage() {
                       <Icon name="sparkles" size={18} color="var(--primary)" />
                       <span>
                         {lang === "ar"
-                          ? "أكتر الخدمات المطلوبة"
+                          ? "الخدمات الأكثر طلباً"
                           : "Top Booked Services"}
                       </span>
                     </div>
@@ -1350,7 +1350,7 @@ export default function WorkspaceLogsPage() {
                     </div>
                     <div className="chart-card-subtitle">
                       {lang === "ar"
-                        ? "عرض تفصيلي للحجوزات مع فلترة سريعة"
+                        ? "عرض تفصيلي للحجوزات مع تصفية سريعة"
                         : "Interactive appointments roster with quick actions"}
                     </div>
                   </div>
@@ -1369,7 +1369,7 @@ export default function WorkspaceLogsPage() {
                       className={`analytics-tab-btn ${tableFilter === "today" ? "active" : ""}`}
                       onClick={() => setTableFilter("today")}
                     >
-                      {lang === "ar" ? "النهارده" : "Today"} ({stats.todayCount}
+                      {lang === "ar" ? "اليوم" : "Today"} ({stats.todayCount}
                       )
                     </button>
                     <button
@@ -1402,7 +1402,7 @@ export default function WorkspaceLogsPage() {
                       className="analytics-search-input"
                       placeholder={
                         lang === "ar"
-                          ? "دور بالاسم أو الخدمة..."
+                          ? "ابحث بالاسم أو الخدمة..."
                           : "Search client, service..."
                       }
                       value={tableSearch}
@@ -1418,7 +1418,7 @@ export default function WorkspaceLogsPage() {
                       <tr>
                         <th>{custSingular}</th>
                         <th>{lang === "ar" ? "الخدمة" : "Service"}</th>
-                        <th>{lang === "ar" ? "الميعاد" : "Date & Time"}</th>
+                        <th>{lang === "ar" ? "الموعد" : "Date & Time"}</th>
                         <th>{lang === "ar" ? "السعر" : "Price"}</th>
                         <th>{lang === "ar" ? "الحالة" : "Status"}</th>
                         <th style={{ textAlign: "center" }}>
@@ -1438,7 +1438,7 @@ export default function WorkspaceLogsPage() {
                             }}
                           >
                             {lang === "ar"
-                              ? "لا توجد مواعيد مطابقة للفلترة الحالية"
+                              ? "لا توجد مواعيد مطابقة للتصفية الحالية"
                               : "No appointments match your filter"}
                           </td>
                         </tr>
@@ -1536,14 +1536,14 @@ export default function WorkspaceLogsPage() {
                                         : "Completed"
                                       : st === "pending"
                                         ? lang === "ar"
-                                          ? "مستنية التأكيد"
+                                          ? "بانتظار التأكيد"
                                           : "Pending"
                                         : st === "cancelled"
                                           ? lang === "ar"
-                                            ? "ملغية"
+                                            ? "ملغاة"
                                             : "Cancelled"
                                           : lang === "ar"
-                                            ? "متأكدة"
+                                            ? "مؤكدة"
                                             : "Confirmed"}
                                   </span>
                                 </span>
@@ -1583,7 +1583,7 @@ export default function WorkspaceLogsPage() {
                 >
                   <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>
                     {lang === "ar"
-                      ? `معروض ${Math.min(8, filteredTableAppointments.length)} من أصل ${filteredTableAppointments.length}`
+                      ? `عرض ${Math.min(8, filteredTableAppointments.length)} من أصل ${filteredTableAppointments.length}`
                       : `Showing ${Math.min(8, filteredTableAppointments.length)} of ${filteredTableAppointments.length}`}
                   </span>
                   <Link
@@ -1592,7 +1592,7 @@ export default function WorkspaceLogsPage() {
                     style={{ fontSize: "0.82rem" }}
                   >
                     {lang === "ar"
-                      ? "روح لكل الحجوزات ←"
+                      ? "عرض جميع الحجوزات ←"
                       : "Go to all bookings →"}
                   </Link>
                 </div>

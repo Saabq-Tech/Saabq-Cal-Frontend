@@ -199,7 +199,7 @@ export default function WorkspaceSetupModal({
               }
             >
               <option value="">
-                -- {t("selectWorkspaceType", "اختار نوع مساحة العمل")} --
+                -- {t("selectWorkspaceType", "اختر نوع مساحة العمل")} --
               </option>
               {workspaceTypes.map((type) => (
                 <option key={type.id} value={type.id}>

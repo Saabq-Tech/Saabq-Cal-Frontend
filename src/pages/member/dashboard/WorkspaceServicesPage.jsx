@@ -78,14 +78,14 @@ export default function WorkspaceServicesPage() {
           endpoints.workspaceServiceItem(serviceId),
           serviceForm,
         );
-        toast.success(t("serviceUpdatedSuccess") || "اتحدثت الخدمة بنجاح");
+        toast.success(t("serviceUpdatedSuccess") || "تم تحديث الخدمة بنجاح");
       } else {
         await client.post(endpoints.workspaceServices, serviceForm);
-        toast.success(t("serviceAddedSuccess") || "اتضافت الخدمة بنجاح");
+        toast.success(t("serviceAddedSuccess") || "تمت إضافة الخدمة بنجاح");
       }
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الخدمة");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حفظ الخدمة");
     }
   };
 
@@ -95,7 +95,7 @@ export default function WorkspaceServicesPage() {
       toast.success(t("serviceDeletedSuccess") || "تم حذف الخدمة بنجاح");
       loadServices();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حذف الخدمة");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف الخدمة");
     }
   };
 

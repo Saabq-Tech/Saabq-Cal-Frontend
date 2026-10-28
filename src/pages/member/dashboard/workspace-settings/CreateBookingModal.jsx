@@ -288,7 +288,7 @@ export default function CreateBookingModal({ isOpen, onClose, onSuccess }) {
     setErrorMessage(null);
 
     if (!serviceId) {
-      setErrorMessage(t("selectServicePrompt") || "من فضلك اختار الخدمة");
+      setErrorMessage(t("selectServicePrompt") || "يرجى اختيار الخدمة");
       return;
     }
 

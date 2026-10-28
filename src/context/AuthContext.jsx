@@ -237,11 +237,18 @@ export function AuthProvider({ children }) {
 
   // Centralized unread counts polling
   const isFetchingUnreadRef = useRef(false);
+  const pendingForceRefreshRef = useRef(false);
   const lastFetchTimeRef = useRef(0);
 
   const refreshUnreadCounts = useCallback(
     (force = false) => {
-      if (!token || isFetchingUnreadRef.current) return;
+      if (!token) return;
+      if (isFetchingUnreadRef.current) {
+        if (force) {
+          pendingForceRefreshRef.current = true;
+        }
+        return;
+      }
       if (document.hidden && !force) return;
 
       const now = Date.now();
@@ -266,6 +273,10 @@ export function AuthProvider({ children }) {
         })
         .finally(() => {
           isFetchingUnreadRef.current = false;
+          if (pendingForceRefreshRef.current) {
+            pendingForceRefreshRef.current = false;
+            refreshUnreadCounts(true);
+          }
         });
     },
     [token],

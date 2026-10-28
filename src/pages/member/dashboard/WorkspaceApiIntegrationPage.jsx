@@ -47,11 +47,14 @@ export default function WorkspaceApiIntegrationPage() {
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
 
+  // Scopes Update State
+  const [isUpdatingScopes, setIsUpdatingScopes] = useState(false);
+
   // Playground State
   const [selectedEndpoint, setSelectedEndpoint] = useState("ping");
   const [playgroundServiceId, _setPlaygroundServiceId] = useState("");
   const [playgroundDate, setPlaygroundDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date(Date.now() + 2 * 86400000).toISOString().split("T")[0],
   );
   const [playgroundPayload, setPlaygroundPayload] = useState("");
   const [isTestingPlayground, setIsTestingPlayground] = useState(false);
@@ -221,6 +224,48 @@ export default function WorkspaceApiIntegrationPage() {
     }
   };
 
+  const handleToggleScope = async (scopeKey) => {
+    if (!isOwner && !canUpdateIntegrations) return;
+    const currentScopes = Array.isArray(apiData?.allowed_scopes)
+      ? apiData.allowed_scopes
+      : [];
+    const exists = currentScopes.includes(scopeKey);
+    const nextScopes = exists
+      ? currentScopes.filter((s) => s !== scopeKey)
+      : [...currentScopes, scopeKey];
+
+    if (nextScopes.length === 0) {
+      toast?.error?.(
+        lang === "ar"
+          ? "يجب تفعيل صلاحية واحدة على الأقل"
+          : "At least one endpoint scope must remain enabled",
+      );
+      return;
+    }
+
+    setIsUpdatingScopes(true);
+    try {
+      const res = await client.put(endpoints.apiIntegrationScopes("member"), {
+        allowed_scopes: nextScopes,
+      });
+      if (res.data?.status || res.data?.success || res.data?.data) {
+        setApiData(res.data.data);
+        toast?.success?.(
+          res.data?.message ||
+            (lang === "ar"
+              ? "تم تحديث صلاحيات الوصول ومجموعة Postman بنجاح"
+              : "Endpoint access and Postman collection updated"),
+        );
+      }
+    } catch (err) {
+      toast?.error?.(
+        err.response?.data?.message || t("errorOccurred") || "حدث خطأ",
+      );
+    } finally {
+      setIsUpdatingScopes(false);
+    }
+  };
+
   const handleQuickPing = async () => {
     setIsPinging(true);
     setPingResult(null);
@@ -239,7 +284,7 @@ export default function WorkspaceApiIntegrationPage() {
         );
       } else {
         toast?.error?.(
-          res.data?.message || t("connectionFailed") || "الاتصال بالسيرفر منجحش",
+          res.data?.message || t("connectionFailed") || "تعذر الاتصال بالخادم",
         );
       }
     } catch (err) {
@@ -249,7 +294,7 @@ export default function WorkspaceApiIntegrationPage() {
         latency: duration,
         error: err.response?.data?.message || "Failed to connect",
       });
-      toast?.error?.(t("connectionFailed") || "الاتصال بالسيرفر منجحش");
+      toast?.error?.(t("connectionFailed") || "تعذر الاتصال بالخادم");
     } finally {
       setIsPinging(false);
     }
@@ -268,7 +313,8 @@ export default function WorkspaceApiIntegrationPage() {
         res = await client.get(endpoints.workspaceServices);
       } else if (selectedEndpoint === "slots") {
         res = await client.get(
-          `${endpoints.workspaceServices}/${playgroundServiceId || 1}`,
+          `${endpoints.workspaceServices}/${playgroundServiceId || 1}/slots`,
+          { params: { date: playgroundDate } },
         );
       } else if (selectedEndpoint === "bookings") {
         res = await client.get(endpoints.workspaceBookings, {
@@ -307,92 +353,32 @@ export default function WorkspaceApiIntegrationPage() {
     }
   };
 
-  const handleDownloadPostman = () => {
-    const postmanJson = {
-      info: {
-        name: `${user?.workspace?.name || "Saabq"} REST API Collection`,
-        schema:
-          "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-      },
-      variable: [
-        {
-          key: "base_url",
-          value: "https://admin.cal.saabq.com/api/v1/external",
-        },
-        { key: "api_key", value: apiData?.api_key || "YOUR_API_KEY" },
-        { key: "api_secret", value: "YOUR_API_SECRET" },
-      ],
-      item: [
-        {
-          name: "1. Ping & Verify",
-          request: {
-            method: "GET",
-            header: [
-              { key: "X-Api-Key", value: "{{api_key}}" },
-              { key: "X-Api-Secret", value: "{{api_secret}}" },
-              { key: "Accept", value: "application/json" },
-            ],
-            url: { raw: "{{base_url}}/ping" },
-          },
-        },
-        {
-          name: "2. List Services",
-          request: {
-            method: "GET",
-            header: [
-              { key: "X-Api-Key", value: "{{api_key}}" },
-              { key: "X-Api-Secret", value: "{{api_secret}}" },
-              { key: "Accept", value: "application/json" },
-            ],
-            url: { raw: "{{base_url}}/services" },
-          },
-        },
-        {
-          name: "3. Check Available Slots",
-          request: {
-            method: "GET",
-            header: [
-              { key: "X-Api-Key", value: "{{api_key}}" },
-              { key: "X-Api-Secret", value: "{{api_secret}}" },
-              { key: "Accept", value: "application/json" },
-            ],
-            url: {
-              raw: "{{base_url}}/services/1/slots?date=2026-09-15",
-            },
-          },
-        },
-        {
-          name: "4. Create Booking",
-          request: {
-            method: "POST",
-            header: [
-              { key: "X-Api-Key", value: "{{api_key}}" },
-              { key: "X-Api-Secret", value: "{{api_secret}}" },
-              { key: "Accept", value: "application/json" },
-              { key: "Content-Type", value: "application/json" },
-            ],
-            body: {
-              mode: "raw",
-              raw: JSON.stringify(
-                {
-                  service_id: 1,
-                  customer_name: "Customer Name",
-                  customer_email: "client@example.com",
-                  customer_phone: "+966500000000",
-                  starts_at: "2026-09-15 10:00:00",
-                  notes: "Booking created via REST API",
-                },
-                null,
-                2,
-              ),
-            },
-            url: { raw: "{{base_url}}/bookings" },
-          },
-        },
-      ],
-    };
+  const handleDownloadPostman = async () => {
+    let collection = apiData?.postman_collection;
 
-    const blob = new Blob([JSON.stringify(postmanJson, null, 2)], {
+    if (!collection) {
+      try {
+        const res = await client.get(
+          endpoints.apiIntegrationCollection("member"),
+        );
+        if (res.data?.data) {
+          collection = res.data.data;
+        }
+      } catch (err) {
+        console.error("Failed to fetch remote Postman collection", err);
+      }
+    }
+
+    if (collection && Array.isArray(collection.variable) && revealedSecret) {
+      collection = {
+        ...collection,
+        variable: collection.variable.map((v) =>
+          v.key === "api_secret" ? { ...v, value: revealedSecret } : v,
+        ),
+      };
+    }
+
+    const blob = new Blob([JSON.stringify(collection || {}, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -694,7 +680,7 @@ export default function WorkspaceApiIntegrationPage() {
               <span>
                 {pingResult.success
                   ? `${t("pingSuccess") || "الاتصال يعمل بنجاح!"} (زمن الاستجابة: ${pingResult.latency}ms)`
-                  : `${t("pingFailed") || "الاتصال منجحش:"} ${pingResult.error}`}
+                  : `${t("pingFailed") || "فشل الاتصال:"} ${pingResult.error}`}
               </span>
             </div>
             <button
@@ -1208,7 +1194,7 @@ export default function WorkspaceApiIntegrationPage() {
                   </div>
                 </div>
 
-                {/* Admin Granted Scopes Matrix */}
+                {/* Admin & Member Scopes Matrix */}
                 <div
                   style={{
                     backgroundColor: "var(--surface)",
@@ -1218,26 +1204,58 @@ export default function WorkspaceApiIntegrationPage() {
                     boxShadow: "var(--shadow-sm)",
                   }}
                 >
-                  <h3
+                  <div
                     style={{
-                      fontSize: "1rem",
-                      fontWeight: 800,
-                      margin: "0 0 6px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      gap: 12,
+                      marginBottom: 18,
                     }}
                   >
-                    {t("enabledScopesTitle") ||
-                      "الميزات والصلاحيات المسموحة عبر الـ API"}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: "0.82rem",
-                      color: "var(--text-muted)",
-                      margin: "0 0 18px",
-                    }}
-                  >
-                    {t("enabledScopesDesc") ||
-                      "يتحكم مسؤول النظام في تفعيل الميزات المسموحة لكل مساحة عمل. تواصل مع الدعم لطلب صلاحيات إضافية."}
-                  </p>
+                    <div>
+                      <h3
+                        style={{
+                          fontSize: "1rem",
+                          fontWeight: 800,
+                          margin: "0 0 6px",
+                        }}
+                      >
+                        {t("enabledScopesTitle") ||
+                          "الميزات والصلاحيات المسموحة عبر الـ API"}
+                      </h3>
+                      <p
+                        style={{
+                          fontSize: "0.82rem",
+                          color: "var(--text-muted)",
+                          margin: 0,
+                        }}
+                      >
+                        {t("enabledScopesDesc") ||
+                          "يتحكم مسؤول النظام في تفعيل الميزات المسموحة لكل مساحة عمل. تواصل مع الدعم لطلب صلاحيات إضافية."}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleDownloadPostman}
+                      disabled={isUpdatingScopes}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        fontSize: "0.78rem",
+                      }}
+                    >
+                      <Icon name="download" size={13} />
+                      <span>
+                        {lang === "ar"
+                          ? "تحميل مجموعة Postman المحدّثة"
+                          : "Download Synced Postman Collection"}
+                      </span>
+                    </button>
+                  </div>
 
                   <div
                     style={{
@@ -1250,6 +1268,14 @@ export default function WorkspaceApiIntegrationPage() {
                     {apiData?.scopes_detail?.map((scopeItem) => (
                       <div
                         key={scopeItem.scope}
+                        onClick={() => {
+                          if (
+                            !isUpdatingScopes &&
+                            (isOwner || canUpdateIntegrations)
+                          ) {
+                            handleToggleScope(scopeItem.scope);
+                          }
+                        }}
                         style={{
                           padding: 14,
                           borderRadius: 12,
@@ -1258,6 +1284,11 @@ export default function WorkspaceApiIntegrationPage() {
                             ? "rgba(32, 123, 89, 0.04)"
                             : "var(--background)",
                           opacity: scopeItem.enabled ? 1 : 0.65,
+                          cursor:
+                            isOwner || canUpdateIntegrations
+                              ? "pointer"
+                              : "default",
+                          transition: "all 0.2s ease",
                         }}
                       >
                         <div
@@ -1709,10 +1740,10 @@ export default function WorkspaceApiIntegrationPage() {
                 }}
               >
                 {[
-                  { id: "curl", label: "cURL" },
-                  { id: "js", label: "JavaScript (Fetch)" },
-                  { id: "php", label: "PHP (Guzzle)" },
-                  { id: "python", label: "Python (Requests)" },
+                  { id: "curl", label: "cURL (Form Data)" },
+                  { id: "js", label: "JavaScript (FormData)" },
+                  { id: "php", label: "PHP (Guzzle Multipart)" },
+                  { id: "python", label: "Python (Form Params)" },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -1729,6 +1760,167 @@ export default function WorkspaceApiIntegrationPage() {
                     {item.label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Base URL & Collection Variables Reference */}
+            <div
+              style={{
+                backgroundColor: "var(--surface)",
+                borderRadius: 16,
+                padding: 24,
+                border: "1px solid var(--border)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 800,
+                  margin: "0 0 8px",
+                }}
+              >
+                {lang === "ar"
+                  ? "عنوان الخادم الأساسي ومتغيرات مجموعة Postman (Base URL & Variables)"
+                  : "Base URL & Postman Collection Variables"}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.84rem",
+                  color: "var(--text-muted)",
+                  margin: "0 0 16px",
+                }}
+              >
+                {lang === "ar"
+                  ? "جميع نقاط الـ API الخارجية تستخدم المتغيرات التالية داخل ملف Postman وتدعم إرسال البيانات عبر Form Data أو Query Params:"
+                  : "All external API endpoints use the following variables in the Postman collection and accept Form Data or Query Parameters:"}
+              </p>
+
+              <div style={{ overflowX: "auto" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.8rem",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid var(--border)",
+                        textAlign: lang === "ar" ? "right" : "left",
+                      }}
+                    >
+                      <th style={{ padding: "8px 10px" }}>Variable</th>
+                      <th style={{ padding: "8px 10px" }}>Default / Example</th>
+                      <th style={{ padding: "8px 10px" }}>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {
+                        key: "{{base_url}}",
+                        val: "https://admin.cal.saabq.com/api/v1",
+                        desc:
+                          lang === "ar"
+                            ? "الرابط الأساسي لواجهة البرمجة (يتبعه /external/...)"
+                            : "Base API v1 URL (prefixed to /external/...)",
+                      },
+                      {
+                        key: "{{api_key}}",
+                        val: apiData?.api_key || "sbq_live_...",
+                        desc:
+                          lang === "ar"
+                            ? "مفتاح مساحة العمل العام المرسل في ترويسة X-Api-Key"
+                            : "Public workspace API key sent in X-Api-Key header",
+                      },
+                      {
+                        key: "{{api_secret}}",
+                        val: revealedSecret || "YOUR_API_SECRET",
+                        desc:
+                          lang === "ar"
+                            ? "المفتاح السري المرسل في ترويسة X-Api-Secret"
+                            : "Secret workspace key sent in X-Api-Secret header",
+                      },
+                      {
+                        key: "{{service_id}}",
+                        val: "1",
+                        desc:
+                          lang === "ar"
+                            ? "معرّف الخدمة النشطة للاستعلام عن المواعيد أو الحجز"
+                            : "Target active service ID",
+                      },
+                      {
+                        key: "{{staff_id}}",
+                        val: "1",
+                        desc:
+                          lang === "ar"
+                            ? "معرّف الموظف أو المختص"
+                            : "Target workspace staff member ID",
+                      },
+                      {
+                        key: "{{booking_id}}",
+                        val: "1",
+                        desc:
+                          lang === "ar"
+                            ? "معرّف الموعد لعرض التفاصيل أو التأجيل أو الإلغاء"
+                            : "Target booking ID for show, reschedule, or cancel",
+                      },
+                      {
+                        key: "{{customer_id}}",
+                        val: "1",
+                        desc:
+                          lang === "ar"
+                            ? "معرّف العميل في مساحة العمل"
+                            : "Target workspace customer ID",
+                      },
+                      {
+                        key: "{{date}}",
+                        val: playgroundDate,
+                        desc:
+                          lang === "ar"
+                            ? "تاريخ الحجز بصيغة YYYY-MM-DD (يجب أن يكون اليوم أو تاريخاً مستقبلياً)"
+                            : "Target date in YYYY-MM-DD format (cannot be in the past)",
+                      },
+                      {
+                        key: "{{start_time}}",
+                        val: "10:00",
+                        desc:
+                          lang === "ar"
+                            ? "وقت بداية الفترة بصيغة HH:mm (يجب أن يطابق فترة متاحة في جدول الخدمة)"
+                            : "Slot start time in 24h HH:mm format (must match an available schedule slot)",
+                      },
+                    ].map((row) => (
+                      <tr
+                        key={row.key}
+                        style={{ borderBottom: "1px solid var(--border)" }}
+                      >
+                        <td style={{ padding: "8px 10px" }}>
+                          <code
+                            style={{
+                              color: "var(--primary)",
+                              fontWeight: 700,
+                            }}
+                            dir="ltr"
+                          >
+                            {row.key}
+                          </code>
+                        </td>
+                        <td style={{ padding: "8px 10px" }}>
+                          <code dir="ltr">{row.val}</code>
+                        </td>
+                        <td
+                          style={{
+                            padding: "8px 10px",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          {row.desc}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -1766,7 +1958,7 @@ export default function WorkspaceApiIntegrationPage() {
                   style={{ fontSize: "0.95rem", fontWeight: 800 }}
                   dir="ltr"
                 >
-                  /api/v1/external/ping
+                  {"{{base_url}}/external/ping"}
                 </code>
               </div>
               <p
@@ -1845,7 +2037,7 @@ print(response.json())`}
               </div>
             </div>
 
-            {/* Doc Endpoint 2: Services */}
+            {/* Doc Endpoint 2: Services & Available Slots */}
             <div
               style={{
                 backgroundColor: "var(--surface)",
@@ -1861,6 +2053,7 @@ print(response.json())`}
                   alignItems: "center",
                   gap: 10,
                   marginBottom: 8,
+                  flexWrap: "wrap",
                 }}
               >
                 <span
@@ -1879,19 +2072,91 @@ print(response.json())`}
                   style={{ fontSize: "0.95rem", fontWeight: 800 }}
                   dir="ltr"
                 >
-                  /api/v1/external/services
+                  {"{{base_url}}/external/services/{{service_id}}/slots"}
                 </code>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(32, 123, 89, 0.12)",
+                    color: "var(--primary)",
+                    fontWeight: 700,
+                  }}
+                >
+                  availability:read
+                </span>
               </div>
               <p
                 style={{
                   fontSize: "0.85rem",
                   color: "var(--text-muted)",
-                  margin: "0 0 16px",
+                  margin: "0 0 12px",
                 }}
               >
                 {t("docServicesDesc") ||
-                  "جلب قائمة الخدمات النشطة مع المدد والأسعار المعتمدة في مساحة العمل."}
+                  "جلب قائمة الخدمات النشطة والمواعيد المتاحة في تاريخ محدد."}
               </p>
+
+              {/* Query Params Table */}
+              <div style={{ overflowX: "auto", marginBottom: 14 }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.78rem",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid var(--border)",
+                        textAlign: lang === "ar" ? "right" : "left",
+                      }}
+                    >
+                      <th style={{ padding: "6px 8px" }}>Query Param</th>
+                      <th style={{ padding: "6px 8px" }}>Required</th>
+                      <th style={{ padding: "6px 8px" }}>Validation</th>
+                      <th style={{ padding: "6px 8px" }}>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "6px 8px" }}>
+                        <code dir="ltr">date</code>
+                      </td>
+                      <td style={{ padding: "6px 8px", color: "#dc2626" }}>
+                        Required
+                      </td>
+                      <td style={{ padding: "6px 8px" }}>
+                        <code dir="ltr">date_format:Y-m-d</code>
+                      </td>
+                      <td style={{ padding: "6px 8px" }}>
+                        Target date (e.g. {playgroundDate})
+                      </td>
+                    </tr>
+                    <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                      <td style={{ padding: "6px 8px" }}>
+                        <code dir="ltr">staff_id</code>
+                      </td>
+                      <td
+                        style={{
+                          padding: "6px 8px",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        Optional
+                      </td>
+                      <td style={{ padding: "6px 8px" }}>
+                        <code dir="ltr">integer | exists:workspace_members,id</code>
+                      </td>
+                      <td style={{ padding: "6px 8px" }}>
+                        Filter slots by staff member ID
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
               <div
                 className="workspace-api-code-wrap"
@@ -1915,37 +2180,46 @@ print(response.json())`}
                   }}
                 >
                   {codeLang === "curl" &&
-                    `curl -X GET "https://admin.cal.saabq.com/api/v1/external/services" \\
+                    `curl -G "https://admin.cal.saabq.com/api/v1/external/services/1/slots" \\
   -H "X-Api-Key: ${apiData?.api_key || "YOUR_API_KEY"}" \\
   -H "X-Api-Secret: YOUR_API_SECRET" \\
-  -H "Accept: application/json"`}
+  -H "Accept: application/json" \\
+  --data-urlencode "date=${playgroundDate}"`}
 
                   {codeLang === "js" &&
-                    `const response = await fetch("https://admin.cal.saabq.com/api/v1/external/services", {
+                    `const params = new URLSearchParams({ date: "${playgroundDate}" });
+const response = await fetch(\`https://admin.cal.saabq.com/api/v1/external/services/1/slots?\${params}\`, {
   headers: {
     "X-Api-Key": "${apiData?.api_key || "YOUR_API_KEY"}",
     "X-Api-Secret": "YOUR_API_SECRET",
     "Accept": "application/json"
   }
 });
-const services = await response.json();`}
+const result = await response.json();`}
 
                   {codeLang === "php" &&
-                    `$response = $client->get('https://admin.cal.saabq.com/api/v1/external/services', [
+                    `$response = $client->get('https://admin.cal.saabq.com/api/v1/external/services/1/slots', [
     'headers' => [
         'X-Api-Key'    => '${apiData?.api_key || "YOUR_API_KEY"}',
         'X-Api-Secret' => 'YOUR_API_SECRET',
         'Accept'       => 'application/json',
-    ]
+    ],
+    'query' => [
+        'date' => '${playgroundDate}',
+    ],
 ]);`}
 
                   {codeLang === "python" &&
-                    `response = requests.get("https://admin.cal.saabq.com/api/v1/external/services", headers=headers)`}
+                    `response = requests.get(
+    "https://admin.cal.saabq.com/api/v1/external/services/1/slots",
+    headers=headers,
+    params={"date": "${playgroundDate}"}
+)`}
                 </pre>
               </div>
             </div>
 
-            {/* Doc Endpoint 3: Create Booking */}
+            {/* Doc Endpoint 3: Create Booking (Form Data + Slot Validation) */}
             <div
               style={{
                 backgroundColor: "var(--surface)",
@@ -1961,6 +2235,7 @@ const services = await response.json();`}
                   alignItems: "center",
                   gap: 10,
                   marginBottom: 8,
+                  flexWrap: "wrap",
                 }}
               >
                 <span
@@ -1979,19 +2254,160 @@ const services = await response.json();`}
                   style={{ fontSize: "0.95rem", fontWeight: 800 }}
                   dir="ltr"
                 >
-                  /api/v1/external/bookings
+                  {"{{base_url}}/external/bookings"}
                 </code>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    padding: "2px 8px",
+                    borderRadius: 10,
+                    backgroundColor: "rgba(37, 99, 235, 0.12)",
+                    color: "#2563eb",
+                    fontWeight: 700,
+                  }}
+                >
+                  bookings:write | Form Data
+                </span>
               </div>
               <p
                 style={{
                   fontSize: "0.85rem",
                   color: "var(--text-muted)",
-                  margin: "0 0 16px",
+                  margin: "0 0 12px",
                 }}
               >
                 {t("docCreateBookingDesc") ||
                   "إنشاء حجز جديد تلقائياً وتثبيته في قاعدة بيانات سابق مع مزامنة تقويم جوجل وإشعارات تليجرام فوراً."}
               </p>
+
+              {/* Validation Rules Alert */}
+              <div
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  backgroundColor: "rgba(245, 158, 11, 0.08)",
+                  border: "1px solid rgba(245, 158, 11, 0.28)",
+                  fontSize: "0.78rem",
+                  marginBottom: 14,
+                  lineHeight: 1.6,
+                }}
+              >
+                <strong>
+                  {lang === "ar"
+                    ? "قواعد التحقق من التاريخ والفترات الزمنية:"
+                    : "Date & Schedule Slot Validation Rules:"}
+                </strong>{" "}
+                {lang === "ar"
+                  ? "لا يُسمح بالحجز في تاريخ أو وقت سابق، ويجب أن يطابق وقت البداية (start_time) فترة متاحة فعلياً في جدول الخدمة لتاريخ الحجز، وإلا سيُرفض الطلب بكود 422."
+                  : "Bookings in the past are rejected, and start_time must match an available slot in the service's schedule for that date (returns 422 Unprocessable Entity otherwise)."}
+              </div>
+
+              {/* Form Data Parameters Table */}
+              <div style={{ overflowX: "auto", marginBottom: 14 }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.78rem",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{
+                        borderBottom: "1px solid var(--border)",
+                        textAlign: lang === "ar" ? "right" : "left",
+                      }}
+                    >
+                      <th style={{ padding: "6px 8px" }}>Form Data Param</th>
+                      <th style={{ padding: "6px 8px" }}>Required</th>
+                      <th style={{ padding: "6px 8px" }}>Validation Rules</th>
+                      <th style={{ padding: "6px 8px" }}>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {
+                        k: "service_id",
+                        req: true,
+                        rule: "integer | exists:services,id",
+                        desc: "Target active service ID",
+                      },
+                      {
+                        k: "date",
+                        req: true,
+                        rule: "date_format:Y-m-d | after_or_equal:today",
+                        desc: "Booking date (must have open schedule slots)",
+                      },
+                      {
+                        k: "start_time",
+                        req: true,
+                        rule: "date_format:H:i | valid available slot",
+                        desc: "Slot start time matching GET /slots (e.g. 10:00)",
+                      },
+                      {
+                        k: "customer_name",
+                        req: true,
+                        rule: "string | max:255",
+                        desc: "Customer full name",
+                      },
+                      {
+                        k: "customer_email",
+                        req: true,
+                        rule: "email | max:255",
+                        desc: "Customer email address",
+                      },
+                      {
+                        k: "customer_phone",
+                        req: false,
+                        rule: "string | max:50",
+                        desc: "Customer phone number",
+                      },
+                      {
+                        k: "staff_id",
+                        req: false,
+                        rule: "integer | exists:workspace_members,id",
+                        desc: "Assigned staff member ID",
+                      },
+                      {
+                        k: "external_reference_id",
+                        req: false,
+                        rule: "string | max:255",
+                        desc: "External order/booking ID for two-way sync",
+                      },
+                      {
+                        k: "notes",
+                        req: false,
+                        rule: "string | max:2000",
+                        desc: "Additional appointment notes",
+                      },
+                    ].map((param) => (
+                      <tr
+                        key={param.k}
+                        style={{ borderBottom: "1px solid var(--border)" }}
+                      >
+                        <td style={{ padding: "6px 8px" }}>
+                          <code dir="ltr">{param.k}</code>
+                        </td>
+                        <td
+                          style={{
+                            padding: "6px 8px",
+                            color: param.req
+                              ? "#dc2626"
+                              : "var(--text-muted)",
+                            fontWeight: param.req ? 700 : 400,
+                          }}
+                        >
+                          {param.req ? "Required" : "Optional"}
+                        </td>
+                        <td style={{ padding: "6px 8px" }}>
+                          <code dir="ltr">{param.rule}</code>
+                        </td>
+                        <td style={{ padding: "6px 8px" }}>{param.desc}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               <div
                 className="workspace-api-code-wrap"
@@ -2018,35 +2434,33 @@ const services = await response.json();`}
                     `curl -X POST "https://admin.cal.saabq.com/api/v1/external/bookings" \\
   -H "X-Api-Key: ${apiData?.api_key || "YOUR_API_KEY"}" \\
   -H "X-Api-Secret: YOUR_API_SECRET" \\
-  -H "Content-Type: application/json" \\
   -H "Accept: application/json" \\
-  -d '{
-    "service_id": 1,
-    "customer_name": "Sarah Smith",
-    "customer_email": "sara@example.com",
-    "customer_phone": "+966551234567",
-    "starts_at": "2026-09-15 11:30:00",
-    "notes": "Direct booking from website",
-    "external_reference_id": "ORDER-9842"
-  }'`}
+  -F "service_id=1" \\
+  -F "date=${playgroundDate}" \\
+  -F "start_time=10:00" \\
+  -F "customer_name=Sarah Smith" \\
+  -F "customer_email=sara@example.com" \\
+  -F "customer_phone=+966551234567" \\
+  -F "external_reference_id=ORDER-9842"`}
 
                   {codeLang === "js" &&
-                    `const res = await fetch("https://admin.cal.saabq.com/api/v1/external/bookings", {
+                    `const formData = new FormData();
+formData.append("service_id", "1");
+formData.append("date", "${playgroundDate}");
+formData.append("start_time", "10:00");
+formData.append("customer_name", "Sarah Smith");
+formData.append("customer_email", "sara@example.com");
+formData.append("customer_phone", "+966551234567");
+formData.append("external_reference_id", "ORDER-9842");
+
+const res = await fetch("https://admin.cal.saabq.com/api/v1/external/bookings", {
   method: "POST",
   headers: {
     "X-Api-Key": "${apiData?.api_key || "YOUR_API_KEY"}",
     "X-Api-Secret": "YOUR_API_SECRET",
-    "Content-Type": "application/json",
     "Accept": "application/json"
   },
-  body: JSON.stringify({
-    service_id: 1,
-    customer_name: "Sarah Smith",
-    customer_email: "sara@example.com",
-    customer_phone: "+966551234567",
-    starts_at: "2026-09-15 11:30:00",
-    external_reference_id: "ORDER-9842"
-  })
+  body: formData
 });
 const booking = await res.json();`}
 
@@ -2057,22 +2471,24 @@ const booking = await res.json();`}
         'X-Api-Secret' => 'YOUR_API_SECRET',
         'Accept'       => 'application/json',
     ],
-    'json' => [
-        'service_id'     => 1,
-        'customer_name'  => 'Sarah Smith',
-        'customer_email' => 'sara@example.com',
-        'starts_at'      => '2026-09-15 11:30:00',
+    'multipart' => [
+        ['name' => 'service_id',     'contents' => '1'],
+        ['name' => 'date',           'contents' => '${playgroundDate}'],
+        ['name' => 'start_time',     'contents' => '10:00'],
+        ['name' => 'customer_name',  'contents' => 'Sarah Smith'],
+        ['name' => 'customer_email', 'contents' => 'sara@example.com'],
     ]
 ]);`}
 
                   {codeLang === "python" &&
                     `payload = {
     "service_id": 1,
+    "date": "${playgroundDate}",
+    "start_time": "10:00",
     "customer_name": "Sarah Smith",
     "customer_email": "sara@example.com",
-    "starts_at": "2026-09-15 11:30:00"
 }
-res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", headers=headers, json=payload)`}
+res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", headers=headers, data=payload)`}
                 </pre>
               </div>
             </div>

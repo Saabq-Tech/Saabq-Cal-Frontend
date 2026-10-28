@@ -157,7 +157,7 @@ export function useCustomerLabel(passedWorkspace) {
       ? `لا يوجد ${plural}`
       : `No ${plural} found`
     : t("noCustomersFound") ||
-      (isRTL ? "ملقيناش أي عملاء" : "No customers found");
+      (isRTL ? "لا يوجد عملاء" : "No customers found");
 
   const noCustomersFoundDesc = isCustom
     ? isRTL
@@ -165,7 +165,7 @@ export function useCustomerLabel(passedWorkspace) {
       : `No ${plural} have been added yet or no results matched your current search.`
     : t("noCustomersFoundDesc") ||
       (isRTL
-        ? "مفيش أي عملاء اتضافوا لحد دلوقتي أو مفيش نتائج مطابقة للبحث."
+        ? "لم تتم إضافة أي عملاء حتى الآن أو لا توجد نتائج مطابقة للبحث."
         : "No customers have been added yet or no results matched your current search.");
 
   const customerCreatedSuccess = isCustom
@@ -197,7 +197,7 @@ export function useCustomerLabel(passedWorkspace) {
       : `Are you sure you want to remove this ${singular} from the workspace?`
     : t("confirmDeleteCustomer") ||
       (isRTL
-        ? "إنت متأكد إنك عايز تحذف العميل من مساحة العمل؟"
+        ? "هل أنت متأكد من رغبتك في حذف هذا العميل من مساحة العمل؟"
         : "Are you sure you want to remove this customer from the workspace?");
 
   const confirmDeleteCustomerDesc = isCustom
@@ -206,7 +206,7 @@ export function useCustomerLabel(passedWorkspace) {
       : `The ${singular} will be unlinked from this workspace. Previous appointment and payment records will be retained for archival purposes.`
     : t("confirmDeleteCustomerDesc") ||
       (isRTL
-        ? "هيتم فك ارتباط العميل بمساحة العمل دي ومش هيظهر في قائمتك. سجلات المواعيد والمدفوعات القديمة هتفضل محفوظة للأرشفة."
+        ? "سيتم فك ارتباط العميل بمساحة العمل الحالية ولن يظهر في قائمتك. ستبقى سجلات المواعيد والمدفوعات السابقة محفوظة لأغراض الأرشفة."
         : "The customer will be unlinked from this workspace. Previous appointment and payment records will be retained for archival purposes.");
 
   const customerNotFound = isCustom
@@ -215,7 +215,7 @@ export function useCustomerLabel(passedWorkspace) {
       : `${singular} not found or you don't have permission to view them`
     : t("customerNotFound") ||
       (isRTL
-        ? "العميل مش موجود أو معندكش صلاحية لعرضه"
+        ? "العميل غير موجود أو ليس لديك صلاحية لعرضه"
         : "Customer not found or you don't have permission to view them");
 
   const backToCustomers = isCustom
@@ -237,7 +237,7 @@ export function useCustomerLabel(passedWorkspace) {
       : `This ${singular} has not booked any appointments in this workspace yet.`
     : t("noCustomerAppointmentsYet") ||
       (isRTL
-        ? "لم يسجل هذا العميل أي مواعيد في مساحة العمل هذه لحد دلوقتي."
+        ? "لم يسجل هذا العميل أي مواعيد في مساحة العمل هذه حتى الآن."
         : "This client has not booked any appointments in this workspace yet.");
 
   const internalNotesNotice = isCustom

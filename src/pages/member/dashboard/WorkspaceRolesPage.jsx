@@ -80,14 +80,14 @@ export default function WorkspaceRolesPage() {
           `${endpoints.workspaceRoles}/${roleForm.editing_id}`,
           payload,
         );
-        toast.success(t("roleUpdatedSuccess") || "اتحدث الدور بنجاح");
+        toast.success(t("roleUpdatedSuccess") || "تم تحديث الدور بنجاح");
       } else {
         await client.post(endpoints.workspaceRoles, payload);
         toast.success(t("roleCreatedSuccess") || "تم إنشاء الدور المخصص بنجاح");
       }
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حفظ الدور");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حفظ الدور");
     }
   };
 
@@ -101,7 +101,7 @@ export default function WorkspaceRolesPage() {
       toast.success(t("roleDeletedSuccess") || "تم حذف الدور بنجاح");
       loadData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "حصل خطأ في حذف الدور");
+      toast.error(err.response?.data?.message || "حدث خطأ أثناء حذف الدور");
     }
   };
 

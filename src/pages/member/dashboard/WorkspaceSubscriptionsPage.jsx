@@ -84,14 +84,14 @@ export default function WorkspaceSubscriptionsPage() {
       toast.success(
         res.data?.message ||
           t("upgradeSuccess") ||
-          "اتحدثت باقة الاشتراك بنجاح",
+          "تم تحديث باقة الاشتراك بنجاح",
       );
       loadData();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
           t("upgradeFailed") ||
-          "حصل خطأ في ترقية الباقة",
+          "حدث خطأ أثناء ترقية الباقة",
       );
     }
   };
