@@ -385,7 +385,7 @@ export default function ChatsPage() {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [toast, t, refreshUnreadCounts],
+    [toast, t, refreshUnreadCounts, scrollToBottom],
   );
 
   // Silent background sync for conversation list & active conversation messages
@@ -467,7 +467,7 @@ export default function ChatsPage() {
     } finally {
       isSyncingRef.current = false;
     }
-  }, [unreadChatCount, refreshUnreadCounts]);
+  }, [unreadChatCount, refreshUnreadCounts, scrollToBottom]);
 
   // Fetch Conversations List
   const fetchConversations = useCallback(async () => {
