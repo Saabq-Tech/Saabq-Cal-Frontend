@@ -44,6 +44,7 @@ export default function SaabqChatInboxTab() {
   // New Label Modal State
   const [newLabelInput, setNewLabelInput] = useState("");
   const [showLabelInput, setShowLabelInput] = useState(false);
+  const [showCustomerPanel, setShowCustomerPanel] = useState(false);
 
   // Fetch Meta Counts
   const fetchMetaCounts = useCallback(() => {
@@ -344,26 +345,32 @@ export default function SaabqChatInboxTab() {
 
   return (
     <div
-      className="saabq-chat-inbox-grid"
+      className={`saabq-chat-inbox-grid ${activeConversation ? "has-active-chat" : ""}`}
       style={{
         display: "grid",
-        gridTemplateColumns: "320px minmax(0, 1fr) 280px",
+        gridTemplateColumns: showCustomerPanel
+          ? "290px minmax(0, 1fr) 270px"
+          : "300px minmax(0, 1fr)",
         gap: 0,
         background: "var(--surface)",
         borderRadius: "var(--radius-lg, 16px)",
         border: "1px solid var(--border)",
-        height: "calc(100dvh - 200px)",
-        minHeight: 560,
+        height: "calc(100vh - 240px)",
+        minHeight: 520,
+        maxHeight: "840px",
         boxShadow: "var(--shadow-sm)",
         overflow: "hidden",
       }}
     >
       {/* 1. Left Column: Conversations List & Filters */}
       <div
+        className="saabq-chat-col-list"
         style={{
           borderInlineEnd: "1px solid var(--border)",
           display: "flex",
           flexDirection: "column",
+          height: "100%",
+          minHeight: 0,
           background: "var(--surface-subtle, rgba(0,0,0,0.02))",
         }}
       >
@@ -651,6 +658,7 @@ export default function SaabqChatInboxTab() {
 
       {/* 2. Middle Column: Active Chat Conversation */}
       <div
+        className="saabq-chat-col-chat"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -766,6 +774,7 @@ export default function SaabqChatInboxTab() {
 
                 {/* Assignee Dropdown */}
                 <select
+                  dir="auto"
                   value={activeConversation.meta?.assignee?.id || ""}
                   onChange={(e) => handleAssignAgent(e.target.value)}
                   style={{
@@ -776,6 +785,9 @@ export default function SaabqChatInboxTab() {
                     background: "var(--surface-bg)",
                     color: "var(--heading)",
                     cursor: "pointer",
+                    boxSizing: "border-box",
+                    maxWidth: 130,
+                    textOverflow: "ellipsis",
                   }}
                 >
                   <option value="">غير معين</option>
@@ -785,6 +797,18 @@ export default function SaabqChatInboxTab() {
                     </option>
                   ))}
                 </select>
+
+                {/* Toggle Customer Info Panel */}
+                <button
+                  type="button"
+                  onClick={() => setShowCustomerPanel(!showCustomerPanel)}
+                  className={`btn btn-sm ${showCustomerPanel ? "btn-primary" : "btn-secondary"}`}
+                  style={{ gap: 4, padding: "5px 10px", fontSize: "0.76rem" }}
+                  title="بيانات وتفاصيل العميل"
+                >
+                  <Icon name="user" size={13} />
+                  <span>بيانات العميل</span>
+                </button>
               </div>
             </div>
 
@@ -927,13 +951,55 @@ export default function SaabqChatInboxTab() {
                   const senderName =
                     m.sender?.name || (isAgent ? "فريق العمل" : "العميل");
 
+                  const resolveMediaUrl = (url) => {
+                    if (!url) return "";
+                    if (
+                      url.startsWith("http://") ||
+                      url.startsWith("https://") ||
+                      url.startsWith("blob:") ||
+                      url.startsWith("data:")
+                    ) {
+                      return url;
+                    }
+                    const baseUrl = "https://app.saabqchat.com";
+                    return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+                  };
+
                   const isImage = (att) =>
                     att.file_type === "image" ||
-                    /\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(att.data_url || "");
+                    /\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(att.data_url || "") ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(att.extension || "");
+
+                  const isAudio = (att) =>
+                    att.file_type === "audio" ||
+                    att.file_type === "voice" ||
+                    /\.(mp3|wav|ogg|m4a|aac|opus)(\?|$)/i.test(att.data_url || "") ||
+                    /\.(mp3|wav|ogg|m4a|aac|opus)$/i.test(att.extension || "");
+
+                  const isVideo = (att) =>
+                    att.file_type === "video" ||
+                    /\.(mp4|webm|mov|mkv)(\?|$)/i.test(att.data_url || "") ||
+                    /\.(mp4|webm|mov|mkv)$/i.test(att.extension || "");
+
                   const attachments = Array.isArray(m.attachments)
                     ? m.attachments
                     : [];
-                  const hasText = Boolean(m.content && String(m.content).trim());
+
+                  const rawContent = (m.content || "").trim();
+                  const isPlaceholder =
+                    rawContent === "مرفق" ||
+                    rawContent.toLowerCase() === "attachment" ||
+                    rawContent === "[مرفق]";
+
+                  // Only show raw text if it is not just a generic placeholder when media is present
+                  const showContentText =
+                    Boolean(rawContent) &&
+                    (!isPlaceholder || attachments.length === 0);
+
+                  const storyOrImageUrl =
+                    m.content_attributes?.story_url ||
+                    m.content_attributes?.image_url;
+
                   const ts = new Date(m.created_at * 1000 || m.created_at);
                   const timeLabel = ts.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -971,13 +1037,15 @@ export default function SaabqChatInboxTab() {
                           minWidth: 64,
                           background: bubbleBg,
                           color: bubbleColor,
-                          borderRadius: 16,
+                          borderRadius: isAgent
+                            ? "16px 16px 4px 16px"
+                            : "16px 16px 16px 4px",
                           border: isPrivate
                             ? "1px dashed rgba(245, 158, 11, 0.55)"
                             : isAgent
                               ? "1px solid transparent"
                               : "1px solid var(--border)",
-                          padding: "9px 14px",
+                          padding: "10px 14px",
                           boxShadow: isAgent
                             ? "0 2px 6px rgba(0,0,0,0.12)"
                             : "0 1px 3px rgba(0,0,0,0.06)",
@@ -996,7 +1064,7 @@ export default function SaabqChatInboxTab() {
                           </div>
                         )}
 
-                        {hasText && (
+                        {showContentText && !isPlaceholder && (
                           <div
                             style={{
                               fontSize: "0.9rem",
@@ -1008,47 +1076,159 @@ export default function SaabqChatInboxTab() {
                           </div>
                         )}
 
+                        {/* Story/Reel media from content_attributes if available */}
+                        {storyOrImageUrl && (
+                          <a
+                            href={resolveMediaUrl(storyOrImageUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ display: "block", lineHeight: 0, marginBottom: 6 }}
+                          >
+                            <img
+                              src={resolveMediaUrl(storyOrImageUrl)}
+                              alt="وسائط إنستغرام"
+                              loading="lazy"
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: 240,
+                                borderRadius: 10,
+                                objectFit: "cover",
+                              }}
+                            />
+                          </a>
+                        )}
+
+                        {/* Fallback for placeholder text with no attachments (e.g. view-once or expired IG media) */}
+                        {isPlaceholder && attachments.length === 0 && !storyOrImageUrl && (
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "6px 10px",
+                              borderRadius: 8,
+                              background: isAgent
+                                ? "rgba(255,255,255,0.18)"
+                                : "rgba(0,0,0,0.04)",
+                              color: "inherit",
+                              fontSize: "0.82rem",
+                            }}
+                          >
+                            <span style={{ fontSize: "1.1rem" }}>📷</span>
+                            <span>مرفق وسائط من إنستغرام</span>
+                          </div>
+                        )}
+
+                        {/* Real attachments list (Images, Audio, Video, Files) */}
                         {attachments.length > 0 && (
                           <div
                             style={{
-                              marginTop: hasText ? 8 : 0,
+                              marginTop: showContentText && !isPlaceholder ? 8 : 0,
                               display: "flex",
-                              gap: 6,
+                              gap: 8,
                               flexDirection: "column",
                             }}
                           >
-                            {attachments.map((att, attIdx) =>
-                              isImage(att) ? (
-                                <a
-                                  key={attIdx}
-                                  href={att.data_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ display: "block", lineHeight: 0 }}
-                                >
-                                  <img
-                                    src={att.thumb_url || att.data_url}
-                                    alt="مرفق"
-                                    loading="lazy"
+                            {attachments.map((att, attIdx) => {
+                              const mediaUrl = resolveMediaUrl(att.data_url);
+
+                              if (isAudio(att)) {
+                                return (
+                                  <div
+                                    key={attIdx}
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: 4,
+                                      padding: "6px 8px",
+                                      background: isAgent
+                                        ? "rgba(255,255,255,0.18)"
+                                        : "rgba(0,0,0,0.04)",
+                                      borderRadius: 10,
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 6,
+                                        fontSize: "0.75rem",
+                                        opacity: 0.9,
+                                      }}
+                                    >
+                                      <span>🎤</span>
+                                      <span style={{ fontWeight: 600 }}>تسجيل صوتي</span>
+                                    </div>
+                                    <audio
+                                      controls
+                                      src={mediaUrl}
+                                      style={{ maxWidth: "100%", width: 250, height: 36 }}
+                                    />
+                                  </div>
+                                );
+                              }
+
+                              if (isVideo(att)) {
+                                return (
+                                  <video
+                                    key={attIdx}
+                                    controls
+                                    src={mediaUrl}
                                     style={{
                                       maxWidth: "100%",
                                       maxHeight: 240,
                                       borderRadius: 10,
-                                      objectFit: "cover",
+                                      background: "#000",
                                     }}
                                   />
-                                </a>
-                              ) : (
+                                );
+                              }
+
+                              if (isImage(att)) {
+                                return (
+                                  <a
+                                    key={attIdx}
+                                    href={mediaUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ display: "block", lineHeight: 0 }}
+                                  >
+                                    <img
+                                      src={resolveMediaUrl(att.thumb_url || att.data_url)}
+                                      alt="مرفق صورة"
+                                      loading="lazy"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: 260,
+                                        borderRadius: 10,
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  </a>
+                                );
+                              }
+
+                              const fileName =
+                                att.fallback_title ||
+                                decodeURIComponent(
+                                  String(att.data_url || "")
+                                    .split("?")[0]
+                                    .split("/")
+                                    .pop() || "ملف مرفق"
+                                );
+
+                              return (
                                 <a
                                   key={attIdx}
-                                  href={att.data_url}
+                                  href={mediaUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  download
                                   style={{
                                     display: "inline-flex",
                                     alignItems: "center",
-                                    gap: 6,
-                                    padding: "6px 10px",
+                                    gap: 8,
+                                    padding: "6px 12px",
                                     borderRadius: 8,
                                     background: isAgent
                                       ? "rgba(255,255,255,0.18)"
@@ -1058,18 +1238,26 @@ export default function SaabqChatInboxTab() {
                                     textDecoration: "none",
                                   }}
                                 >
-                                  <Icon name="paperclip" size={13} />
-                                  <span>
-                                    {decodeURIComponent(
-                                      String(att.data_url || "")
-                                        .split("?")[0]
-                                        .split("/")
-                                        .pop() || "مرفق",
-                                    )}
+                                  <span>📎</span>
+                                  <span
+                                    style={{
+                                      fontWeight: 600,
+                                      maxWidth: 180,
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {fileName}
                                   </span>
+                                  {att.file_size ? (
+                                    <span style={{ fontSize: "0.68rem", opacity: 0.75 }}>
+                                      ({(att.file_size / 1024).toFixed(0)} KB)
+                                    </span>
+                                  ) : null}
                                 </a>
-                              ),
-                            )}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -1135,6 +1323,7 @@ export default function SaabqChatInboxTab() {
                 padding: "12px 18px",
                 borderTop: "1px solid var(--border)",
                 background: "var(--surface)",
+                flexShrink: 0,
               }}
             >
               {/* Composer Toolbar */}
@@ -1525,9 +1714,10 @@ export default function SaabqChatInboxTab() {
       </div>
 
       {/* 3. Right Column: CRM Context & Customer Summary */}
-      <div
-        style={{
-          borderInlineStart: "1px solid var(--border)",
+      {showCustomerPanel && (
+        <div
+          style={{
+            borderInlineStart: "1px solid var(--border)",
           padding: 16,
           background: "var(--surface-subtle, rgba(0,0,0,0.02))",
           overflowY: "auto",
@@ -1667,7 +1857,8 @@ export default function SaabqChatInboxTab() {
             لا يوجد عميل محدد
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       {/* New Conversation Modal */}
       {showNewConvModal && (

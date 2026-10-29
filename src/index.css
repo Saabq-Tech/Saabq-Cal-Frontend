@@ -19487,8 +19487,31 @@ html.dark .go-to-top-btn:hover,
 
 @media (max-width: 900px) {
   .saabq-chat-inbox-grid {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100dvh - 180px) !important;
+    min-height: 480px !important;
   }
+
+  .saabq-chat-inbox-grid.has-active-chat .saabq-chat-col-list {
+    display: none !important;
+  }
+
+  .saabq-chat-inbox-grid:not(.has-active-chat) .saabq-chat-col-chat {
+    display: none !important;
+  }
+
+  .saabq-chat-inbox-grid .saabq-chat-col-crm {
+    display: none !important;
+  }
+
+  .saabq-chat-mobile-back-btn {
+    display: inline-flex !important;
+  }
+}
+
+.saabq-chat-mobile-back-btn {
+  display: none;
 }
 
 /* ── Home redesign: full-width pricing, why strip, FAQ two-column ── */
