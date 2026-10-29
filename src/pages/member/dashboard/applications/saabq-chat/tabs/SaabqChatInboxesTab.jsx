@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useLanguage } from "../../../../../../context/LanguageContext";
@@ -419,6 +420,7 @@ export default function SaabqChatInboxesTab() {
 
       {/* Create Inbox Modal */}
       {showCreateModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 480 }}>
             <div className="modal-header">
@@ -590,10 +592,12 @@ export default function SaabqChatInboxesTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Edit Inbox Modal */}
       {showEditModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 480 }}>
             <div className="modal-header">
@@ -729,10 +733,12 @@ export default function SaabqChatInboxesTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Inbox Members Modal */}
       {showMembersModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -826,6 +832,7 @@ export default function SaabqChatInboxesTab() {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

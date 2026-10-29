@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -527,6 +528,7 @@ export default function SaabqChatAgentsTeamsTab() {
 
       {/* Agent Modal */}
       {showAgentModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -679,10 +681,12 @@ export default function SaabqChatAgentsTeamsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Team Modal */}
       {showTeamModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -794,10 +798,12 @@ export default function SaabqChatAgentsTeamsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Team Members Modal */}
       {showTeamMembersModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -889,6 +895,7 @@ export default function SaabqChatAgentsTeamsTab() {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -529,6 +530,7 @@ export default function SaabqChatAutomationsTab() {
 
       {/* Canned Modal */}
       {showCannedModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -618,10 +620,12 @@ export default function SaabqChatAutomationsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Rule Modal */}
       {showRuleModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -770,10 +774,12 @@ export default function SaabqChatAutomationsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Macro Modal */}
       {showMacroModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -866,6 +872,7 @@ export default function SaabqChatAutomationsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect, useCallback } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -424,6 +425,7 @@ export default function SaabqChatContactsTab() {
 
       {/* Create Contact Modal */}
       {showCreateModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -561,10 +563,12 @@ export default function SaabqChatContactsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Edit Contact Modal */}
       {showEditModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -675,10 +679,12 @@ export default function SaabqChatContactsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Merge Contacts Modal */}
       {showMergeModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -756,6 +762,7 @@ export default function SaabqChatContactsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

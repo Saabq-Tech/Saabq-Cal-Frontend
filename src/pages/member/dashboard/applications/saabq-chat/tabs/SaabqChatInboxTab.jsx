@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -1600,6 +1601,7 @@ export default function SaabqChatInboxTab() {
 
       {/* New Conversation Modal */}
       {showNewConvModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1719,6 +1721,7 @@ export default function SaabqChatInboxTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

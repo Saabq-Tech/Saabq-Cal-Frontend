@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -952,6 +953,7 @@ export default function SaabqChatSettingsTab() {
 
       {/* Label Modal */}
       {showLabelModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 400 }}>
             <div className="modal-header">
@@ -1039,10 +1041,12 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Custom Attribute Modal */}
       {showAttrModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1164,10 +1168,12 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Webhook Modal */}
       {showWebhookModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1229,10 +1235,12 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Bot Modal */}
       {showBotModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1320,10 +1328,12 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Dashboard App Modal */}
       {showAppModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1411,10 +1421,12 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Campaign Modal */}
       {showCampaignModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -1506,6 +1518,7 @@ export default function SaabqChatSettingsTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

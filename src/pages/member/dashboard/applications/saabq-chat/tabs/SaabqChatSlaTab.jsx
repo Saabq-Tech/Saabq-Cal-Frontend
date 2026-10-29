@@ -1,3 +1,4 @@
+import ModalPortal from "../../../../../../components/common/ModalPortal";
 import React, { useState, useEffect } from "react";
 import client, { endpoints } from "../../../../../../api/client";
 import Icon from "../../../../../../components/common/Icon";
@@ -306,6 +307,7 @@ export default function SaabqChatSlaTab() {
 
       {/* Modal */}
       {showModal && (
+        <ModalPortal>
         <div className="modal-backdrop">
           <div className="modal-card" style={{ maxWidth: 440 }}>
             <div className="modal-header">
@@ -480,6 +482,7 @@ export default function SaabqChatSlaTab() {
             </form>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );
