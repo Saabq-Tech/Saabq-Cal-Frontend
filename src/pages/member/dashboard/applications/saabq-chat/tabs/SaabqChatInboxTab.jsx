@@ -30,6 +30,7 @@ export default function SaabqChatInboxTab() {
   const [agents, setAgents] = useState([]);
   const [attachmentFile, setAttachmentFile] = useState(null);
   const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   // New Conversation Modal State
   const [showNewConvModal, setShowNewConvModal] = useState(false);
@@ -132,6 +133,11 @@ export default function SaabqChatInboxTab() {
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  // Keep the newest message in view
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, messagesLoading]);
 
   // Send Message (Supports Public text, Private Notes & Attachments)
   const handleSendMessage = async (e) => {
@@ -341,12 +347,13 @@ export default function SaabqChatInboxTab() {
       className="saabq-chat-inbox-grid"
       style={{
         display: "grid",
-        gridTemplateColumns: "330px 1fr 300px",
-        gap: 16,
+        gridTemplateColumns: "320px minmax(0, 1fr) 280px",
+        gap: 0,
         background: "var(--surface)",
         borderRadius: "var(--radius-lg, 16px)",
         border: "1px solid var(--border)",
-        minHeight: 740,
+        height: "calc(100dvh - 200px)",
+        minHeight: 560,
         boxShadow: "var(--shadow-sm)",
         overflow: "hidden",
       }}
@@ -648,6 +655,8 @@ export default function SaabqChatInboxTab() {
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          minHeight: 0,
+          minWidth: 0,
           background: "var(--surface)",
         }}
       >
@@ -878,11 +887,14 @@ export default function SaabqChatInboxTab() {
             <div
               style={{
                 flex: 1,
-                padding: "16px 20px",
+                minHeight: 0,
+                padding: "18px 22px",
                 overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
-                gap: 12,
+                gap: 10,
+                background:
+                  "color-mix(in srgb, var(--primary) 4%, var(--background, #f6f8fa))",
               }}
             >
               {messagesLoading ? (
@@ -915,148 +927,206 @@ export default function SaabqChatInboxTab() {
                   const senderName =
                     m.sender?.name || (isAgent ? "فريق العمل" : "العميل");
 
+                  const isImage = (att) =>
+                    att.file_type === "image" ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(att.data_url || "");
+                  const attachments = Array.isArray(m.attachments)
+                    ? m.attachments
+                    : [];
+                  const hasText = Boolean(m.content && String(m.content).trim());
+                  const ts = new Date(m.created_at * 1000 || m.created_at);
+                  const timeLabel = ts.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const bubbleBg = isPrivate
+                    ? "rgba(245, 158, 11, 0.12)"
+                    : isAgent
+                      ? "var(--primary)"
+                      : "var(--surface)";
+                  const bubbleColor = isPrivate
+                    ? "#92400e"
+                    : isAgent
+                      ? "#ffffff"
+                      : "var(--heading)";
+
                   return (
                     <div
                       key={m.id}
                       style={{
-                        alignSelf: isPrivate
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: isPrivate
                           ? "center"
                           : isAgent
                             ? "flex-end"
                             : "flex-start",
-                        maxWidth: isPrivate ? "90%" : "75%",
-                        width: isPrivate ? "100%" : "auto",
-                        background: isPrivate
-                          ? "rgba(245, 158, 11, 0.1)"
-                          : isAgent
-                            ? "var(--primary)"
-                            : "var(--surface-bg)",
-                        color: isPrivate
-                          ? "#92400e"
-                          : isAgent
-                            ? "#ffffff"
-                            : "var(--heading)",
-                        borderRadius: 12,
-                        border: isPrivate
-                          ? "1px solid rgba(245, 158, 11, 0.3)"
-                          : "1px solid var(--border)",
-                        padding: "10px 14px",
-                        boxShadow: "var(--shadow-sm)",
-                        position: "relative",
+                        gap: 3,
+                        width: "100%",
                       }}
                     >
                       <div
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: 4,
-                          fontSize: "0.7rem",
-                          opacity: 0.85,
-                          gap: 12,
+                          maxWidth: isPrivate ? "85%" : "min(520px, 78%)",
+                          minWidth: 64,
+                          background: bubbleBg,
+                          color: bubbleColor,
+                          borderRadius: 16,
+                          border: isPrivate
+                            ? "1px dashed rgba(245, 158, 11, 0.55)"
+                            : isAgent
+                              ? "1px solid transparent"
+                              : "1px solid var(--border)",
+                          padding: "9px 14px",
+                          boxShadow: isAgent
+                            ? "0 2px 6px rgba(0,0,0,0.12)"
+                            : "0 1px 3px rgba(0,0,0,0.06)",
+                          wordBreak: "break-word",
                         }}
                       >
-                        <span style={{ fontWeight: 700 }}>
-                          {isPrivate ? "🔒 ملاحظة خاصة داخلية" : senderName}
-                        </span>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: 6,
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>
-                            {new Date(
-                              m.created_at * 1000 || m.created_at,
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                          <button
-                            type="button"
-                            title="حذف الرسالة"
-                            onClick={() => handleDeleteMessage(m.id)}
+                        {isPrivate && (
+                          <div
                             style={{
-                              background: "transparent",
-                              border: "none",
-                              cursor: "pointer",
-                              color: "inherit",
-                              padding: 0,
-                              opacity: 0.6,
+                              fontSize: "0.7rem",
+                              fontWeight: 700,
+                              marginBottom: 4,
                             }}
                           >
-                            <Icon name="trash-2" size={11} />
-                          </button>
-                          {m.status === "failed" && (
-                            <button
-                              type="button"
-                              title="إعادة المحاولة"
-                              onClick={() => handleRetryMessage(m.id)}
-                              style={{
-                                background: "transparent",
-                                border: "none",
-                                cursor: "pointer",
-                                color: "#ef4444",
-                                padding: 0,
-                              }}
-                            >
-                              <Icon name="refresh-cw" size={11} />
-                            </button>
-                          )}
-                        </div>
+                            🔒 ملاحظة خاصة داخلية
+                          </div>
+                        )}
+
+                        {hasText && (
+                          <div
+                            style={{
+                              fontSize: "0.9rem",
+                              lineHeight: 1.65,
+                              whiteSpace: "pre-wrap",
+                            }}
+                          >
+                            {m.content}
+                          </div>
+                        )}
+
+                        {attachments.length > 0 && (
+                          <div
+                            style={{
+                              marginTop: hasText ? 8 : 0,
+                              display: "flex",
+                              gap: 6,
+                              flexDirection: "column",
+                            }}
+                          >
+                            {attachments.map((att, attIdx) =>
+                              isImage(att) ? (
+                                <a
+                                  key={attIdx}
+                                  href={att.data_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ display: "block", lineHeight: 0 }}
+                                >
+                                  <img
+                                    src={att.thumb_url || att.data_url}
+                                    alt="مرفق"
+                                    loading="lazy"
+                                    style={{
+                                      maxWidth: "100%",
+                                      maxHeight: 240,
+                                      borderRadius: 10,
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </a>
+                              ) : (
+                                <a
+                                  key={attIdx}
+                                  href={att.data_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    padding: "6px 10px",
+                                    borderRadius: 8,
+                                    background: isAgent
+                                      ? "rgba(255,255,255,0.18)"
+                                      : "rgba(0,0,0,0.06)",
+                                    color: "inherit",
+                                    fontSize: "0.78rem",
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  <Icon name="paperclip" size={13} />
+                                  <span>
+                                    {decodeURIComponent(
+                                      String(att.data_url || "")
+                                        .split("?")[0]
+                                        .split("/")
+                                        .pop() || "مرفق",
+                                    )}
+                                  </span>
+                                </a>
+                              ),
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div
                         style={{
-                          fontSize: "0.88rem",
-                          lineHeight: 1.6,
-                          whiteSpace: "pre-wrap",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "0 6px",
+                          fontSize: "0.68rem",
+                          color: "var(--muted)",
                         }}
                       >
-                        {m.content}
-                      </div>
-
-                      {/* Attachments if any */}
-                      {Array.isArray(m.attachments) &&
-                        m.attachments.length > 0 && (
-                          <div
+                        {!isPrivate && (
+                          <span style={{ fontWeight: 600 }}>{senderName}</span>
+                        )}
+                        <span>{timeLabel}</span>
+                        <button
+                          type="button"
+                          title="حذف الرسالة"
+                          onClick={() => handleDeleteMessage(m.id)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "inherit",
+                            padding: 0,
+                            opacity: 0.55,
+                            display: "inline-flex",
+                          }}
+                        >
+                          <Icon name="trash-2" size={11} />
+                        </button>
+                        {m.status === "failed" && (
+                          <button
+                            type="button"
+                            title="إعادة المحاولة"
+                            onClick={() => handleRetryMessage(m.id)}
                             style={{
-                              marginTop: 8,
-                              display: "flex",
-                              gap: 6,
-                              flexWrap: "wrap",
+                              background: "transparent",
+                              border: "none",
+                              cursor: "pointer",
+                              color: "#ef4444",
+                              padding: 0,
+                              display: "inline-flex",
                             }}
                           >
-                            {m.attachments.map((att, attIdx) => (
-                              <a
-                                key={attIdx}
-                                href={att.data_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  display: "inline-flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                  padding: "4px 8px",
-                                  borderRadius: 6,
-                                  background: "rgba(0,0,0,0.06)",
-                                  color: "inherit",
-                                  fontSize: "0.75rem",
-                                  textDecoration: "none",
-                                }}
-                              >
-                                <Icon name="paperclip" size={12} />
-                                <span>مرفق</span>
-                              </a>
-                            ))}
-                          </div>
+                            <Icon name="refresh-cw" size={11} />
+                          </button>
                         )}
+                      </div>
                     </div>
                   );
                 })
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Message Composer */}
