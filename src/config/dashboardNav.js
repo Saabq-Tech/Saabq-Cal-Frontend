@@ -51,7 +51,7 @@ export function getWorkspaceSettingsSubTabs(t) {
   ];
 }
 
-/** The sub-items for Saabq-Chat application. */
+/** The sub-items for Saabq-Chat application (only Inbox and Contacts). */
 export function getSaabqChatSubTabs(t) {
   return [
     {
@@ -63,46 +63,6 @@ export function getSaabqChatSubTabs(t) {
       id: "contacts",
       label: t("saabqChatNavContacts") || "جهات الاتصال",
       icon: "users",
-    },
-    {
-      id: "inboxes",
-      label: t("saabqChatNavInboxes") || "قنوات الاستقبال",
-      icon: "radio",
-    },
-    {
-      id: "automations",
-      label: t("saabqChatNavAutomations") || "الأتمتة والردود",
-      icon: "zap",
-    },
-    {
-      id: "sla",
-      label: t("saabqChatNavSla") || "اتفاقيات الخدمة",
-      icon: "shield",
-    },
-    {
-      id: "captain-ai",
-      label: t("saabqChatNavCaptainAi") || "كابتن الذكاء الاصطناعي",
-      icon: "sparkles",
-    },
-    {
-      id: "reports",
-      label: t("saabqChatNavReports") || "التقارير والتحليلات",
-      icon: "bar-chart",
-    },
-    {
-      id: "portals",
-      label: t("saabqChatNavPortals") || "مركز المساعدة والمقالات",
-      icon: "book-open",
-    },
-    {
-      id: "agents-teams",
-      label: t("saabqChatNavAgentsTeams") || "فريق العمل والأدوار",
-      icon: "user-check",
-    },
-    {
-      id: "settings",
-      label: t("saabqChatNavSettings") || "إعدادات الربط والمنظومة",
-      icon: "settings",
     },
   ];
 }

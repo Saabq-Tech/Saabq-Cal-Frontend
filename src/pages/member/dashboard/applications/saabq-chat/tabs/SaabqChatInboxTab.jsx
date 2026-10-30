@@ -19,17 +19,10 @@ export default function SaabqChatInboxTab() {
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [replyText, setReplyText] = useState("");
-  const [isPrivateNote, setIsPrivateNote] = useState(false);
   const [loading, setLoading] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [aiGenerating, setAiGenerating] = useState(false);
-  const [cannedResponses, setCannedResponses] = useState([]);
-  const [showCannedDropdown, setShowCannedDropdown] = useState(false);
-  const [showAiDropdown, setShowAiDropdown] = useState(false);
   const [agents, setAgents] = useState([]);
-  const [attachmentFile, setAttachmentFile] = useState(null);
-  const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   // New Conversation Modal State
@@ -98,16 +91,8 @@ export default function SaabqChatInboxTab() {
     fetchMetaCounts();
   }, [fetchConversations, fetchMetaCounts]);
 
-  // Load Canned Responses & Agents
+  // Load Agents
   useEffect(() => {
-    client
-      .get(endpoints.workspaceSaabqChatCannedResponses)
-      .then((res) => {
-        const list = res.data?.data || [];
-        setCannedResponses(Array.isArray(list) ? list : []);
-      })
-      .catch(() => setCannedResponses([]));
-
     client
       .get(endpoints.workspaceSaabqChatAgents)
       .then((res) => {
@@ -140,22 +125,17 @@ export default function SaabqChatInboxTab() {
     messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, [messages, messagesLoading]);
 
-  // Send Message (Supports Public text, Private Notes & Attachments)
+  // Send Message
   const handleSendMessage = async (e) => {
     e?.preventDefault();
-    if ((!replyText.trim() && !attachmentFile) || !activeConversation?.id)
+    if (!replyText.trim() || !activeConversation?.id)
       return;
 
     setSending(true);
     try {
       const formData = new FormData();
-      if (replyText.trim()) {
-        formData.append("content", replyText.trim());
-      }
-      formData.append("private", isPrivateNote ? "1" : "0");
-      if (attachmentFile) {
-        formData.append("attachments[]", attachmentFile);
-      }
+      formData.append("content", replyText.trim());
+      formData.append("private", "0");
 
       await client.post(
         endpoints.workspaceSaabqChatMessages(activeConversation.id),
@@ -166,8 +146,6 @@ export default function SaabqChatInboxTab() {
       );
 
       setReplyText("");
-      setAttachmentFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
       fetchMessages();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to send message");
@@ -266,30 +244,6 @@ export default function SaabqChatInboxTab() {
       fetchMessages();
     } catch (err) {
       alert(err.response?.data?.message || "Retry failed");
-    }
-  };
-
-  // Captain AI Tasks
-  const handleCaptainAiTask = async (taskType) => {
-    setShowAiDropdown(false);
-    setAiGenerating(true);
-    try {
-      const res = await client.post(endpoints.workspaceSaabqChatCaptainAiTask, {
-        task: taskType,
-        message: replyText || undefined,
-        conversation_id: activeConversation?.id || undefined,
-      });
-      const generated =
-        res.data?.data?.result ||
-        res.data?.data?.content ||
-        res.data?.data?.output;
-      if (generated) {
-        setReplyText(generated);
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "AI task failed");
-    } finally {
-      setAiGenerating(false);
     }
   };
 
@@ -1326,322 +1280,6 @@ export default function SaabqChatInboxTab() {
                 flexShrink: 0,
               }}
             >
-              {/* Composer Toolbar */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: 8,
-                }}
-              >
-                {/* Mode toggle (Public reply vs Private note) */}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button
-                    type="button"
-                    onClick={() => setIsPrivateNote(false)}
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: 6,
-                      fontSize: "0.76rem",
-                      fontWeight: !isPrivateNote ? 700 : 500,
-                      border: !isPrivateNote
-                        ? "1px solid var(--primary)"
-                        : "1px solid var(--border)",
-                      background: !isPrivateNote
-                        ? "rgba(2, 105, 130, 0.08)"
-                        : "transparent",
-                      color: !isPrivateNote ? "var(--primary)" : "var(--muted)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    رد للعميل
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsPrivateNote(true)}
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: 6,
-                      fontSize: "0.76rem",
-                      fontWeight: isPrivateNote ? 700 : 500,
-                      border: isPrivateNote
-                        ? "1px solid #d97706"
-                        : "1px solid var(--border)",
-                      background: isPrivateNote
-                        ? "rgba(245, 158, 11, 0.1)"
-                        : "transparent",
-                      color: isPrivateNote ? "#d97706" : "var(--muted)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    🔒 ملاحظة خاصة
-                  </button>
-                </div>
-
-                {/* Helper actions: Captain AI, Canned Responses, Attachments */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 6,
-                    alignItems: "center",
-                    position: "relative",
-                  }}
-                >
-                  {/* Captain AI Assistant */}
-                  <button
-                    type="button"
-                    disabled={aiGenerating}
-                    onClick={() => setShowAiDropdown((prev) => !prev)}
-                    className="btn btn-secondary btn-sm"
-                    style={{ gap: 4, padding: "4px 8px", fontSize: "0.76rem" }}
-                  >
-                    <Icon name="sparkles" size={12} />
-                    <span>
-                      {aiGenerating ? "الذكاء الاصطناعي يفكر..." : "كابتن AI"}
-                    </span>
-                  </button>
-
-                  {/* AI Dropdown Menu */}
-                  {showAiDropdown && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "100%",
-                        insetInlineEnd: 80,
-                        background: "var(--surface)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                        boxShadow: "var(--shadow-lg)",
-                        padding: 6,
-                        zIndex: 50,
-                        width: 190,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 4,
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleCaptainAiTask("reply_suggestion")}
-                        className="dropdown-item"
-                        style={{
-                          padding: "6px 10px",
-                          fontSize: "0.78rem",
-                          textAlign: "start",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
-                      >
-                        💡 اقتراح رد ذكي
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCaptainAiTask("summarize")}
-                        className="dropdown-item"
-                        style={{
-                          padding: "6px 10px",
-                          fontSize: "0.78rem",
-                          textAlign: "start",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
-                      >
-                        📝 تلخيص المحادثة
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCaptainAiTask("rephrase")}
-                        className="dropdown-item"
-                        style={{
-                          padding: "6px 10px",
-                          fontSize: "0.78rem",
-                          textAlign: "start",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
-                      >
-                        ✨ إعادة صياغة النص
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCaptainAiTask("make_friendly")}
-                        className="dropdown-item"
-                        style={{
-                          padding: "6px 10px",
-                          fontSize: "0.78rem",
-                          textAlign: "start",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
-                      >
-                        😊 جعله ودوداً
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleCaptainAiTask("fix_spelling_grammar")
-                        }
-                        className="dropdown-item"
-                        style={{
-                          padding: "6px 10px",
-                          fontSize: "0.78rem",
-                          textAlign: "start",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
-                      >
-                        🔍 تصحيح الإملاء والقواعد
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Canned Responses Shortcut */}
-                  <button
-                    type="button"
-                    onClick={() => setShowCannedDropdown((prev) => !prev)}
-                    className="btn btn-secondary btn-sm"
-                    style={{ gap: 4, padding: "4px 8px", fontSize: "0.76rem" }}
-                  >
-                    <Icon name="message-circle" size={12} />
-                    <span>رد جاهز</span>
-                  </button>
-
-                  {/* Canned dropdown */}
-                  {showCannedDropdown && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        bottom: "100%",
-                        insetInlineEnd: 0,
-                        background: "var(--surface)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                        boxShadow: "var(--shadow-lg)",
-                        padding: 6,
-                        zIndex: 50,
-                        width: 240,
-                        maxHeight: 200,
-                        overflowY: "auto",
-                      }}
-                    >
-                      {cannedResponses.length === 0 ? (
-                        <div
-                          style={{
-                            padding: 10,
-                            fontSize: "0.75rem",
-                            color: "var(--muted)",
-                            textAlign: "center",
-                          }}
-                        >
-                          لا توجد ردود جاهزة مسجلة
-                        </div>
-                      ) : (
-                        cannedResponses.map((cr) => (
-                          <div
-                            key={cr.id}
-                            onClick={() => {
-                              setReplyText((prev) =>
-                                prev ? prev + " " + cr.content : cr.content,
-                              );
-                              setShowCannedDropdown(false);
-                            }}
-                            style={{
-                              padding: "6px 8px",
-                              fontSize: "0.76rem",
-                              borderRadius: 4,
-                              cursor: "pointer",
-                              borderBottom: "1px solid var(--border)",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontWeight: 700,
-                                color: "var(--primary)",
-                              }}
-                            >
-                              !{cr.short_code}
-                            </span>
-                            <div
-                              style={{
-                                color: "var(--text-secondary)",
-                                fontSize: "0.72rem",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {cr.content}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-
-                  {/* Attachment Button */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="btn btn-secondary btn-sm"
-                    style={{ padding: "4px 8px" }}
-                    title="إرفاق ملف"
-                  >
-                    <Icon name="paperclip" size={13} />
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    style={{ display: "none" }}
-                    onChange={(e) =>
-                      setAttachmentFile(e.target.files?.[0] || null)
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Attachment Preview Chip */}
-              {attachmentFile && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "4px 10px",
-                    borderRadius: 6,
-                    background: "rgba(2, 105, 130, 0.08)",
-                    color: "var(--primary)",
-                    fontSize: "0.76rem",
-                    marginBottom: 8,
-                    width: "fit-content",
-                  }}
-                >
-                  <Icon name="paperclip" size={12} />
-                  <span>{attachmentFile.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAttachmentFile(null);
-                      if (fileInputRef.current) fileInputRef.current.value = "";
-                    }}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "inherit",
-                      padding: 0,
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-
               {/* Composer Input Form */}
               <form
                 onSubmit={handleSendMessage}
@@ -1650,22 +1288,14 @@ export default function SaabqChatInboxTab() {
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={
-                    isPrivateNote
-                      ? "اكتب ملاحظة خاصة للفريق (لن يراها العميل)..."
-                      : "اكتب ردك للعميل هنا..."
-                  }
+                  placeholder="اكتب ردك للعميل هنا..."
                   rows={2}
                   style={{
                     flex: 1,
                     padding: "10px 14px",
                     borderRadius: 8,
-                    border: isPrivateNote
-                      ? "1px solid #d97706"
-                      : "1px solid var(--border)",
-                    background: isPrivateNote
-                      ? "rgba(245, 158, 11, 0.03)"
-                      : "var(--surface)",
+                    border: "1px solid var(--border)",
+                    background: "var(--surface)",
                     fontSize: "0.88rem",
                     resize: "none",
                   }}
@@ -1678,12 +1308,11 @@ export default function SaabqChatInboxTab() {
                 />
                 <button
                   type="submit"
-                  disabled={sending || (!replyText.trim() && !attachmentFile)}
+                  disabled={sending || !replyText.trim()}
                   className="btn btn-primary"
                   style={{
                     padding: "0 18px",
                     borderRadius: 8,
-                    background: isPrivateNote ? "#d97706" : "var(--primary)",
                   }}
                 >
                   {sending ? (
