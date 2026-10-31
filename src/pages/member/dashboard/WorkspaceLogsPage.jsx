@@ -1369,8 +1369,7 @@ export default function WorkspaceLogsPage() {
                       className={`analytics-tab-btn ${tableFilter === "today" ? "active" : ""}`}
                       onClick={() => setTableFilter("today")}
                     >
-                      {lang === "ar" ? "اليوم" : "Today"} ({stats.todayCount}
-                      )
+                      {lang === "ar" ? "اليوم" : "Today"} ({stats.todayCount})
                     </button>
                     <button
                       type="button"

@@ -426,342 +426,354 @@ export default function SaabqChatContactsTab() {
       {/* Create Contact Modal */}
       {showCreateModal && (
         <ModalPortal>
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 440 }}>
-            <div className="modal-header">
-              <h4 className="modal-title">إضافة جهة اتصال جديدة</h4>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setShowCreateModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleCreateContact} className="modal-body">
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  الاسم الكامل *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  البريد الإلكتروني
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  رقم الهاتف (دولي)
-                </label>
-                <input
-                  type="text"
-                  placeholder="+966500000000"
-                  value={formData.phone_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone_number: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 18 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  المعرف الفريد (Identifier)
-                </label>
-                <input
-                  type="text"
-                  placeholder="CUST-1002"
-                  value={formData.identifier}
-                  onChange={(e) =>
-                    setFormData({ ...formData, identifier: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
-              >
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 440 }}>
+              <div className="modal-header">
+                <h4 className="modal-title">إضافة جهة اتصال جديدة</h4>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close"
                   onClick={() => setShowCreateModal(false)}
                 >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="btn btn-primary"
-                >
-                  {submitting ? "جاري الحفظ..." : "حفظ جهة الاتصال"}
+                  ✕
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleCreateContact} className="modal-body">
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    الاسم الكامل *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    البريد الإلكتروني
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    رقم الهاتف (دولي)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="+966500000000"
+                    value={formData.phone_number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone_number: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 18 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    المعرف الفريد (Identifier)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="CUST-1002"
+                    value={formData.identifier}
+                    onChange={(e) =>
+                      setFormData({ ...formData, identifier: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowCreateModal(false)}
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn btn-primary"
+                  >
+                    {submitting ? "جاري الحفظ..." : "حفظ جهة الاتصال"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
         </ModalPortal>
       )}
 
       {/* Edit Contact Modal */}
       {showEditModal && (
         <ModalPortal>
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 440 }}>
-            <div className="modal-header">
-              <h4 className="modal-title">تعديل بيانات جهة الاتصال</h4>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setShowEditModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleUpdateContact} className="modal-body">
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  الاسم الكامل *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  البريد الإلكتروني
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: 18 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  رقم الهاتف
-                </label>
-                <input
-                  type="text"
-                  value={formData.phone_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone_number: e.target.value })
-                  }
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
-              >
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 440 }}>
+              <div className="modal-header">
+                <h4 className="modal-title">تعديل بيانات جهة الاتصال</h4>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close"
                   onClick={() => setShowEditModal(false)}
                 >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="btn btn-primary"
-                >
-                  {submitting ? "جاري التحديث..." : "حفظ التغييرات"}
+                  ✕
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleUpdateContact} className="modal-body">
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    الاسم الكامل *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    البريد الإلكتروني
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 18 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    رقم الهاتف
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.phone_number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone_number: e.target.value })
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn btn-primary"
+                  >
+                    {submitting ? "جاري التحديث..." : "حفظ التغييرات"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
         </ModalPortal>
       )}
 
       {/* Merge Contacts Modal */}
       {showMergeModal && (
         <ModalPortal>
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 440 }}>
-            <div className="modal-header">
-              <h4 className="modal-title">دمج جهات اتصال مكررة</h4>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setShowMergeModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleMergeContacts} className="modal-body">
-              <p
-                style={{
-                  fontSize: "0.82rem",
-                  color: "var(--muted)",
-                  margin: "0 0 14px",
-                  lineHeight: 1.6,
-                }}
-              >
-                سيتم الاحتفاظ بالسجل الأساسي ({activeContact?.name}) ونقل كافة
-                المحادثات والوسوم إليه، وحذف جهة الاتصال المكررة نهائياً.
-              </p>
-              <div className="form-group" style={{ marginBottom: 18 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  اختر جهة الاتصال المراد دمجها وحذفها:
-                </label>
-                <select
-                  required
-                  value={mergeeId}
-                  onChange={(e) => setMergeeId(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                >
-                  <option value="">-- حدد جهة الاتصال المكررة --</option>
-                  {contacts
-                    .filter((c) => c.id !== activeContact?.id)
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} ({c.email || c.phone_number || `#${c.id}`})
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
-              >
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 440 }}>
+              <div className="modal-header">
+                <h4 className="modal-title">دمج جهات اتصال مكررة</h4>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close"
                   onClick={() => setShowMergeModal(false)}
                 >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting || !mergeeId}
-                  className="btn btn-primary"
-                >
-                  {submitting ? "جاري الدمج..." : "تأكيد الدمج"}
+                  ✕
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleMergeContacts} className="modal-body">
+                <p
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "var(--muted)",
+                    margin: "0 0 14px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  سيتم الاحتفاظ بالسجل الأساسي ({activeContact?.name}) ونقل كافة
+                  المحادثات والوسوم إليه، وحذف جهة الاتصال المكررة نهائياً.
+                </p>
+                <div className="form-group" style={{ marginBottom: 18 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    اختر جهة الاتصال المراد دمجها وحذفها:
+                  </label>
+                  <select
+                    required
+                    value={mergeeId}
+                    onChange={(e) => setMergeeId(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    <option value="">-- حدد جهة الاتصال المكررة --</option>
+                    {contacts
+                      .filter((c) => c.id !== activeContact?.id)
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.email || c.phone_number || `#${c.id}`})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowMergeModal(false)}
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting || !mergeeId}
+                    className="btn btn-primary"
+                  >
+                    {submitting ? "جاري الدمج..." : "تأكيد الدمج"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
         </ModalPortal>
       )}
     </div>

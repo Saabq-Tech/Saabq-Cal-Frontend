@@ -1,5 +1,11 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getDatabase, ref, onChildAdded, onValue, off } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onChildAdded,
+  onValue,
+  off,
+} from "firebase/database";
 
 const DB_URL =
   import.meta.env.VITE_FIREBASE_DATABASE_URL ||

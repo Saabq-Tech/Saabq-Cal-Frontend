@@ -940,9 +940,7 @@ export default function WorkspaceApiIntegrationPage() {
                     onClick={() => setShowRequestModal(true)}
                   >
                     <Icon name="refresh-cw" size={14} />
-                    <span>
-                      {t("requestNewKeys") || "طلب مفاتيح جديدة"}
-                    </span>
+                    <span>{t("requestNewKeys") || "طلب مفاتيح جديدة"}</span>
                   </button>
                 )}
               </div>
@@ -2148,7 +2146,9 @@ print(response.json())`}
                         Optional
                       </td>
                       <td style={{ padding: "6px 8px" }}>
-                        <code dir="ltr">integer | exists:workspace_members,id</code>
+                        <code dir="ltr">
+                          integer | exists:workspace_members,id
+                        </code>
                       </td>
                       <td style={{ padding: "6px 8px" }}>
                         Filter slots by staff member ID
@@ -2391,9 +2391,7 @@ const result = await response.json();`}
                         <td
                           style={{
                             padding: "6px 8px",
-                            color: param.req
-                              ? "#dc2626"
-                              : "var(--text-muted)",
+                            color: param.req ? "#dc2626" : "var(--text-muted)",
                             fontWeight: param.req ? 700 : 400,
                           }}
                         >
@@ -2640,7 +2638,11 @@ res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", head
               }}
             >
               <h3
-                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 800,
+                  margin: "0 0 8px",
+                }}
               >
                 {t("requestApiModalTitle") ||
                   "طلب تفعيل مفتاح الربط البرمجي (API)"}
@@ -2763,7 +2765,11 @@ res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", head
               }}
             >
               <h3
-                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 800,
+                  margin: "0 0 8px",
+                }}
               >
                 {t("confirmPasswordTitle") ||
                   "تأكيد كلمة المرور لعرض المفتاح السري"}
@@ -2868,7 +2874,11 @@ res = requests.post("https://admin.cal.saabq.com/api/v1/external/bookings", head
               </div>
 
               <h3
-                style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 8px" }}
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 800,
+                  margin: "0 0 8px",
+                }}
               >
                 {t("confirmRegenerateTitle") ||
                   "هل أنت متأكد من رغبتك في تدوير المفتاح السري؟"}

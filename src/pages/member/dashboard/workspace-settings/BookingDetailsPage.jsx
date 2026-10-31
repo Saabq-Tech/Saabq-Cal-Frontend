@@ -421,9 +421,7 @@ export default function BookingDetailsPage({
     e.preventDefault();
     if (!followUpDate || !followUpTime) {
       toast.error(
-        isRTL
-          ? "يرجى اختيار التاريخ والوقت"
-          : "Please select a date and time",
+        isRTL ? "يرجى اختيار التاريخ والوقت" : "Please select a date and time",
       );
       return;
     }

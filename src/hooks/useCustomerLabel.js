@@ -156,8 +156,7 @@ export function useCustomerLabel(passedWorkspace) {
     ? isRTL
       ? `لا يوجد ${plural}`
       : `No ${plural} found`
-    : t("noCustomersFound") ||
-      (isRTL ? "لا يوجد عملاء" : "No customers found");
+    : t("noCustomersFound") || (isRTL ? "لا يوجد عملاء" : "No customers found");
 
   const noCustomersFoundDesc = isCustom
     ? isRTL

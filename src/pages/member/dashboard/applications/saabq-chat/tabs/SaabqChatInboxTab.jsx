@@ -128,8 +128,7 @@ export default function SaabqChatInboxTab() {
   // Send Message
   const handleSendMessage = async (e) => {
     e?.preventDefault();
-    if (!replyText.trim() || !activeConversation?.id)
-      return;
+    if (!replyText.trim() || !activeConversation?.id) return;
 
     setSending(true);
     try {
@@ -921,13 +920,19 @@ export default function SaabqChatInboxTab() {
 
                   const isImage = (att) =>
                     att.file_type === "image" ||
-                    /\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(att.data_url || "") ||
-                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(att.extension || "");
+                    /\.(png|jpe?g|gif|webp|bmp|svg)(\?|$)/i.test(
+                      att.data_url || "",
+                    ) ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(
+                      att.extension || "",
+                    );
 
                   const isAudio = (att) =>
                     att.file_type === "audio" ||
                     att.file_type === "voice" ||
-                    /\.(mp3|wav|ogg|m4a|aac|opus)(\?|$)/i.test(att.data_url || "") ||
+                    /\.(mp3|wav|ogg|m4a|aac|opus)(\?|$)/i.test(
+                      att.data_url || "",
+                    ) ||
                     /\.(mp3|wav|ogg|m4a|aac|opus)$/i.test(att.extension || "");
 
                   const isVideo = (att) =>
@@ -1036,7 +1041,11 @@ export default function SaabqChatInboxTab() {
                             href={resolveMediaUrl(storyOrImageUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ display: "block", lineHeight: 0, marginBottom: 6 }}
+                            style={{
+                              display: "block",
+                              lineHeight: 0,
+                              marginBottom: 6,
+                            }}
                           >
                             <img
                               src={resolveMediaUrl(storyOrImageUrl)}
@@ -1053,31 +1062,34 @@ export default function SaabqChatInboxTab() {
                         )}
 
                         {/* Fallback for placeholder text with no attachments (e.g. view-once or expired IG media) */}
-                        {isPlaceholder && attachments.length === 0 && !storyOrImageUrl && (
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 8,
-                              padding: "6px 10px",
-                              borderRadius: 8,
-                              background: isAgent
-                                ? "rgba(255,255,255,0.18)"
-                                : "rgba(0,0,0,0.04)",
-                              color: "inherit",
-                              fontSize: "0.82rem",
-                            }}
-                          >
-                            <span style={{ fontSize: "1.1rem" }}>📷</span>
-                            <span>مرفق وسائط من إنستغرام</span>
-                          </div>
-                        )}
+                        {isPlaceholder &&
+                          attachments.length === 0 &&
+                          !storyOrImageUrl && (
+                            <div
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 8,
+                                padding: "6px 10px",
+                                borderRadius: 8,
+                                background: isAgent
+                                  ? "rgba(255,255,255,0.18)"
+                                  : "rgba(0,0,0,0.04)",
+                                color: "inherit",
+                                fontSize: "0.82rem",
+                              }}
+                            >
+                              <span style={{ fontSize: "1.1rem" }}>📷</span>
+                              <span>مرفق وسائط من إنستغرام</span>
+                            </div>
+                          )}
 
                         {/* Real attachments list (Images, Audio, Video, Files) */}
                         {attachments.length > 0 && (
                           <div
                             style={{
-                              marginTop: showContentText && !isPlaceholder ? 8 : 0,
+                              marginTop:
+                                showContentText && !isPlaceholder ? 8 : 0,
                               display: "flex",
                               gap: 8,
                               flexDirection: "column",
@@ -1111,12 +1123,18 @@ export default function SaabqChatInboxTab() {
                                       }}
                                     >
                                       <span>🎤</span>
-                                      <span style={{ fontWeight: 600 }}>تسجيل صوتي</span>
+                                      <span style={{ fontWeight: 600 }}>
+                                        تسجيل صوتي
+                                      </span>
                                     </div>
                                     <audio
                                       controls
                                       src={mediaUrl}
-                                      style={{ maxWidth: "100%", width: 250, height: 36 }}
+                                      style={{
+                                        maxWidth: "100%",
+                                        width: 250,
+                                        height: 36,
+                                      }}
                                     />
                                   </div>
                                 );
@@ -1148,7 +1166,9 @@ export default function SaabqChatInboxTab() {
                                     style={{ display: "block", lineHeight: 0 }}
                                   >
                                     <img
-                                      src={resolveMediaUrl(att.thumb_url || att.data_url)}
+                                      src={resolveMediaUrl(
+                                        att.thumb_url || att.data_url,
+                                      )}
                                       alt="مرفق صورة"
                                       loading="lazy"
                                       style={{
@@ -1168,7 +1188,7 @@ export default function SaabqChatInboxTab() {
                                   String(att.data_url || "")
                                     .split("?")[0]
                                     .split("/")
-                                    .pop() || "ملف مرفق"
+                                    .pop() || "ملف مرفق",
                                 );
 
                               return (
@@ -1205,7 +1225,12 @@ export default function SaabqChatInboxTab() {
                                     {fileName}
                                   </span>
                                   {att.file_size ? (
-                                    <span style={{ fontSize: "0.68rem", opacity: 0.75 }}>
+                                    <span
+                                      style={{
+                                        fontSize: "0.68rem",
+                                        opacity: 0.75,
+                                      }}
+                                    >
                                       ({(att.file_size / 1024).toFixed(0)} KB)
                                     </span>
                                   ) : null}
@@ -1347,270 +1372,274 @@ export default function SaabqChatInboxTab() {
         <div
           style={{
             borderInlineStart: "1px solid var(--border)",
-          padding: 16,
-          background: "var(--surface-subtle, rgba(0,0,0,0.02))",
-          overflowY: "auto",
-        }}
-      >
-        {activeConversation ? (
-          <div>
-            <div
-              style={{
-                textAlign: "center",
-                paddingBottom: 16,
-                borderBottom: "1px solid var(--border)",
-              }}
-            >
+            padding: 16,
+            background: "var(--surface-subtle, rgba(0,0,0,0.02))",
+            overflowY: "auto",
+          }}
+        >
+          {activeConversation ? (
+            <div>
               <div
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: "50%",
-                  background: "rgba(2, 105, 130, 0.12)",
-                  color: "var(--primary)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 10px",
-                  fontWeight: 800,
-                  fontSize: "1.2rem",
+                  textAlign: "center",
+                  paddingBottom: 16,
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
-                {
-                  (activeConversation.meta?.sender?.name ||
-                    activeConversation.contact?.name ||
-                    "ع")[0]
-                }
-              </div>
-              <h4
-                style={{
-                  margin: 0,
-                  fontSize: "0.95rem",
-                  fontWeight: 800,
-                  color: "var(--heading)",
-                }}
-              >
-                {activeConversation.meta?.sender?.name ||
-                  activeConversation.contact?.name ||
-                  "العميل"}
-              </h4>
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  fontSize: "0.78rem",
-                  color: "var(--muted)",
-                }}
-              >
-                {activeConversation.meta?.sender?.email ||
-                  activeConversation.contact?.email ||
-                  "لا يوجد بريد مسجل"}
-              </p>
-            </div>
-
-            {/* Custom Attributes Viewer */}
-            <div
-              style={{
-                padding: "14px 0",
-                borderBottom: "1px solid var(--border)",
-              }}
-            >
-              <h5
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: "0.82rem",
-                  fontWeight: 800,
-                  color: "var(--heading)",
-                }}
-              >
-                السمات والبيانات المخصصة
-              </h5>
-              {activeConversation.custom_attributes &&
-              Object.keys(activeConversation.custom_attributes).length > 0 ? (
                 <div
                   style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: "50%",
+                    background: "rgba(2, 105, 130, 0.12)",
+                    color: "var(--primary)",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                    fontSize: "0.78rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto 10px",
+                    fontWeight: 800,
+                    fontSize: "1.2rem",
                   }}
                 >
-                  {Object.entries(activeConversation.custom_attributes).map(
-                    ([k, v]) => (
-                      <div
-                        key={k}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <span style={{ color: "var(--muted)" }}>{k}:</span>
-                        <span style={{ fontWeight: 600 }}>{String(v)}</span>
-                      </div>
-                    ),
-                  )}
+                  {
+                    (activeConversation.meta?.sender?.name ||
+                      activeConversation.contact?.name ||
+                      "ع")[0]
+                  }
                 </div>
-              ) : (
-                <p
+                <h4
                   style={{
                     margin: 0,
-                    fontSize: "0.76rem",
+                    fontSize: "0.95rem",
+                    fontWeight: 800,
+                    color: "var(--heading)",
+                  }}
+                >
+                  {activeConversation.meta?.sender?.name ||
+                    activeConversation.contact?.name ||
+                    "العميل"}
+                </h4>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "0.78rem",
                     color: "var(--muted)",
                   }}
                 >
-                  لا توجد سمات إضافية مسجلة
+                  {activeConversation.meta?.sender?.email ||
+                    activeConversation.contact?.email ||
+                    "لا يوجد بريد مسجل"}
                 </p>
-              )}
-            </div>
+              </div>
 
-            {/* Link to Full CRM Details */}
-            <div style={{ padding: "14px 0" }}>
-              <Link
-                to="/member/workspace/applications/saabq-chat/contacts"
-                className="btn btn-secondary btn-sm"
-                style={{ width: "100%", justifyContent: "center", gap: 6 }}
+              {/* Custom Attributes Viewer */}
+              <div
+                style={{
+                  padding: "14px 0",
+                  borderBottom: "1px solid var(--border)",
+                }}
               >
-                <Icon name="users" size={13} />
-                <span>إدارة جهات الاتصال في CRM</span>
-              </Link>
+                <h5
+                  style={{
+                    margin: "0 0 10px",
+                    fontSize: "0.82rem",
+                    fontWeight: 800,
+                    color: "var(--heading)",
+                  }}
+                >
+                  السمات والبيانات المخصصة
+                </h5>
+                {activeConversation.custom_attributes &&
+                Object.keys(activeConversation.custom_attributes).length > 0 ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      fontSize: "0.78rem",
+                    }}
+                  >
+                    {Object.entries(activeConversation.custom_attributes).map(
+                      ([k, v]) => (
+                        <div
+                          key={k}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span style={{ color: "var(--muted)" }}>{k}:</span>
+                          <span style={{ fontWeight: 600 }}>{String(v)}</span>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                ) : (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.76rem",
+                      color: "var(--muted)",
+                    }}
+                  >
+                    لا توجد سمات إضافية مسجلة
+                  </p>
+                )}
+              </div>
+
+              {/* Link to Full CRM Details */}
+              <div style={{ padding: "14px 0" }}>
+                <Link
+                  to="/member/workspace/applications/saabq-chat/contacts"
+                  className="btn btn-secondary btn-sm"
+                  style={{ width: "100%", justifyContent: "center", gap: 6 }}
+                >
+                  <Icon name="users" size={13} />
+                  <span>إدارة جهات الاتصال في CRM</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              textAlign: "center",
-              color: "var(--muted)",
-              paddingTop: 40,
-              fontSize: "0.85rem",
-            }}
-          >
-            لا يوجد عميل محدد
-          </div>
-        )}
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                color: "var(--muted)",
+                paddingTop: 40,
+                fontSize: "0.85rem",
+              }}
+            >
+              لا يوجد عميل محدد
+            </div>
+          )}
         </div>
       )}
 
       {/* New Conversation Modal */}
       {showNewConvModal && (
         <ModalPortal>
-        <div className="modal-backdrop">
-          <div className="modal-card" style={{ maxWidth: 440 }}>
-            <div className="modal-header">
-              <h4 className="modal-title">بدء محادثة جديدة</h4>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setShowNewConvModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleCreateConversation} className="modal-body">
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  قناة الاستقبال (Inbox)
-                </label>
-                <select
-                  value={newConvInboxId}
-                  onChange={(e) => setNewConvInboxId(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                >
-                  {inboxes.map((ib) => (
-                    <option key={ib.id} value={ib.id}>
-                      {ib.name} ({ib.channel_type})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 14 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  العميل المستهدف (Contact)
-                </label>
-                <select
-                  value={newConvContactId}
-                  onChange={(e) => setNewConvContactId(e.target.value)}
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                >
-                  {contacts.map((ct) => (
-                    <option key={ct.id} value={ct.id}>
-                      {ct.name} {ct.email ? `(${ct.email})` : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 18 }}>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    display: "block",
-                  }}
-                >
-                  الرسالة الافتتاحية (اختياري)
-                </label>
-                <textarea
-                  value={newConvMessage}
-                  onChange={(e) => setNewConvMessage(e.target.value)}
-                  placeholder="مرحباً، نود التواصل معك بشأن..."
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    borderRadius: 8,
-                    border: "1px solid var(--border)",
-                  }}
-                />
-              </div>
-
-              <div
-                style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
-              >
+          <div className="modal-backdrop">
+            <div className="modal-card" style={{ maxWidth: 440 }}>
+              <div className="modal-header">
+                <h4 className="modal-title">بدء محادثة جديدة</h4>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="modal-close"
                   onClick={() => setShowNewConvModal(false)}
                 >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={creatingConv}
-                  className="btn btn-primary"
-                >
-                  {creatingConv ? "جاري الإنشاء..." : "بدء المحادثة"}
+                  ✕
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleCreateConversation} className="modal-body">
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    قناة الاستقبال (Inbox)
+                  </label>
+                  <select
+                    value={newConvInboxId}
+                    onChange={(e) => setNewConvInboxId(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    {inboxes.map((ib) => (
+                      <option key={ib.id} value={ib.id}>
+                        {ib.name} ({ib.channel_type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    العميل المستهدف (Contact)
+                  </label>
+                  <select
+                    value={newConvContactId}
+                    onChange={(e) => setNewConvContactId(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    {contacts.map((ct) => (
+                      <option key={ct.id} value={ct.id}>
+                        {ct.name} {ct.email ? `(${ct.email})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 18 }}>
+                  <label
+                    style={{
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                      marginBottom: 4,
+                      display: "block",
+                    }}
+                  >
+                    الرسالة الافتتاحية (اختياري)
+                  </label>
+                  <textarea
+                    value={newConvMessage}
+                    onChange={(e) => setNewConvMessage(e.target.value)}
+                    placeholder="مرحباً، نود التواصل معك بشأن..."
+                    rows={3}
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      borderRadius: 8,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowNewConvModal(false)}
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingConv}
+                    className="btn btn-primary"
+                  >
+                    {creatingConv ? "جاري الإنشاء..." : "بدء المحادثة"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
         </ModalPortal>
       )}
     </div>

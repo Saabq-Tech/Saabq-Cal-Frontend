@@ -2271,46 +2271,15 @@ export default function WorkspaceProfilePage() {
               padding: 24,
             }}
           >
-          <button
-            type="button"
-            onClick={() => setLightboxIndex(null)}
-            style={{
-              position: "absolute",
-              top: 20,
-              [isRTL ? "left" : "right"]: 20,
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.3)",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-            title={isRTL ? "إغلاق" : "Close"}
-          >
-            <Icon name="x" size={20} />
-          </button>
-
-          {galleryItems.length > 1 && (
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex(
-                  (lightboxIndex - 1 + galleryItems.length) %
-                    galleryItems.length,
-                );
-              }}
+              onClick={() => setLightboxIndex(null)}
               style={{
                 position: "absolute",
-                [isRTL ? "right" : "left"]: 20,
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: 48,
-                height: 48,
+                top: 20,
+                [isRTL ? "left" : "right"]: 20,
+                width: 44,
+                height: 44,
                 borderRadius: "50%",
                 background: "rgba(255,255,255,0.15)",
                 border: "1px solid rgba(255,255,255,0.3)",
@@ -2320,79 +2289,116 @@ export default function WorkspaceProfilePage() {
                 justifyContent: "center",
                 cursor: "pointer",
               }}
-              title={isRTL ? "السابق" : "Previous"}
+              title={isRTL ? "إغلاق" : "Close"}
             >
-              <Icon name={isRTL ? "chevron-right" : "chevron-left"} size={22} />
+              <Icon name="x" size={20} />
             </button>
-          )}
 
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "min(900px, 90vw)",
-              maxHeight: "85vh",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <img
-              src={galleryItems[lightboxIndex].url}
-              alt={galleryItems[lightboxIndex].caption || "Portfolio image"}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "72vh",
-                borderRadius: 16,
-                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-                objectFit: "contain",
-              }}
-            />
-            {galleryItems[lightboxIndex].caption && (
-              <p
-                style={{
-                  color: "#fff",
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  textAlign: "center",
-                  margin: 0,
+            {galleryItems.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex(
+                    (lightboxIndex - 1 + galleryItems.length) %
+                      galleryItems.length,
+                  );
                 }}
+                style={{
+                  position: "absolute",
+                  [isRTL ? "right" : "left"]: 20,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+                title={isRTL ? "السابق" : "Previous"}
               >
-                {galleryItems[lightboxIndex].caption}
-              </p>
+                <Icon
+                  name={isRTL ? "chevron-right" : "chevron-left"}
+                  size={22}
+                />
+              </button>
+            )}
+
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: "min(900px, 90vw)",
+                maxHeight: "85vh",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <img
+                src={galleryItems[lightboxIndex].url}
+                alt={galleryItems[lightboxIndex].caption || "Portfolio image"}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "72vh",
+                  borderRadius: 16,
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                  objectFit: "contain",
+                }}
+              />
+              {galleryItems[lightboxIndex].caption && (
+                <p
+                  style={{
+                    color: "#fff",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    margin: 0,
+                  }}
+                >
+                  {galleryItems[lightboxIndex].caption}
+                </p>
+              )}
+            </div>
+
+            {galleryItems.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((lightboxIndex + 1) % galleryItems.length);
+                }}
+                style={{
+                  position: "absolute",
+                  [isRTL ? "left" : "right"]: 20,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.15)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+                title={isRTL ? "التالي" : "Next"}
+              >
+                <Icon
+                  name={isRTL ? "chevron-left" : "chevron-right"}
+                  size={22}
+                />
+              </button>
             )}
           </div>
-
-          {galleryItems.length > 1 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex((lightboxIndex + 1) % galleryItems.length);
-              }}
-              style={{
-                position: "absolute",
-                [isRTL ? "left" : "right"]: 20,
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-              title={isRTL ? "التالي" : "Next"}
-            >
-              <Icon name={isRTL ? "chevron-left" : "chevron-right"} size={22} />
-            </button>
-          )}
-        </div>
-      </ModalPortal>
+        </ModalPortal>
       )}
     </div>
   );

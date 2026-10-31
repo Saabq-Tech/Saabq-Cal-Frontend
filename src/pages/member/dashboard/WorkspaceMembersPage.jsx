@@ -71,7 +71,9 @@ export default function WorkspaceMembersPage() {
       const memberId = formData.id || formData.editing_id;
       if (memberId) {
         await client.put(endpoints.workspaceMemberItem(memberId), formData);
-        toast.success(t("memberUpdatedSuccess") || "تم تحديث بيانات العضو بنجاح");
+        toast.success(
+          t("memberUpdatedSuccess") || "تم تحديث بيانات العضو بنجاح",
+        );
       } else {
         await client.post(endpoints.workspaceMembers, formData);
         toast.success(t("inviteSentSuccess") || "تم إرسال الدعوة للعضو بنجاح");

@@ -95,12 +95,24 @@ html .workspace-dashboard-content {
   background: var(--background);
 }
 
-html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+html
+  .workspace-dashboard-content.profile-dashboard-content:not(
+    :has(.chat-container)
+  ) {
   padding: 36px 48px 64px !important;
 }
 
-html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
-html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+html
+  .workspace-dashboard-content.profile-dashboard-content:not(
+    :has(.chat-container)
+  )
+  > .card,
+html
+  .workspace-dashboard-content.profile-dashboard-content:not(
+    :has(.chat-container)
+  )
+  > div
+  > .card:first-child {
   padding: 28px 32px !important;
   background: var(--surface) !important;
   border: 1px solid var(--border-light) !important;
@@ -109,12 +121,24 @@ html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-conta
 }
 
 @media (max-width: 1100px) {
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    ) {
     padding: 28px 28px 56px !important;
   }
 
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    )
+    > .card,
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    )
+    > div
+    > .card:first-child {
     padding: 22px 24px !important;
   }
 }
@@ -391,12 +415,24 @@ html
     overflow-x: clip !important;
   }
 
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) {
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    ) {
     padding: 20px 18px 88px !important;
   }
 
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > .card,
-  html .workspace-dashboard-content.profile-dashboard-content:not(:has(.chat-container)) > div > .card:first-child {
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    )
+    > .card,
+  html
+    .workspace-dashboard-content.profile-dashboard-content:not(
+      :has(.chat-container)
+    )
+    > div
+    > .card:first-child {
     padding: 18px 16px !important;
   }
 

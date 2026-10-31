@@ -291,7 +291,8 @@ export default function ChatsPage() {
     });
   }, []);
 
-  const lastMessageId = messages.length > 0 ? messages[messages.length - 1]?.id : null;
+  const lastMessageId =
+    messages.length > 0 ? messages[messages.length - 1]?.id : null;
   const prevLastMessageIdRef = useRef(null);
   useEffect(() => {
     if (!lastMessageId) {
